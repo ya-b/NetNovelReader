@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable name="bookinfo" type="com.netnovelreader.shelf.BookInfoBean"/>
+        <variable name="clickEvent" type="com.netnovelreader.shelf.ShelfClickEvent"/>
+    </data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{clickEvent.startReaderActivity}">
+
+        <TextView
+            android:id="@+id/nameView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:text="@{bookinfo.bookname}" />
+    </LinearLayout>
+
+</layout>
