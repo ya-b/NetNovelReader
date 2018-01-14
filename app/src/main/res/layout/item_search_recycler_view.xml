@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
-        <variable name="itemDetail" type="com.netnovelreader.shelf.ShelfModel.BookInfoBean"/>
-        <variable name="clickEvent" type="com.netnovelreader.shelf.ShelfViewModel.ShelfClickEvent"/>
+        <variable name="itemDetail" type="com.netnovelreader.search.SearchModel.SearchResultBean"/>
+        <variable name="clickEvent" type="com.netnovelreader.search.SearchViewModel.SearchClickEvent"/>
     </data>
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::startReaderActivity}">
+        android:onClick="@{clickEvent::downloadBook??``}">
 
         <TextView
             android:id="@+id/nameView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="24sp"
-            android:text="@{itemDetail.bookname??``}" />
+            android:text="@{itemDetail.url??``}" />
     </LinearLayout>
 
 </layout>

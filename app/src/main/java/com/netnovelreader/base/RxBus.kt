@@ -1,13 +1,8 @@
-package com.netnovelreader.utils
+package com.netnovelreader.base
 
-import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
-import io.reactivex.FlowableOnSubscribe
 import io.reactivex.processors.FlowableProcessor
 import io.reactivex.processors.PublishProcessor
-import io.reactivex.subjects.PublishSubject
-import io.reactivex.subjects.Subject
-import io.reactivex.subscribers.SerializedSubscriber
 
 /**
  * Created by yangbo on 2018/1/12.
