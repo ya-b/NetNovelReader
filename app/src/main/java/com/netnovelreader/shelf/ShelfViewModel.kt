@@ -26,7 +26,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
 
     override fun updateBookList(): Boolean{
         var dbManager = ShelfSQLManager()
-        shelfBean ?: shelfBean!!.bookList.clear()
+        shelfBean?.bookList?.clear()
         var cursor = dbManager.queryBookList()
         while (cursor != null && cursor.moveToNext()){
             var bookBean = ShelfBean.BookInfoBean(cursor.getInt(cursor.getColumnIndex(BaseSQLManager.ID)),

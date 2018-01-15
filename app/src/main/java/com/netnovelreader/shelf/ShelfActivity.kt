@@ -41,6 +41,11 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         initView()
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateShelf(null)
+    }
+
     override fun setViewModel(vm: ShelfViewModel) {
         mViewModel = vm
         DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
@@ -53,7 +58,6 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         if(checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)){
             shelfRecycler.adapter = BindingAdapter(mViewModel?.getModel()?.bookList,
                     R.layout.item_shelf_recycler_view, ShelfClickEvent())
-            updateShelf(null)
         }else{
             shelfRecycler.adapter = BindingAdapter<Any>(null,
                     R.layout.item_shelf_recycler_view, ShelfClickEvent())
@@ -109,7 +113,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     class ShelfClickEvent : IClickEvent {
         fun startReaderActivity(v: View){
             var intent = Intent(v.context, ReaderActivity::class.java)
-            intent.putExtra("bookname", v.nameView.text.toString())
+            intent.putExtra("tablename", v.nameView.text.toString())
             v.context.startActivity(intent)
         }
     }

@@ -5,12 +5,12 @@ import android.database.Cursor
 /**
  * Created by yangbo on 18-1-14.
  */
-class SearchSQLManager : BaseSQLManager {
+class SearchSQLManager : BaseSQLManager() {
     companion object {
         val SEARCH_NAME = "searchname"
     }
-    constructor() : super() {
-        db?.execSQL("create table if not exists ${BaseSQLManager.TABLE_SEARCH} (" +
+    init {
+        getDB().execSQL("create table if not exists ${BaseSQLManager.TABLE_SEARCH} (" +
                 "${BaseSQLManager.ID} integer primary key, " +
                 "${BaseSQLManager.SEARCH_HOSTNAME} varchar(128) unique, " +
                 "${BaseSQLManager.ISREDIRECT} varchar(128), " +
@@ -25,11 +25,11 @@ class SearchSQLManager : BaseSQLManager {
     }
 
     fun queryAll(): Cursor? {
-        return db?.rawQuery("select * from ${BaseSQLManager.TABLE_SEARCH}", null)
+        return getDB().rawQuery("select * from ${BaseSQLManager.TABLE_SEARCH}", null)
     }
 
     fun querySite(hostname: String): Map<String, String?>{
-        var cursor = db?.rawQuery("select * from ${BaseSQLManager.TABLE_SEARCH} where " +
+        var cursor = getDB().rawQuery("select * from ${BaseSQLManager.TABLE_SEARCH} where " +
                 "${BaseSQLManager.SEARCH_HOSTNAME}='$hostname';", null)
         var map = HashMap<String, String?>()
         cursor ?: return map
@@ -49,7 +49,7 @@ class SearchSQLManager : BaseSQLManager {
     fun initTable(){
         var cursor = queryAll()
         if(cursor != null && !cursor.moveToFirst()){
-            db?.execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (" +
+            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (" +
                     "1," +
                     "'qidian.com'," +
                     "'0'," +
@@ -60,7 +60,7 @@ class SearchSQLManager : BaseSQLManager {
                     "''," +
                     "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1) > cite'," +
                     "'utf-8');")
-            db?.execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (" +
+            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (" +
                     "2," +
                     "'yunlaige.com'," +
                     "'1'," +

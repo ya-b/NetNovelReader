@@ -11,6 +11,7 @@ interface ISearchContract {
         fun updateSearchResult(bookname: String?, shCode: Int)
     }
     interface ISearchViewModel: IViewModel<SearchBean> {
+        fun addBookToShelf(bookname: String, url: String): String
         fun updateResultList(bookname: String?, siteinfo: Array<String?>, searchCode: Int): SearchBean.SearchResultBean
         fun getSearchSite(): ArrayList<Array<String?>>?
     }

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Environment
 import android.support.v4.app.ActivityCompat
+import java.io.File
 import java.util.jar.Manifest
 import java.util.regex.Pattern
 
@@ -12,10 +13,13 @@ import java.util.regex.Pattern
  * Created by yangbo on 17-12-11.
  */
 
+val TIMEOUT = 3000
+val UA = "Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0"
+
 fun getSavePath(): String {
     var path: String?
     if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-        path = Environment.getExternalStorageDirectory().path.toString() + "/mynovelreader"
+        path = Environment.getExternalStorageDirectory().path.toString() + "/netnovelreader"
     } else {
         path = "/data/data/com.mynovelreader"
     }
@@ -32,4 +36,12 @@ fun url2Hostname(url: String) : String{
 
 fun id2Bookname(id: Int): String{
     return "BOOK" + id
+}
+
+fun mkdirs(dir: String): String{
+    val file = File(dir)
+    if(!file.exists()){
+        file.mkdirs()
+    }
+    return file.toString()
 }

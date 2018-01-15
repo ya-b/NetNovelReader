@@ -1,10 +1,12 @@
 package com.netnovelreader.search
 
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.netnovelreader.NetNovelReaderApplication
@@ -12,6 +14,7 @@ import com.netnovelreader.R
 import com.netnovelreader.base.BindingAdapter
 import com.netnovelreader.base.IClickEvent
 import com.netnovelreader.databinding.ActivitySearchBinding
+import com.netnovelreader.service.DownloadService
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -39,7 +42,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query != null && query.length > 0 && mViewModel != null) {
                     updateSearchResult(query, searchCode++)
-//                    updateSearchResult("极道天魔", searchCode++)
+//                    updateSearchResult("大界果", searchCode++)
                 }
                 return true
             }
@@ -64,7 +67,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { result ->
-                        if (result.reqCode + 1 == searchCode && result.url.length > 0) {
+                        if (result.reqCode + 1 == searchCode && result.url.length > 0 && result.bookname.length > 0) {
                             mViewModel!!.getModel()?.resultList?.add(result)
                             searchRecycler.adapter.notifyDataSetChanged()
                         }
@@ -72,16 +75,17 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         }
     }
 
-
     inner class SearchClickEvent : IClickEvent {
         fun downloadBook(v: View) {
-            Observable.create<Boolean>({ e -> e.onNext(mViewModel!!.addBook(v.resultName.text.toString(), v.resultUrl.text.toString())) })
+            Observable.create<String>({ e -> e.onNext(mViewModel!!.addBookToShelf(v.resultName.text.toString(), v.resultUrl.text.toString())) })
                     .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { r ->
-                        if (r) {
+                    .subscribe { localpath ->
+                        if(v.resultName.text.toString().length > 0 &&  v.resultUrl.text.toString().length > 0){
                             Toast.makeText(NetNovelReaderApplication.context, R.string.add_success, Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(NetNovelReaderApplication.context, R.string.add_fail, Toast.LENGTH_SHORT).show()
+                            var intent = Intent(v.context, DownloadService::class.java)
+                            intent.putExtra("localpath", localpath)
+                            intent.putExtra("catalogurl", v.resultUrl.text.toString())
+                            startService(intent)
                         }
                     }
         }

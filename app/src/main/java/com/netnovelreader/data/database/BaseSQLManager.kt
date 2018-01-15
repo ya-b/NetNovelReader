@@ -2,6 +2,7 @@ package com.netnovelreader.data.database
 
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.netnovelreader.reader.ReaderBean
 import com.netnovelreader.utils.getSavePath
 import java.io.File
 
@@ -11,26 +12,23 @@ import java.io.File
 open class BaseSQLManager {
     var db: SQLiteDatabase? = null
     val filepath = "${getSavePath()}/databases/mynovelreader.db"
-    constructor() {
-        var file = File(filepath).parentFile
+    init {
+        val file = File(filepath).parentFile
         if(!file.exists()){
             file.mkdirs()
         }
-        db ?: run {db = SQLiteDatabase.openOrCreateDatabase(File(filepath), null)}
     }
 
-    open fun execSQL(sql: String){
-        db?.execSQL(sql)
-    }
-
-    open fun rawQuery(sql: String) : Cursor? = db?.rawQuery(sql, null)
-
-    open fun dropTable(tableName : String){
-
+    fun getDB(): SQLiteDatabase{
+        db ?: synchronized(BaseSQLManager::class){
+            db ?: run{ db = SQLiteDatabase.openOrCreateDatabase(File(filepath), null) }
+        }
+        return db!!
     }
 
     open fun closeDB(){
         db?.close()
+        db = null
     }
 
     companion object {
@@ -48,7 +46,7 @@ open class BaseSQLManager {
 
         val TABLE_PARSERULES = "parserules"
         //书名
-        val BOOKNAME = "bookname"
+        val BOOKNAME = "tablename"
         //最新章节
         val LATESTCHAPTER = "latestChapter"
         //阅读记录
@@ -77,5 +75,6 @@ open class BaseSQLManager {
         val CHAPTERNAME = "chaptername"
         //章节来源网址
         val CHAPTERURL = "chapterurl"
+        val ISDOWNLOADED = "is_downloaded"
     }
 }

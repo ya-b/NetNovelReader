@@ -1,5 +1,7 @@
 package com.netnovelreader
 
+import io.reactivex.Observable
+import io.reactivex.ObservableSource
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -12,6 +14,10 @@ import org.junit.Assert.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        var taskList = ArrayList<String>()
+        taskList.add("3iofj")
+        taskList.add("fowijf")
+        taskList.add("fjoiwifo")
+        Observable.fromIterable(taskList).flatMap { s -> Observable.just(s + "====") }.subscribe { s -> println(s) }
     }
 }
