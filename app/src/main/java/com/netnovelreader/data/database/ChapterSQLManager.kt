@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteDatabase
 class ChapterSQLManager : BaseSQLManager() {
     fun createTable(tableName : String): ChapterSQLManager {
         db!!.execSQL("create table if not exists $tableName (${ID} integer primary key," +
-                "${CHAPTERNAME} varchar(128) unique, ${CHAPTERURL} text);")
+                "${CHAPTERNAME} varchar(128) unique, ${CHAPTERURL} text, ${ISDOWNLOADED} var char(128);")
         return this
     }
 
@@ -18,8 +18,9 @@ class ChapterSQLManager : BaseSQLManager() {
             var ite = map.iterator()
             while (ite.hasNext()){
                 val entry = ite.next()
-                db!!.execSQL("insert into $tableName (${CHAPTERNAME}, ${CHAPTERURL}) values (" +
-                        "'${entry.key}','${entry.value}')")
+                //0表示没有下载
+                db!!.execSQL("insert into $tableName (${CHAPTERNAME}, ${CHAPTERURL}, ${ISDOWNLOADED}) " +
+                        "values ('${entry.key}','${entry.value}','0')")
             }
             db!!.setTransactionSuccessful()
         }finally {
@@ -27,5 +28,14 @@ class ChapterSQLManager : BaseSQLManager() {
         }
         closeDB()
         return true
+    }
+
+    fun finishChapter(tableName: String, chaptername: String, isDownloadSuccess: Boolean){
+        if(isDownloadSuccess){
+            db!!.execSQL("update $tableName set ${ISDOWNLOADED}='1' where ${CHAPTERNAME}='$chaptername';")
+        }else{
+            db!!.execSQL("update $tableName set ${ISDOWNLOADED}='0' where ${CHAPTERNAME}='$chaptername';")
+        }
+        closeDB()
     }
 }

@@ -48,7 +48,7 @@ open class BaseSQLManager {
 
         val TABLE_PARSERULES = "parserules"
         //书名
-        val BOOKNAME = "bookname"
+        val BOOKNAME = "savename"
         //最新章节
         val LATESTCHAPTER = "latestChapter"
         //阅读记录
@@ -77,5 +77,6 @@ open class BaseSQLManager {
         val CHAPTERNAME = "chaptername"
         //章节来源网址
         val CHAPTERURL = "chapterurl"
+        val ISDOWNLOADED = "is_downloaded"
     }
 }

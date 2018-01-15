@@ -12,8 +12,8 @@ import java.net.URLEncoder
 
 /**
  * Created by yangbo on 18-1-14.
- * search("http://se.qidian.com/?kw=" + URLEncoder.encode(bookname, "utf-8"),".book-img-text > ul:nth-child(1) > li:nth-child(1)"))
- * search("http://www.yunlaige.com/modules/article/search.php?searchkey=" + URLEncoder.encode(bookname, "gbk") + "&action=login&submit=", "location", ".readnow", "li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)")
+ * search("http://se.qidian.com/?kw=" + URLEncoder.encode(savename, "utf-8"),".book-img-text > ul:nth-child(1) > li:nth-child(1)"))
+ * search("http://www.yunlaige.com/modules/article/search.php?searchkey=" + URLEncoder.encode(savename, "gbk") + "&action=login&submit=", "location", ".readnow", "li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)")
  */
 class SearchBook : Cloneable{
     companion object {
@@ -57,7 +57,7 @@ class SearchBook : Cloneable{
         if(result.contains("qidian.com")){
             result += "#Catalog"
         }
-        result = doc.select(noRedirectName).text() + "~" + result
+        result = doc.select(noRedirectName).text() + "~~~" + result
         return result
     }
 
