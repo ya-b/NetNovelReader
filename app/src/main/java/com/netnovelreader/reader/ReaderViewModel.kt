@@ -6,7 +6,7 @@ package com.netnovelreader.reader
 class ReaderViewModel : IReaderContract.IReaderViewModel {
     var pageNumber = 0L
     val texts = Array(3){ StringBuilder() }
-    var readerModel: ReaderModel? = null
+    var readerBean: ReaderBean? = null
 
     /**
      * @boolean true表示向后翻页 false表示向前翻页
@@ -23,12 +23,12 @@ class ReaderViewModel : IReaderContract.IReaderViewModel {
         return texts
     }
 
-    override fun getModel(): ReaderModel? {
-        readerModel ?: run{
+    override fun getModel(): ReaderBean? {
+        readerBean ?: run{
             synchronized(this){
-                readerModel ?: run{ readerModel = ReaderModel() }
+                readerBean ?: run{ readerBean = ReaderBean() }
             }
         }
-        return readerModel
+        return readerBean
     }
 }

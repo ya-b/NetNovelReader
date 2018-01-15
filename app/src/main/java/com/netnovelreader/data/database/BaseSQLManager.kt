@@ -18,15 +18,12 @@ open class BaseSQLManager {
         }
         db ?: run {db = SQLiteDatabase.openOrCreateDatabase(File(filepath), null)}
     }
-    open fun getDataBase(): SQLiteDatabase?{
-        return db
-    }
 
     open fun execSQL(sql: String){
-        getDataBase()?.execSQL(sql)
+        db?.execSQL(sql)
     }
 
-    open fun rawQuery(sql: String) : Cursor? = getDataBase()?.rawQuery(sql, null)
+    open fun rawQuery(sql: String) : Cursor? = db?.rawQuery(sql, null)
 
     open fun dropTable(tableName : String){
 
@@ -72,6 +69,8 @@ open class BaseSQLManager {
         val REDIRECTFILELD = "redirect_fileld"
         val REDIRECTSELECTOR = "redirect_selector"
         val NOREDIRECTSELECTOR = "no_redirect_selector"
+        val REDIRECTNAME = "redirect_name"
+        val NOREDIRECTNAME = "no_redirect_name"
         val SEARCHCHARSET = CHARSET
 
         //章节名

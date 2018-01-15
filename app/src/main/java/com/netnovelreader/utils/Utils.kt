@@ -29,3 +29,7 @@ fun url2Hostname(url: String) : String{
         hostname = matcher.group(1)
     return hostname ?: "error"
 }
+
+fun id2Bookname(id: Int): String{
+    return "BOOK" + id
+}

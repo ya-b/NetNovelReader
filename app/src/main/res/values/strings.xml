@@ -5,4 +5,6 @@
     <string name="permission_warnning">此程序没有执行所需要的权限</string>
     <string name="search_button">搜索</string>
     <string name="title_activity_search">SearchActivity</string>
+    <string name="add_success">成功添加到书架</string>
+    <string name="add_fail">添加失败</string>
 </resources>

@@ -8,11 +8,11 @@ import java.util.Vector
 /**
  * Created by yangbo on 18-1-14.
  */
-class SearchModel : BaseObservable() {
+class SearchBean : BaseObservable() {
     @Bindable
     var resultList: ObservableArrayList<SearchResultBean>
     init {
         resultList = ObservableArrayList<SearchResultBean>()
     }
-    class SearchResultBean(val url: String)
+    class SearchResultBean(val reqCode: Int, val bookname: String, val url: String)
 }

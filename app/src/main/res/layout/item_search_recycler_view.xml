@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
-        <variable name="itemDetail" type="com.netnovelreader.search.SearchModel.SearchResultBean"/>
-        <variable name="clickEvent" type="com.netnovelreader.search.SearchViewModel.SearchClickEvent"/>
+        <variable name="itemDetail" type="com.netnovelreader.search.SearchBean.SearchResultBean"/>
+        <variable name="clickEvent" type="com.netnovelreader.search.SearchActivity.SearchClickEvent"/>
     </data>
 
     <LinearLayout
@@ -12,10 +12,16 @@
         android:onClick="@{clickEvent::downloadBook??``}">
 
         <TextView
-            android:id="@+id/nameView"
+            android:id="@+id/resultName"
+            android:textSize="24sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="24sp"
+            android:text="@{itemDetail.bookname??``}"/>
+        <TextView
+            android:id="@+id/resultUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
             android:text="@{itemDetail.url??``}" />
     </LinearLayout>
 
