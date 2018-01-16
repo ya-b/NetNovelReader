@@ -2,6 +2,7 @@ package com.netnovelreader.data.database
 
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.netnovelreader.reader.ReaderBean
 import com.netnovelreader.utils.getSavePath
 import java.io.File
 
@@ -11,29 +12,18 @@ import java.io.File
 open class BaseSQLManager {
     var db: SQLiteDatabase? = null
     val filepath = "${getSavePath()}/databases/mynovelreader.db"
-    constructor() {
-        var file = File(filepath).parentFile
+    init {
+        val file = File(filepath).parentFile
         if(!file.exists()){
             file.mkdirs()
         }
     }
 
-    open fun execSQL(sql: String){
-        getDB().execSQL(sql)
-    }
-
-    open fun rawQuery(sql: String) : Cursor? = db?.rawQuery(sql, null)
-
-    open fun dropTable(tableName : String){
-
-    }
-
     fun getDB(): SQLiteDatabase{
-        if(db != null) return db!!
-        synchronized(BaseSQLManager::class){
-            db ?: run {db = SQLiteDatabase.openOrCreateDatabase(File(filepath), null)}
-            return db!!
+        db ?: synchronized(BaseSQLManager::class){
+            db ?: run{ db = SQLiteDatabase.openOrCreateDatabase(File(filepath), null) }
         }
+        return db!!
     }
 
     open fun closeDB(){

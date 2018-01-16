@@ -67,7 +67,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { result ->
-                        if (result.reqCode + 1 == searchCode && result.url.length > 0) {
+                        if (result.reqCode + 1 == searchCode && result.url.length > 0 && result.bookname.length > 0) {
                             mViewModel!!.getModel()?.resultList?.add(result)
                             searchRecycler.adapter.notifyDataSetChanged()
                         }

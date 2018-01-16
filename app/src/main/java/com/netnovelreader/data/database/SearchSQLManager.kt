@@ -5,11 +5,11 @@ import android.database.Cursor
 /**
  * Created by yangbo on 18-1-14.
  */
-class SearchSQLManager : BaseSQLManager {
+class SearchSQLManager : BaseSQLManager() {
     companion object {
         val SEARCH_NAME = "searchname"
     }
-    constructor() : super() {
+    init {
         getDB().execSQL("create table if not exists ${BaseSQLManager.TABLE_SEARCH} (" +
                 "${BaseSQLManager.ID} integer primary key, " +
                 "${BaseSQLManager.SEARCH_HOSTNAME} varchar(128) unique, " +

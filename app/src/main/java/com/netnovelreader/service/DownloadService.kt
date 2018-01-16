@@ -6,10 +6,13 @@ import android.content.Intent
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Created by yangbo on 18-1-15.
@@ -31,7 +34,7 @@ class DownloadService : Service() {
         super.onCreate()
         openNotification()
         queue = LinkedBlockingQueue<DownloadTask>()
-        download()
+        downloadThreadStart()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -39,7 +42,7 @@ class DownloadService : Service() {
             queue!!.offer(DownloadTask(intent!!.getStringExtra("localpath"),
                     intent.getStringExtra("catalogurl")))
         }
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -47,29 +50,33 @@ class DownloadService : Service() {
         mNotificationManager?.cancel(NOTIFYID)
     }
 
-    fun download(){
+    //TODO 优化
+    fun downloadThreadStart(){
         Thread{
+            Thread.sleep(100)
             val threadPool = Executors.newFixedThreadPool(5)
             var flag = true
             while (flag){
                 var taskList: ArrayList<DownloadTask.ChapterRunnable>? = null
-                if(progress == max){
-                    if(queue!!.isEmpty()){
-                        flag = false
-                        stopSelf()
-                    }else{
-                        try {
-                            taskList = queue!!.take().getRunnables()
-                        }catch (e: Exception){
-                            stopSelf()
-                        }
-                        max += taskList?.size ?: 0
-                    }
+                try {
+                    taskList = queue!!.take().getRunnables()
+                }catch (e: Exception){
+                    stopSelf()
                 }
-                taskList?.forEach{
-                    Observable.create<Int> { e -> threadPool?.execute(it.setFun { e.onNext(1) }) }
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe ( {updateNotification(max, ++progress)} )}
+                flag = {max += taskList!!.size; max}() != 0
+                Flowable.fromIterable(taskList)
+                        .flatMap { it ->
+                            Flowable.create<Int>({ e -> threadPool?.execute(it.setFun { e.onNext(1) }) },
+                                    BackpressureStrategy.BUFFER)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            updateNotification(max, ++progress)
+                            if(progress == max){
+                                stopSelf()
+                                flag = false
+                            }
+                        }
             }
         }.start()
     }
@@ -97,11 +104,13 @@ class DownloadService : Service() {
     }
 
     fun updateNotification(max: Int, progress: Int){
-        var str: String? = null
-        builder?.setProgress(max, progress, false)
-                ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max" +
-                        "${{if(!queue!!.isEmpty()) str = ", 有${queue!!.size}项待处理";str}()}")
+        var str: String?
+        if(queue!!.isEmpty()){
+            str = ""
+        }else{
+            str = ",${getString(R.string.wait2download)}".replace("n", queue!!.size.toString())
+        }
+        builder?.setProgress(max, progress, false)?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
-
 }

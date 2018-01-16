@@ -24,10 +24,8 @@ class ReaderViewModel : IReaderContract.IReaderViewModel {
     }
 
     override fun getModel(): ReaderBean? {
-        readerBean ?: run{
-            synchronized(this){
-                readerBean ?: run{ readerBean = ReaderBean() }
-            }
+        readerBean ?: synchronized(this){
+            readerBean ?: run{ readerBean = ReaderBean() }
         }
         return readerBean
     }

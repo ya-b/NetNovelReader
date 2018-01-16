@@ -14,10 +14,8 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     private var searchBean: SearchBean? = null
 
     override fun getModel(): SearchBean? {
-        searchBean ?: run {
-            synchronized(this) {
-                searchBean ?: run { searchBean = SearchBean() }
-            }
+        searchBean ?: synchronized(this) {
+            searchBean ?: run { searchBean = SearchBean() }
         }
         return searchBean
     }
