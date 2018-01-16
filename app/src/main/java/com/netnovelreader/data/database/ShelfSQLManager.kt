@@ -9,7 +9,7 @@ import java.net.URL
  */
 class ShelfSQLManager : BaseSQLManager {
     constructor() : super() {
-        db!!.execSQL("create table if not exists $TABLE_SHELF ($ID integer primary key, " +
+        getDB().execSQL("create table if not exists $TABLE_SHELF ($ID integer primary key, " +
                 "$BOOKNAME varchar(128) unique, $READRECORD varchar(128), $DOWNLOADURL text);")
     }
 

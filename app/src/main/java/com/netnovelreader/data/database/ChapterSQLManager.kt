@@ -1,5 +1,6 @@
 package com.netnovelreader.data.database
 
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 
 /**
@@ -7,35 +8,64 @@ import android.database.sqlite.SQLiteDatabase
  */
 class ChapterSQLManager : BaseSQLManager() {
     fun createTable(tableName : String): ChapterSQLManager {
-        db!!.execSQL("create table if not exists $tableName (${ID} integer primary key," +
-                "${CHAPTERNAME} varchar(128) unique, ${CHAPTERURL} text, ${ISDOWNLOADED} var char(128);")
+        getDB().execSQL("create table if not exists $tableName (${ID} integer primary key," +
+                "${CHAPTERNAME} varchar(128), ${CHAPTERURL} text, ${ISDOWNLOADED} var char(128));")
         return this
+    }
+
+    fun isTableExists(tableName: String): Boolean{
+        var result = false
+        var cursor: Cursor? = null
+        try {
+            cursor = getDB().rawQuery("select * from Sqlite_master  where type ='table' and name ='"
+                    + tableName.trim() + "' ", null)
+            if (cursor!!.moveToNext()) {
+                result = true
+            }
+        } catch (e: Exception) {
+        }finally {
+            cursor?.close()
+        }
+        return result
     }
 
     fun addAllChapter(map: LinkedHashMap<String, String>, tableName : String): Boolean{
         try {
-            db!!.beginTransaction()
+            getDB().beginTransaction()
             var ite = map.iterator()
             while (ite.hasNext()){
                 val entry = ite.next()
                 //0表示没有下载
-                db!!.execSQL("insert into $tableName (${CHAPTERNAME}, ${CHAPTERURL}, ${ISDOWNLOADED}) " +
-                        "values ('${entry.key}','${entry.value}','0')")
+                getDB().execSQL("insert into $tableName (${CHAPTERNAME}, ${CHAPTERURL}, ${ISDOWNLOADED}) "
+                        + "values ('${entry.key}','${entry.value}','0')")
             }
-            db!!.setTransactionSuccessful()
+            getDB().setTransactionSuccessful()
         }finally {
-            db!!.endTransaction()
+            getDB().endTransaction()
         }
-        closeDB()
         return true
     }
 
-    fun finishChapter(tableName: String, chaptername: String, isDownloadSuccess: Boolean){
-        if(isDownloadSuccess){
-            db!!.execSQL("update $tableName set ${ISDOWNLOADED}='1' where ${CHAPTERNAME}='$chaptername';")
+    fun setChapterFinish(tableName: String, chaptername: String, isDownloadSuccess: Boolean, url: String){
+        var cursor = getDB().rawQuery("select * from $tableName where $CHAPTERNAME='$chaptername';",null)
+        if(!cursor.moveToNext()){
+            getDB().execSQL("insert into $tableName ($CHAPTERNAME, $CHAPTERURL, $ISDOWNLOADED) "
+                    + "values ('$chaptername','$url','${compareValues(isDownloadSuccess, false)}')")
         }else{
-            db!!.execSQL("update $tableName set ${ISDOWNLOADED}='0' where ${CHAPTERNAME}='$chaptername';")
+            getDB().execSQL("update $tableName set ${ISDOWNLOADED}='${compareValues(isDownloadSuccess, false)}' " +
+                    "where ${CHAPTERNAME}='$chaptername';")
         }
-        closeDB()
+        cursor.close()
+    }
+
+    fun getDownloaded(tableName: String): ArrayList<String>{
+        var arrayList = ArrayList<String>()
+        var cursor = getDB().rawQuery("select ${CHAPTERNAME} from $tableName where " +
+                "${ISDOWNLOADED}='1';", null)
+        while (cursor.moveToNext()){
+            arrayList.add(cursor.getString(0))
+        }
+        cursor.close()
+        return arrayList
     }
 }

@@ -41,8 +41,8 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         search_bar.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query != null && query.length > 0 && mViewModel != null) {
-//                    updateSearchResult(query, searchCode++)
-                    updateSearchResult("极道天魔", searchCode++)
+                    updateSearchResult(query, searchCode++)
+//                    updateSearchResult("大界果", searchCode++)
                 }
                 return true
             }
@@ -80,16 +80,12 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             Observable.create<String>({ e -> e.onNext(mViewModel!!.addBookToShelf(v.resultName.text.toString(), v.resultUrl.text.toString())) })
                     .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                     .subscribe { localpath ->
-                        Toast.makeText(NetNovelReaderApplication.context, R.string.add_success, Toast.LENGTH_SHORT).show()
                         if(v.resultName.text.toString().length > 0 &&  v.resultUrl.text.toString().length > 0){
+                            Toast.makeText(NetNovelReaderApplication.context, R.string.add_success, Toast.LENGTH_SHORT).show()
                             var intent = Intent(v.context, DownloadService::class.java)
                             intent.putExtra("localpath", localpath)
                             intent.putExtra("catalogurl", v.resultUrl.text.toString())
-                            intent.putExtra("iscatalog", true)
-                            Log.d("==========click ","startservice")
                             startService(intent)
-                        }else{
-                            Log.d("==========click ","startservice error")
                         }
                     }
         }

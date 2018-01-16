@@ -16,11 +16,10 @@ open class BaseSQLManager {
         if(!file.exists()){
             file.mkdirs()
         }
-        db ?: run {db = SQLiteDatabase.openOrCreateDatabase(File(filepath), null)}
     }
 
     open fun execSQL(sql: String){
-        db?.execSQL(sql)
+        getDB().execSQL(sql)
     }
 
     open fun rawQuery(sql: String) : Cursor? = db?.rawQuery(sql, null)
@@ -29,8 +28,17 @@ open class BaseSQLManager {
 
     }
 
+    fun getDB(): SQLiteDatabase{
+        if(db != null) return db!!
+        synchronized(BaseSQLManager::class){
+            db ?: run {db = SQLiteDatabase.openOrCreateDatabase(File(filepath), null)}
+            return db!!
+        }
+    }
+
     open fun closeDB(){
         db?.close()
+        db = null
     }
 
     companion object {
@@ -48,7 +56,7 @@ open class BaseSQLManager {
 
         val TABLE_PARSERULES = "parserules"
         //书名
-        val BOOKNAME = "savename"
+        val BOOKNAME = "tablename"
         //最新章节
         val LATESTCHAPTER = "latestChapter"
         //阅读记录

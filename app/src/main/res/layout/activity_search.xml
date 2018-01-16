@@ -14,8 +14,6 @@
 
             <SearchView
                 android:id="@+id/search_bar"
-                android:autofillHints="极道天魔"
-                android:queryHint="极道天魔"
                 android:iconifiedByDefault="false"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>

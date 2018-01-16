@@ -23,8 +23,8 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     }
 
     override fun addBookToShelf(bookname: String, url: String): String{
-//        var bookPath = id2Bookname(ShelfSQLManager().addBookToShelf(savename, url))
-//        var map = ParseHtml().getCatalog(url)
+//        var bookPath = id2Bookname(ShelfSQLManager().addBookToShelf(savename, chapterUrl))
+//        var map = ParseHtml().getCatalog(chapterUrl)
 //        return ChapterSQLManager().createTable(bookPath).addAllChapter(map, bookPath)
         return id2Bookname(ShelfSQLManager().addBookToShelf(bookname, url))
     }
@@ -69,7 +69,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
 //                    .subscribeOn(Schedulers.io())
 //                    .observeOn(AndroidSchedulers.mainThread())
 //                    .subscribe { result ->
-//                        if (result.reqCode == searchCode && result.url.length > 0) {
+//                        if (result.reqCode == searchCode && result.chapterUrl.length > 0) {
 //                            getModel()?.resultList?.add(result)
 //                        }
 //                    }
