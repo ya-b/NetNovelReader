@@ -9,9 +9,9 @@ import android.content.Context
 class NetNovelReaderApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        context ?: run{ context = applicationContext }
+        appContext ?: run{ appContext = applicationContext }
     }
     companion object {
-        var context: Context? = null
+        var appContext: Context? = null
     }
 }

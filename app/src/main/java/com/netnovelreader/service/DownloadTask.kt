@@ -1,6 +1,5 @@
 package com.netnovelreader.service
 
-import android.util.Log
 import com.netnovelreader.data.database.ChapterSQLManager
 import com.netnovelreader.data.network.ParseHtml
 import com.netnovelreader.utils.getSavePath
@@ -8,7 +7,7 @@ import com.netnovelreader.utils.mkdirs
 import java.io.File
 import java.io.FileOutputStream
 import java.net.SocketTimeoutException
-import java.util.concurrent.TimeoutException
+import kotlin.collections.ArrayList
 
 /**
  * Created by yangbo on 2018/1/16.
@@ -26,6 +25,7 @@ class DownloadTask{
     fun getRunnables(): ArrayList<ChapterRunnable> {
         val dir = mkdirs(getSavePath() + "/$tableName")
         var runnables: ArrayList<ChapterRunnable>? = null
+        //TODO chapterName != null
         if(chapterName == null){
             runnables = formCatalog(dir)
         }
@@ -39,7 +39,6 @@ class DownloadTask{
         var alreadyExists: ArrayList<String>? = null
         if(sqlManager.isTableExists(tableName!!)){
             alreadyExists = sqlManager.getDownloaded(tableName!!)
-//            alreadyExists = ArrayList<String>()
         }else{
             sqlManager.createTable(tableName!!).addAllChapter(map, tableName!!)
         }
@@ -58,20 +57,19 @@ class DownloadTask{
 
     class ChapterRunnable(val tablename: String, val dir: String, val chapterName: String, val chapterUrl:String) : Runnable{
         lateinit var eON: () -> Unit ?
+
         override fun run() {
             var fos: FileOutputStream? = null
             var dbm = ChapterSQLManager()
             try{
-                Log.d("=====Service ondownload", "$dir==$chapterName")
                 fos = FileOutputStream(File(dir, chapterName))
                 fos.write(ParseHtml().getChapter(chapterUrl).toByteArray())
                 dbm.setChapterFinish(tablename, chapterName, true, chapterUrl)
             }catch (e: Exception){
                 dbm.setChapterFinish(tablename, chapterName, false, chapterUrl)
             }finally {
-//                RxBus.post(1)
-                dbm.closeDB()
                 fos?.close()
+                dbm.closeDB()
                 eON()
             }
         }

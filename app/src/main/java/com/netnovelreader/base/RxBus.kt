@@ -7,6 +7,7 @@ import io.reactivex.processors.PublishProcessor
 /**
  * Created by yangbo on 2018/1/12.
  */
+
 object RxBus {
     private val mbus: FlowableProcessor<Any>
 
@@ -29,6 +30,4 @@ object RxBus {
     fun hasSubscribers(): Boolean {
         return mbus.hasSubscribers()
     }
-
-
 }

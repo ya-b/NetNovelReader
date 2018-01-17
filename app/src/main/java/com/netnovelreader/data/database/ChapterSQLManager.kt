@@ -1,18 +1,19 @@
 package com.netnovelreader.data.database
 
 import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
 
 /**
  * Created by yangbo on 18-1-12.
  */
 class ChapterSQLManager : BaseSQLManager() {
+    @Synchronized
     fun createTable(tableName : String): ChapterSQLManager {
         getDB().execSQL("create table if not exists $tableName (${ID} integer primary key," +
                 "${CHAPTERNAME} varchar(128), ${CHAPTERURL} text, ${ISDOWNLOADED} var char(128));")
         return this
     }
 
+    @Synchronized
     fun isTableExists(tableName: String): Boolean{
         var result = false
         var cursor: Cursor? = null
@@ -29,6 +30,7 @@ class ChapterSQLManager : BaseSQLManager() {
         return result
     }
 
+    @Synchronized
     fun addAllChapter(map: LinkedHashMap<String, String>, tableName : String): Boolean{
         try {
             getDB().beginTransaction()
@@ -46,6 +48,7 @@ class ChapterSQLManager : BaseSQLManager() {
         return true
     }
 
+    @Synchronized
     fun setChapterFinish(tableName: String, chaptername: String, isDownloadSuccess: Boolean, url: String){
         var cursor = getDB().rawQuery("select * from $tableName where $CHAPTERNAME='$chaptername';",null)
         if(!cursor.moveToNext()){
@@ -58,6 +61,7 @@ class ChapterSQLManager : BaseSQLManager() {
         cursor.close()
     }
 
+    @Synchronized
     fun getDownloaded(tableName: String): ArrayList<String>{
         var arrayList = ArrayList<String>()
         var cursor = getDB().rawQuery("select ${CHAPTERNAME} from $tableName where " +

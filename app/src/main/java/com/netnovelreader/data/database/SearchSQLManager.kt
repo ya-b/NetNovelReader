@@ -43,30 +43,20 @@ class SearchSQLManager : BaseSQLManager() {
             map.put(BaseSQLManager.NOREDIRECTNAME, cursor.getString(cursor.getColumnIndex(BaseSQLManager.NOREDIRECTNAME)))
             map.put(BaseSQLManager.SEARCHCHARSET, cursor.getString(cursor.getColumnIndex(BaseSQLManager.SEARCHCHARSET)))
         }
+        cursor.close()
         return map
     }
 
     fun initTable(){
         var cursor = queryAll()
         if(cursor != null && !cursor.moveToFirst()){
-            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (" +
-                    "1," +
-                    "'qidian.com'," +
-                    "'0'," +
-                    "'http://se.qidian.com/?kw=$SEARCH_NAME'," +
-                    "''," +
-                    "''," +
-                    "'.book-img-text > ul:nth-child(1) > li:nth-child(1)'," +
-                    "''," +
+            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (1,'qidian.com','0','',''," +
+                    "'.book-img-text > ul:nth-child(1) > li:nth-child(1)',''," +
                     "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1) > cite'," +
                     "'utf-8');")
-            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (" +
-                    "2," +
-                    "'yunlaige.com'," +
-                    "'1'," +
+            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (2,'yunlaige.com','1'," +
                     "'http://www.yunlaige.com/modules/article/search.php?searchkey=$SEARCH_NAME&action=login&submit='," +
-                    "'location'," +
-                    "'.readnow'," +
+                    "'location','.readnow'," +
                     "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)'," +
                     "'#content > div.book-info > div.info > h2 > a'," +
                     "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)'," +
