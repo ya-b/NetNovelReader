@@ -1,7 +1,6 @@
 package com.netnovelreader.data.database
 
 import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
 
 /**
  * Created by yangbo on 18-1-12.

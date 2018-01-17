@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.netnovelreader.NetNovelReaderApplication
@@ -41,8 +40,8 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         search_bar.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query != null && query.length > 0 && mViewModel != null) {
-                    updateSearchResult(query, searchCode++)
-//                    updateSearchResult("大界果", searchCode++)
+//                    updateSearchResult(query, searchCode++)
+                    updateSearchResult("极道天魔", searchCode++)
                 }
                 return true
             }
@@ -81,7 +80,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                     .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                     .subscribe { localpath ->
                         if(v.resultName.text.toString().length > 0 &&  v.resultUrl.text.toString().length > 0){
-                            Toast.makeText(NetNovelReaderApplication.context, R.string.add_success, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(NetNovelReaderApplication.appContext, R.string.add_success, Toast.LENGTH_SHORT).show()
                             var intent = Intent(v.context, DownloadService::class.java)
                             intent.putExtra("localpath", localpath)
                             intent.putExtra("catalogurl", v.resultUrl.text.toString())
