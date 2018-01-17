@@ -8,8 +8,8 @@
         android:orientation="vertical"
         tools:context="com.netnovelreader.reader.ReaderActivity">
 
-        <TextView
-            android:id="@+id/mViewPager"
+        <com.netnovelreader.reader.ReaderView
+            android:id="@+id/readerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 

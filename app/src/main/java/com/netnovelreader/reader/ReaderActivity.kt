@@ -3,10 +3,6 @@ package com.netnovelreader.reader
 import android.databinding.DataBindingUtil
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.view.PagerAdapter
-import android.support.v4.view.ViewPager
-import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import com.netnovelreader.R
 import com.netnovelreader.databinding.ActivityShelfBinding
@@ -14,41 +10,35 @@ import kotlinx.android.synthetic.main.activity_reader.*
 
 class ReaderActivity : AppCompatActivity(),IReaderContract.IReaderView {
     var mViewModel: ReaderViewModel? = null
-    var mReaderAdapter: ReaderPagerAdapter? = null
-    var mPageChangeListener: ReaderPagerAdapter.ReaderOnPageChangeListener? = null
     var viewArray: Array<TextView>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setViewModel(ReaderViewModel())
+        readerView.mViewModel = mViewModel
         initView()
-        updateText(true)
     }
 
     override fun initView() {
-        viewArray = Array<TextView>(3){TextView(this)}
-        mReaderAdapter = ReaderPagerAdapter(viewArray!!)
-        mViewPager.adapter = mReaderAdapter
-        mPageChangeListener = ReaderPagerAdapter.ReaderOnPageChangeListener(mViewPager, this)
-        mViewPager.addOnPageChangeListener(mPageChangeListener)
-        mViewPager.setCurrentItem(1, false)
+
     }
 
     /**
      * @boolean true表示向后翻页 false表示向前翻页
      */
     override fun updateText(boolean: Boolean) {
-        val texts = mViewModel?.getChapterText(boolean)
-        if(boolean){
-            for(i in 0..2) viewArray!![i].text = texts!![i]
-        }else{
-            for(i in 0..2) viewArray!![i].text = texts!![2 - i]
-        }
+//        val texts = mViewModel?.getChapterText(boolean)
+//        if(boolean){
+//            for(i in 0..2) viewArray!![i].text = texts!![i]
+//        }else{
+//            for(i in 0..2) viewArray!![i].text = texts!![2 - i]
+//        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mViewPager.removeOnPageChangeListener(mPageChangeListener)
+        mViewModel = null
+        readerView.mViewModel = null
     }
 
     override fun setViewModel(vm: ReaderViewModel) {

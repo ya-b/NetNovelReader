@@ -40,8 +40,8 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         search_bar.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query != null && query.length > 0 && mViewModel != null) {
-//                    updateSearchResult(query, searchCode++)
-                    updateSearchResult("极道天魔", searchCode++)
+                    updateSearchResult(query, searchCode++)
+//                    updateSearchResult("极道天魔", searchCode++)
                 }
                 return true
             }
@@ -63,8 +63,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         searchRecycler.adapter.notifyDataSetChanged()
         mViewModel!!.getSearchSite()?.forEach {
             Observable.create<SearchBean.SearchResultBean> { e -> e.onNext(mViewModel!!.updateResultList(bookname, it, shCode)) }
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                     .subscribe { result ->
                         if (result.reqCode + 1 == searchCode && result.url.length > 0 && result.bookname.length > 0) {
                             mViewModel!!.getModel()?.resultList?.add(result)
