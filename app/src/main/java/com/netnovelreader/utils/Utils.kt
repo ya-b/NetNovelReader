@@ -45,3 +45,13 @@ fun mkdirs(dir: String): String{
     }
     return file.toString()
 }
+
+fun getHeaders(url: String): HashMap<String, String>{
+    var map = HashMap<String, String>()
+    map.put("accept", "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+    map.put("user-agent", UA)
+    map.put("Upgrade-Insecure-Requests", "1")
+    map.put("Connection","keep-alive")
+    map.put("Referer", "http://www.${url2Hostname(url)}/")
+    return map
+}

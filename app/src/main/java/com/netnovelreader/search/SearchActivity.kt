@@ -45,8 +45,8 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             override fun onQueryTextSubmit(query: String): Boolean {
                 if(tmp == query && System.currentTimeMillis() - tmpTime < 1000) return true
                 if (query.length > 0 && mViewModel != null) {
-//                    updateSearchResult(query, searchCode++)
-                    updateSearchResult("修真聊天群", searchCode++)
+                    updateSearchResult(query, searchCode++)
+//                    updateSearchResult("修真聊天群", searchCode++)
                     tmp = query
                     tmpTime = System.currentTimeMillis()
                 }

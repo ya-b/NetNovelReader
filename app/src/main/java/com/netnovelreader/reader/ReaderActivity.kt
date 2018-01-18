@@ -22,17 +22,6 @@ class ReaderActivity : AppCompatActivity(),IReaderContract.IReaderView {
         readerView.background = getDrawable(R.drawable.bg_readbook_yellow)
     }
 
-    /**
-     * @boolean true表示向后翻页 false表示向前翻页
-     */
-    override fun updateText(boolean: Boolean) {
-//        val texts = mViewModel?.getChapterText(boolean)
-//        if(boolean){
-//            for(i in 0..2) viewArray!![i].indicator = texts!![i]
-//        }else{
-//            for(i in 0..2) viewArray!![i].indicator = texts!![2 - i]
-//        }
-    }
 
     override fun onDestroy() {
         super.onDestroy()

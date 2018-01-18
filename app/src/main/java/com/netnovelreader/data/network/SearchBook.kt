@@ -4,6 +4,7 @@ import android.util.Log
 import com.netnovelreader.data.database.SearchSQLManager
 import com.netnovelreader.utils.TIMEOUT
 import com.netnovelreader.utils.UA
+import com.netnovelreader.utils.getHeaders
 import com.netnovelreader.utils.url2Hostname
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
@@ -46,8 +47,7 @@ class SearchBook : Cloneable{
 
     @Throws(ConnectException::class)
     fun search(url: String, noRedirectSelector: String, noRedirectName: String): String? {
-        Log.d("search Book","$url")
-        val doc = Jsoup.connect(url).userAgent(UA)
+        val doc = Jsoup.connect(url).headers(getHeaders(url))
                 .timeout(TIMEOUT).get()
         var result = doc.select(noRedirectSelector).select("a").attr("href")
         if(!result!!.contains("//")){

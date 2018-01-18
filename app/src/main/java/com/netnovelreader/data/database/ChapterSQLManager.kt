@@ -38,7 +38,6 @@ class ChapterSQLManager : BaseSQLManager() {
             var ite = map.iterator()
             while (ite.hasNext()){
                 val entry = ite.next()
-                //0表示没有下载
                 getDB().execSQL("insert into $tableName (${CHAPTERNAME}, ${CHAPTERURL}, ${ISDOWNLOADED}) "
                         + "values ('${entry.key}','${entry.value}','0')")
             }
@@ -76,14 +75,12 @@ class ChapterSQLManager : BaseSQLManager() {
 
     fun getChapterName(tableName: String, id: Int): String{
         var chapterName: String? = null
-        Log.d("===========chapter sql", "$id===$tableName=======")
         val cursor = getDB().rawQuery("select $CHAPTERNAME from $tableName where $ID=$id;", null)
         if (cursor.moveToFirst()){
             chapterName = cursor.getString(0)
         }
         cursor.close()
         closeDB()
-        Log.d("===========chapter sql", "$chapterName=======")
         return chapterName ?: ""
     }
 

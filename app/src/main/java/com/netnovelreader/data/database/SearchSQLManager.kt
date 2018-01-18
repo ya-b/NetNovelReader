@@ -51,8 +51,8 @@ class SearchSQLManager : BaseSQLManager() {
         var cursor = queryAll()
         if(cursor != null && !cursor.moveToFirst()){
             getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (1,'qidian.com','0','http://se.qidian.com/?kw=$SEARCH_NAME'," +
-                    "'','','.book-img-indicator > ul:nth-child(1) > li:nth-child(1)',''," +
-                    "'.book-img-indicator > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1) > cite'," +
+                    "'','','.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)',''," +
+                    "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)'," +
                     "'utf-8');")
             getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (2,'yunlaige.com','1'," +
                     "'http://www.yunlaige.com/modules/article/search.php?searchkey=$SEARCH_NAME&action=login&submit='," +

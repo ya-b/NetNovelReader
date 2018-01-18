@@ -15,13 +15,11 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
 
     @Throws(IOException::class)
     override fun getChapterText(chapterNum: Int, dirName: String): String {
-        Log.d("===============", "view model getChapter start==========")
         val sb = StringBuilder()
         val chapterPath = "${getSavePath()}/$dirName/${ChapterSQLManager().getChapterName(dirName, chapterNum)}"
         val fr = FileReader(chapterPath)
-        fr.forEachLine { sb.append(it) }
+        fr.forEachLine { sb.append(it + "\n") }
         fr.close()
-        Log.d("===============", "view model getChapter finish==========")
         return sb.toString()
     }
 
@@ -35,24 +33,25 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
     fun getChapterCount(): Int = ChapterSQLManager().getChapterCount("BOOK${ShelfSQLManager().getRecord(bookName)[0]}")
 
     fun splitChapterTxt(chapter: String, width: Int, height: Int, txtFontSize: Float): ArrayList<ArrayList<String>>{
-        val tmpArray = chapter.split("\\n")
+        val tmpArray = chapter.split("\n")
         val tmplist = ArrayList<String>()
         tmpArray.forEach{
+            var tmp = "  " + it.trim()
             val totalCount = width / txtFontSize.toInt() - 1
-            if(it.length > totalCount){
-                val count = it.length / totalCount
+            if(tmp.length > totalCount){
+                val count = tmp.length / totalCount
                 for(i in 0..count - 1){
-                    tmplist.add(it.substring(i * totalCount, (i + 1) * totalCount))
+                    tmplist.add(tmp.substring(i * totalCount, (i + 1) * totalCount))
                 }
                 if(it.length % totalCount != 0){
-                    tmplist.add(it.substring(count * totalCount))
+                    tmplist.add(tmp.substring(count * totalCount))
                 }
             }else {
-                tmplist.add(it)
+                tmplist.add(tmp)
             }
         }
         val arrayList = ArrayList<ArrayList<String>>()
-        val totalCount = height / txtFontSize.toInt() - 1
+        val totalCount = height / txtFontSize.toInt() - 2
         if( tmplist.size > totalCount){
             val count = tmplist.size / totalCount
             for(i in 0..count -1){

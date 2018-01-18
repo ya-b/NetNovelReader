@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -21,6 +22,7 @@ class ReaderView : View, GestureDetector.OnGestureListener {
      * 最小滑动距离
      */
     val MIN_MOVE = 80F
+    val MAX_MOVE = 5F
     /**
      * 当前页码
      * 章节数
@@ -63,9 +65,9 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     constructor(mContext: Context, attrs: AttributeSet, defStyleAttr: Int) : super(mContext, attrs, defStyleAttr)
 
     override fun onDraw(canvas: Canvas) {
-        if(isFirstDraw) doOnFistDraw()
+        if(isFirstDraw) doOnFirstDraw()
         super.onDraw(canvas)
-        indicator = getIndicator(chapterNum, pageNum, maxPageNum)
+        indicator = "第${chapterNum}章:${pageNum}/$maxPageNum"
         txtPaint.textSize = indacitorFontSize
         canvas.drawText(indicator, width - indacitorFontSize * indicator.length, height - indacitorFontSize, txtPaint)
         txtPaint.textSize = txtFontSize
@@ -76,7 +78,7 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         }
     }
 
-    fun doOnFistDraw(){
+    fun doOnFirstDraw(){
         isFirstDraw = false
         maxChapterNum = mViewModel?.getChapterCount() ?: 1
         if(bookName != null) {
@@ -91,7 +93,21 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         getChapter(chapterNum, dirName!!, true)
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+//        var startx = 0F
+//        var endx = 0F
+//        when(event.action){
+//            MotionEvent.ACTION_DOWN -> startx = event.getX()
+//            MotionEvent.ACTION_UP -> endx = event.getY()
+//        }
+//        if(Math.abs(startx - endx) < MAX_MOVE){
+//            if(startx > width / 2){
+//                pageNext()
+//            }else{
+//                pagePrevious()
+//            }
+//            return false
+//        }
         return detector.onTouchEvent(event)
     }
 
@@ -103,28 +119,13 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
         val beginX = e1.getX()
         val endX = e2.getX()
-        if (Math.abs(beginX - endX) < MIN_MOVE) return false
-        if (beginX > endX) {
-            if (pageNum == maxPageNum || maxPageNum < 2){
-                if(chapterNum == maxChapterNum){
-                    return false
-                }else{
-                    getChapter(++chapterNum, dirName!!, true)
-                }
-            }else{
-                pageNum++
-                invalidate()
-            }
-        } else {
-            if (pageNum < 2){
-                if(chapterNum == 1){
-                    return false
-                }else{
-                    getChapter(--chapterNum, dirName!!, false)
-                }
-            }else{
-                pageNum--
-                invalidate()
+        if(Math.abs(beginX - endX) < MIN_MOVE) {
+            return false
+        }else{
+            if (beginX > endX) {
+                if(!pageNext()) return false
+            } else {
+                if(!pagePrevious()) return false
             }
         }
         readRecord = "$chapterNum#$pageNum"
@@ -150,12 +151,9 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         return false
     }
 
-    fun getIndicator(chapterNum: Int, pageNum: Int, maxPageNum: Int): String{
-        return "第${chapterNum}章:${pageNum}/$maxPageNum"
-    }
-
     fun getChapter(chapterNum: Int, dirName: String, isNext: Boolean){
         Observable.create<String> { e ->
+            Log.d("===get chapter on next","$chapterNum==$dirName==$isNext")
             e.onNext(mViewModel?.getChapterText(chapterNum, dirName) ?: "")
         }
                 .subscribeOn(Schedulers.io())
@@ -174,5 +172,31 @@ class ReaderView : View, GestureDetector.OnGestureListener {
                 }
     }
 
+    fun pageNext(): Boolean{
+        if (pageNum == maxPageNum || maxPageNum < 2){
+            if(chapterNum == maxChapterNum){
+                return false
+            }else{
+                getChapter(++chapterNum, dirName!!, true)
+            }
+        }else{
+            pageNum++
+            invalidate()
+        }
+        return true
+    }
 
+    fun pagePrevious(): Boolean{
+        if (pageNum < 2){
+            if(chapterNum == 1){
+                return false
+            }else{
+                getChapter(--chapterNum, dirName!!, false)
+            }
+        }else{
+            pageNum--
+            invalidate()
+        }
+        return true
+    }
 }
