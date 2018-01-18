@@ -13,6 +13,11 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="ReaderTheme" parent="AppTheme.NoActionBar">
+        <item name="android:colorPrimary">@color/readerPrimary</item>
+        <item name="android:colorPrimaryDark">@color/readerPrimaryDark</item>
+    </style>
+
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

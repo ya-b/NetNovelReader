@@ -23,6 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 import kotlinx.android.synthetic.main.activity_shelf.*
+import kotlinx.android.synthetic.main.item_shelf_recycler_view.*
 import kotlinx.android.synthetic.main.item_shelf_recycler_view.view.*
 
 class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
@@ -111,10 +112,15 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     }
 
     class ShelfClickEvent : IClickEvent {
-        fun startReaderActivity(v: View){
-            var intent = Intent(v.context, ReaderActivity::class.java)
-            intent.putExtra("tablename", v.nameView.text.toString())
+        fun itemOnClick(v: View){
+            val intent = Intent(v.context, ReaderActivity::class.java)
+            intent.putExtra("bookname", v.nameView.text.toString())
             v.context.startActivity(intent)
+        }
+
+        fun itemOnLongClick(view: View): Boolean{
+            Toast.makeText(view.context, "删除${view.nameView.text.toString()}", Toast.LENGTH_SHORT).show()
+            return true
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.netnovelreader.data.database
 
 import android.database.Cursor
+import android.util.Log
 
 /**
  * Created by yangbo on 18-1-12.
@@ -9,7 +10,7 @@ class ChapterSQLManager : BaseSQLManager() {
     @Synchronized
     fun createTable(tableName : String): ChapterSQLManager {
         getDB().execSQL("create table if not exists $tableName (${ID} integer primary key," +
-                "${CHAPTERNAME} varchar(128), ${CHAPTERURL} text, ${ISDOWNLOADED} var char(128));")
+                "${CHAPTERNAME} varchar(128), ${CHAPTERURL} indicator, ${ISDOWNLOADED} var char(128));")
         return this
     }
 
@@ -37,7 +38,6 @@ class ChapterSQLManager : BaseSQLManager() {
             var ite = map.iterator()
             while (ite.hasNext()){
                 val entry = ite.next()
-                //0表示没有下载
                 getDB().execSQL("insert into $tableName (${CHAPTERNAME}, ${CHAPTERURL}, ${ISDOWNLOADED}) "
                         + "values ('${entry.key}','${entry.value}','0')")
             }
@@ -63,13 +63,35 @@ class ChapterSQLManager : BaseSQLManager() {
 
     @Synchronized
     fun getDownloaded(tableName: String): ArrayList<String>{
-        var arrayList = ArrayList<String>()
-        var cursor = getDB().rawQuery("select ${CHAPTERNAME} from $tableName where " +
-                "${ISDOWNLOADED}='1';", null)
+        val arrayList = ArrayList<String>()
+        val cursor = getDB().rawQuery("select $CHAPTERNAME from $tableName where " +
+                "$ISDOWNLOADED='1';", null)
         while (cursor.moveToNext()){
             arrayList.add(cursor.getString(0))
         }
         cursor.close()
         return arrayList
+    }
+
+    fun getChapterName(tableName: String, id: Int): String{
+        var chapterName: String? = null
+        val cursor = getDB().rawQuery("select $CHAPTERNAME from $tableName where $ID=$id;", null)
+        if (cursor.moveToFirst()){
+            chapterName = cursor.getString(0)
+        }
+        cursor.close()
+        closeDB()
+        return chapterName ?: ""
+    }
+
+    fun getChapterCount(tableName: String): Int{
+        var c = 1
+        var cursor = getDB().rawQuery("select count(*) from $tableName;", null)
+        if(cursor.moveToFirst()){
+            c = cursor.getInt(0)
+        }
+        cursor.close()
+        closeDB()
+        return c
     }
 }

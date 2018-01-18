@@ -14,7 +14,7 @@ class SearchSQLManager : BaseSQLManager() {
                 "${BaseSQLManager.ID} integer primary key, " +
                 "${BaseSQLManager.SEARCH_HOSTNAME} varchar(128) unique, " +
                 "${BaseSQLManager.ISREDIRECT} varchar(128), " +
-                "${BaseSQLManager.SEARCHURL} text, " +
+                "${BaseSQLManager.SEARCHURL} indicator, " +
                 "${BaseSQLManager.REDIRECTFILELD} varchar(128), " +
                 "${BaseSQLManager.REDIRECTSELECTOR} varchar(128), " +
                 "${BaseSQLManager.NOREDIRECTSELECTOR} varchar(128), " +
@@ -50,9 +50,9 @@ class SearchSQLManager : BaseSQLManager() {
     fun initTable(){
         var cursor = queryAll()
         if(cursor != null && !cursor.moveToFirst()){
-            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (1,'qidian.com','0','',''," +
-                    "'.book-img-text > ul:nth-child(1) > li:nth-child(1)',''," +
-                    "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1) > cite'," +
+            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (1,'qidian.com','0','http://se.qidian.com/?kw=$SEARCH_NAME'," +
+                    "'','','.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)',''," +
+                    "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)'," +
                     "'utf-8');")
             getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (2,'yunlaige.com','1'," +
                     "'http://www.yunlaige.com/modules/article/search.php?searchkey=$SEARCH_NAME&action=login&submit='," +
