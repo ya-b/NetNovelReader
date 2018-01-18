@@ -4,7 +4,7 @@
     tools:context="com.netnovelreader.shelf.ShelfActivity">
     <item
         android:id="@+id/search_button"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/icon_search"
         android:title="@string/search_button"
         app:showAsAction="ifRoom"/>
     <item

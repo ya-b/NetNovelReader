@@ -5,7 +5,7 @@ import com.netnovelreader.data.network.ParseHtml
 import com.netnovelreader.utils.getSavePath
 import com.netnovelreader.utils.mkdirs
 import java.io.File
-import java.io.FileOutputStream
+import java.io.FileWriter
 import java.net.SocketTimeoutException
 import kotlin.collections.ArrayList
 
@@ -59,11 +59,12 @@ class DownloadTask{
         lateinit var eON: () -> Unit ?
 
         override fun run() {
-            var fos: FileOutputStream? = null
+            var fos: FileWriter? = null
             var dbm = ChapterSQLManager()
             try{
-                fos = FileOutputStream(File(dir, chapterName))
-                fos.write(ParseHtml().getChapter(chapterUrl).toByteArray())
+                fos = FileWriter(File(dir, chapterName))
+                fos.write(ParseHtml().getChapter(chapterUrl))
+                fos.flush()
                 dbm.setChapterFinish(tablename, chapterName, true, chapterUrl)
             }catch (e: Exception){
                 dbm.setChapterFinish(tablename, chapterName, false, chapterUrl)

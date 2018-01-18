@@ -9,8 +9,8 @@ import org.jsoup.Connection
 class ParseSQLManager : BaseSQLManager() {
     init {
         getDB().execSQL("create table if not exists ${BaseSQLManager.TABLE_PARSERULES} (${BaseSQLManager.ID} integer primary key," +
-                "${BaseSQLManager.HOSTNAME} varchar(128) unique,${BaseSQLManager.CATALOG_RULE} text,${BaseSQLManager.CHAPTER_RULE} text," +
-                "${BaseSQLManager.CHARSET} varchar(128),${BaseSQLManager.COVER_RULE} text);")
+                "${BaseSQLManager.HOSTNAME} varchar(128) unique,${BaseSQLManager.CATALOG_RULE} indicator,${BaseSQLManager.CHAPTER_RULE} indicator," +
+                "${BaseSQLManager.CHARSET} varchar(128),${BaseSQLManager.COVER_RULE} indicator);")
         val cursor = getDB().rawQuery("select * from ${BaseSQLManager.TABLE_PARSERULES}", null)
         if(cursor != null && !cursor.moveToFirst()){
             getDB().execSQL("insert into ${BaseSQLManager.TABLE_PARSERULES} values (1,'qidian.com','.volume-wrap','.read-content','utf-8',NULL);")

@@ -10,14 +10,14 @@ import java.net.URL
 class ShelfSQLManager : BaseSQLManager() {
     init {
         getDB().execSQL("create table if not exists $TABLE_SHELF ($ID integer primary key, " +
-                "$BOOKNAME varchar(128) unique, $READRECORD varchar(128), $DOWNLOADURL text);")
+                "$BOOKNAME varchar(128) unique, $READRECORD varchar(128), $DOWNLOADURL indicator);")
     }
 
     fun queryBookList(): Cursor? = db?.rawQuery("select * from $TABLE_SHELF;", null)
 
     fun addBookToShelf(bookname: String, url: String): Int{
         var id = 0
-        var cursor = db!!.rawQuery("select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';", null)
+        val cursor = db!!.rawQuery("select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';", null)
         if(cursor.moveToFirst()){
             id = cursor.getInt(0)
         }else{
@@ -29,5 +29,23 @@ class ShelfSQLManager : BaseSQLManager() {
         cursor.close()
         closeDB()
         return id
+    }
+
+    fun getRecord(bookname: String): Array<String>{
+        val result = Array<String>(2){""}
+        val cursor = getDB().
+                rawQuery("select $ID,$READRECORD from $TABLE_SHELF where $BOOKNAME='$bookname';", null)
+        if(cursor.moveToFirst()){
+            result[0] = cursor.getString(0) ?: ""
+            result[1] = cursor.getString(1) ?: ""
+        }
+        cursor.close()
+        closeDB()
+        return result
+    }
+
+    fun setRecord(bookname: String, record: String){
+        getDB().execSQL("update $TABLE_SHELF set $READRECORD='$record' where $BOOKNAME='$bookname';");
+        closeDB()
     }
 }

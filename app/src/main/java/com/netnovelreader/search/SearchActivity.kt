@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.netnovelreader.NetNovelReaderApplication
@@ -20,6 +21,7 @@ import io.reactivex.schedulers.Schedulers
 
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.item_search_recycler_view.view.*
+import java.util.*
 
 class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     var mViewModel: SearchViewModel? = null
@@ -37,11 +39,16 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     }
 
     override fun initView() {
+        var tmp = ""
+        var tmpTime = System.currentTimeMillis()
         search_bar.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                if (query != null && query.length > 0 && mViewModel != null) {
-                    updateSearchResult(query, searchCode++)
-//                    updateSearchResult("极道天魔", searchCode++)
+            override fun onQueryTextSubmit(query: String): Boolean {
+                if(tmp == query && System.currentTimeMillis() - tmpTime < 1000) return true
+                if (query.length > 0 && mViewModel != null) {
+//                    updateSearchResult(query, searchCode++)
+                    updateSearchResult("修真聊天群", searchCode++)
+                    tmp = query
+                    tmpTime = System.currentTimeMillis()
                 }
                 return true
             }

@@ -1,5 +1,6 @@
 package com.netnovelreader.data.network
 
+import android.util.Log
 import com.netnovelreader.data.database.SearchSQLManager
 import com.netnovelreader.utils.TIMEOUT
 import com.netnovelreader.utils.UA
@@ -14,7 +15,7 @@ import java.net.URLEncoder
 
 /**
  * Created by yangbo on 18-1-14.
- * search("http://se.qidian.com/?kw=" + URLEncoder.encode(tablename, "utf-8"),".book-img-text > ul:nth-child(1) > li:nth-child(1)"))
+ * search("http://se.qidian.com/?kw=" + URLEncoder.encode(tablename, "utf-8"),".book-img-indicator > ul:nth-child(1) > li:nth-child(1)"))
  * search("http://www.yunlaige.com/modules/article/search.php?searchkey=" + URLEncoder.encode(tablename, "gbk") + "&action=login&submit=", "location", ".readnow", "li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)")
  */
 class SearchBook : Cloneable{
@@ -25,9 +26,10 @@ class SearchBook : Cloneable{
         if(redirectFileld.equals("")){
             search(url, noRedirectSelector, noRedirectName)
         }
+        Log.d("search Book","$url")
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.instanceFollowRedirects = false
-        conn.setRequestProperty("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+        conn.setRequestProperty("accept", "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
         conn.setRequestProperty("user-agent", UA)
         conn.setRequestProperty("Upgrade-Insecure-Requests", "1")
         conn.setRequestProperty("Connection","keep-alive")
@@ -44,6 +46,7 @@ class SearchBook : Cloneable{
 
     @Throws(ConnectException::class)
     fun search(url: String, noRedirectSelector: String, noRedirectName: String): String? {
+        Log.d("search Book","$url")
         val doc = Jsoup.connect(url).userAgent(UA)
                 .timeout(TIMEOUT).get()
         var result = doc.select(noRedirectSelector).select("a").attr("href")

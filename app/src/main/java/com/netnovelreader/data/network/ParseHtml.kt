@@ -18,7 +18,7 @@ class ParseHtml {
         selector ?: return ""
         val chapter = Jsoup.connect(url).userAgent(UA)
                 .timeout(TIMEOUT).get().select(selector)
-        var txt = "    " + chapter.text().replace(" ", "\n\n    ")
+        var txt = "    " + chapter.text().replace(" ", "\\n\\n  ")
         return txt
     }
 

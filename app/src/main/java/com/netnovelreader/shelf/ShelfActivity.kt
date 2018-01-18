@@ -113,7 +113,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     class ShelfClickEvent : IClickEvent {
         fun startReaderActivity(v: View){
             var intent = Intent(v.context, ReaderActivity::class.java)
-            intent.putExtra("tablename", v.nameView.text.toString())
+            intent.putExtra("bookname", v.nameView.text.toString())
             v.context.startActivity(intent)
         }
     }

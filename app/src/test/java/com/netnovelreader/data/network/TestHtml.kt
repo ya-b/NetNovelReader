@@ -10,7 +10,7 @@ class TestHtml {
     @Test
     fun testSearch(){
         val searchBook = SearchBook()
-//        var r1 = searchBook.search("http://se.qidian.com/?kw=" + URLEncoder.encode("极道天魔", "utf-8"),".book-img-text > ul:nth-child(1) > li:nth-child(1)",".book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1) > cite")
+//        var r1 = searchBook.search("http://se.qidian.com/?kw=" + URLEncoder.encode("极道天魔", "utf-8"),".book-img-indicator > ul:nth-child(1) > li:nth-child(1)",".book-img-indicator > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1) > cite")
         var r1 = searchBook.search("http://www.yunlaige.com/modules/article/search.php?searchkey=" + URLEncoder.encode("极道天魔", "gbk") + "&action=login&submit=",
                 "location",
                 ".readnow",

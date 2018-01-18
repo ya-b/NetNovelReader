@@ -11,6 +11,6 @@ interface IReaderContract {
         fun updateText(boolean: Boolean)
     }
     interface IReaderViewModel: IViewModel<ReaderBean> {
-        fun getChapterText(boolean: Boolean): Array<StringBuilder>
+        fun getChapterText(chapterNum: Int, dirName: String): String
     }
 }
