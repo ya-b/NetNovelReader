@@ -11,8 +11,12 @@ import java.io.IOException
  * Created by yangbo on 18-1-13.
  */
 class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
-    var readerBean: ReaderBean? = null
 
+    /**
+     * 获取小说章节内容
+     * @chapterNum:Int 章节数
+     * @dirname:String 代表对应书籍目录名，sqlite表名
+     */
     @Throws(IOException::class)
     override fun getChapterText(chapterNum: Int, dirName: String): String {
         val sb = StringBuilder()
@@ -32,6 +36,12 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
      */
     fun getChapterCount(): Int = ChapterSQLManager().getChapterCount("BOOK${ShelfSQLManager().getRecord(bookName)[0]}")
 
+    /**
+     * 将一章分割成ArrayList<ArrayList<String>>，表示：arraylist页《arraylist行》
+     * @width 屏幕宽
+     * @height 屏幕高
+     * @txtFontSize 字体大小
+     */
     fun splitChapterTxt(chapter: String, width: Int, height: Int, txtFontSize: Float): ArrayList<ArrayList<String>>{
         val tmpArray = chapter.split("\n")
         val tmplist = ArrayList<String>()
@@ -66,12 +76,5 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
             }
         }
         return arrayList
-    }
-
-    override fun getModel(): ReaderBean? {
-        readerBean ?: synchronized(this){
-            readerBean ?: run{ readerBean = ReaderBean() }
-        }
-        return readerBean
     }
 }

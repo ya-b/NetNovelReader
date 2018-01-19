@@ -1,6 +1,7 @@
 package com.netnovelreader.search
 
-import android.util.Log
+import android.databinding.ObservableArrayList
+import android.databinding.ObservableField
 import com.netnovelreader.data.database.SearchSQLManager
 import com.netnovelreader.data.database.ShelfSQLManager
 import com.netnovelreader.data.network.SearchBook
@@ -11,21 +12,30 @@ import java.net.URLEncoder
  * Created by yangbo on 18-1-14.
  */
 class SearchViewModel : ISearchContract.ISearchViewModel {
-    private var searchBean: SearchBean? = null
-
-    override fun getModel(): SearchBean? {
-        searchBean ?: synchronized(this) {
-            searchBean ?: run { searchBean = SearchBean() }
-        }
-        return searchBean
+    @Volatile
+    var searchCode = 0
+    var resultList: ObservableArrayList<SearchBean>
+    init {
+        resultList = ObservableArrayList<SearchBean>()
     }
 
+    /**
+     * 添加书到数据库
+     */
     override fun addBookToShelf(bookname: String, url: String): String{
         return id2Bookname(ShelfSQLManager().addBookToShelf(bookname, url))
     }
 
-    override fun updateResultList(bookname: String?, siteinfo: Array<String?>, searchCode: Int): SearchBean.SearchResultBean {
-        bookname ?: return SearchBean.SearchResultBean(searchCode, "","")
+    override fun searchBook(bookname: String?) {
+        bookname ?: return
+        searchCode++
+        resultList.clear()
+        //查询所有搜索站点设置，然后逐个搜索
+        SearchSQLManager().queryAll().forEach { Thread{ searchBookFromSite(bookname, it, searchCode) }.start() }
+    }
+
+
+    override fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, reqCode: Int) {
         var result: String? = null
         val url = siteinfo[1]!!.replace(SearchSQLManager.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
         try{
@@ -36,23 +46,12 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
                         siteinfo[4] ?: "", siteinfo[5] ?: "", siteinfo[6] ?: "")
             }
         }catch (e: Exception){
-            result ?: return SearchBean.SearchResultBean(searchCode, "","")
+            result ?: return
         }
-        result ?: return SearchBean.SearchResultBean(searchCode, "","")
+        result ?: return
         val s = result.split("~~~")
-        return SearchBean.SearchResultBean(searchCode, s[0], s[1])
-    }
-
-    override fun getSearchSite(): ArrayList<Array<String?>>? {
-        val sqlManager = SearchSQLManager()
-        val cursor = sqlManager.queryAll()
-        cursor ?: return null
-        val siteList = ArrayList<Array<String?>>()
-        while (cursor.moveToNext()) {
-            siteList.add(Array<String?>(8){it -> cursor.getString(it + 2 ) })
+        if(searchCode == reqCode){
+            resultList.add(SearchBean(ObservableField(s[0]), ObservableField(s[1])))
         }
-        cursor.close()
-        sqlManager.closeDB()
-        return siteList
     }
 }
