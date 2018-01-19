@@ -39,7 +39,11 @@ class DownloadService : Service() {
         tmpQueue = LinkedList<DownloadTask>()
         threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1)
         executeDownload = Thread(ExecuteDownload())
-        executeDownload?.start()
+        try{
+            executeDownload?.start()
+        }catch (e: Exception){
+            stopSelf()
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -61,8 +65,8 @@ class DownloadService : Service() {
         super.onDestroy()
         queue = null
         mNotificationManager?.cancel(NOTIFYID)
+//        executeDownload?.interrupt()
         threadPool?.shutdown()
-        executeDownload?.interrupt()
     }
 
     fun openNotification(){
@@ -83,8 +87,12 @@ class DownloadService : Service() {
         }
         builder?.setProgress(max, progress, false)?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
         mNotificationManager?.notify(NOTIFYID, builder?.build())
+    }
+
+    fun stopOrContinue(){
         if(progress == max && max != 0){  //判断一个task是否执行完
             if(tmpQueue!!.size == 0){ //是否还有任务待执行
+                queue!!.offer(DownloadTask("",""))
                 stopSelf()
             }else {
                 queue!!.offer(tmpQueue!!.removeFirst())
@@ -93,16 +101,20 @@ class DownloadService : Service() {
     }
 
     inner class ExecuteDownload : Runnable{
+
+        @Throws(Exception::class)
         override fun run() {
             while (true){
-                var taskList: ArrayList<DownloadTask.ChapterRunnable>? = null
-                try {
-                    taskList = queue!!.take().getRunnables()
-                }catch (e: Exception){
-                    stopSelf()
+                val downloadTask = queue!!.take()
+                if(downloadTask.tableName.equals("")){
                     break
                 }
+                val taskList = downloadTask.getRunnables()
                 max += taskList.size
+                if(taskList.isEmpty()){
+                    stopOrContinue()
+                    continue
+                }
                 Observable.fromIterable(taskList)
                         .flatMap { it ->
                             Observable.create<Int>( { e -> threadPool?.execute(it.setFun { e.onNext(1) }) } )
@@ -110,7 +122,9 @@ class DownloadService : Service() {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             updateNotification(max, ++progress)
+                            stopOrContinue()
                         }
+
             }
         }
     }

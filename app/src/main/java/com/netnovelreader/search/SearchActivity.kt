@@ -48,7 +48,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                 if(tmp == query && System.currentTimeMillis() - tmpTime < 1000) return true  //点击间隔小于1秒，并且搜索书名相同不再搜索
                 if (query.length > 0 && mViewModel != null) {
 //                    updateSearchResult(query, searchCode++)
-                    mViewModel?.searchBook("极道天魔" )
+                    mViewModel?.searchBook("电视剧世界" )
                     tmp = query
                     tmpTime = System.currentTimeMillis()
                 }
@@ -77,17 +77,14 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
 
     inner class SearchClickEvent : IClickEvent {
         fun downloadBook(v: View) {
-            Observable.create<String>({ e -> e.onNext(mViewModel!!.addBookToShelf(v.resultName.text.toString(), v.resultUrl.text.toString())) })
-                    .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { localpath ->
-                        if(v.resultName.text.toString().length > 0 &&  v.resultUrl.text.toString().length > 0){
-                            Toast.makeText(this@SearchActivity, R.string.add_success, Toast.LENGTH_SHORT).show()
-                            val intent = Intent(v.context, DownloadService::class.java)
-                            intent.putExtra("localpath", localpath)
-                            intent.putExtra("catalogurl", v.resultUrl.text.toString())
-                            startService(intent)
-                        }
-                    }
+            if(v.resultName.text.toString().length > 0 &&  v.resultUrl.text.toString().length > 0){
+                val path = mViewModel!!.addBookToShelf(v.resultName.text.toString(), v.resultUrl.text.toString())
+                Toast.makeText(this@SearchActivity, R.string.start_download, Toast.LENGTH_SHORT).show()
+                val intent = Intent(v.context, DownloadService::class.java)
+                intent.putExtra("localpath", path)
+                intent.putExtra("catalogurl", v.resultUrl.text.toString())
+                startService(intent)
+            }
         }
     }
 

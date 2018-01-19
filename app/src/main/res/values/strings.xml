@@ -5,8 +5,7 @@
     <string name="permission_warnning">此程序没有执行所需要的权限</string>
     <string name="search_button">搜索</string>
     <string name="title_activity_search">SearchActivity</string>
-    <string name="add_success">成功添加到书架</string>
-    <string name="add_fail">添加失败</string>
+    <string name="start_download">开始下载</string>
     <string name="prepare_download">更新章节列表，准备下载中。。。</string>
     <string name="downloading">下载中</string>
     <string name="wait2download">还有n项待处理</string>

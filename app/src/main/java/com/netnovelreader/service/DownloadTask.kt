@@ -12,14 +12,8 @@ import kotlin.collections.ArrayList
 /**
  * Created by yangbo on 2018/1/16.
  */
-class DownloadTask{
-    var tableName: String? = null
-    var url: String? = null
+class DownloadTask(val tableName: String, val url: String){
     var chapterName: String? = null
-    constructor(tableName: String, url: String){
-        this.tableName = tableName
-        this.url = url
-    }
 
     @Throws(SocketTimeoutException::class)
     fun getRunnables(): ArrayList<ChapterRunnable> {

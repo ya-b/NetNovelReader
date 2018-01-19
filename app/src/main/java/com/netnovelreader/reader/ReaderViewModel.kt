@@ -1,5 +1,6 @@
 package com.netnovelreader.reader
 
+import android.databinding.ObservableArrayList
 import android.util.Log
 import com.netnovelreader.data.database.ChapterSQLManager
 import com.netnovelreader.data.database.ShelfSQLManager
@@ -11,6 +12,7 @@ import java.io.IOException
  * Created by yangbo on 18-1-13.
  */
 class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
+    var text = ObservableArrayList<String>()
 
     /**
      * 获取小说章节内容
@@ -42,7 +44,7 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
      * @height 屏幕高
      * @txtFontSize 字体大小
      */
-    fun splitChapterTxt(chapter: String, width: Int, height: Int, txtFontSize: Float): ArrayList<ArrayList<String>>{
+    fun splitChapterTxt(chapter: String, width: Int, height: Int, txtFontSize: Float): ArrayList<ObservableArrayList<String>>{
         val tmpArray = chapter.split("\n")
         val tmplist = ArrayList<String>()
         tmpArray.forEach{
@@ -60,17 +62,17 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
                 tmplist.add(tmp)
             }
         }
-        val arrayList = ArrayList<ArrayList<String>>()
+        val arrayList = ArrayList<ObservableArrayList<String>>()
         val totalCount = height / txtFontSize.toInt() - 2
         if( tmplist.size > totalCount){
             val count = tmplist.size / totalCount
             for(i in 0..count -1){
-                val a = ArrayList<String>()
+                val a = ObservableArrayList<String>()
                 tmplist.subList(i * totalCount, (i + 1) * totalCount).forEach{ a.add(it)}
                 arrayList.add(a)
             }
             if(tmplist.size % totalCount != 0){
-                val b = ArrayList<String>()
+                val b = ObservableArrayList<String>()
                 tmplist.subList(count * totalCount, tmplist.size - 1).forEach{ b.add(it)}
                 arrayList.add(b)
             }

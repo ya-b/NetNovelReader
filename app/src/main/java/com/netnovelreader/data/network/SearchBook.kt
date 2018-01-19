@@ -64,7 +64,6 @@ class SearchBook : Cloneable{
             result += "#Catalog"
         }
         result = doc.select(name).text() + "~~~" + result
-        Log.d("======search Book","$url")
         return result
     }
 
