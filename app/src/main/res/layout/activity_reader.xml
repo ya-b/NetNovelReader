@@ -1,21 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable name="chapter" type="com.netnovelreader.reader.ReaderViewModel"/>
     </data>
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context="com.netnovelreader.reader.ReaderActivity">
 
-        <com.netnovelreader.reader.NewReaderView
+        <com.netnovelreader.reader.ReaderView
             android:id="@+id/readerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@{chapter.text}"/>
+            android:text="@{chapter.text}"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/footView"
+            android:visibility="invisible"
+            android:background="@drawable/reader_foot_view_top_border"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
+            <Button
+                android:id="@+id/catalogButton"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="@string/catalogButton"
+                android:textColor="@color/black"
+                android:textSize="20sp"/>
+            <Button
+                android:id="@+id/fontSizeButton"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="@string/fontSizeButton"
+                android:textColor="@color/black"
+                android:textSize="20sp"/>
+            <Button
+                android:id="@+id/backgroundButton"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="@string/backgroundButton"
+                android:textColor="@color/black"
+                android:textSize="20sp"/>
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
 </layout>

@@ -4,10 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/showText"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/catalogView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="aaaaaaaaaaaaaaaaaaaaaaaaaa"/>
+        android:scrollbars="vertical">
+
+    </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

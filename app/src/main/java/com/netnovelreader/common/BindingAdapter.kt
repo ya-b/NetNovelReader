@@ -1,4 +1,4 @@
-package com.netnovelreader.base
+package com.netnovelreader.common
 
 import android.databinding.DataBindingUtil
 import android.databinding.ObservableArrayList
@@ -8,12 +8,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 
 import com.netnovelreader.BR
+import com.netnovelreader.base.IClickEvent
 
 /**
  * Created by yangbo on 18-1-12.
  */
 
-class BindingAdapter<T>(var itemDetails: ObservableArrayList<T>?, val resId: Int, val clickEvent: IClickEvent?) : RecyclerView.Adapter<BindingAdapter.BindingViewHolder<T>>() {
+class BindingAdapter<T>(var itemDetails: ObservableArrayList<T>?, val resId: Int, val clickEvent: IClickEvent?)
+    : RecyclerView.Adapter<BindingAdapter.BindingViewHolder<T>>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<T> {
         val binding = DataBindingUtil.inflate<ViewDataBinding>(LayoutInflater.from(parent.context),
@@ -30,13 +32,8 @@ class BindingAdapter<T>(var itemDetails: ObservableArrayList<T>?, val resId: Int
         return itemDetails!!.size
     }
 
-    fun changeDataSet(itemDetails: ObservableArrayList<T>?){
-        this.itemDetails = itemDetails
-        notifyDataSetChanged()
-    }
-
-    class BindingViewHolder<T>(val binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root){
-        fun bind(itemData: T?, clickEvent: IClickEvent?){
+    class BindingViewHolder<T>(val binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(itemData: T?, clickEvent: IClickEvent?) {
             binding.setVariable(BR.itemDetail, itemData)
             binding.setVariable(BR.clickEvent, clickEvent)
             binding.executePendingBindings()

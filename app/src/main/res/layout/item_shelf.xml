@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable name="itemDetail" type="com.netnovelreader.shelf.ShelfBean"/>
         <variable name="clickEvent" type="com.netnovelreader.shelf.ShelfActivity.ShelfClickEvent"/>
     </data>
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/layout_border"
         android:onLongClick="@{clickEvent::itemOnLongClick}"
         android:onClick="@{clickEvent::itemOnClick}">
 
@@ -19,6 +19,14 @@
             android:layout_height="wrap_content"
             android:textSize="24sp"
             android:text="@{itemDetail.bookname??``}" />
-    </LinearLayout>
+
+        <TextView
+            android:id="@+id/latestChapter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{itemDetail.latestChapter??``}"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/nameView"/>
+    </android.support.constraint.ConstraintLayout>
 
 </layout>

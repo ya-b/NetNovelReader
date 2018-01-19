@@ -1,12 +1,7 @@
-package com.netnovelreader.utils
+package com.netnovelreader.common
 
-import android.app.Activity
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Environment
-import android.support.v4.app.ActivityCompat
 import java.io.File
-import java.util.jar.Manifest
 import java.util.regex.Pattern
 
 /**
@@ -19,7 +14,7 @@ val UA = "Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0"
 fun getSavePath(): String {
     var path: String?
     if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-        path = Environment.getExternalStorageDirectory().path.toString() + "/netnovelreader"
+        path = Environment.getExternalStorageDirectory().path + "/netnovelreader"
     } else {
         path = "/data/data/com.mynovelreader"
     }
@@ -27,7 +22,7 @@ fun getSavePath(): String {
 }
 
 //例如: http://www.hello.com/world/fjwoj/foew.html  中截取 hello.com
-fun url2Hostname(url: String) : String{
+fun url2Hostname(url: String): String {
     var hostname: String? = null
     var matcher = Pattern.compile(".*?//.*?\\.(.*?)/.*?").matcher(url)
     if (matcher.find())
@@ -35,24 +30,29 @@ fun url2Hostname(url: String) : String{
     return hostname ?: "error"
 }
 
-fun id2Bookname(id: Int): String{
-    return "BOOK" + id
+//根据shelf书名对应的id作为这本书目录表的表名（表明不能用数字作为开头）
+fun id2TableName(id: Any): String {
+    return "BOOK" + id.toString()
 }
 
-fun mkdirs(dir: String): String{
+fun tableName2Id(tableName: String): String {
+    return tableName.replace("BOOK", "")
+}
+
+fun mkdirs(dir: String): String {
     val file = File(dir)
-    if(!file.exists()){
+    if (!file.exists()) {
         file.mkdirs()
     }
     return file.toString()
 }
 
-fun getHeaders(url: String): HashMap<String, String>{
+fun getHeaders(url: String): HashMap<String, String> {
     var map = HashMap<String, String>()
     map.put("accept", "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
     map.put("user-agent", UA)
     map.put("Upgrade-Insecure-Requests", "1")
-    map.put("Connection","keep-alive")
+    map.put("Connection", "keep-alive")
     map.put("Referer", "http://www.${url2Hostname(url)}/")
     return map
 }

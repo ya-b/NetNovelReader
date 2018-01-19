@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.netnovelreader.search.SearchActivity">
+
+    <item
+        android:id="@+id/searchViewBar"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:title="@string/search_button"
+        app:actionViewClass="SearchView"
+        app:showAsAction="ifRoom|collapseActionView"/>
+
+</menu>

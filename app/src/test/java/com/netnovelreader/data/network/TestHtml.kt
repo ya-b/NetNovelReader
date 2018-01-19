@@ -1,5 +1,6 @@
 package com.netnovelreader.data.network
 
+import com.netnovelreader.data.SearchBook
 import org.junit.Test
 import java.net.URLEncoder
 
