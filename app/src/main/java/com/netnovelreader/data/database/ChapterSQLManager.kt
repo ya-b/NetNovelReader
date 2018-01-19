@@ -9,8 +9,8 @@ import android.util.Log
 class ChapterSQLManager : BaseSQLManager() {
     @Synchronized
     fun createTable(tableName : String): ChapterSQLManager {
-        getDB().execSQL("create table if not exists $tableName (${ID} integer primary key," +
-                "${CHAPTERNAME} varchar(128), ${CHAPTERURL} indicator, ${ISDOWNLOADED} var char(128));")
+        getDB().execSQL("create table if not exists $tableName ($ID integer primary key," +
+                "$CHAPTERNAME varchar(128), $CHAPTERURL indicator, $ISDOWNLOADED var char(128));")
         return this
     }
 
@@ -38,7 +38,7 @@ class ChapterSQLManager : BaseSQLManager() {
             var ite = map.iterator()
             while (ite.hasNext()){
                 val entry = ite.next()
-                getDB().execSQL("insert into $tableName (${CHAPTERNAME}, ${CHAPTERURL}, ${ISDOWNLOADED}) "
+                getDB().execSQL("insert into $tableName ($CHAPTERNAME, $CHAPTERURL, $ISDOWNLOADED) "
                         + "values ('${entry.key}','${entry.value}','0')")
             }
             getDB().setTransactionSuccessful()
@@ -55,8 +55,8 @@ class ChapterSQLManager : BaseSQLManager() {
             getDB().execSQL("insert into $tableName ($CHAPTERNAME, $CHAPTERURL, $ISDOWNLOADED) "
                     + "values ('$chaptername','$url','${compareValues(isDownloadSuccess, false)}')")
         }else{
-            getDB().execSQL("update $tableName set ${ISDOWNLOADED}='${compareValues(isDownloadSuccess, false)}' " +
-                    "where ${CHAPTERNAME}='$chaptername';")
+            getDB().execSQL("update $tableName set $ISDOWNLOADED='${compareValues(isDownloadSuccess, false)}' " +
+                    "where $CHAPTERNAME='$chaptername';")
         }
         cursor.close()
     }

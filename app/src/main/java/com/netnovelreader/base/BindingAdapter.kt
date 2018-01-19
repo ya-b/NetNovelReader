@@ -14,19 +14,16 @@ import com.netnovelreader.BR
  * Created by yangbo on 18-1-12.
  */
 
-class BindingAdapter<T>(var itemDetails: ObservableArrayList<T>?, val resId: Int, val clickEvent: IClickEvent?) : RecyclerView.Adapter<BindingAdapter.BindingViewHolder>() {
+class BindingAdapter<T>(var itemDetails: ObservableArrayList<T>?, val resId: Int, val clickEvent: IClickEvent?) : RecyclerView.Adapter<BindingAdapter.BindingViewHolder<T>>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<T> {
         val binding = DataBindingUtil.inflate<ViewDataBinding>(LayoutInflater.from(parent.context),
                 resId, parent, false)
-        return BindingViewHolder(binding.root)
+        return BindingViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder, position: Int) {
-        val binding = DataBindingUtil.getBinding<ViewDataBinding>(holder.itemView)
-        binding.setVariable(BR.itemDetail, itemDetails?.get(position))
-        binding.setVariable(BR.clickEvent, clickEvent)
-        binding.executePendingBindings()
+    override fun onBindViewHolder(holder: BindingViewHolder<T>, position: Int) {
+        holder.bind(itemDetails?.get(position), clickEvent)
     }
 
     override fun getItemCount(): Int {
@@ -39,5 +36,11 @@ class BindingAdapter<T>(var itemDetails: ObservableArrayList<T>?, val resId: Int
         notifyDataSetChanged()
     }
 
-    class BindingViewHolder(v: View) : RecyclerView.ViewHolder(v)
+    class BindingViewHolder<T>(val binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root){
+        fun bind(itemData: T?, clickEvent: IClickEvent?){
+            binding.setVariable(BR.itemDetail, itemData)
+            binding.setVariable(BR.clickEvent, clickEvent)
+            binding.executePendingBindings()
+        }
+    }
 }

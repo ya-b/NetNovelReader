@@ -55,6 +55,9 @@ class DownloadTask{
     }
 
 
+    /**
+     * 下载保存章节具体执行者，实现runnable接口，线程池执行
+     */
     class ChapterRunnable(val tablename: String, val dir: String, val chapterName: String, val chapterUrl:String) : Runnable{
         lateinit var eON: () -> Unit ?
 

@@ -13,6 +13,9 @@ import java.net.SocketTimeoutException
  * Created by yangbo on 18-1-14.
  */
 class ParseHtml {
+    /**
+     * 解析章节
+     */
     @Throws(SocketTimeoutException::class)
     fun getChapter(url: String): String {
         var selector = ParseSQLManager().getChapterRule(url2Hostname(url), BaseSQLManager.CHAPTER_RULE)
@@ -23,6 +26,9 @@ class ParseHtml {
         return txt
     }
 
+    /**
+     * 解析目录
+     */
     @Throws(SocketTimeoutException::class)
     fun getCatalog(url: String): LinkedHashMap<String, String> {
         var selector = ParseSQLManager().getChapterRule(url2Hostname(url), BaseSQLManager.CATALOG_RULE)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
-        <variable name="itemDetail" type="com.netnovelreader.shelf.ShelfBean.BookInfoBean"/>
+        <variable name="itemDetail" type="com.netnovelreader.shelf.ShelfBean"/>
         <variable name="clickEvent" type="com.netnovelreader.shelf.ShelfActivity.ShelfClickEvent"/>
     </data>
 

@@ -10,51 +10,59 @@ class SearchSQLManager : BaseSQLManager() {
         val SEARCH_NAME = "searchname"
     }
     init {
-        getDB().execSQL("create table if not exists ${BaseSQLManager.TABLE_SEARCH} (" +
-                "${BaseSQLManager.ID} integer primary key, " +
-                "${BaseSQLManager.SEARCH_HOSTNAME} varchar(128) unique, " +
-                "${BaseSQLManager.ISREDIRECT} varchar(128), " +
-                "${BaseSQLManager.SEARCHURL} indicator, " +
-                "${BaseSQLManager.REDIRECTFILELD} varchar(128), " +
-                "${BaseSQLManager.REDIRECTSELECTOR} varchar(128), " +
-                "${BaseSQLManager.NOREDIRECTSELECTOR} varchar(128), " +
-                "${BaseSQLManager.REDIRECTNAME} varchar(128), " +
-                "${BaseSQLManager.NOREDIRECTNAME} varchar(128), " +
-                "${BaseSQLManager.SEARCHCHARSET} varchar(128));")
+        getDB().execSQL("create table if not exists $TABLE_SEARCH (" +
+                "$ID integer primary key, " +
+                "$SEARCH_HOSTNAME varchar(128) unique, " +
+                "$ISREDIRECT varchar(128), " +
+                "$SEARCHURL indicator, " +
+                "$REDIRECTFILELD varchar(128), " +
+                "$REDIRECTSELECTOR varchar(128), " +
+                "$NOREDIRECTSELECTOR varchar(128), " +
+                "$REDIRECTNAME varchar(128), " +
+                "$NOREDIRECTNAME varchar(128), " +
+                "$SEARCHCHARSET varchar(128));")
         initTable()
     }
 
-    fun queryAll(): Cursor? {
-        return getDB().rawQuery("select * from ${BaseSQLManager.TABLE_SEARCH}", null)
+    fun queryAll(): ArrayList<Array<String?>> {
+        var arraylist = ArrayList<Array<String?>>()
+        var cursor = getDB().rawQuery("select * from $TABLE_SEARCH;", null)
+        while (cursor.moveToNext()){
+            arraylist.add(Array<String?>(8){it -> cursor.getString(it + 2 ) })
+        }
+        cursor.close()
+        closeDB()
+        return arraylist
     }
 
     fun querySite(hostname: String): Map<String, String?>{
-        var cursor = getDB().rawQuery("select * from ${BaseSQLManager.TABLE_SEARCH} where " +
-                "${BaseSQLManager.SEARCH_HOSTNAME}='$hostname';", null)
+        var cursor = getDB().rawQuery("select * from $TABLE_SEARCH where " +
+                "${SEARCH_HOSTNAME}='$hostname';", null)
         var map = HashMap<String, String?>()
         cursor ?: return map
         if(cursor.moveToFirst()){
-            map.put(BaseSQLManager.ISREDIRECT, cursor.getString(cursor.getColumnIndex(BaseSQLManager.ISREDIRECT)))
-            map.put(BaseSQLManager.SEARCHURL, cursor.getString(cursor.getColumnIndex(BaseSQLManager.SEARCHURL)))
-            map.put(BaseSQLManager.REDIRECTFILELD, cursor.getString(cursor.getColumnIndex(BaseSQLManager.REDIRECTFILELD)))
-            map.put(BaseSQLManager.REDIRECTSELECTOR, cursor.getString(cursor.getColumnIndex(BaseSQLManager.REDIRECTSELECTOR)))
-            map.put(BaseSQLManager.NOREDIRECTSELECTOR, cursor.getString(cursor.getColumnIndex(BaseSQLManager.NOREDIRECTSELECTOR)))
-            map.put(BaseSQLManager.REDIRECTNAME, cursor.getString(cursor.getColumnIndex(BaseSQLManager.REDIRECTNAME)))
-            map.put(BaseSQLManager.NOREDIRECTNAME, cursor.getString(cursor.getColumnIndex(BaseSQLManager.NOREDIRECTNAME)))
-            map.put(BaseSQLManager.SEARCHCHARSET, cursor.getString(cursor.getColumnIndex(BaseSQLManager.SEARCHCHARSET)))
+            map.put(ISREDIRECT, cursor.getString(cursor.getColumnIndex(ISREDIRECT)))
+            map.put(SEARCHURL, cursor.getString(cursor.getColumnIndex(SEARCHURL)))
+            map.put(REDIRECTFILELD, cursor.getString(cursor.getColumnIndex(REDIRECTFILELD)))
+            map.put(REDIRECTSELECTOR, cursor.getString(cursor.getColumnIndex(REDIRECTSELECTOR)))
+            map.put(NOREDIRECTSELECTOR, cursor.getString(cursor.getColumnIndex(NOREDIRECTSELECTOR)))
+            map.put(REDIRECTNAME, cursor.getString(cursor.getColumnIndex(REDIRECTNAME)))
+            map.put(NOREDIRECTNAME, cursor.getString(cursor.getColumnIndex(NOREDIRECTNAME)))
+            map.put(SEARCHCHARSET, cursor.getString(cursor.getColumnIndex(SEARCHCHARSET)))
         }
         cursor.close()
         return map
     }
 
     fun initTable(){
-        var cursor = queryAll()
+        var cursor = getDB().rawQuery("select * from $TABLE_SEARCH;", null)
         if(cursor != null && !cursor.moveToFirst()){
-            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (1,'qidian.com','0','http://se.qidian.com/?kw=$SEARCH_NAME'," +
-                    "'','','.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)',''," +
+            getDB().execSQL("insert into $TABLE_SEARCH values (1,'qidian.com','0'," +
+                    "'https://www.qidian.com/search/?kw=$SEARCH_NAME','',''," +
+                    "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)',''," +
                     "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)'," +
                     "'utf-8');")
-            getDB().execSQL("insert into ${BaseSQLManager.TABLE_SEARCH} values (2,'yunlaige.com','1'," +
+            getDB().execSQL("insert into $TABLE_SEARCH values (2,'yunlaige.com','1'," +
                     "'http://www.yunlaige.com/modules/article/search.php?searchkey=$SEARCH_NAME&action=login&submit='," +
                     "'location','.readnow'," +
                     "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)'," +

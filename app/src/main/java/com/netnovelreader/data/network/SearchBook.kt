@@ -1,33 +1,38 @@
 package com.netnovelreader.data.network
 
 import android.util.Log
-import com.netnovelreader.data.database.SearchSQLManager
 import com.netnovelreader.utils.TIMEOUT
 import com.netnovelreader.utils.UA
 import com.netnovelreader.utils.getHeaders
 import com.netnovelreader.utils.url2Hostname
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import org.jsoup.Jsoup
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLEncoder
 
 /**
  * Created by yangbo on 18-1-14.
- * search("http://se.qidian.com/?kw=" + URLEncoder.encode(tablename, "utf-8"),".book-img-indicator > ul:nth-child(1) > li:nth-child(1)"))
- * search("http://www.yunlaige.com/modules/article/search.php?searchkey=" + URLEncoder.encode(tablename, "gbk") + "&action=login&submit=", "location", ".readnow", "li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)")
  */
 class SearchBook : Cloneable{
 
+    /**
+     * @url
+     * @redirectFileld
+     * @redirectSelector
+     * @noRedirectSelector
+     * @redirectName
+     * @noRedirectName
+     * 有些网站搜索到书名后，响应头例如Location：http://www.yunlaige.com/book/19984.html，然后跳转到书籍页,redirectFileld表示响应头跳转链接
+     * 有些网站搜索到书名后，显示搜索列表,
+     * Selector  jsoup选择结果页目录url
+     * Name  jsoup选择结果页书名
+     */
     @Throws(ConnectException::class)
     fun search(url: String, redirectFileld: String, redirectSelector: String, noRedirectSelector: String, redirectName: String, noRedirectName: String): String?{
         var result: String?
         if(redirectFileld.equals("")){
             search(url, noRedirectSelector, noRedirectName)
         }
-        Log.d("search Book","$url")
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.instanceFollowRedirects = false
         conn.setRequestProperty("accept", "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
@@ -46,10 +51,10 @@ class SearchBook : Cloneable{
     }
 
     @Throws(ConnectException::class)
-    fun search(url: String, noRedirectSelector: String, noRedirectName: String): String? {
+    fun search(url: String, selector: String, name: String): String? {
         val doc = Jsoup.connect(url).headers(getHeaders(url))
                 .timeout(TIMEOUT).get()
-        var result = doc.select(noRedirectSelector).select("a").attr("href")
+        var result = doc.select(selector).select("a").attr("href")
         if(!result!!.contains("//")){
             result = url.substring(0, url.lastIndexOf('/') + 1) + result
         }else if(result.startsWith("//")){
@@ -58,7 +63,8 @@ class SearchBook : Cloneable{
         if(result.contains("qidian.com")){
             result += "#Catalog"
         }
-        result = doc.select(noRedirectName).text() + "~~~" + result
+        result = doc.select(name).text() + "~~~" + result
+        Log.d("======search Book","$url")
         return result
     }
 

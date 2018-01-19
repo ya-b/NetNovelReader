@@ -23,6 +23,7 @@ class DownloadService : Service() {
     var tmpQueue: LinkedList<DownloadTask>? = null
     val NOTIFYID = 1599407175
     var threadPool: ExecutorService? = null
+    var executeDownload: Thread? = null
     @Volatile
     var max = -1
     @Volatile
@@ -37,7 +38,8 @@ class DownloadService : Service() {
         queue = LinkedBlockingQueue<DownloadTask>()
         tmpQueue = LinkedList<DownloadTask>()
         threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1)
-        downloadThreadStart()
+        executeDownload = Thread(ExecuteDownload())
+        executeDownload?.start()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -57,33 +59,10 @@ class DownloadService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        queue = null
         mNotificationManager?.cancel(NOTIFYID)
         threadPool?.shutdown()
-    }
-
-    //TODO 优化
-    fun downloadThreadStart(){
-        Thread{
-            Thread.sleep(100)
-            while (true){
-                var taskList: ArrayList<DownloadTask.ChapterRunnable>? = null
-                try {
-                    taskList = queue!!.take().getRunnables()
-                }catch (e: Exception){
-                    stopSelf()
-                    break
-                }
-                max += taskList.size
-                Observable.fromIterable(taskList)
-                        .flatMap { it ->
-                            Observable.create<Int>( { e -> threadPool?.execute(it.setFun { e.onNext(1) }) } )
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            updateNotification(max, ++progress)
-                        }
-            }
-        }.start()
+        executeDownload?.interrupt()
     }
 
     fun openNotification(){
@@ -104,8 +83,8 @@ class DownloadService : Service() {
         }
         builder?.setProgress(max, progress, false)?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
         mNotificationManager?.notify(NOTIFYID, builder?.build())
-        if(progress == max && max != 0){
-            if(tmpQueue!!.size == 0){
+        if(progress == max && max != 0){  //判断一个task是否执行完
+            if(tmpQueue!!.size == 0){ //是否还有任务待执行
                 stopSelf()
             }else {
                 queue!!.offer(tmpQueue!!.removeFirst())
@@ -113,4 +92,26 @@ class DownloadService : Service() {
         }
     }
 
+    inner class ExecuteDownload : Runnable{
+        override fun run() {
+            while (true){
+                var taskList: ArrayList<DownloadTask.ChapterRunnable>? = null
+                try {
+                    taskList = queue!!.take().getRunnables()
+                }catch (e: Exception){
+                    stopSelf()
+                    break
+                }
+                max += taskList.size
+                Observable.fromIterable(taskList)
+                        .flatMap { it ->
+                            Observable.create<Int>( { e -> threadPool?.execute(it.setFun { e.onNext(1) }) } )
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            updateNotification(max, ++progress)
+                        }
+            }
+        }
+    }
 }

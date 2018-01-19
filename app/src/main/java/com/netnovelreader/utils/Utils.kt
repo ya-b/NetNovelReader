@@ -26,6 +26,7 @@ fun getSavePath(): String {
     return path
 }
 
+//例如: http://www.hello.com/world/fjwoj/foew.html  中截取 hello.com
 fun url2Hostname(url: String) : String{
     var hostname: String? = null
     var matcher = Pattern.compile(".*?//.*?\\.(.*?)/.*?").matcher(url)

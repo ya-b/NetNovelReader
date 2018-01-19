@@ -1,5 +1,6 @@
 package com.netnovelreader.search
 
+import android.databinding.ObservableInt
 import com.netnovelreader.base.IView
 import com.netnovelreader.base.IViewModel
 
@@ -8,11 +9,11 @@ import com.netnovelreader.base.IViewModel
  */
 interface ISearchContract {
     interface ISearchView: IView<SearchViewModel> {
-        fun updateSearchResult(bookname: String?, shCode: Int)
+        fun updateSearchResult(bookname: String?, shCode: ObservableInt)
     }
     interface ISearchViewModel: IViewModel<SearchBean> {
         fun addBookToShelf(bookname: String, url: String): String
-        fun updateResultList(bookname: String?, siteinfo: Array<String?>, searchCode: Int): SearchBean.SearchResultBean
-        fun getSearchSite(): ArrayList<Array<String?>>?
+        fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, searchCode: Int)
+        fun searchBook(bookname: String?)
     }
 }

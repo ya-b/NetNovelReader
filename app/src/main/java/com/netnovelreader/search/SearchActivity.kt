@@ -2,14 +2,15 @@ package com.netnovelreader.search
 
 import android.content.Intent
 import android.databinding.DataBindingUtil
+import android.databinding.ObservableArrayList
+import android.databinding.ObservableInt
+import android.databinding.ObservableList
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.View
 import android.widget.Toast
-import com.netnovelreader.NetNovelReaderApplication
 import com.netnovelreader.R
 import com.netnovelreader.base.BindingAdapter
 import com.netnovelreader.base.IClickEvent
@@ -21,11 +22,10 @@ import io.reactivex.schedulers.Schedulers
 
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.item_search_recycler_view.view.*
-import java.util.*
 
 class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     var mViewModel: SearchViewModel? = null
-    var searchCode = 0
+    var arrayListChangeListener = ArrayListChangeListener()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,14 +39,16 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     }
 
     override fun initView() {
-        var tmp = ""
-        var tmpTime = System.currentTimeMillis()
+
+        //搜索事件监听
         search_bar.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
+            var tmp = ""
+            var tmpTime = System.currentTimeMillis()
             override fun onQueryTextSubmit(query: String): Boolean {
-                if(tmp == query && System.currentTimeMillis() - tmpTime < 1000) return true
+                if(tmp == query && System.currentTimeMillis() - tmpTime < 1000) return true  //点击间隔小于1秒，并且搜索书名相同不再搜索
                 if (query.length > 0 && mViewModel != null) {
-                    updateSearchResult(query, searchCode++)
-//                    updateSearchResult("修真聊天群", searchCode++)
+//                    updateSearchResult(query, searchCode++)
+                    mViewModel?.searchBook("极道天魔" )
                     tmp = query
                     tmpTime = System.currentTimeMillis()
                 }
@@ -57,27 +59,20 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                 return true
             }
         })
+
         searchRecycler.layoutManager = LinearLayoutManager(this)
-        searchRecycler.adapter = BindingAdapter(mViewModel?.getModel()?.resultList,
+        searchRecycler.adapter = BindingAdapter(mViewModel?.resultList,
                 R.layout.item_search_recycler_view, SearchClickEvent())
         searchRecycler.setItemAnimator(DefaultItemAnimator())
+        mViewModel?.resultList?.addOnListChangedCallback(arrayListChangeListener)
     }
 
-    override fun updateSearchResult(bookname: String?, shCode: Int) {
-        bookname ?: return
-        mViewModel ?: return
-        mViewModel!!.getModel()?.resultList?.clear()
-        searchRecycler.adapter.notifyDataSetChanged()
-        mViewModel!!.getSearchSite()?.forEach {
-            Observable.create<SearchBean.SearchResultBean> { e -> e.onNext(mViewModel!!.updateResultList(bookname, it, shCode)) }
-                    .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { result ->
-                        if (result.reqCode + 1 == searchCode && result.url.length > 0 && result.bookname.length > 0) {
-                            mViewModel!!.getModel()?.resultList?.add(result)
-                            searchRecycler.adapter.notifyDataSetChanged()
-                        }
-                    }
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        mViewModel?.resultList?.removeOnListChangedCallback(arrayListChangeListener)
+    }
+
+    override fun updateSearchResult(bookname: String?, shCode: ObservableInt) {
     }
 
     inner class SearchClickEvent : IClickEvent {
@@ -86,13 +81,39 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                     .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                     .subscribe { localpath ->
                         if(v.resultName.text.toString().length > 0 &&  v.resultUrl.text.toString().length > 0){
-                            Toast.makeText(NetNovelReaderApplication.appContext, R.string.add_success, Toast.LENGTH_SHORT).show()
-                            var intent = Intent(v.context, DownloadService::class.java)
+                            Toast.makeText(this@SearchActivity, R.string.add_success, Toast.LENGTH_SHORT).show()
+                            val intent = Intent(v.context, DownloadService::class.java)
                             intent.putExtra("localpath", localpath)
                             intent.putExtra("catalogurl", v.resultUrl.text.toString())
                             startService(intent)
                         }
                     }
+        }
+    }
+
+    inner class ArrayListChangeListener : ObservableList.OnListChangedCallback<ObservableArrayList<SearchBean>>(){
+        override fun onChanged(p0: ObservableArrayList<SearchBean>?) {
+            notifyDataSetChanged()
+        }
+
+        override fun onItemRangeChanged(p0: ObservableArrayList<SearchBean>?, p1: Int, p2: Int) {
+            notifyDataSetChanged()
+        }
+
+        override fun onItemRangeInserted(p0: ObservableArrayList<SearchBean>?, p1: Int, p2: Int) {
+            notifyDataSetChanged()
+        }
+
+        override fun onItemRangeMoved(p0: ObservableArrayList<SearchBean>?, p1: Int, p2: Int, p3: Int) {
+            notifyDataSetChanged()
+        }
+
+        override fun onItemRangeRemoved(p0: ObservableArrayList<SearchBean>?, p1: Int, p2: Int) {
+            notifyDataSetChanged()
+        }
+
+        fun notifyDataSetChanged(){
+            runOnUiThread { searchRecycler.adapter.notifyDataSetChanged() }
         }
     }
 }

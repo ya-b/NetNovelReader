@@ -9,11 +9,11 @@ import com.netnovelreader.base.IViewModel
  */
 interface IShelfContract {
     interface IShelfView: IView<ShelfViewModel>{
-        fun updateShelf(adapter: BindingAdapter<ShelfBean.BookInfoBean>?)
+        fun updateShelf(adapter: BindingAdapter<ShelfBean>?)
         fun checkPermission(permission: String): Boolean
         fun requirePermission(permission: String, reqCode: Int)
     }
     interface IShelfViewModel: IViewModel<ShelfBean> {
-        fun updateBookList(): Boolean
+        fun updateBookList()
     }
 }
