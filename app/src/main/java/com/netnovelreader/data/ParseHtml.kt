@@ -23,7 +23,6 @@ class ParseHtml {
         } else {
             txt = Jsoup.connect(url).headers(getHeaders(url))
                     .timeout(TIMEOUT).get().select(selector).text()
-
         }
         txt = "    " + txt!!.replace(" ", "\n\n  ")
         return txt
@@ -54,7 +53,7 @@ class ParseHtml {
     }
 
     @Throws(IOException::class)
-    fun getChapterWithSelector(url: String): String {
+    private fun getChapterWithSelector(url: String): String {
         val elements = Jsoup.connect(url).get().allElements
         val indexList = ArrayList<Element>()
         if (elements.size > 1) {

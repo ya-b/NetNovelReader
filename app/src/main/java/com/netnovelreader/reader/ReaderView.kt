@@ -27,7 +27,7 @@ class ReaderView : View {
     internal var firstDrawListener: FirstDrawListener? = null
     private val paint = Paint()
     var txtFontSize: Float = 50f
-    private var indacitorFontSize: Float = 30f
+    var indacitorFontSize: Float = 30f
     private var isFirstDraw = true
 
     constructor(context: Context) : super(context)

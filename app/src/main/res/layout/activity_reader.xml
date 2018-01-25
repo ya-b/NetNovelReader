@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
+        <variable name="clickEvent" type="com.netnovelreader.reader.ReaderActivity.ReaderClickEvent"/>
         <variable name="chapter" type="com.netnovelreader.reader.ReaderViewModel"/>
     </data>
 
@@ -23,6 +24,68 @@
             app:layout_constraintRight_toRightOf="parent"/>
 
         <LinearLayout
+            android:id="@+id/fontSetting"
+            android:visibility="invisible"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/footView">
+            <Button
+                android:id="@+id/size30"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{clickEvent::onFontSizeClick}"
+                android:text="30"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                style="?android:attr/buttonBarButtonStyle" />
+            <Button
+                android:id="@+id/size40"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{clickEvent::onFontSizeClick}"
+                android:text="40"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                style="?android:attr/buttonBarButtonStyle" />
+            <Button
+                android:id="@+id/size50"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{clickEvent::onFontSizeClick}"
+                android:text="50"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                style="?android:attr/buttonBarButtonStyle" />
+            <Button
+                android:id="@+id/size60"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{clickEvent::onFontSizeClick}"
+                android:text="60"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                style="?android:attr/buttonBarButtonStyle" />
+            <Button
+                android:id="@+id/size70"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{clickEvent::onFontSizeClick}"
+                android:text="70"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                style="?android:attr/buttonBarButtonStyle" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/footView"
             android:visibility="invisible"
             android:background="@drawable/reader_foot_view_top_border"
@@ -38,30 +101,33 @@
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="?android:attr/buttonBarButtonStyle"
+                android:onClick="@{clickEvent::onFootViewClick}"
                 android:text="@string/catalogButton"
                 android:textColor="@color/black"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                style="?android:attr/buttonBarButtonStyle"/>
             <Button
                 android:id="@+id/fontSizeButton"
                 android:gravity="center"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="?android:attr/buttonBarButtonStyle"
+                android:onClick="@{clickEvent::onFootViewClick}"
                 android:text="@string/fontSizeButton"
                 android:textColor="@color/black"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                style="?android:attr/buttonBarButtonStyle"/>
             <Button
                 android:id="@+id/backgroundButton"
                 android:gravity="center"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="?android:attr/buttonBarButtonStyle"
+                android:onClick="@{clickEvent::onFootViewClick}"
                 android:text="@string/backgroundButton"
                 android:textColor="@color/black"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                style="?android:attr/buttonBarButtonStyle"/>
         </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>

@@ -20,17 +20,28 @@ import java.util.concurrent.LinkedBlockingQueue
  * Created by yangbo on 18-1-15.
  */
 class DownloadService : Service() {
-    var mNotificationManager: NotificationManager? = null
-    var builder: NotificationCompat.Builder? = null
+    private var mNotificationManager: NotificationManager? = null
+    private var builder: NotificationCompat.Builder? = null
     var queue: LinkedBlockingQueue<DownloadTask>? = null
-    var tmpQueue: LinkedList<DownloadTask>? = null
-    val NOTIFYID = 1599407175
+    private var tmpQueue: LinkedList<DownloadTask>? = null
+    private val NOTIFYID = 1599407175
     var executors: ExecutorService? = null
-    var executeDownload: Thread? = null
+    private var executeDownload: Thread? = null
+    /**
+     * 下载总数
+     */
     @Volatile
     var max = -1
+    /**
+     * 下载完成数（包括失败的下载）
+     */
     @Volatile
-    var progress = 0
+    private var progress = 0
+    /**
+     * 失败的下载数
+     */
+    @Volatile
+    var failed = 0
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -41,8 +52,7 @@ class DownloadService : Service() {
         openNotification()
         queue = LinkedBlockingQueue()
         tmpQueue = LinkedList()
-        executors = Executors.newFixedThreadPool(
-                Runtime.getRuntime().availableProcessors() + 1)
+        executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1)
         executeDownload = Thread(ExecuteDownload())
         try {
             executeDownload?.start()
@@ -54,7 +64,8 @@ class DownloadService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         synchronized(this) {
             if (queue != null || intent != null) {
-                val t = DownloadTask(intent!!.getStringExtra("tableName"), intent.getStringExtra("catalogurl"))
+                val t = DownloadTask(intent!!.getStringExtra("tableName"),
+                        intent.getStringExtra("catalogurl"))
                 if (max == -1) {
                     queue!!.offer(t)
                     max = 0 //从网上解析目录需要时间，max不会马上赋值，所有在这里改变
@@ -68,10 +79,18 @@ class DownloadService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mNotificationManager?.cancel(NOTIFYID)
+        if(failed == 0){
+            mNotificationManager?.cancel(NOTIFYID)
+        }else{
+            builder?.setContentTitle(getString(R.string.downloadfailed).replace("nn", "$failed"))
+                    ?.setContentTitle(getString(R.string.downloadfailed).replace("nn", "$failed"))
+                    ?.setAutoCancel(true)
+            mNotificationManager?.notify(NOTIFYID, builder?.build())
+
+        }
     }
 
-    fun openNotification() {
+    private fun openNotification() {
         builder = NotificationCompat.Builder(this, "reader")
                 .setTicker(getString(R.string.app_name))
                 .setContentTitle(getString(R.string.prepare_download))
@@ -80,26 +99,32 @@ class DownloadService : Service() {
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
 
-    fun updateNotification(max: Int, progress: Int) {
-        var str: String?
+    fun updateNotification() {
+        if(progress == max ) return
+        val str: String
         if (tmpQueue!!.isEmpty()) {
             str = ""
         } else {
-            str = ",${getString(R.string.wait2download)}".replace("n", tmpQueue!!.size.toString())
+            str = ",${getString(R.string.wait4download)}".replace("nn", tmpQueue!!.size.toString())
         }
-        builder?.setProgress(max, progress, false)?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
+        builder?.setProgress(max, progress, false)
+                ?.setContentTitle("${getString(R.string.downloading)}:${progress}/$max$str")
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
 
     fun stopOrContinue() {
-        if (progress == max) {  //判断一个task是否执行完
-            if (tmpQueue!!.size == 0) { //是否还有任务待执行
-                queue!!.offer(DownloadTask("", ""))
-                stopSelf()
-            } else {
-                queue!!.offer(tmpQueue!!.removeFirst())
-            }
+        if (progress != max) return  //判断一个task是否执行完
+        if (tmpQueue!!.size == 0) { //是否还有任务待执行
+            queue!!.offer(DownloadTask("", ""))//ExecuteDownload线程结束信号
+            stopSelf()
+        } else {
+            queue!!.offer(tmpQueue!!.removeFirst())
         }
+    }
+
+    @Synchronized
+    fun progressIncrement(){
+        progress++
     }
 
     inner class ExecuteDownload : Runnable {
@@ -111,31 +136,41 @@ class DownloadService : Service() {
                     executors?.shutdown()
                     break
                 }
-                var downloadUnitList: ArrayList<DownloadTask.DownloadChapterUnit>? = null
+                var downloadUnitList: ArrayList<DownloadTask.DownloadChapterUnit>
                 try {
                     downloadUnitList = downloadTask.getUnitList()
                 } catch (e: IOException) {
                     stopOrContinue()
+                    continue
                 }
-                max += downloadUnitList?.size ?: 0
-                if (downloadUnitList?.isEmpty() ?: true) {
+                max += downloadUnitList.size
+                if (downloadUnitList.isEmpty()) {
                     stopOrContinue()
                 } else {
-                    Observable.fromIterable(downloadUnitList)
-                            .flatMap {
-                                Observable.create<Int> { emitter -> emitter.onNext(it.download(it.getChapterTxt())) }
-                                        .subscribeOn(Schedulers.from(executors!!))
-                            }
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({
-                                updateNotification(max, ++progress)
-                                stopOrContinue()
-                            }, {
-                                updateNotification(max, ++progress)
-                                stopOrContinue()
-                            })
+                    downEveryItem(downloadUnitList)
                 }
             }
+        }
+        private fun downEveryItem(downloadUnitList: ArrayList<DownloadTask.DownloadChapterUnit>){
+            Observable.fromIterable(downloadUnitList)
+                    .flatMap {
+                        Observable.create<Int> { emitter ->
+                            try {
+                                it.download(it.getChapterTxt())
+                            }catch (e: IOException){
+                                failed++
+                            }finally {
+                                progressIncrement()
+                                emitter.onNext(1)
+                            }
+                        }.subscribeOn(Schedulers.from(executors!!))
+                    }.observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        synchronized(this){
+                            updateNotification()
+                            stopOrContinue()
+                        }
+                    })
         }
     }
 }

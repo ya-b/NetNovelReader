@@ -3,6 +3,7 @@ package com.netnovelreader.shelf
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableField
 import android.databinding.ObservableInt
+import android.util.Log
 import com.netnovelreader.common.DownloadTask
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.id2TableName
@@ -53,6 +54,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
                         ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))))
                 if (listInDir.contains(id2TableName(bookBean.bookid.get()))) {
                     bookList.add(bookBean)
+                    Thread{ checkCatalog(bookBean) }.start()
                 } else {
                     Thread{ deleteBook(bookBean.bookname.get()) }.start()
                 }
@@ -70,24 +72,19 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
         }.start()
     }
 
-    fun deleteDirs(file: File) {
-        if (!file.exists()) return
-        if (file.isFile) {
-            file.delete()
-        } else {
-            val fileArray = file.listFiles()
-            if (fileArray.size > 0) {
-                for (i in 0..fileArray.size - 1) {
-                    fileArray[i].delete()
-                }
-                file.delete()
-            } else {
-                file.delete()
-            }
+    private fun deleteDirs(file: File) {
+        if (!file.exists()) {
+            return
         }
+        if (file.isFile) {
+            file.deleteOnExit()
+            return
+        }
+        file.listFiles().forEach { it.deleteOnExit() }
+        file.delete()
     }
 
-    fun dirBookList(): ArrayList<String> {
+    private fun dirBookList(): ArrayList<String> {
         val list = ArrayList<String>()
         val file = File(getSavePath())
         if (file.exists()) {
@@ -96,5 +93,16 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
             }
         }
         return list
+    }
+
+    private fun checkCatalog(bookBean: ShelfBean){
+        val tableName = id2TableName(bookBean.bookid.get())
+        if(SQLHelper.getChapterCount(tableName) == 0){
+            try{
+                DownloadTask(tableName, bookBean.downloadURL.get()).updateSql()
+            }catch (e: IOException){
+                Log.d("Reader:ShelfViewModel",e.printStackTrace().toString())
+            }
+        }
     }
 }

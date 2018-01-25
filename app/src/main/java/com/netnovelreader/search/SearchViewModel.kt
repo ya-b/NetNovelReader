@@ -12,7 +12,7 @@ import java.net.URLEncoder
  */
 class SearchViewModel : ISearchContract.ISearchViewModel {
     @Volatile
-    var searchCode = 0
+    private var searchCode = 0
     var resultList: ObservableArrayList<SearchBean>
 
     init {
@@ -37,7 +37,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     }
 
 
-    fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, reqCode: Int) {
+    private fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, reqCode: Int) {
         var result: String? = null
         val url = siteinfo[1]!!.replace(SQLHelper.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
         try {

@@ -10,6 +10,7 @@ import java.util.regex.Pattern
 
 val TIMEOUT = 3000
 val UA = "Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0"
+val PREFERENCE_NAME = "setting"
 
 fun getSavePath(): String {
     var path: String?

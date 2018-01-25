@@ -1,6 +1,7 @@
 package com.netnovelreader.reader
 
 import android.app.AlertDialog
+import android.content.Context
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -16,6 +17,7 @@ import com.netnovelreader.R
 import com.netnovelreader.base.IClickEvent
 import com.netnovelreader.common.BindingAdapter
 import com.netnovelreader.common.NovelItemDecoration
+import com.netnovelreader.common.PREFERENCE_NAME
 import com.netnovelreader.data.SQLHelper
 import com.netnovelreader.databinding.ActivityReaderBinding
 import kotlinx.android.synthetic.main.activity_reader.*
@@ -23,10 +25,11 @@ import kotlinx.android.synthetic.main.item_catalog.view.*
 
 class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView, GestureDetector.OnGestureListener,
         ReaderView.FirstDrawListener, IClickEvent {
+    val FONTSIZE = "FontSize"
     var readerViewModel: ReaderViewModel? = null
-    var detector: GestureDetector? = null
+    private var detector: GestureDetector? = null
     var dialog: AlertDialog? = null
-    val MIN_MOVE = 80F
+    private val MIN_MOVE = 80F
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,18 +37,19 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView, Gesture
         init()
     }
 
+    override fun setViewModel(vm: ReaderViewModel) {
+        readerViewModel = vm
+        val binding = DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
+        binding.setVariable(BR.clickEvent, ReaderClickEvent())
+        binding.setVariable(BR.chapter, readerViewModel)
+    }
+
     override fun init() {
         readerView.background = getDrawable(R.drawable.bg_readbook_yellow)
         readerView.firstDrawListener = this
-        readerView.txtFontSize = 50f
+        readerView.txtFontSize = getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+                .getFloat(FONTSIZE, 50f)
         detector = GestureDetector(this, this)
-        catalogButton.setOnClickListener {
-            footView.visibility = View.INVISIBLE
-            showDialog()
-        }
-        fontSizeButton.setOnClickListener {
-
-        }
     }
 
     override fun onDestroy() {
@@ -54,22 +58,18 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView, Gesture
         SQLHelper.closeDB()
     }
 
-    override fun setViewModel(vm: ReaderViewModel) {
-        readerViewModel = vm
-        val binding = DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
-        binding.setVariable(BR.chapter, readerViewModel)
-    }
-
     /**
      * readerview第一次绘制时调用
      */
     override fun doDrawPrepare() {
-        readerViewModel?.initData(readerView.width, readerView.height, readerView.txtFontSize)
+        readerViewModel?.initData(readerView.width,
+                readerView.height  - readerView.indacitorFontSize.toInt(), readerView.txtFontSize)
     }
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
         if (footView.visibility == View.VISIBLE) {
             footView.visibility = View.INVISIBLE
+            fontSetting.visibility = View.INVISIBLE
             return false
         }
         val beginX = e1.x
@@ -78,9 +78,11 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView, Gesture
             return false
         } else {
             if (beginX > endX) {
-                readerViewModel!!.pageToNext(readerView.width, readerView.height, readerView.txtFontSize)
+                readerViewModel!!.pageToNext(readerView.width,
+                        readerView.height  - readerView.indacitorFontSize.toInt(), readerView.txtFontSize)
             } else {
-                readerViewModel!!.pageToPrevious(readerView.width, readerView.height, readerView.txtFontSize)
+                readerViewModel!!.pageToPrevious(readerView.width,
+                        readerView.height  - readerView.indacitorFontSize.toInt(), readerView.txtFontSize)
             }
         }
         return false
@@ -89,14 +91,17 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView, Gesture
     override fun onSingleTapUp(e: MotionEvent): Boolean {
         if (footView.visibility == View.VISIBLE) {
             footView.visibility = View.INVISIBLE
+            fontSetting.visibility = View.INVISIBLE
             return false
         }
         val x = e.x
         val y = e.y
         if (x > readerView.width * 3 / 5) {
-            readerViewModel!!.pageToNext(readerView.width, readerView.height, readerView.txtFontSize)
+            readerViewModel!!.pageToNext(readerView.width,
+                    readerView.height  - readerView.indacitorFontSize.toInt(), readerView.txtFontSize)
         } else if (x < readerView.width * 2 / 5) {
-            readerViewModel!!.pageToPrevious(readerView.width, readerView.height, readerView.txtFontSize)
+            readerViewModel!!.pageToPrevious(readerView.width,
+                    readerView.height  - readerView.indacitorFontSize.toInt(), readerView.txtFontSize)
         } else if (y > readerView.height * 2 / 5 && y < readerView.height * 3 / 5) {
             if (footView.visibility == View.INVISIBLE) {
                 footView.visibility = View.VISIBLE
@@ -144,9 +149,43 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView, Gesture
 
     inner class CatalogItemClickListener : IClickEvent {
         fun onChapterClick(v: View) {
-            readerViewModel?.pageByCatalog(v.itemChapter.text.toString(), readerView.width, readerView.height,
+            readerViewModel?.pageByCatalog(v.itemChapter.text.toString(), readerView.width,
+                    readerView.height  - readerView.indacitorFontSize.toInt(),
                     readerView.txtFontSize)
             dialog?.dismiss()
+        }
+    }
+
+    inner class ReaderClickEvent : IClickEvent{
+        fun onFootViewClick(v: View){
+            when(v){
+                catalogButton -> {
+                    footView.visibility = View.INVISIBLE
+                    fontSetting.visibility = View.INVISIBLE
+                    showDialog()
+                }
+                fontSizeButton -> {
+                    if(fontSetting.visibility == View.VISIBLE){
+                        fontSetting.visibility = View.INVISIBLE
+                    }else{
+                        fontSetting.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
+
+        fun onFontSizeClick(v: View){
+            when(v){
+                size30 -> readerView.txtFontSize = 30f
+                size40 -> readerView.txtFontSize = 40f
+                size60 -> readerView.txtFontSize = 60f
+                size70 -> readerView.txtFontSize = 70f
+                else -> readerView.txtFontSize = 50f
+            }
+            getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
+                    .putFloat(FONTSIZE, readerView.txtFontSize).apply()
+            readerViewModel?.changeFontSize(readerView.width,
+                    readerView.height  - readerView.indacitorFontSize.toInt(), readerView.txtFontSize)
         }
     }
 }

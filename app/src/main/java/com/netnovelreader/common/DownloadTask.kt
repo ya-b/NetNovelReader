@@ -10,7 +10,7 @@ import java.io.IOException
  * Created by yangbo on 2018/1/16.
  */
 class DownloadTask(val tableName: String, val url: String) {
-    var chapterName: String? = null
+    private var chapterName: String? = null
 
     @Throws(IOException::class)
     fun getUnitList(): ArrayList<DownloadChapterUnit> {
@@ -49,7 +49,7 @@ class DownloadTask(val tableName: String, val url: String) {
     }
 
     @Throws(IOException::class)
-    fun getUnDownloadFromSql(saveDir: String, tableName: String): ArrayList<DownloadChapterUnit> {
+    private fun getUnDownloadFromSql(saveDir: String, tableName: String): ArrayList<DownloadChapterUnit> {
         val map = SQLHelper.getDownloadedOrNot(tableName, 0)
         val runnables = ArrayList<DownloadChapterUnit>()
         val iterator = map.iterator()
@@ -64,8 +64,8 @@ class DownloadTask(val tableName: String, val url: String) {
     /**
      * 下载保存章节具体执行者
      */
-    class DownloadChapterUnit(val tablename: String, val dir: String, val chapterName: String,
-                              val chapterUrl: String) {
+    class DownloadChapterUnit(private val tablename: String, private val dir: String, private val chapterName: String,
+                              private val chapterUrl: String) {
 
         @Throws(IOException::class)
         fun download(chapterText: String): Int {

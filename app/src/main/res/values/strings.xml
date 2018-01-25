@@ -8,7 +8,8 @@
     <string name="start_download">开始下载</string>
     <string name="prepare_download">更新章节列表，准备下载中。。。</string>
     <string name="downloading">下载中</string>
-    <string name="wait2download">还有n项待处理</string>
+    <string name="wait4download">还有nn项待处理</string>
+    <string name="downloadfailed">共有nn章下载失败</string>
     <string name="catalogButton">目录</string>
     <string name="fontSizeButton">字体</string>
     <string name="backgroundButton">背景</string>

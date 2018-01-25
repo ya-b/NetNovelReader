@@ -11,8 +11,8 @@ import com.netnovelreader.ReaderApplication
  * Created by yangbo on 17-12-24.
  */
 object SQLHelper {
-    var db: SQLiteDatabase? = null
-    val dbName = "netnovelreader.db"
+    private var db: SQLiteDatabase? = null
+    private val dbName = "netnovelreader.db"
 
     fun getDB(): SQLiteDatabase {
         db ?: synchronized(SQLHelper) {
@@ -269,8 +269,8 @@ object SQLHelper {
     //章节名
     val CHAPTERNAME = "chaptername"
     //章节来源网址
-    val CHAPTERURL = "chapterurl"
-    val ISDOWNLOADED = "is_downloaded"
+    private val CHAPTERURL = "chapterurl"
+    private val ISDOWNLOADED = "is_downloaded"
     val SEARCH_NAME = "searchname"
 
     class NovelSQLHelper(val context: Context, val name: String, val version: Int)
@@ -284,7 +284,7 @@ object SQLHelper {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        fun initTable(db: SQLiteDatabase?) {
+        private fun initTable(db: SQLiteDatabase?) {
             db?.execSQL("create table if not exists ${TABLE_PARSERULES} (${ID} integer primary key," +
                     "${HOSTNAME} varchar(128) unique,${CATALOG_RULE} text,${CHAPTER_RULE} text," +
                     "${CHARSET} varchar(128),${COVER_RULE} text);")

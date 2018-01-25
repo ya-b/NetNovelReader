@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.item_search.view.*
 
 class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     var searchViewModel: SearchViewModel? = null
-    var arrayListChangeListener: ArrayListChangeListener<SearchBean>?= null
+    private var arrayListChangeListener: ArrayListChangeListener<SearchBean>?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +37,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         searchRecycler.layoutManager = LinearLayoutManager(this)
         val mAdapter = BindingAdapter(searchViewModel?.resultList, R.layout.item_search, SearchClickEvent())
         searchRecycler.adapter = mAdapter
-        searchRecycler.setItemAnimator(DefaultItemAnimator())
+        searchRecycler.itemAnimator = DefaultItemAnimator()
         searchRecycler.addItemDecoration(NovelItemDecoration(this))
         arrayListChangeListener = ArrayListChangeListener(mAdapter)
         searchViewModel?.resultList?.addOnListChangedCallback(arrayListChangeListener)
@@ -55,8 +55,8 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
 
 
     inner class QueryListener : android.support.v7.widget.SearchView.OnQueryTextListener{
-        var tmp = ""
-        var tmpTime = System.currentTimeMillis()
+        private var tmp = ""
+        private var tmpTime = System.currentTimeMillis()
 
         override fun onQueryTextSubmit(query: String): Boolean {
             if (tmp == query && System.currentTimeMillis() - tmpTime < 1000) return true  //点击间隔小于1秒，并且搜索书名相同不再搜索

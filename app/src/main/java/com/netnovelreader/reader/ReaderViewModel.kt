@@ -10,35 +10,34 @@ import kotlin.collections.ArrayList
  * Created by yangbo on 18-1-13.
  */
 
-class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
+class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderViewModel {
     var catalog = ObservableArrayList<ReaderBean.Catalog>()
     /**
      * 一页显示的内容
      */
-    @Volatile
     var text = ObservableArrayList<String>()
     /**
      * 一章的所有内容
      */
-    @Volatile
-    var chapterText = Vector<ArrayList<String>>()
+    private var chapterText = Vector<ArrayList<String>>()
 
     @Volatile
-    var dirName: String? = null
+    private var dirName: String? = null
 
     @Volatile
-    var chapterName: String? = null
+    private var chapterName: String? = null
     /**
      * 章节数，页码，最大章节数，最大页码，例如1,1,4,5 == 第一章第一页,总共4章，这一章有5页
      */
-    var pageIndicator = IntArray(4) { it -> 1 }
+    @Volatile
+    var pageIndicator = IntArray(4) { _ -> 1 }
 
     /**
      * 章节缓存，缓存后面 CACHE_NUM 章
      */
-    val CACHE_NUM = 3
-    var tableName = ""
-    val chapterCache: ChapterCache
+    private val CACHE_NUM = 3
+    private var tableName = ""
+    private val chapterCache: ChapterCache
 
     init{
         val cursor = SQLHelper.getDB().rawQuery("select ${SQLHelper.ID} from " +
@@ -129,6 +128,15 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
         updateTextAndRecord(pageIndicator)
     }
 
+    override fun changeFontSize(width: Int, height: Int, txtFontSize: Float){
+        val s = pageIndicator[3].toFloat() / pageIndicator[1].toFloat()
+        getPage(pageIndicator, width, height, txtFontSize)
+        pageIndicator[3] = chapterText.size
+        pageIndicator[1] = Math.round(pageIndicator[3] / s)
+        if(pageIndicator[1] == 0) pageIndicator[1] = 1
+        updateTextAndRecord(pageIndicator)
+    }
+
     /**
      * 重新读取目录
      */
@@ -147,7 +155,7 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
     /**
      * 获取阅读记录
      */
-    fun getRecord(): IntArray {
+    private fun getRecord(): IntArray {
         val queryResult = SQLHelper.getRecord(bookName) //阅读记录 3#2 表示第3章第2页
         dirName = id2TableName(queryResult[0])
         var readRecord = queryResult[1]
@@ -161,7 +169,7 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
     /**
      * 获取章节总数
      */
-    fun getChapterCount(): Int {
+    private fun getChapterCount(): Int {
         return SQLHelper.getChapterCount(tableName)
     }
 
@@ -171,7 +179,7 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
      * @dirName
      * @isNext  1 下一章,pagenum=1 ， -1 上一章 pagenum=pageIndicator[3] ,0 pagenum不变
      */
-    fun getPage(pageIndicator: IntArray, width: Int, height: Int, txtFontSize: Float) {
+    private fun getPage(pageIndicator: IntArray, width: Int, height: Int, txtFontSize: Float) {
         val chapterTxt = chapterCache.getChapter(pageIndicator[0])
         val indexOfDelimiter = chapterTxt.indexOf("|")
         chapterName = chapterTxt.substring(0, indexOfDelimiter)
@@ -184,7 +192,7 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
      * 保存阅读记录
      */
     @Synchronized
-    fun updateTextAndRecord(pageIndicator: IntArray) {
+    private fun updateTextAndRecord(pageIndicator: IntArray) {
         text.clear()
         text.add("${chapterName}：${pageIndicator[1]}/${pageIndicator[3]}")
         if (chapterText.size < 1) return
@@ -200,7 +208,7 @@ class ReaderViewModel(val bookName: String) : IReaderContract.IReaderViewModel {
      * @height 屏幕高
      * @txtFontSize 字体大小
      */
-    fun splitChapterTxt(chapter: String, width: Int, height: Int, txtFontSize: Float)
+    private fun splitChapterTxt(chapter: String, width: Int, height: Int, txtFontSize: Float)
             : Vector<ArrayList<String>> {
         if (chapter.length < 1) return Vector()
         val tmpArray = chapter.split("\n")

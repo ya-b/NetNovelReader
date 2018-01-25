@@ -6,4 +6,5 @@
     <color name="readerPrimary">#E4F2DC</color>
     <color name="readerPrimaryDark">#A1906A</color>
     <color name="black">#000</color>
+    <color name="white">#fff</color>
 </resources>

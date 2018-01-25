@@ -11,16 +11,16 @@ import java.util.*
 /**
  * Created by yangbo on 18-1-15.
  */
-class ChapterCache(val cacheNum: Int, val tableName: String) {
+class ChapterCache(private val cacheNum: Int, private val tableName: String) {
     /**
      * hashTablb<第几章，章节内容>
      */
-    val chapterTxtTable = Hashtable<Int, String>()
+    private val chapterTxtTable = Hashtable<Int, String>()
     /**
      * 最大章节数
      */
-    var maxChapterNum = 0
-    var dirName: String? = null
+    private var maxChapterNum = 0
+    private var dirName: String? = null
     fun prepare(chapterNum: Int, maxChapterNum: Int, dirName: String) {
         this.maxChapterNum = maxChapterNum
         this.dirName = dirName
@@ -49,7 +49,7 @@ class ChapterCache(val cacheNum: Int, val tableName: String) {
      * @isCurrentChapter 是否为将要阅读的章节，如果不是，从网络下载，如果是，让主线程进行处理
      */
     @Throws(IOException::class)
-    fun getText(chapterNum: Int, isCurrentChapter: Boolean): String {
+    private fun getText(chapterNum: Int, isCurrentChapter: Boolean): String {
         val sb = StringBuilder()
         val chapterName = SQLHelper.getChapterName(dirName!!, chapterNum)
         sb.append(chapterName + "|")
@@ -69,7 +69,7 @@ class ChapterCache(val cacheNum: Int, val tableName: String) {
      * 从本地文件获取章节内容
      */
     @Throws(IOException::class)
-    fun getFromFile(chapterPath: String): String {
+    private fun getFromFile(chapterPath: String): String {
         val sb = StringBuilder()
         val fr = FileReader(chapterPath)
         fr.forEachLine { sb.append(it + "\n") }
@@ -80,7 +80,7 @@ class ChapterCache(val cacheNum: Int, val tableName: String) {
     /**
      * 从网络获取章节内容
      */
-    fun getFromNet(dir: String, chapterName: String): String {
+    private fun getFromNet(dir: String, chapterName: String): String {
         val download = DownloadTask.DownloadChapterUnit(tableName, dir, chapterName,
                 SQLHelper.getChapterUrl(tableName, chapterName))
         var chapterText: String? = null
@@ -97,13 +97,11 @@ class ChapterCache(val cacheNum: Int, val tableName: String) {
     /**
      * 章节内容读到map里
      */
-    fun readToCache(chapterNum: Int) {
-        val iterator = chapterTxtTable.iterator()
+    private fun readToCache(chapterNum: Int) {
         val arrayList = ArrayList<Int>(0)
-        while (iterator.hasNext()) {
-            val entry = iterator.next()
-            if (entry.key + 1 < chapterNum || entry.key - cacheNum > chapterNum || entry.value.length == 0) {
-                arrayList.add((entry.key))
+        chapterTxtTable.forEach{
+            if (it.key + 1 < chapterNum || it.key - cacheNum > chapterNum || it.value.length == 0) {
+                arrayList.add((it.key))
             }
         }
         arrayList.forEach {

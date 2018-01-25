@@ -8,7 +8,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 /**
  * Created by yangbo on 2018/1/24.
  */
-class ArrayListChangeListener<T>(val adapter: BindingAdapter<T>)
+class ArrayListChangeListener<T>(private val adapter: BindingAdapter<T>)
     : ObservableList.OnListChangedCallback<ObservableArrayList<T>>() {
 
     override fun onChanged(p0: ObservableArrayList<T>?) {
@@ -31,7 +31,7 @@ class ArrayListChangeListener<T>(val adapter: BindingAdapter<T>)
         notifyDataSetChanged()
     }
 
-    fun notifyDataSetChanged() {
+    private fun notifyDataSetChanged() {
         Observable.just(1).observeOn(AndroidSchedulers.mainThread()).subscribe {
             adapter.notifyDataSetChanged()
         }

@@ -11,9 +11,9 @@ import android.view.View
  * Created by yangbo on 18-1-20.
  */
 class NovelItemDecoration(val context: Context) : RecyclerView.ItemDecoration() {
-    val attrs = IntArray(1) { android.R.attr.listDivider }
-    val diverHeight = 3
-    val mDivider: Drawable
+    private val attrs = IntArray(1) { android.R.attr.listDivider }
+    private val diverHeight = 3
+    private val mDivider: Drawable
 
     init {
         val typedArray = context.obtainStyledAttributes(attrs)

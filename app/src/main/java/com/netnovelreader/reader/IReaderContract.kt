@@ -17,6 +17,7 @@ interface IReaderContract {
         fun pageToNext(width: Int, height: Int, txtFontSize: Float)
         fun pageToPrevious(width: Int, height: Int, txtFontSize: Float)
         fun pageByCatalog(chapterName: String, width: Int, height: Int, txtFontSize: Float)
+        fun changeFontSize(width: Int, height: Int, txtFontSize: Float)
         fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog>
     }
 }

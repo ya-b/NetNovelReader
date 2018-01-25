@@ -28,8 +28,8 @@ import kotlinx.android.synthetic.main.item_shelf.view.*
 class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     var shelfViewModel: ShelfViewModel? = null
-    var arrayListChangeListener: ArrayListChangeListener<ShelfBean>? = null
-    var hasPermission = false
+    private var arrayListChangeListener: ArrayListChangeListener<ShelfBean>? = null
+    private var hasPermission = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +56,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         setSupportActionBar({ shelfToolbar.setTitle(R.string.shelf_activity_title); shelfToolbar }())
         shelfRecycler.layoutManager = LinearLayoutManager(this)
         shelfRecycler.addItemDecoration(NovelItemDecoration(this))
-        shelfRecycler.setItemAnimator(DefaultItemAnimator())
+        shelfRecycler.itemAnimator = DefaultItemAnimator()
         val mAdapter = BindingAdapter(shelfViewModel?.bookList, R.layout.item_shelf, ShelfClickEvent())
         shelfRecycler.adapter = mAdapter
         arrayListChangeListener = ArrayListChangeListener(mAdapter)
