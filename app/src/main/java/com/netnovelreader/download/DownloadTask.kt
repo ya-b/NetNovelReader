@@ -1,7 +1,9 @@
-package com.netnovelreader.common
+package com.netnovelreader.download
 
+import com.netnovelreader.common.getSavePath
+import com.netnovelreader.common.mkdirs
+import com.netnovelreader.common.tableName2Id
 import com.netnovelreader.data.ParseHtml
-import com.netnovelreader.data.SQLHelper
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException

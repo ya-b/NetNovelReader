@@ -1,8 +1,21 @@
 <resources>
     <string name="app_name">小说阅读器</string>
     <string name="shelf_activity_title">书架</string>
-    <string name="action_settings">设置</string>
     <string name="permission_warnning">此程序没有执行所需要的权限</string>
+    <string name="deleteBook">删除book?</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="settings">设置</string>
+
+    <string name="full_screen">阅读界面全屏</string>
+    <string name="full_screen_key">fullscreen</string>
+    <string name="auto_download">自动下载后面3章</string>
+    <string name="auto_download_key">autodownload</string>
+    <string name="theme">主题</string>
+    <string name="themeKey">theme</string>
+    <string name="theme_summary">选择你喜欢的主题</string>
+
+
     <string name="search_button">搜索</string>
     <string name="title_activity_search">SearchActivity</string>
     <string name="start_download">开始下载</string>
@@ -10,17 +23,9 @@
     <string name="downloading">下载中</string>
     <string name="wait4download">还有nn项待处理</string>
     <string name="downloadfailed">共有nn章下载失败</string>
+
+
     <string name="catalogButton">目录</string>
     <string name="fontSizeButton">字体</string>
     <string name="backgroundButton">背景</string>
-    <string name="nightmodel">夜间模式</string>
-    <string name="fullScreen">阅读界面全屏</string>
-    <string name="open">打开</string>
-    <string name="title_activity_settings">Settings</string>
-    <string name="deleteBook">删除book?</string>
-    <string name="yes">是</string>
-    <string name="no">否</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

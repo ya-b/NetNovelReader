@@ -5,12 +5,13 @@ import android.databinding.ObservableField
 import android.databinding.ObservableInt
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.util.Log
-import com.netnovelreader.common.DownloadTask
 import com.netnovelreader.common.IMAGENAME
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.id2TableName
 import com.netnovelreader.data.SQLHelper
+import com.netnovelreader.download.DownloadTask
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.Executors
@@ -18,7 +19,7 @@ import java.util.concurrent.Executors
 /**
  * Created by yangbo on 2018/1/12.
  */
-class ShelfViewModel(val defaultBitmap: Bitmap) : IShelfContract.IShelfViewModel {
+class ShelfViewModel : IShelfContract.IShelfViewModel {
 
     var bookList: ObservableArrayList<ShelfBean>
 
@@ -48,6 +49,8 @@ class ShelfViewModel(val defaultBitmap: Bitmap) : IShelfContract.IShelfViewModel
         Thread{
             bookList.clear()
             val listInDir = dirBookList()
+//            val bookList = ReaderApplication.daoSession.bookShelfDao.loadAll()
+//            bookList.
             val cursor = SQLHelper.queryShelfBookList()
             while (cursor != null && cursor.moveToNext()) {
                 val bookId = cursor.getInt(cursor.getColumnIndex(SQLHelper.ID))
@@ -115,8 +118,9 @@ class ShelfViewModel(val defaultBitmap: Bitmap) : IShelfContract.IShelfViewModel
         val file = File(getSavePath() + "/${id2TableName(bookId)}", IMAGENAME)
         var bitmap: Bitmap? = null
         if(file.exists()){
-            bitmap = BitmapFactory.decodeFile(file.path);
+            bitmap = BitmapFactory.decodeFile(file.path)
         }
-        return bitmap ?: defaultBitmap
+        return bitmap ?: Bitmap.createBitmap(IntArray(45 * 60){ _ -> Color.parseColor("#7092bf") },
+                45, 60, Bitmap.Config.RGB_565)
     }
 }

@@ -29,8 +29,6 @@ class ReaderView : View {
     var txtFontSize: Float = 50f
     var indacitorFontSize: Float = 30f
     private var isFirstDraw = true
-    var textAreaWidth = 0
-    var textAreaHeight = 0
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)

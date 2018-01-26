@@ -2,7 +2,6 @@ package com.netnovelreader.reader
 
 import android.databinding.ObservableArrayList
 import com.netnovelreader.common.id2TableName
-import com.netnovelreader.data.SQLHelper
 import java.util.Vector
 import kotlin.collections.ArrayList
 
@@ -10,7 +9,7 @@ import kotlin.collections.ArrayList
  * Created by yangbo on 18-1-13.
  */
 
-class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderViewModel {
+class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) : IReaderContract.IReaderViewModel {
     var catalog = ObservableArrayList<ReaderBean.Catalog>()
     /**
      * 一页显示的内容
@@ -32,10 +31,6 @@ class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderVie
     @Volatile
     var pageIndicator = IntArray(4) { _ -> 1 }
 
-    /**
-     * 章节缓存，缓存后面 CACHE_NUM 章
-     */
-    private val CACHE_NUM = 3
     private var tableName = ""
     private val chapterCache: ChapterCache
 

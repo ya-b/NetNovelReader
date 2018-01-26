@@ -5,16 +5,17 @@
         <variable name="clickEvent" type="com.netnovelreader.reader.ReaderActivity.CatalogItemClickListener"/>
     </data>
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::onChapterClick}">
+        android:layout_margin="4dp"
+        android:onClick="@{clickEvent::onChapterClick}"
+        android:orientation="vertical">
         <TextView
             android:id="@+id/itemChapter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="@{itemDetail.catalogItem??``}"/>
+            android:text="@{itemDetail.catalogItem??``}"
+            android:textSize="18sp" />
 
     </LinearLayout>
 </layout>

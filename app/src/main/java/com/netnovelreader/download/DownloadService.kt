@@ -1,4 +1,4 @@
-package com.netnovelreader.service
+package com.netnovelreader.download
 
 import android.app.NotificationManager
 import android.app.Service
@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
-import com.netnovelreader.common.DownloadTask
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers

@@ -1,8 +1,7 @@
 package com.netnovelreader.reader
 
-import com.netnovelreader.common.DownloadTask
 import com.netnovelreader.common.getSavePath
-import com.netnovelreader.data.SQLHelper
+import com.netnovelreader.download.DownloadTask
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
@@ -98,7 +97,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
      * 章节内容读到map里
      */
     private fun readToCache(chapterNum: Int) {
-        val arrayList = ArrayList<Int>(0)
+        val arrayList = ArrayList<Int>()
         chapterTxtTable.forEach{
             if (it.key + 1 < chapterNum || it.key - cacheNum > chapterNum || it.value.length == 0) {
                 arrayList.add((it.key))

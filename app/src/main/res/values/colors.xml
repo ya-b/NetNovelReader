@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
-    <color name="readerPrimary">#E4F2DC</color>
-    <color name="readerPrimaryDark">#ab9057</color>
+    <color name="colorPrimaryBlue">#3F51B5</color>
+    <color name="colorPrimaryDarkBlue">#303F9F</color>
+    <color name="colorAccentBlue">#FF4081</color>
+
+    <color name="colorPrimaryBlack">#333</color>
+    <color name="colorPrimaryDarkBlack">#111</color>
+    <color name="colorAccentBlack">#FF4081</color>
+
+    <color name="colorPrimaryGray">#777</color>
+    <color name="colorPrimaryDarkGray">#333</color>
+    <color name="colorAccentGray">#FF4081</color>
+
     <color name="black">#000</color>
     <color name="white">#fff</color>
+    <color name="gray">#aaa</color>
 </resources>

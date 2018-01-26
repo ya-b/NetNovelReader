@@ -8,7 +8,7 @@ import android.widget.ImageView
 /**
  * Created by yangbo on 2018/1/26.
  */
-class BookCoverView : ImageView {
+class BookCoverImage : ImageView {
     var text: Bitmap? = null
         set(value) {
             field = value

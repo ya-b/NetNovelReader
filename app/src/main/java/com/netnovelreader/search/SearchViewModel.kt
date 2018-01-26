@@ -10,10 +10,7 @@ import com.netnovelreader.data.SQLHelper
 import com.netnovelreader.data.SearchBook
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
 import java.net.URLEncoder
 
 /**
@@ -74,29 +71,33 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
             Log.d("reader,searchviewmodel",e.printStackTrace().toString())
         }
         result ?: return
-        if (searchCode == reqCode) {
+        if (searchCode == reqCode && ObservableField(result[1]).get().length > 0) {
             resultList.add(SearchBean(ObservableField(result[1]), ObservableField(result[0])))
         }
-        Thread{
-            try {
-                downloadImage(result[1], result[2])
-            }catch (e: IOException){
-                Log.d("novel,searchviewmodel", e.printStackTrace().toString())
-            }
-        }.start()
+        downloadImage(result[1], result[2]) //下载书籍封面图片
     }
 
     @Throws(IOException::class)
     private fun downloadImage(bookname: String, imageUrl: String){
         if(imageUrl.equals("")) return
         val request = Request.Builder().url(imageUrl).build()
-        val inputStream = OkHttpClient().newCall(request).execute().body()?.byteStream()
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        val path = mkdirs(getSavePath() + "/tmp") + "/$bookname.${url2Hostname(imageUrl)}"
-        val outputStream = FileOutputStream(path)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-        outputStream.flush()
-        outputStream.close()
+        Thread {
+            var inputStream: InputStream? = null
+            var outputStream: FileOutputStream? = null
+            try {
+                inputStream = OkHttpClient().newCall(request).execute().body()?.byteStream()
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                val path = mkdirs(getSavePath() + "/tmp") + "/$bookname.${url2Hostname(imageUrl)}"
+                outputStream = FileOutputStream(path)
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                outputStream.flush()
+            } catch (e: IOException) {
+                Log.d("novel,searchviewmodel", e.printStackTrace().toString())
+            } finally {
+                inputStream?.close()
+                outputStream?.close()
+            }
+        }.start()
     }
 
     private fun copyFile(srcFile: File, distFile: File){

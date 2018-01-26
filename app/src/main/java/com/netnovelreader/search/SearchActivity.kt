@@ -10,11 +10,12 @@ import android.view.View
 import android.widget.Toast
 import com.netnovelreader.R
 import com.netnovelreader.base.IClickEvent
+import com.netnovelreader.common.ApplyPreference
 import com.netnovelreader.common.ArrayListChangeListener
 import com.netnovelreader.common.BindingAdapter
 import com.netnovelreader.common.NovelItemDecoration
 import com.netnovelreader.databinding.ActivitySearchBinding
-import com.netnovelreader.service.DownloadService
+import com.netnovelreader.download.DownloadService
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.item_search.view.*
 
@@ -23,6 +24,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     private var arrayListChangeListener: ArrayListChangeListener<SearchBean>?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ApplyPreference.setTheme(this)
         super.onCreate(savedInstanceState)
         setViewModel(SearchViewModel())
         init()

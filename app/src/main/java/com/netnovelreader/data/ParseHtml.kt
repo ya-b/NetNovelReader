@@ -39,15 +39,13 @@ class ParseHtml {
         val list = Jsoup.connect(url).headers(getHeaders(url))
                 .timeout(TIMEOUT).get().select(selector).select("a")
         list.forEach {
-            if (!it.text().contains("分卷阅读")) {
-                var link = it.attr("href")
-                if (!link.contains("//")) {
-                    link = url.substring(0, url.lastIndexOf('/') + 1) + link
-                } else if (link.startsWith("//")) {
-                    link = "http:" + link
-                }
-                catalog.put(it.text(), link)
+            var link = it.attr("href")
+            if (!link.contains("//")) {
+                link = url.substring(0, url.lastIndexOf('/') + 1) + link
+            } else if (link.startsWith("//")) {
+                link = "http:" + link
             }
+            catalog.put(it.text(), link)
         }
         return catalog
     }

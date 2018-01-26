@@ -2,6 +2,16 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <SwitchPreference
         android:defaultValue="false"
-        android:key="@string/fullScreen"
-        android:title="@string/fullScreen" />
+        android:key="@string/full_screen_key"
+        android:title="@string/full_screen" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/auto_download_key"
+        android:title="@string/auto_download" />
+    <ListPreference
+        android:entries="@array/themes"
+        android:entryValues="@array/themes_values"
+        android:key="@string/themeKey"
+        android:summary="@string/theme_summary"
+        android:title="@string/theme" />
 </PreferenceScreen>

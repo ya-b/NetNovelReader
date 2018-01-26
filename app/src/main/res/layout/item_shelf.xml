@@ -7,30 +7,30 @@
     </data>
 
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="60dp">
-        <com.netnovelreader.shelf.BookCoverView
+        android:layout_height="60dp"
+        android:orientation="horizontal">
+
+        <com.netnovelreader.shelf.BookCoverImage
             android:id="@+id/bookCover"
-            android:layout_gravity="center_vertical"
             android:layout_width="45dp"
             android:layout_height="60dp"
+            android:layout_gravity="center_vertical"
             android:text="@{itemDetail.bitmap}"/>
 
-
         <android.support.constraint.ConstraintLayout
-            android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:onLongClick="@{clickEvent::itemOnLongClick}"
-            android:onClick="@{clickEvent::itemOnClick}">
+            android:layout_weight="1"
+            android:onClick="@{clickEvent::itemOnClick}"
+            android:onLongClick="@{clickEvent::itemOnLongClick}">
 
             <TextView
                 android:id="@+id/nameView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
                 android:text="@{itemDetail.bookname??``}"
+                android:textSize="24sp"
                 app:layout_constraintTop_toTopOf="parent"/>
 
             <TextView

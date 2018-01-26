@@ -12,14 +12,13 @@ import android.view.*
 import com.netnovelreader.BR
 import com.netnovelreader.R
 import com.netnovelreader.base.IClickEvent
+import com.netnovelreader.common.ApplyPreference
 import com.netnovelreader.common.BindingAdapter
 import com.netnovelreader.common.NovelItemDecoration
 import com.netnovelreader.common.PREFERENCE_NAME
-import com.netnovelreader.data.SQLHelper
 import com.netnovelreader.databinding.ActivityReaderBinding
 import kotlinx.android.synthetic.main.activity_reader.*
 import kotlinx.android.synthetic.main.item_catalog.view.*
-
 
 
 class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView, GestureDetector.OnGestureListener,
@@ -31,12 +30,12 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView, Gesture
     private val MIN_MOVE = 80F
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if(getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-                        .getBoolean(getString(R.string.fullScreen), true)){
+        if (ApplyPreference.isFullScreen(this)) {
             window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,  WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
+        ApplyPreference.setTheme(this)
         super.onCreate(savedInstanceState)
-        setViewModel(ReaderViewModel(intent.getStringExtra("bookname")))
+        setViewModel(ReaderViewModel(intent.getStringExtra("bookname"), ApplyPreference.getAutoDownNum(this)))
         init()
     }
 
@@ -53,12 +52,6 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView, Gesture
         readerView.txtFontSize = getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
                 .getFloat(FONTSIZE, 50f)
         detector = GestureDetector(this, this)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        readerViewModel = null
-        SQLHelper.closeDB()
     }
 
     override fun onBackPressed() {
