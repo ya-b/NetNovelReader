@@ -31,7 +31,7 @@
         </activity>
         <activity
             android:name=".reader.ReaderActivity"
-            android:theme="@style/ReaderTheme" />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".search.SearchActivity"
             android:label="@string/title_activity_search"

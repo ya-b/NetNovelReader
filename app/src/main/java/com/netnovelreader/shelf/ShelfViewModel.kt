@@ -3,8 +3,11 @@ package com.netnovelreader.shelf
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableField
 import android.databinding.ObservableInt
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.netnovelreader.common.DownloadTask
+import com.netnovelreader.common.IMAGENAME
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.id2TableName
 import com.netnovelreader.data.SQLHelper
@@ -15,7 +18,7 @@ import java.util.concurrent.Executors
 /**
  * Created by yangbo on 2018/1/12.
  */
-class ShelfViewModel : IShelfContract.IShelfViewModel {
+class ShelfViewModel(val defaultBitmap: Bitmap) : IShelfContract.IShelfViewModel {
 
     var bookList: ObservableArrayList<ShelfBean>
 
@@ -47,11 +50,13 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
             val listInDir = dirBookList()
             val cursor = SQLHelper.queryShelfBookList()
             while (cursor != null && cursor.moveToNext()) {
-                val bookBean = ShelfBean(ObservableInt(cursor.getInt(cursor.getColumnIndex(SQLHelper.ID))),
+                val bookId = cursor.getInt(cursor.getColumnIndex(SQLHelper.ID))
+                val bookBean = ShelfBean(ObservableInt(bookId),
                         ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME))),
                         ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER))
                                 ?: ""),
-                        ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))))
+                        ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))),
+                        ObservableField(getBitmap(bookId)))
                 if (listInDir.contains(id2TableName(bookBean.bookid.get()))) {
                     bookList.add(bookBean)
                     Thread{ checkCatalog(bookBean) }.start()
@@ -104,5 +109,14 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
                 Log.d("Reader:ShelfViewModel",e.printStackTrace().toString())
             }
         }
+    }
+
+    private fun getBitmap(bookId: Int): Bitmap{
+        val file = File(getSavePath() + "/${id2TableName(bookId)}", IMAGENAME)
+        var bitmap: Bitmap? = null
+        if(file.exists()){
+            bitmap = BitmapFactory.decodeFile(file.path);
+        }
+        return bitmap ?: defaultBitmap
     }
 }

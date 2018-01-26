@@ -1,8 +1,13 @@
 package com.netnovelreader.shelf
 
+import android.app.AlertDialog
+import android.app.Dialog
+import android.app.Fragment
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
@@ -30,10 +35,13 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     var shelfViewModel: ShelfViewModel? = null
     private var arrayListChangeListener: ArrayListChangeListener<ShelfBean>? = null
     private var hasPermission = false
+    private var isFragmentShow = false
+    private var settingFragment: ShelfSettingFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setViewModel(ShelfViewModel())
+        val bitmap = (resources.getDrawable(R.drawable.default_image, null) as BitmapDrawable).bitmap
+        setViewModel(ShelfViewModel(bitmap))
         hasPermission = checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (!hasPermission) {
             requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)
@@ -108,12 +116,35 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
                 true
             }
             R.id.action_settings -> {
-//                val settingFragment = ShelfSettingFragment()
-//                fragmentManager.beginTransaction().replace(R.id.settingLayout, settingFragment).commit()
+                isFragmentShow = true
+                settingFragment = ShelfSettingFragment()
+                fragmentManager.beginTransaction().replace(R.id.shelfFrameLayout, settingFragment).commit()
+                shelfToolbar.setTitle(R.string.action_settings)
+                shelfToolbar.setNavigationIcon(R.drawable.icon_back)
+                shelfToolbar.setNavigationOnClickListener {removeFragment(settingFragment)
+                }
+                findViewById<View>(R.id.search_button).visibility = View.INVISIBLE
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onBackPressed() {
+        if (isFragmentShow) {
+            removeFragment(settingFragment)
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    fun removeFragment(fragment: Fragment?) {
+        fragment ?: return
+        fragmentManager.beginTransaction().remove(fragment).commit()
+        shelfToolbar.setTitle(R.string.shelf_activity_title)
+        shelfToolbar.navigationIcon = null
+        findViewById<View>(R.id.search_button).visibility = View.VISIBLE
+        isFragmentShow = false
     }
 
     /**
@@ -152,10 +183,24 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         }
 
         fun itemOnLongClick(view: View): Boolean {
-            Toast.makeText(view.context, "删除${view.nameView.text}", Toast.LENGTH_SHORT).show()
-            shelfViewModel?.deleteBook(view.nameView.text.toString())
-            shelfViewModel?.refreshBookList()
+            val listener = DialogClickListener(view.nameView.text.toString())
+            val builder = AlertDialog.Builder(this@ShelfActivity)
+            builder.setTitle(getString(R.string.deleteBook).replace("book", view.nameView.text.toString()))
+                    .setPositiveButton(R.string.yes, listener)
+                    .setNegativeButton(R.string.no, listener)
+                    .create()
+                    .show()
             return true
+        }
+    }
+
+    inner class DialogClickListener(val bookname: String) : DialogInterface.OnClickListener {
+        override fun onClick(dialog: DialogInterface?, which: Int) {
+            if (which == Dialog.BUTTON_POSITIVE) {
+                shelfViewModel?.deleteBook(bookname)
+                shelfViewModel?.refreshBookList()
+            }
+            dialog?.dismiss()
         }
     }
 }

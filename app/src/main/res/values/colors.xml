@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="readerPrimary">#E4F2DC</color>
-    <color name="readerPrimaryDark">#A1906A</color>
+    <color name="readerPrimaryDark">#ab9057</color>
     <color name="black">#000</color>
     <color name="white">#fff</color>
 </resources>

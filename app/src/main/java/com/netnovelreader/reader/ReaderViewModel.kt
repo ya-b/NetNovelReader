@@ -53,7 +53,7 @@ class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderVie
     /**
      * readerView第一次绘制时执行
      */
-    override fun initData(width: Int, height: Int, txtFontSize: Float) {
+    override fun initData(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float) {
         pageIndicator[2] = getChapterCount()
         if (pageIndicator[2] == 0) {
             for (i in 0..3) {
@@ -65,19 +65,19 @@ class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderVie
         pageIndicator[0] = array[0]
         pageIndicator[1] = array[1]
         chapterCache.prepare(pageIndicator[0], pageIndicator[2], dirName!!)
-        getPage(pageIndicator, width, height, txtFontSize)
+        getPage(pageIndicator, textAreaWidth, textAreaHeight, txtFontSize)
         pageIndicator[3] = chapterText.size
         updateTextAndRecord(pageIndicator)
     }
 
-    override fun pageToNext(width: Int, height: Int, txtFontSize: Float) {
+    override fun pageToNext(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float) {
         if (pageIndicator[1] == pageIndicator[3] || pageIndicator[3] < 2) {
             if (pageIndicator[0] == pageIndicator[2]) {
                 return
             } else {
                 //下一章
                 pageIndicator[0] += 1
-                getPage(pageIndicator, width, height, txtFontSize)
+                getPage(pageIndicator, textAreaWidth, textAreaHeight, txtFontSize)
                 pageIndicator[3] = chapterText.size
                 if (pageIndicator[3] != 0) {
                     pageIndicator[1] = 1
@@ -93,14 +93,14 @@ class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderVie
         }
     }
 
-    override fun pageToPrevious(width: Int, height: Int, txtFontSize: Float) {
+    override fun pageToPrevious(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float) {
         if (pageIndicator[1] < 2) {
             if (pageIndicator[0] < 2) {
                 return
             } else {
                 //上一章
                 pageIndicator[0] -= 1
-                getPage(pageIndicator, width, height, txtFontSize)
+                getPage(pageIndicator, textAreaWidth, textAreaHeight, txtFontSize)
                 pageIndicator[3] = chapterText.size
                 pageIndicator[1] = pageIndicator[3]
                 updateTextAndRecord(pageIndicator)
@@ -115,10 +115,10 @@ class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderVie
     /**
      * 翻页到目录中的某章
      */
-    override fun pageByCatalog(chapterName: String, width: Int, height: Int, txtFontSize: Float) {
+    override fun pageByCatalog(chapterName: String, textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float) {
         pageIndicator[0] = SQLHelper.getChapterId(tableName, chapterName)
         pageIndicator[1] = 1
-        getPage(pageIndicator, width, height, txtFontSize)
+        getPage(pageIndicator, textAreaWidth, textAreaHeight, txtFontSize)
         pageIndicator[3] = chapterText.size
         if (pageIndicator[3] > 1) {
             pageIndicator[1] = 1
@@ -128,9 +128,9 @@ class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderVie
         updateTextAndRecord(pageIndicator)
     }
 
-    override fun changeFontSize(width: Int, height: Int, txtFontSize: Float){
+    override fun changeFontSize(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float){
         val s = pageIndicator[3].toFloat() / pageIndicator[1].toFloat()
-        getPage(pageIndicator, width, height, txtFontSize)
+        getPage(pageIndicator, textAreaWidth, textAreaHeight, txtFontSize)
         pageIndicator[3] = chapterText.size
         pageIndicator[1] = Math.round(pageIndicator[3] / s)
         if(pageIndicator[1] == 0) pageIndicator[1] = 1
@@ -179,12 +179,12 @@ class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderVie
      * @dirName
      * @isNext  1 下一章,pagenum=1 ， -1 上一章 pagenum=pageIndicator[3] ,0 pagenum不变
      */
-    private fun getPage(pageIndicator: IntArray, width: Int, height: Int, txtFontSize: Float) {
+    private fun getPage(pageIndicator: IntArray, textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float) {
         val chapterTxt = chapterCache.getChapter(pageIndicator[0])
         val indexOfDelimiter = chapterTxt.indexOf("|")
         chapterName = chapterTxt.substring(0, indexOfDelimiter)
-        chapterText = splitChapterTxt(chapterTxt.substring(indexOfDelimiter + 1), width,
-                height, txtFontSize)
+        chapterText = splitChapterTxt(chapterTxt.substring(indexOfDelimiter + 1), textAreaWidth,
+                textAreaHeight, txtFontSize)
     }
 
     /**
@@ -204,18 +204,18 @@ class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderVie
 
     /**
      * 将一章分割成Vector<ObservableArrayList<String>>，表示：Vector每一项表示一页，ArrayList每一项表示一行
-     * @width 屏幕宽
-     * @height 屏幕高
+     * @textAreaWidth 屏幕宽
+     * @textAreaHeight 屏幕高
      * @txtFontSize 字体大小
      */
-    private fun splitChapterTxt(chapter: String, width: Int, height: Int, txtFontSize: Float)
+    private fun splitChapterTxt(chapter: String, textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float)
             : Vector<ArrayList<String>> {
         if (chapter.length < 1) return Vector()
         val tmpArray = chapter.split("\n")
         val tmplist = ArrayList<String>()
         tmpArray.forEach {
             val tmp = "  " + it.trim()
-            val totalCount = width / txtFontSize.toInt() - 1
+            val totalCount = textAreaWidth / txtFontSize.toInt()
             if (tmp.length > totalCount) {
                 val count = tmp.length / totalCount
                 for (i in 0..count - 1) {
@@ -229,7 +229,7 @@ class ReaderViewModel(private val bookName: String) : IReaderContract.IReaderVie
             }
         }
         val arrayList = Vector<ArrayList<String>>()
-        val totalCount = height / txtFontSize.toInt() - 2
+        val totalCount = textAreaHeight / txtFontSize.toInt()
         if (tmplist.size > totalCount) {
             val count = tmplist.size / totalCount
             for (i in 0..count - 1) {

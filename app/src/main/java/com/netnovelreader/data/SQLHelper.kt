@@ -95,7 +95,7 @@ object SQLHelper {
             val arraylist = ArrayList<Array<String?>>()
             val cursor = getDB().rawQuery("select * from $TABLE_SEARCH;", null)
             while (cursor.moveToNext()) {
-                arraylist.add(Array(8) { it -> cursor.getString(it + 2) })
+                arraylist.add(Array(10) { it -> cursor.getString(it + 2) })
             }
             cursor.close()
             return arraylist
@@ -265,6 +265,8 @@ object SQLHelper {
     val REDIRECTNAME = "redirect_name"
     val NOREDIRECTNAME = "no_redirect_name"
     val SEARCHCHARSET = CHARSET
+    val REDIRECTIMAGE = "redirect_image"
+    val NOREDIRECTIMAGE = "no_redirect_image"
 
     //章节名
     val CHAPTERNAME = "chaptername"
@@ -285,33 +287,33 @@ object SQLHelper {
         }
 
         private fun initTable(db: SQLiteDatabase?) {
-            db?.execSQL("create table if not exists ${TABLE_PARSERULES} (${ID} integer primary key," +
-                    "${HOSTNAME} varchar(128) unique,${CATALOG_RULE} text,${CHAPTER_RULE} text," +
-                    "${CHARSET} varchar(128),${COVER_RULE} text);")
-            db?.execSQL("insert into ${TABLE_PARSERULES} values (1,'qidian.com','.volume-wrap'," +
+            db?.execSQL("create table if not exists $TABLE_PARSERULES ($ID integer primary key," +
+                    "$HOSTNAME varchar(128) unique,$CATALOG_RULE text,$CHAPTER_RULE text," +
+                    "$CHARSET varchar(128),$COVER_RULE text);")
+            db?.execSQL("insert into $TABLE_PARSERULES values (1,'qidian.com','.volume-wrap'," +
                     "'.read-content','utf-8',NULL);")
-            db?.execSQL("insert into ${TABLE_PARSERULES} values (2,'yunlaige.com','#contenttable'," +
+            db?.execSQL("insert into $TABLE_PARSERULES values (2,'yunlaige.com','#contenttable'," +
                     "'#content','gbk',NULL);")
-            db?.execSQL("create table if not exists ${TABLE_SEARCH} (${ID} integer primary key, " +
-                    "${SEARCH_HOSTNAME} varchar(128) unique, ${ISREDIRECT} varchar(128), ${SEARCHURL} text, " +
-                    "${REDIRECTFILELD} varchar(128), ${REDIRECTSELECTOR} varchar(128), ${NOREDIRECTSELECTOR} " +
-                    "varchar(128), ${REDIRECTNAME} varchar(128), ${NOREDIRECTNAME} varchar(128), " +
-                    "${SEARCHCHARSET} varchar(128));")
-            db?.execSQL("insert into ${TABLE_SEARCH} values (1,'qidian.com','0'," +
-                    "'https://www.qidian.com/search/?kw=${SEARCH_NAME}','',''," +
+            db?.execSQL("create table if not exists $TABLE_SEARCH ($ID integer primary key, " +
+                    "$SEARCH_HOSTNAME varchar(128) unique, $ISREDIRECT varchar(128), $SEARCHURL text, " +
+                    "$REDIRECTFILELD varchar(128), ${REDIRECTSELECTOR} varchar(128), $NOREDIRECTSELECTOR " +
+                    "varchar(128), $REDIRECTNAME varchar(128), $NOREDIRECTNAME varchar(128), " +
+                    "$SEARCHCHARSET varchar(128),$REDIRECTIMAGE text,$NOREDIRECTIMAGE text);")
+            db?.execSQL("insert into $TABLE_SEARCH values (1,'qidian.com','0'," +
+                    "'https://www.qidian.com/search/?kw=$SEARCH_NAME','',''," +
                     "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)',''," +
                     "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)'," +
-                    "'utf-8');")
-            db?.execSQL("insert into ${TABLE_SEARCH} values (2,'yunlaige.com','1'," +
-                    "'http://www.yunlaige.com/modules/article/search.php?searchkey=${SEARCH_NAME}&action=login&submit='," +
+                    "'utf-8','','.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)');")
+            db?.execSQL("insert into $TABLE_SEARCH values (2,'yunlaige.com','1'," +
+                    "'http://www.yunlaige.com/modules/article/search.php?searchkey=$SEARCH_NAME&action=login&submit='," +
                     "'location','.readnow'," +
                     "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)'," +
                     "'#content > div.book-info > div.info > h2 > a'," +
                     "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)'," +
-                    "'gbk');")
-            db?.execSQL("create table if not exists ${TABLE_SHELF} (${ID} integer primary key, " +
-                    "${BOOKNAME} varchar(128) unique, ${READRECORD} varchar(128), ${DOWNLOADURL} text, " +
-                    "${LATESTCHAPTER} varchar(128));")
+                    "'gbk','','');")
+            db?.execSQL("create table if not exists $TABLE_SHELF ($ID integer primary key, " +
+                    "$BOOKNAME varchar(128) unique, $READRECORD varchar(128), $DOWNLOADURL text, " +
+                    "$LATESTCHAPTER varchar(128));")
         }
     }
 }

@@ -17,4 +17,17 @@ class ExampleUnitTest {
         taskList.add("fjoiwifo")
         Observable.fromIterable(taskList).flatMap { s -> Observable.just(s + "====") }.subscribe { s -> println(s) }
     }
+
+    @Test
+    fun hello(){
+        var arr1 = ArrayList<Int>()
+        arr1 .add(3)
+        var arr2 = ArrayList<Int>()
+        arr2.add(4)
+        arr1.forEach {
+            arr2.forEach{
+                println(it)
+            }
+        }
+    }
 }

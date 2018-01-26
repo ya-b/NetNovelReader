@@ -2,9 +2,18 @@ package com.netnovelreader.search
 
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableField
-import com.netnovelreader.common.id2TableName
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
+import com.netnovelreader.common.*
 import com.netnovelreader.data.SQLHelper
 import com.netnovelreader.data.SearchBook
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.net.URLEncoder
 
 /**
@@ -36,24 +45,70 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         }
     }
 
+    fun saveBookImage(tableName: String, bookname: String){
+        val imageDir = File(getSavePath() + "/tmp")
+        val imagePath = File(mkdirs(getSavePath() + "/$tableName"))
+        if(!imageDir.exists()) return
+        val list = imageDir.list()
+        for(i in 0..list.size){
+            if(list[i].contains(bookname)){
+                Thread{ copyFile(File(imageDir, list[i]), File(imagePath, IMAGENAME)) }.start()
+                break
+            }
+        }
+    }
+
 
     private fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, reqCode: Int) {
-        var result: String? = null
+        var result: Array<String>? = null
         val url = siteinfo[1]!!.replace(SQLHelper.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
         try {
             if (siteinfo[0].equals("0")) {
-                result = SearchBook().search(url, siteinfo[4] ?: "", siteinfo[6] ?: "")
+                result = SearchBook().search(url, siteinfo[4] ?: "", siteinfo[6] ?: "", siteinfo[9] ?: "")
             } else {
                 result = SearchBook().search(url, siteinfo[2] ?: "", siteinfo[3] ?: "",
-                        siteinfo[4] ?: "", siteinfo[5] ?: "", siteinfo[6] ?: "")
+                        siteinfo[4] ?: "", siteinfo[5] ?: "",
+                        siteinfo[6] ?: "", siteinfo[8] ?: "", siteinfo[9] ?: "")
             }
         } catch (e: Exception) {
-            result ?: return
+            Log.d("reader,searchviewmodel",e.printStackTrace().toString())
         }
         result ?: return
-        val s = result.split("~~~")
         if (searchCode == reqCode) {
-            resultList.add(SearchBean(ObservableField(s[0]), ObservableField(s[1])))
+            resultList.add(SearchBean(ObservableField(result[1]), ObservableField(result[0])))
         }
+        Thread{
+            try {
+                downloadImage(result[1], result[2])
+            }catch (e: IOException){
+                Log.d("novel,searchviewmodel", e.printStackTrace().toString())
+            }
+        }.start()
+    }
+
+    @Throws(IOException::class)
+    private fun downloadImage(bookname: String, imageUrl: String){
+        if(imageUrl.equals("")) return
+        val request = Request.Builder().url(imageUrl).build()
+        val inputStream = OkHttpClient().newCall(request).execute().body()?.byteStream()
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        val path = mkdirs(getSavePath() + "/tmp") + "/$bookname.${url2Hostname(imageUrl)}"
+        val outputStream = FileOutputStream(path)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        outputStream.flush()
+        outputStream.close()
+    }
+
+    private fun copyFile(srcFile: File, distFile: File){
+        val fi = FileInputStream(srcFile)
+        val fo = FileOutputStream(distFile)
+        val buffer = ByteArray(100)
+        var length: Int = 0
+        while ({length = fi.read(buffer); length}() > -1){
+            fo.write(buffer, 0, length)
+            fo.flush()
+        }
+        fi.close()
+        fo.close()
     }
 }

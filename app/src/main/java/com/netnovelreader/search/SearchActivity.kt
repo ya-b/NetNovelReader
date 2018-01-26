@@ -82,6 +82,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                 intent.putExtra("tableName", tableName)
                 intent.putExtra("catalogurl", v.resultUrl.text.toString())
                 startService(intent)
+                searchViewModel?.saveBookImage(tableName, v.resultName.text.toString())
             }
         }
     }
