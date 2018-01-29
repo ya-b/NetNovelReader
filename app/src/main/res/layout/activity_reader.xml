@@ -2,9 +2,16 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <data>
-        <variable name="clickEvent" type="com.netnovelreader.reader.ReaderActivity.ReaderClickEvent"/>
-        <variable name="chapter" type="com.netnovelreader.reader.ReaderViewModel"/>
+
+        <variable
+            name="clickEvent"
+            type="com.netnovelreader.reader.ReaderActivity.ReaderClickEvent" />
+
+        <variable
+            name="chapter"
+            type="com.netnovelreader.reader.ReaderViewModel" />
     </data>
 
     <android.support.constraint.ConstraintLayout
@@ -18,116 +25,146 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@{chapter.text}"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/headerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:visibility="invisible"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/changeSouce"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{clickEvent::onHeadViewClick}"
+                android:text="@string/changeSource"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                app:layout_constraintRight_toRightOf="parent" />
+        </android.support.constraint.ConstraintLayout>
 
         <LinearLayout
             android:id="@+id/fontSetting"
-            android:visibility="invisible"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
+            android:background="@color/black"
+            android:orientation="horizontal"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@id/footView"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/footView">
-            <Button
+            app:layout_constraintRight_toRightOf="parent">
+
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size30"
-                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="30"
-                android:textSize="20sp"
-                android:textColor="@color/black"
-                style="?android:attr/buttonBarButtonStyle" />
-            <Button
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size40"
-                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="40"
-                android:textSize="20sp"
-                android:textColor="@color/black"
-                style="?android:attr/buttonBarButtonStyle" />
-            <Button
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size50"
-                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="50"
-                android:textSize="20sp"
-                android:textColor="@color/black"
-                style="?android:attr/buttonBarButtonStyle" />
-            <Button
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size60"
-                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="60"
-                android:textSize="20sp"
-                android:textColor="@color/black"
-                style="?android:attr/buttonBarButtonStyle" />
-            <Button
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size70"
-                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="70"
-                android:textSize="20sp"
-                android:textColor="@color/black"
-                style="?android:attr/buttonBarButtonStyle" />
+                android:textColor="@color/white"
+                android:textSize="20sp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/footView"
-            android:visibility="invisible"
-            android:background="@drawable/reader_foot_view_top_border"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:orientation="horizontal"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent">
-            <Button
+
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/catalogButton"
-                android:gravity="center"
-                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
                 android:onClick="@{clickEvent::onFootViewClick}"
                 android:text="@string/catalogButton"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                style="?android:attr/buttonBarButtonStyle"/>
-            <Button
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/fontSizeButton"
-                android:gravity="center"
-                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
                 android:onClick="@{clickEvent::onFootViewClick}"
                 android:text="@string/fontSizeButton"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                style="?android:attr/buttonBarButtonStyle"/>
-            <Button
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/backgroundButton"
-                android:gravity="center"
-                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
                 android:onClick="@{clickEvent::onFootViewClick}"
                 android:text="@string/backgroundButton"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:textColor="@color/white"
+                android:textSize="20sp" />
         </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>

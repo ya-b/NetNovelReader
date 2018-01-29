@@ -2,6 +2,7 @@ package com.netnovelreader.reader
 
 import android.databinding.ObservableArrayList
 import com.netnovelreader.common.id2TableName
+import com.netnovelreader.data.SQLHelper
 import java.util.Vector
 import kotlin.collections.ArrayList
 
@@ -9,7 +10,8 @@ import kotlin.collections.ArrayList
  * Created by yangbo on 18-1-13.
  */
 
-class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) : IReaderContract.IReaderViewModel {
+class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) :
+    IReaderContract.IReaderViewModel {
     var catalog = ObservableArrayList<ReaderBean.Catalog>()
     /**
      * 一页显示的内容
@@ -34,10 +36,12 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     private var tableName = ""
     private val chapterCache: ChapterCache
 
-    init{
-        val cursor = SQLHelper.getDB().rawQuery("select ${SQLHelper.ID} from " +
-                "${SQLHelper.TABLE_SHELF} where ${SQLHelper.BOOKNAME}='$bookName';",
-                null)
+    init {
+        val cursor = SQLHelper.getDB().rawQuery(
+            "select ${SQLHelper.ID} from " +
+                    "${SQLHelper.TABLE_SHELF} where ${SQLHelper.BOOKNAME}='$bookName';",
+            null
+        )
         if (cursor.moveToFirst()) {
             tableName = id2TableName(cursor.getInt(0))
         }
@@ -110,7 +114,12 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     /**
      * 翻页到目录中的某章
      */
-    override fun pageByCatalog(chapterName: String, textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float) {
+    override fun pageByCatalog(
+        chapterName: String,
+        textAreaWidth: Int,
+        textAreaHeight: Int,
+        txtFontSize: Float
+    ) {
         pageIndicator[0] = SQLHelper.getChapterId(tableName, chapterName)
         pageIndicator[1] = 1
         getPage(pageIndicator, textAreaWidth, textAreaHeight, txtFontSize)
@@ -123,12 +132,12 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
         updateTextAndRecord(pageIndicator)
     }
 
-    override fun changeFontSize(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float){
+    override fun changeFontSize(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float) {
         val s = pageIndicator[3].toFloat() / pageIndicator[1].toFloat()
         getPage(pageIndicator, textAreaWidth, textAreaHeight, txtFontSize)
         pageIndicator[3] = chapterText.size
         pageIndicator[1] = Math.round(pageIndicator[3] / s)
-        if(pageIndicator[1] == 0) pageIndicator[1] = 1
+        if (pageIndicator[1] == 0) pageIndicator[1] = 1
         updateTextAndRecord(pageIndicator)
     }
 
@@ -138,8 +147,10 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     @Synchronized
     override fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog> {
         catalog.clear()
-        val catalogCursor = SQLHelper.getDB().rawQuery("select ${SQLHelper.CHAPTERNAME} " +
-                "from $tableName", null)
+        val catalogCursor = SQLHelper.getDB().rawQuery(
+            "select ${SQLHelper.CHAPTERNAME} " +
+                    "from $tableName", null
+        )
         while (catalogCursor.moveToNext()) {
             catalog.add(ReaderBean.Catalog(catalogCursor.getString(0)))
         }
@@ -174,12 +185,19 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
      * @dirName
      * @isNext  1 下一章,pagenum=1 ， -1 上一章 pagenum=pageIndicator[3] ,0 pagenum不变
      */
-    private fun getPage(pageIndicator: IntArray, textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float) {
+    private fun getPage(
+        pageIndicator: IntArray,
+        textAreaWidth: Int,
+        textAreaHeight: Int,
+        txtFontSize: Float
+    ) {
         val chapterTxt = chapterCache.getChapter(pageIndicator[0])
         val indexOfDelimiter = chapterTxt.indexOf("|")
         chapterName = chapterTxt.substring(0, indexOfDelimiter)
-        chapterText = splitChapterTxt(chapterTxt.substring(indexOfDelimiter + 1), textAreaWidth,
-                textAreaHeight, txtFontSize)
+        chapterText = splitChapterTxt(
+            chapterTxt.substring(indexOfDelimiter + 1), textAreaWidth,
+            textAreaHeight, txtFontSize
+        )
     }
 
     /**
@@ -203,7 +221,12 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
      * @textAreaHeight 屏幕高
      * @txtFontSize 字体大小
      */
-    private fun splitChapterTxt(chapter: String, textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float)
+    private fun splitChapterTxt(
+        chapter: String,
+        textAreaWidth: Int,
+        textAreaHeight: Int,
+        txtFontSize: Float
+    )
             : Vector<ArrayList<String>> {
         if (chapter.length < 1) return Vector()
         val tmpArray = chapter.split("\n")

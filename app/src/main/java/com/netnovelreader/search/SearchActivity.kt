@@ -21,7 +21,7 @@ import kotlinx.android.synthetic.main.item_search.view.*
 
 class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     var searchViewModel: SearchViewModel? = null
-    private var arrayListChangeListener: ArrayListChangeListener<SearchBean>?= null
+    private lateinit var arrayListChangeListener: ArrayListChangeListener<SearchBean>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ApplyPreference.setTheme(this)
@@ -56,7 +56,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     }
 
 
-    inner class QueryListener : android.support.v7.widget.SearchView.OnQueryTextListener{
+    inner class QueryListener : android.support.v7.widget.SearchView.OnQueryTextListener {
         private var tmp = ""
         private var tmpTime = System.currentTimeMillis()
 
@@ -78,8 +78,12 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     inner class SearchClickEvent : IClickEvent {
         fun downloadBook(v: View) {
             if (v.resultName.text.toString().length > 0 && v.resultUrl.text.toString().length > 0) {
-                val tableName = searchViewModel!!.addBookToShelf(v.resultName.text.toString(), v.resultUrl.text.toString())
-                Toast.makeText(this@SearchActivity, R.string.start_download, Toast.LENGTH_SHORT).show()
+                val tableName = searchViewModel!!.addBookToShelf(
+                    v.resultName.text.toString(),
+                    v.resultUrl.text.toString()
+                )
+                Toast.makeText(this@SearchActivity, R.string.start_download, Toast.LENGTH_SHORT)
+                    .show()
                 val intent = Intent(v.context, DownloadService::class.java)
                 intent.putExtra("tableName", tableName)
                 intent.putExtra("catalogurl", v.resultUrl.text.toString())

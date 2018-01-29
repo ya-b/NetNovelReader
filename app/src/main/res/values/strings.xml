@@ -24,7 +24,7 @@
     <string name="wait4download">还有nn项待处理</string>
     <string name="downloadfailed">共有nn章下载失败</string>
 
-
+    <string name="changeSource">换源下载</string>
     <string name="catalogButton">目录</string>
     <string name="fontSizeButton">字体</string>
     <string name="backgroundButton">背景</string>

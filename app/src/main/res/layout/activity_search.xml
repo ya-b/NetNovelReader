@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:tools="http://schemas.android.com/tools">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -15,25 +15,25 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:orientation="horizontal"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/backButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
                     android:background="@drawable/icon_back"
-                    android:contentDescription="@string/app_name"/>
+                    android:contentDescription="@string/app_name" />
 
                 <android.support.v7.widget.SearchView
                     android:id="@+id/searchViewBar"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:iconifiedByDefault="false"/>
+                    android:layout_weight="1"
+                    android:iconifiedByDefault="false" />
 
             </LinearLayout>
 

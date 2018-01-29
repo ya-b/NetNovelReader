@@ -18,7 +18,10 @@ import android.view.View
 import android.widget.Toast
 import com.netnovelreader.R
 import com.netnovelreader.base.IClickEvent
-import com.netnovelreader.common.*
+import com.netnovelreader.common.ApplyPreference
+import com.netnovelreader.common.ArrayListChangeListener
+import com.netnovelreader.common.BindingAdapter
+import com.netnovelreader.common.id2TableName
 import com.netnovelreader.data.SQLHelper
 import com.netnovelreader.databinding.ActivityShelfBinding
 import com.netnovelreader.download.DownloadService
@@ -60,9 +63,9 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     override fun init() {
         setSupportActionBar({ shelfToolbar.setTitle(R.string.shelf_activity_title); shelfToolbar }())
         shelfRecycler.layoutManager = LinearLayoutManager(this)
-        shelfRecycler.addItemDecoration(NovelItemDecoration(this))
         shelfRecycler.itemAnimator = DefaultItemAnimator()
-        val mAdapter = BindingAdapter(shelfViewModel?.bookList, R.layout.item_shelf, ShelfClickEvent())
+        val mAdapter =
+            BindingAdapter(shelfViewModel?.bookList, R.layout.item_shelf, ShelfClickEvent())
         shelfRecycler.adapter = mAdapter
         arrayListChangeListener = ArrayListChangeListener(mAdapter)
         shelfViewModel?.bookList?.addOnListChangedCallback(arrayListChangeListener)
@@ -116,10 +119,12 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
             R.id.action_settings -> {
                 isFragmentShow = true
                 settingFragment = SettingFragment()
-                fragmentManager.beginTransaction().replace(R.id.shelfFrameLayout, settingFragment).commit()
+                fragmentManager.beginTransaction().replace(R.id.shelfFrameLayout, settingFragment)
+                    .commit()
                 shelfToolbar.setTitle(R.string.settings)
                 shelfToolbar.setNavigationIcon(R.drawable.icon_back)
-                shelfToolbar.setNavigationOnClickListener {removeFragment(settingFragment)
+                shelfToolbar.setNavigationOnClickListener {
+                    removeFragment(settingFragment)
                 }
                 findViewById<View>(R.id.search_button).visibility = View.INVISIBLE
                 true
@@ -148,7 +153,11 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     /**
      * 请求权限
      */
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 hasPermission = true
@@ -163,7 +172,10 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     }
 
     override fun checkPermission(permission: String): Boolean {
-        return ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+        return ActivityCompat.checkSelfPermission(
+            this,
+            permission
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun requirePermission(permission: String, reqCode: Int) {
@@ -183,11 +195,16 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         fun itemOnLongClick(view: View): Boolean {
             val listener = DialogClickListener(view.nameView.text.toString())
             val builder = AlertDialog.Builder(this@ShelfActivity)
-            builder.setTitle(getString(R.string.deleteBook).replace("book", view.nameView.text.toString()))
-                    .setPositiveButton(R.string.yes, listener)
-                    .setNegativeButton(R.string.no, listener)
-                    .create()
-                    .show()
+            builder.setTitle(
+                getString(R.string.deleteBook).replace(
+                    "book",
+                    view.nameView.text.toString()
+                )
+            )
+                .setPositiveButton(R.string.yes, listener)
+                .setNegativeButton(R.string.no, listener)
+                .create()
+                .show()
             return true
         }
     }

@@ -32,11 +32,16 @@ class ReaderView : View {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
+
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int)
             : super(context, attrs, defStyleAttr, defStyleRes)
 
-    init{
+    init {
         paint.color = Color.BLACK
         paint.textSize = 40f
         paint.isAntiAlias = true
@@ -54,14 +59,36 @@ class ReaderView : View {
         super.onDraw(canvas)
         paint.textSize = indacitorFontSize
         //右下角绘制：   第n章：n/n
-        canvas.drawText(this.text!![0], width - indacitorFontSize * this.text!![0].length,
-                height - indacitorFontSize, paint)
+        canvas.drawText(
+            this.text!![0], width - indacitorFontSize * text!![0].toCharArray().size,
+            height - indacitorFontSize, paint
+        )
         paint.textSize = txtFontSize
-        for (i in 1 until this.text!!.size) {
+        for (i in 1 until text!!.size) {
             //绘制正文
-            canvas.drawText(this.text!![i].replace(" ", "    "), width * 0.04f,
-                    height * 0.04f + (i - 1) * txtFontSize, paint)
+            canvas.drawText(
+                this.text!![i].replace(" ", "    "), getMarginLeft(),
+                getMarginTop() + (i - 1) * txtFontSize, paint
+            )
         }
+    }
+
+    fun getTextWidth(): Int {
+        return (width * 0.96f).toInt()
+    }
+
+    fun getTextHeight(): Int {
+        return((height - indacitorFontSize) * 0.96f).toInt()
+    }
+
+    private fun getMarginLeft(): Float {
+        val count = (width * 0.96f).toInt() / txtFontSize.toInt()
+        return (width - count * txtFontSize) / 2
+    }
+
+    private fun getMarginTop(): Float {
+        val count = ((height - indacitorFontSize) * 0.96f).toInt() / txtFontSize.toInt()
+        return ((height - indacitorFontSize) - count * txtFontSize) / 3 + txtFontSize
     }
 
     internal interface FirstDrawListener {

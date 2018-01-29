@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
+
     <data>
-        <variable name="itemDetail" type="com.netnovelreader.search.SearchBean"/>
-        <variable name="clickEvent" type="com.netnovelreader.search.SearchActivity.SearchClickEvent"/>
+
+        <variable
+            name="itemDetail"
+            type="com.netnovelreader.search.SearchBean" />
+
+        <variable
+            name="clickEvent"
+            type="com.netnovelreader.search.SearchActivity.SearchClickEvent" />
     </data>
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::downloadBook??``}">
+        android:onClick="@{clickEvent::downloadBook??``}"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/resultName"
-            android:textSize="24sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{itemDetail.bookname??``}"/>
+            android:text="@{itemDetail.bookname??``}"
+            android:textSize="24sp" />
+
         <TextView
             android:id="@+id/resultUrl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:text="@{itemDetail.url??``}" />
+            android:text="@{itemDetail.url??``}"
+            android:textSize="18sp" />
     </LinearLayout>
 
 </layout>

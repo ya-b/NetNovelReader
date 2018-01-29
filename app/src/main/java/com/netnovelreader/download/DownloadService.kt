@@ -63,8 +63,10 @@ class DownloadService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         synchronized(this) {
             if (queue != null || intent != null) {
-                val t = DownloadTask(intent!!.getStringExtra("tableName"),
-                        intent.getStringExtra("catalogurl"))
+                val t = DownloadTask(
+                    intent!!.getStringExtra("tableName"),
+                    intent.getStringExtra("catalogurl")
+                )
                 if (max == -1) {
                     queue!!.offer(t)
                     max = 0 //从网上解析目录需要时间，max不会马上赋值，所有在这里改变
@@ -78,12 +80,12 @@ class DownloadService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if(failed == 0){
+        if (failed == 0) {
             mNotificationManager?.cancel(NOTIFYID)
-        }else{
+        } else {
             builder?.setContentTitle(getString(R.string.downloadfailed).replace("nn", "$failed"))
-                    ?.setContentTitle(getString(R.string.downloadfailed).replace("nn", "$failed"))
-                    ?.setAutoCancel(true)
+                ?.setContentTitle(getString(R.string.downloadfailed).replace("nn", "$failed"))
+                ?.setAutoCancel(true)
             mNotificationManager?.notify(NOTIFYID, builder?.build())
 
         }
@@ -91,15 +93,14 @@ class DownloadService : Service() {
 
     private fun openNotification() {
         builder = NotificationCompat.Builder(this, "reader")
-                .setTicker(getString(R.string.app_name))
-                .setContentTitle(getString(R.string.prepare_download))
-                .setSmallIcon(R.drawable.ic_launcher_background)
+            .setTicker(getString(R.string.app_name))
+            .setContentTitle(getString(R.string.prepare_download))
+            .setSmallIcon(R.drawable.ic_launcher_background)
         mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
 
-    fun updateNotification() {
-        if(progress == max ) return
+    fun updateNotification(progress: Int, max: Int) {
         val str: String
         if (tmpQueue!!.isEmpty()) {
             str = ""
@@ -107,7 +108,7 @@ class DownloadService : Service() {
             str = ",${getString(R.string.wait4download)}".replace("nn", tmpQueue!!.size.toString())
         }
         builder?.setProgress(max, progress, false)
-                ?.setContentTitle("${getString(R.string.downloading)}:${progress}/$max$str")
+            ?.setContentTitle("${getString(R.string.downloading)}:${progress}/$max$str")
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
 
@@ -122,11 +123,12 @@ class DownloadService : Service() {
     }
 
     @Synchronized
-    fun progressIncrement(){
-        progress++
+    fun progressIncrement(): Int {
+        return ++progress
     }
 
     inner class ExecuteDownload : Runnable {
+        var tmp = 0
 
         override fun run() {
             while (true) {
@@ -135,9 +137,9 @@ class DownloadService : Service() {
                     executors?.shutdown()
                     break
                 }
-                var downloadUnitList: ArrayList<DownloadTask.DownloadChapterUnit>
+                var downloadUnitList: ArrayList<DownloadChapter>
                 try {
-                    downloadUnitList = downloadTask.getUnitList()
+                    downloadUnitList = downloadTask.downloadAll()
                 } catch (e: IOException) {
                     stopOrContinue()
                     continue
@@ -150,26 +152,29 @@ class DownloadService : Service() {
                 }
             }
         }
-        private fun downEveryItem(downloadUnitList: ArrayList<DownloadTask.DownloadChapterUnit>){
+
+        private fun downEveryItem(downloadUnitList: ArrayList<DownloadChapter>) {
             Observable.fromIterable(downloadUnitList)
-                    .flatMap {
-                        Observable.create<Int> { emitter ->
-                            try {
-                                it.download(it.getChapterTxt())
-                            }catch (e: IOException){
-                                failed++
-                            }finally {
-                                progressIncrement()
-                                emitter.onNext(1)
-                            }
-                        }.subscribeOn(Schedulers.from(executors!!))
-                    }.observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        synchronized(this){
-                            updateNotification()
-                            stopOrContinue()
+                .flatMap {
+                    Observable.create<Int> { emitter ->
+                        try {
+                            it.download(it.getChapterTxt())
+                        } catch (e: IOException) {
+                            failed++
+                        } finally {
+                            emitter.onNext(progressIncrement())
                         }
-                    })
+                    }.subscribeOn(Schedulers.from(executors!!))
+                }.observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    synchronized(this) {
+                        if(it > tmp){
+                            updateNotification(it, max)
+                            stopOrContinue()
+                            tmp = it
+                        }
+                    }
+                })
         }
     }
 }

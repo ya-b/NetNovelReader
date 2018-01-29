@@ -40,16 +40,17 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         SQLHelper.queryAllSearchSite().forEach {
             Thread { searchBookFromSite(bookname, it, searchCode) }.start()
         }
+
     }
 
-    fun saveBookImage(tableName: String, bookname: String){
+    fun saveBookImage(tableName: String, bookname: String) {
         val imageDir = File(getSavePath() + "/tmp")
         val imagePath = File(mkdirs(getSavePath() + "/$tableName"))
-        if(!imageDir.exists()) return
+        if (!imageDir.exists()) return
         val list = imageDir.list()
-        for(i in 0..list.size){
-            if(list[i].contains(bookname)){
-                Thread{ copyFile(File(imageDir, list[i]), File(imagePath, IMAGENAME)) }.start()
+        for (i in 0..list.size) {
+            if (list[i].startsWith(bookname)) {
+                Thread { copyFile(File(imageDir, list[i]), File(imagePath, IMAGENAME)) }.start()
                 break
             }
         }
@@ -58,17 +59,25 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
 
     private fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, reqCode: Int) {
         var result: Array<String>? = null
-        val url = siteinfo[1]!!.replace(SQLHelper.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
+        val url =
+            siteinfo[1]!!.replace(SQLHelper.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
         try {
             if (siteinfo[0].equals("0")) {
-                result = SearchBook().search(url, siteinfo[4] ?: "", siteinfo[6] ?: "", siteinfo[9] ?: "")
+                result = SearchBook().search(
+                    url,
+                    siteinfo[4] ?: "",
+                    siteinfo[6] ?: "",
+                    siteinfo[9] ?: ""
+                )
             } else {
-                result = SearchBook().search(url, siteinfo[2] ?: "", siteinfo[3] ?: "",
-                        siteinfo[4] ?: "", siteinfo[5] ?: "",
-                        siteinfo[6] ?: "", siteinfo[8] ?: "", siteinfo[9] ?: "")
+                result = SearchBook().search(
+                    url, siteinfo[2] ?: "", siteinfo[3] ?: "",
+                    siteinfo[4] ?: "", siteinfo[5] ?: "",
+                    siteinfo[6] ?: "", siteinfo[8] ?: "", siteinfo[9] ?: ""
+                )
             }
         } catch (e: Exception) {
-            Log.d("reader,searchviewmodel",e.printStackTrace().toString())
+            Log.d("reader,searchviewmodel", e.printStackTrace().toString())
         }
         result ?: return
         if (searchCode == reqCode && ObservableField(result[1]).get().length > 0) {
@@ -78,8 +87,8 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     }
 
     @Throws(IOException::class)
-    private fun downloadImage(bookname: String, imageUrl: String){
-        if(imageUrl.equals("")) return
+    private fun downloadImage(bookname: String, imageUrl: String) {
+        if (imageUrl.equals("")) return
         val request = Request.Builder().url(imageUrl).build()
         Thread {
             var inputStream: InputStream? = null
@@ -100,12 +109,12 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         }.start()
     }
 
-    private fun copyFile(srcFile: File, distFile: File){
+    private fun copyFile(srcFile: File, distFile: File) {
         val fi = FileInputStream(srcFile)
         val fo = FileOutputStream(distFile)
         val buffer = ByteArray(100)
-        var length: Int = 0
-        while ({length = fi.read(buffer); length}() > -1){
+        var length = 0
+        while ({ length = fi.read(buffer); length }() > -1) {
             fo.write(buffer, 0, length)
             fo.flush()
         }

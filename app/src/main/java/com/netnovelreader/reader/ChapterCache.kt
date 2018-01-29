@@ -1,7 +1,8 @@
 package com.netnovelreader.reader
 
 import com.netnovelreader.common.getSavePath
-import com.netnovelreader.download.DownloadTask
+import com.netnovelreader.data.SQLHelper
+import com.netnovelreader.download.DownloadChapter
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
@@ -55,8 +56,12 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         val chapterPath = "${getSavePath()}/$dirName/$chapterName"
         if (!File(chapterPath).exists()) {
             if (!isCurrentChapter) {
-                sb.append(getFromNet("${getSavePath()}/$dirName",
-                        chapterName))
+                sb.append(
+                    getFromNet(
+                        "${getSavePath()}/$dirName",
+                        chapterName
+                    )
+                )
             }
         } else {
             sb.append(getFromFile(chapterPath))
@@ -80,15 +85,17 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
      * 从网络获取章节内容
      */
     private fun getFromNet(dir: String, chapterName: String): String {
-        val download = DownloadTask.DownloadChapterUnit(tableName, dir, chapterName,
-                SQLHelper.getChapterUrl(tableName, chapterName))
+        val download = DownloadChapter(
+            tableName, dir, chapterName,
+            SQLHelper.getChapterUrl(tableName, chapterName)
+        )
         var chapterText: String? = null
         try {
             chapterText = download.getChapterTxt()
             download.download(chapterText)
-        }catch (e: IOException){
+        } catch (e: IOException) {
             chapterText = ""
-        }finally {
+        } finally {
             return chapterText ?: ""
         }
     }
@@ -98,7 +105,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
      */
     private fun readToCache(chapterNum: Int) {
         val arrayList = ArrayList<Int>()
-        chapterTxtTable.forEach{
+        chapterTxtTable.forEach {
             if (it.key + 1 < chapterNum || it.key - cacheNum > chapterNum || it.value.length == 0) {
                 arrayList.add((it.key))
             }

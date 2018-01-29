@@ -14,12 +14,17 @@ import com.netnovelreader.base.IClickEvent
  * Created by yangbo on 18-1-12.
  */
 
-class BindingAdapter<T>(private var itemDetails: ObservableArrayList<T>?, private val resId: Int, val clickEvent: IClickEvent?)
-    : RecyclerView.Adapter<BindingAdapter.BindingViewHolder<T>>() {
+class BindingAdapter<T>(
+    private var itemDetails: ObservableArrayList<T>?,
+    private val resId: Int,
+    val clickEvent: IClickEvent?
+) : RecyclerView.Adapter<BindingAdapter.BindingViewHolder<T>>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<T> {
-        val binding = DataBindingUtil.inflate<ViewDataBinding>(LayoutInflater.from(parent.context),
-                resId, parent, false)
+        val binding = DataBindingUtil.inflate<ViewDataBinding>(
+            LayoutInflater.from(parent.context),
+            resId, parent, false
+        )
         return BindingViewHolder(binding)
     }
 
@@ -32,7 +37,8 @@ class BindingAdapter<T>(private var itemDetails: ObservableArrayList<T>?, privat
         return itemDetails!!.size
     }
 
-    class BindingViewHolder<T>(private val binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root) {
+    class BindingViewHolder<T>(private val binding: ViewDataBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(itemData: T?, clickEvent: IClickEvent?) {
             binding.setVariable(BR.itemDetail, itemData)
             binding.setVariable(BR.clickEvent, clickEvent)

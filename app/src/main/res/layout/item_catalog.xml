@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
+
     <data>
-        <variable name="itemDetail" type="com.netnovelreader.reader.ReaderBean.Catalog"/>
-        <variable name="clickEvent" type="com.netnovelreader.reader.ReaderActivity.CatalogItemClickListener"/>
+
+        <variable
+            name="itemDetail"
+            type="com.netnovelreader.reader.ReaderBean.Catalog" />
+
+        <variable
+            name="clickEvent"
+            type="com.netnovelreader.reader.ReaderActivity.CatalogItemClickListener" />
     </data>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
         android:onClick="@{clickEvent::onChapterClick}"
         android:orientation="vertical">
+
         <TextView
             android:id="@+id/itemChapter"
             android:layout_width="match_parent"

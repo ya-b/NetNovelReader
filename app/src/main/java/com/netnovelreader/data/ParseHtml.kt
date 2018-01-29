@@ -16,16 +16,15 @@ class ParseHtml {
      */
     @Throws(IOException::class)
     fun getChapter(url: String): String {
-        var txt: String?
+        val txt: String?
         val selector = SQLHelper.getParseRule(url2Hostname(url), SQLHelper.CHAPTER_RULE)
-        if (selector == null || selector.length < 2) {
+        if (selector.isEmpty() || selector.length < 2) {
             txt = getChapterWithSelector(url)
         } else {
             txt = Jsoup.connect(url).headers(getHeaders(url))
-                    .timeout(TIMEOUT).get().select(selector).text()
+                .timeout(TIMEOUT).get().select(selector).text()
         }
-        txt = "    " + txt!!.replace(" ", "\n\n  ")
-        return txt
+        return "    " + txt!!.replace(" ", "\n\n  ")
     }
 
     /**
@@ -37,7 +36,7 @@ class ParseHtml {
         val catalog = LinkedHashMap<String, String>()
         selector ?: return catalog
         val list = Jsoup.connect(url).headers(getHeaders(url))
-                .timeout(TIMEOUT).get().select(selector).select("a")
+            .timeout(TIMEOUT).get().select(selector).select("a")
         list.forEach {
             var link = it.attr("href")
             if (!link.contains("//")) {
