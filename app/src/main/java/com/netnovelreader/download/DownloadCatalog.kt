@@ -14,7 +14,13 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     @Throws(IOException::class)
     fun download() {
         SQLHelper.createTable(tableName)
-        val map = filtExistsInSql(getMap(catalogUrl))
+        val cacheMap = CatalogCache.cache.get(catalogUrl)?.catalogMap
+        val map: LinkedHashMap<String, String>
+        if (cacheMap != null && cacheMap.isNotEmpty()) {
+            map = filtExistsInSql(cacheMap)
+        } else {
+            map = filtExistsInSql(getMap(catalogUrl))
+        }
         var latestChapter: String? = null
         map.forEach {
             SQLHelper.setChapterFinish(tableName, it.key, it.value, false)
@@ -25,6 +31,7 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
             "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.LATESTCHAPTER}=" +
                     "'$latestChapter' where ${SQLHelper.ID}=${tableName2Id(tableName)}"
         )
+        CatalogCache.clearCache()
     }
 
     @Throws(IOException::class)

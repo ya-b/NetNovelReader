@@ -11,5 +11,6 @@ interface ISearchContract {
     interface ISearchViewModel : IViewModel<SearchBean> {
         fun addBookToShelf(bookname: String, url: String): String
         fun searchBook(bookname: String?)
+        fun saveBookImage(tableName: String, bookname: String)
     }
 }

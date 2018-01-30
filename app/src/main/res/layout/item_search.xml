@@ -9,13 +9,13 @@
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.search.SearchActivity.SearchClickEvent" />
+            type="com.netnovelreader.search.SearchActivity.SearchItemClickEvent" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::downloadBook??``}"
+        android:onClick="@{clickEvent::onClick}"
         android:orientation="vertical">
 
         <TextView
@@ -26,11 +26,18 @@
             android:textSize="24sp" />
 
         <TextView
+            android:id="@+id/latestChapter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{itemDetail.latestChapter??``}"
+            android:textSize="18sp" />
+
+        <TextView
             android:id="@+id/resultUrl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@{itemDetail.url??``}"
-            android:textSize="18sp" />
+            android:textSize="12sp" />
     </LinearLayout>
 
 </layout>

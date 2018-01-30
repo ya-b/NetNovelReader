@@ -8,6 +8,7 @@ import android.util.Log
 import com.netnovelreader.common.*
 import com.netnovelreader.data.SQLHelper
 import com.netnovelreader.data.SearchBook
+import com.netnovelreader.download.CatalogCache
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.*
@@ -36,14 +37,14 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         bookname ?: return
         searchCode++
         resultList.clear()
+        CatalogCache.clearCache()
         //查询所有搜索站点设置，然后逐个搜索
         SQLHelper.queryAllSearchSite().forEach {
             Thread { searchBookFromSite(bookname, it, searchCode) }.start()
         }
-
     }
 
-    fun saveBookImage(tableName: String, bookname: String) {
+    override fun saveBookImage(tableName: String, bookname: String) {
         val imageDir = File(getSavePath() + "/tmp")
         val imagePath = File(mkdirs(getSavePath() + "/$tableName"))
         if (!imageDir.exists()) return
@@ -56,7 +57,19 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         }
     }
 
+    //删除目标及之后的章节,换源重新下载做准备
+    fun delChapterAfterSrc(tableName: String, chapterName: String) {
+        val arrayList = SQLHelper.delChapterAfterSrc(tableName, chapterName)
+        val fileDir = File(getSavePath() + "/$tableName")
+        if (!fileDir.exists()) return
+        fileDir.listFiles().forEach {
+            if (arrayList.contains(it.name)) {
+                it.delete()
+            }
+        }
+    }
 
+    //从具体网站搜索，并添加到resultList
     private fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, reqCode: Int) {
         var result: Array<String>? = null
         val url =
@@ -80,8 +93,12 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
             Log.d("reader,searchviewmodel", e.printStackTrace().toString())
         }
         result ?: return
-        if (searchCode == reqCode && ObservableField(result[1]).get().length > 0) {
-            resultList.add(SearchBean(ObservableField(result[1]), ObservableField(result[0])))
+        if (searchCode == reqCode && ObservableField(result[1]).get().length > 0) { //result[1]==bookname,result[0]==catalogurl
+            CatalogCache.addCatalog(result[1], result[0])
+            val bean = CatalogCache.cache.get(result[0])
+            if (bean != null && bean.url.get() != null) {
+                resultList.add(bean)
+            }
         }
         downloadImage(result[1], result[2]) //下载书籍封面图片
     }

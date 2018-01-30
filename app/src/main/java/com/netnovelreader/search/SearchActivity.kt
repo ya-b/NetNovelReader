@@ -8,6 +8,7 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.widget.Toast
+import com.netnovelreader.BR
 import com.netnovelreader.R
 import com.netnovelreader.base.IClickEvent
 import com.netnovelreader.common.ApplyPreference
@@ -15,6 +16,7 @@ import com.netnovelreader.common.ArrayListChangeListener
 import com.netnovelreader.common.BindingAdapter
 import com.netnovelreader.common.NovelItemDecoration
 import com.netnovelreader.databinding.ActivitySearchBinding
+import com.netnovelreader.download.CatalogCache
 import com.netnovelreader.download.DownloadService
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.item_search.view.*
@@ -28,16 +30,23 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         super.onCreate(savedInstanceState)
         setViewModel(SearchViewModel())
         init()
+        changeSource()
     }
 
     override fun setViewModel(vm: SearchViewModel) {
         searchViewModel = vm
-        DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
+        val binding =
+            DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
+        binding.setVariable(BR.clickEvent, BackClickEvent())
     }
 
     override fun init() {
         searchRecycler.layoutManager = LinearLayoutManager(this)
-        val mAdapter = BindingAdapter(searchViewModel?.resultList, R.layout.item_search, SearchClickEvent())
+        val mAdapter = BindingAdapter(
+            searchViewModel?.resultList,
+            R.layout.item_search,
+            SearchItemClickEvent()
+        )
         searchRecycler.adapter = mAdapter
         searchRecycler.itemAnimator = DefaultItemAnimator()
         searchRecycler.addItemDecoration(NovelItemDecoration(this))
@@ -46,7 +55,6 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         searchViewBar.setOnQueryTextListener(QueryListener())
         searchViewBar.isIconified = false
         searchViewBar.onActionViewExpanded()
-        backButton.setOnClickListener { finish() }
     }
 
     override fun onDestroy() {
@@ -55,6 +63,19 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         searchViewModel = null
     }
 
+    override fun onBackPressed() {
+        CatalogCache.clearCache()
+        super.onBackPressed()
+    }
+
+    fun changeSource() {
+        val bookname = intent.getStringExtra("bookname")
+        if (bookname.isNullOrEmpty()) return
+        searchViewBar.visibility = View.INVISIBLE
+        searchViewText.visibility = View.VISIBLE
+        searchViewText.text = bookname
+        searchViewModel?.searchBook(bookname)
+    }
 
     inner class QueryListener : android.support.v7.widget.SearchView.OnQueryTextListener {
         private var tmp = ""
@@ -75,21 +96,31 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         }
     }
 
-    inner class SearchClickEvent : IClickEvent {
-        fun downloadBook(v: View) {
-            if (v.resultName.text.toString().length > 0 && v.resultUrl.text.toString().length > 0) {
-                val tableName = searchViewModel!!.addBookToShelf(
-                    v.resultName.text.toString(),
-                    v.resultUrl.text.toString()
-                )
-                Toast.makeText(this@SearchActivity, R.string.start_download, Toast.LENGTH_SHORT)
-                    .show()
-                val intent = Intent(v.context, DownloadService::class.java)
-                intent.putExtra("tableName", tableName)
-                intent.putExtra("catalogurl", v.resultUrl.text.toString())
-                startService(intent)
-                searchViewModel?.saveBookImage(tableName, v.resultName.text.toString())
+    //backbutton点击事件
+    inner class BackClickEvent : IClickEvent {
+        fun onClick(v: View) {
+            finish()
+        }
+    }
+
+    //搜索列表item点击事件
+    inner class SearchItemClickEvent : IClickEvent {
+        fun onClick(v: View) {
+            val chapterName = intent.getStringExtra("chapterName")
+            val catalogUrl = v.resultUrl.text.toString()
+            val tableName =
+                searchViewModel!!.addBookToShelf(v.resultName.text.toString(), catalogUrl)
+            if (!intent.getStringExtra("bookname").isNullOrEmpty() && !chapterName.isNullOrEmpty()) {
+                searchViewModel?.delChapterAfterSrc(tableName, chapterName)
             }
+            Toast.makeText(this@SearchActivity, R.string.start_download, Toast.LENGTH_SHORT)
+                .show()
+            val intent = Intent(v.context, DownloadService::class.java)
+            intent.putExtra("tableName", tableName)
+            intent.putExtra("catalogurl", v.resultUrl.text.toString())
+            startService(intent)
+            searchViewModel?.saveBookImage(tableName, v.resultName.text.toString())
+            this@SearchActivity.finish()
         }
     }
 }

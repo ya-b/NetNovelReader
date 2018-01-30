@@ -2,6 +2,7 @@ package com.netnovelreader.reader
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -18,9 +19,9 @@ import com.netnovelreader.common.BindingAdapter
 import com.netnovelreader.common.NovelItemDecoration
 import com.netnovelreader.common.PREFERENCE_NAME
 import com.netnovelreader.databinding.ActivityReaderBinding
+import com.netnovelreader.search.SearchActivity
 import kotlinx.android.synthetic.main.activity_reader.*
 import kotlinx.android.synthetic.main.item_catalog.view.*
-import android.view.WindowManager
 
 
 class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
@@ -229,7 +230,10 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                     headerView.visibility = View.INVISIBLE
                     footView.visibility = View.INVISIBLE
                     fontSetting.visibility = View.INVISIBLE
-
+                    val mIntent = Intent(this@ReaderActivity, SearchActivity::class.java)
+                    mIntent.putExtra("bookname", intent.getStringExtra("bookname"))
+                    mIntent.putExtra("chapterName", readerViewModel?.chapterName)
+                    startActivity(mIntent)
                 }
             }
         }

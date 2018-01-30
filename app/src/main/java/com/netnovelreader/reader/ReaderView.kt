@@ -73,10 +73,12 @@ class ReaderView : View {
         }
     }
 
+    //正文区域宽度
     fun getTextWidth(): Int {
         return (width * 0.96f).toInt()
     }
 
+    //正文区域高度
     fun getTextHeight(): Int {
         return((height - indacitorFontSize) * 0.96f).toInt()
     }

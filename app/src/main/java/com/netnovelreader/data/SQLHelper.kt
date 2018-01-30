@@ -30,13 +30,14 @@ object SQLHelper {
         }
     }
 
-
+    //查询下载的所有书
     fun queryShelfBookList(): Cursor {
         synchronized(SQLHelper) {
             return getDB().rawQuery("select * from $TABLE_SHELF;", null)
         }
     }
 
+    //添加书
     fun addBookToShelf(bookname: String, url: String): Int {
         synchronized(SQLHelper) {
             var id = 0
@@ -57,6 +58,7 @@ object SQLHelper {
         }
     }
 
+    //删除书
     fun removeBookFromShelf(bookname: String): Int {
         synchronized(SQLHelper) {
             val cursor = getDB().rawQuery(
@@ -73,6 +75,7 @@ object SQLHelper {
         }
     }
 
+    //获取阅读记录
     fun getRecord(bookname: String): Array<String> {
         synchronized(SQLHelper) {
             val result = Array(2) { "" }
@@ -89,6 +92,7 @@ object SQLHelper {
         }
     }
 
+    //设置阅读记录
     fun setRecord(bookname: String, record: String) {
         synchronized(SQLHelper) {
             getDB().execSQL(
@@ -98,6 +102,7 @@ object SQLHelper {
         }
     }
 
+    //查询所有可以搜索的网站
     fun queryAllSearchSite(): ArrayList<Array<String?>> {
         synchronized(SQLHelper) {
             val arraylist = ArrayList<Array<String?>>()
@@ -110,6 +115,7 @@ object SQLHelper {
         }
     }
 
+    //根据field对应的获取解析规则
     fun getParseRule(hostname: String, field: String): String {
         synchronized(SQLHelper) {
             var rule: String? = null
@@ -125,7 +131,7 @@ object SQLHelper {
         }
     }
 
-
+    //创建表，添加书的时侯用到，里面保存章节目录
     fun createTable(tableName: String) {
         synchronized(SQLHelper) {
             getDB().execSQL(
@@ -143,6 +149,7 @@ object SQLHelper {
         }
     }
 
+    //设置章节是否下载完成
     fun setChapterFinish(
         tableName: String,
         chaptername: String,
@@ -173,6 +180,7 @@ object SQLHelper {
 
     /**
      * @isDownloaded  0表示未下载,1表示已下载
+     * 获取未下载，或已下载的章节列表，反回map<章节名，该章节url>
      */
     fun getChapterList(tableName: String, isDownloaded: Int): LinkedHashMap<String, String> {
         synchronized(SQLHelper) {
@@ -190,6 +198,7 @@ object SQLHelper {
         }
     }
 
+    //所有章节列表
     fun getAllChapter(tableName: String): ArrayList<String> {
         synchronized(SQLHelper) {
             val arrayList = ArrayList<String>()
@@ -202,6 +211,7 @@ object SQLHelper {
         }
     }
 
+    //根据id获取章节名
     fun getChapterName(tableName: String, id: Int): String {
         synchronized(SQLHelper) {
             var chapterName: String? = null
@@ -216,6 +226,7 @@ object SQLHelper {
             return chapterName ?: ""
         }
     }
+
 
     fun getChapterUrl(tableName: String, chapterName: String): String {
         synchronized(SQLHelper) {
@@ -244,6 +255,22 @@ object SQLHelper {
             }
             cursor.close()
             return id
+        }
+    }
+
+    //搜索该章之后的所有表
+    fun delChapterAfterSrc(tableName: String, chapterName: String): ArrayList<String> {
+        synchronized(SQLHelper) {
+            val arrayList = ArrayList<String>()
+            val id = getChapterId(tableName, chapterName)
+            val cursor =
+                getDB().rawQuery("select $CHAPTERNAME from $tableName where $ID>=$id;", null)
+            while (cursor.moveToNext()) {
+                arrayList.add(cursor.getString(0))
+            }
+            cursor.close()
+            getDB().execSQL("delete from $tableName where $ID>=$id")
+            return arrayList
         }
     }
 

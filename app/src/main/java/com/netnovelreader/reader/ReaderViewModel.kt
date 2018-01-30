@@ -3,6 +3,7 @@ package com.netnovelreader.reader
 import android.databinding.ObservableArrayList
 import com.netnovelreader.common.id2TableName
 import com.netnovelreader.data.SQLHelper
+import com.netnovelreader.download.ChapterCache
 import java.util.Vector
 import kotlin.collections.ArrayList
 
@@ -26,7 +27,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     private var dirName: String? = null
 
     @Volatile
-    private var chapterName: String? = null
+    var chapterName: String? = null
     /**
      * 章节数，页码，最大章节数，最大页码，例如1,1,4,5 == 第一章第一页,总共4章，这一章有5页
      */

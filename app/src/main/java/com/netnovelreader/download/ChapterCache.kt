@@ -1,8 +1,7 @@
-package com.netnovelreader.reader
+package com.netnovelreader.download
 
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.data.SQLHelper
-import com.netnovelreader.download.DownloadChapter
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
@@ -84,6 +83,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
     /**
      * 从网络获取章节内容
      */
+    @Throws(IOException::class)
     private fun getFromNet(dir: String, chapterName: String): String {
         val download = DownloadChapter(
             tableName, dir, chapterName,
@@ -103,6 +103,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
     /**
      * 章节内容读到map里
      */
+    @Throws(IOException::class)
     private fun readToCache(chapterNum: Int) {
         val arrayList = ArrayList<Int>()
         chapterTxtTable.forEach {
