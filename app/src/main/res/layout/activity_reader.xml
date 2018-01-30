@@ -25,16 +25,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@{chapter.text}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/headerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/black"
+            android:background="@color/my_dark"
+            android:padding="5dp"
             android:visibility="invisible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -42,89 +42,194 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/changeSouce"
-                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:gravity="center"
                 android:onClick="@{clickEvent::onHeadViewClick}"
                 android:text="@string/changeSource"
                 android:textColor="@color/white"
-                android:textSize="20sp"
+                android:textSize="13sp"
                 app:layout_constraintRight_toRightOf="parent" />
         </android.support.constraint.ConstraintLayout>
 
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
             android:id="@+id/fontSetting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/black"
-            android:orientation="horizontal"
+            android:background="@color/my_dark"
             android:visibility="invisible"
-            app:layout_constraintBottom_toTopOf="@id/footView"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
+            app:layout_constraintBottom_toTopOf="@+id/footView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="19dp"
+                android:layout_height="19dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/brightness_min" />
+
+            <SeekBar
+                android:id="@+id/sb_brightness"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:max="255"
+                app:layout_constraintStart_toEndOf="@+id/imageView"
+                app:layout_constraintTop_toTopOf="@+id/imageView" />
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="19dp"
+                android:layout_height="19dp"
+                android:layout_marginStart="16dp"
+                app:layout_constraintStart_toEndOf="@+id/sb_brightness"
+                app:layout_constraintTop_toTopOf="@+id/imageView"
+                app:srcCompat="@drawable/brightness_max" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size30"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
+                style="@style/function_button_style_2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginTop="12dp"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="30"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                app:layout_constraintEnd_toStartOf="@+id/size40"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size40"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
+                style="@style/function_button_style_2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="40"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                app:layout_constraintEnd_toStartOf="@+id/size50"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/size30"
+                app:layout_constraintTop_toTopOf="@+id/size30" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size50"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
+                style="@style/function_button_style_2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="50"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                app:layout_constraintEnd_toStartOf="@+id/size60"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/size40"
+                app:layout_constraintTop_toTopOf="@+id/size30" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size60"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
+                style="@style/function_button_style_2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="60"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                app:layout_constraintEnd_toStartOf="@+id/size70"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/size50"
+                app:layout_constraintTop_toTopOf="@+id/size30" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size70"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
+                style="@style/function_button_style_2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="70"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
-        </LinearLayout>
+                app:layout_constraintEnd_toStartOf="@+id/font_label"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/size60"
+                app:layout_constraintTop_toTopOf="@+id/size30" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/font_label"
+                style="@style/function_button_style_2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="字体"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/size70"
+                app:layout_constraintTop_toTopOf="@+id/size30" />
+
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/read_bg_default"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginBottom="12dp"
+                android:layout_marginTop="12dp"
+                android:src="@color/read_bg_default"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/read_bg_2"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/size30" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/read_bg_1"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@color/read_bg_1"
+                app:layout_constraintEnd_toStartOf="@+id/read_bg_4"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/read_bg_3"
+                app:layout_constraintTop_toTopOf="@+id/read_bg_default" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/read_bg_2"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@color/read_bg_2"
+                app:layout_constraintEnd_toStartOf="@+id/read_bg_3"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/read_bg_default"
+                app:layout_constraintTop_toTopOf="@+id/read_bg_default" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/read_bg_3"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@color/read_bg_3"
+                app:layout_constraintEnd_toStartOf="@+id/read_bg_1"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/read_bg_2"
+                app:layout_constraintTop_toTopOf="@+id/read_bg_default" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/read_bg_4"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@color/read_bg_4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/read_bg_1"
+                app:layout_constraintTop_toTopOf="@+id/read_bg_default" />
+
+
+        </android.support.constraint.ConstraintLayout>
 
         <LinearLayout
             android:id="@+id/footView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/black"
+            android:background="@color/my_dark"
             android:orientation="horizontal"
+            android:paddingTop="8dp"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -132,39 +237,24 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/catalogButton"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
+                style="@style/function_button_style_1"
+                android:drawableTop="@drawable/ic_menu_toc_normal"
                 android:onClick="@{clickEvent::onFootViewClick}"
-                android:text="@string/catalogButton"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:text="@string/catalogButton" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/fontSizeButton"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
+                style="@style/function_button_style_1"
+                android:drawableTop="@drawable/ic_menu_settings_normal"
                 android:onClick="@{clickEvent::onFootViewClick}"
-                android:text="@string/fontSizeButton"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:text="@string/settings" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/backgroundButton"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
+                style="@style/function_button_style_1"
+                android:drawableTop="@drawable/ic_menu_mode_night_normal"
                 android:onClick="@{clickEvent::onFootViewClick}"
-                android:text="@string/backgroundButton"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:text="@string/backgroundButton" />
         </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>

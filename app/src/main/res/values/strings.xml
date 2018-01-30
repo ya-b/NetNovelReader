@@ -26,6 +26,7 @@
 
     <string name="changeSource">换源下载</string>
     <string name="catalogButton">目录</string>
-    <string name="fontSizeButton">字体</string>
+    <string name="setting">设置</string>
     <string name="backgroundButton">背景</string>
+    <string name="followSystem">跟随系统</string>
 </resources>
