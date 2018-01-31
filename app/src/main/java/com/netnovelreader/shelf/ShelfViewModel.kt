@@ -53,14 +53,14 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
             while (cursor.moveToNext()) {
                 val bookId = cursor.getInt(cursor.getColumnIndex(SQLHelper.ID))
                 val bookBean = ShelfBean(
-                    ObservableInt(bookId),
-                    ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME))),
-                    ObservableField(
-                        cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER))
-                                ?: ""
-                    ),
-                    ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))),
-                    ObservableField(getBitmap(bookId))
+                        ObservableInt(bookId),
+                        ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME))),
+                        ObservableField(
+                                cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER))
+                                        ?: ""
+                        ),
+                        ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))),
+                        ObservableField(getBitmap(bookId))
                 )
                 if (listInDir.contains(id2TableName(bookBean.bookid.get()))) {
                     bookList.add(bookBean)
@@ -111,8 +111,8 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
             bitmap = BitmapFactory.decodeFile(file.path)
         }
         return bitmap ?: Bitmap.createBitmap(
-            IntArray(45 * 60) { _ -> Color.parseColor("#7092bf") },
-            45, 60, Bitmap.Config.RGB_565
+                IntArray(45 * 60) { _ -> Color.parseColor("#7092bf") },
+                45, 60, Bitmap.Config.RGB_565
         )
     }
 }

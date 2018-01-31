@@ -11,8 +11,8 @@ import java.io.IOException
  * Created by yangbo on 18-1-27.
  */
 class DownloadChapter(
-    private val tablename: String, private val dir: String, private val chapterName: String,
-    private val chapterUrl: String
+        private val tablename: String, private val dir: String, private val chapterName: String,
+        private val chapterUrl: String
 ) {
 
     @Throws(IOException::class)

@@ -22,7 +22,7 @@ class ParseHtml {
             txt = getChapterWithSelector(url)
         } else {
             txt = Jsoup.connect(url).headers(getHeaders(url))
-                .timeout(TIMEOUT).get().select(selector).text()
+                    .timeout(TIMEOUT).get().select(selector).text()
         }
         return "    " + txt!!.replace(" ", "\n\n  ")
     }
@@ -34,19 +34,27 @@ class ParseHtml {
     fun getCatalog(url: String): LinkedHashMap<String, String> {
         val selector = SQLHelper.getParseRule(url2Hostname(url), SQLHelper.CATALOG_RULE)
         val catalog = LinkedHashMap<String, String>()
-        selector ?: return catalog
         val list = Jsoup.connect(url).headers(getHeaders(url))
-            .timeout(TIMEOUT).get().select(selector).select("a")
+                .timeout(TIMEOUT).get().select(selector).select("a")
         list.forEach {
-            var link = it.attr("href")
-            if (!link.contains("//")) {
-                link = url.substring(0, url.lastIndexOf('/') + 1) + link
-            } else if (link.startsWith("//")) {
-                link = "http:" + link
+            val link = fixChapterUrl(url, it.attr("href"))
+            val name = it.text()
+            if (catalog.containsKey(name)) {
+                catalog.remove(name)
             }
-            catalog.put(it.text(), link)
+            catalog.put(name, link)
         }
         return catalog
+    }
+
+    private fun fixChapterUrl(catalogUrl: String, chapterUrl: String): String {
+        if (chapterUrl.contains("http")) return chapterUrl
+        if (chapterUrl.startsWith("//")) return "http:" + chapterUrl
+        val arr = chapterUrl.split("/")
+        if (arr.size > 1 && catalogUrl.contains(arr[1])) {
+            return catalogUrl.substring(0, catalogUrl.indexOf(arr[1]) - 1) + chapterUrl
+        }
+        return catalogUrl.substring(0, catalogUrl.lastIndexOf("/")) + chapterUrl
     }
 
     @Throws(IOException::class)

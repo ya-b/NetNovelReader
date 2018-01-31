@@ -39,12 +39,12 @@ object CatalogCache {
         }
         arr.forEach { map.remove(it) }
         cache.put(
-            catalogUrl, SearchBean(
+                catalogUrl, SearchBean(
                 ObservableField(bookname),
                 ObservableField(catalogUrl),
                 ObservableField(latestChapter),
                 map
-            )
+        )
         )
     }
 

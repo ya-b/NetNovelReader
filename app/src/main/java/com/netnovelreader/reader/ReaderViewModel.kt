@@ -12,7 +12,7 @@ import kotlin.collections.ArrayList
  */
 
 class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) :
-    IReaderContract.IReaderViewModel {
+        IReaderContract.IReaderViewModel {
     var catalog = ObservableArrayList<ReaderBean.Catalog>()
     /**
      * 一页显示的内容
@@ -39,9 +39,9 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
 
     init {
         val cursor = SQLHelper.getDB().rawQuery(
-            "select ${SQLHelper.ID} from " +
-                    "${SQLHelper.TABLE_SHELF} where ${SQLHelper.BOOKNAME}='$bookName';",
-            null
+                "select ${SQLHelper.ID} from " +
+                        "${SQLHelper.TABLE_SHELF} where ${SQLHelper.BOOKNAME}='$bookName';",
+                null
         )
         if (cursor.moveToFirst()) {
             tableName = id2TableName(cursor.getInt(0))
@@ -116,10 +116,10 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
      * 翻页到目录中的某章
      */
     override fun pageByCatalog(
-        chapterName: String,
-        textAreaWidth: Int,
-        textAreaHeight: Int,
-        txtFontSize: Float
+            chapterName: String,
+            textAreaWidth: Int,
+            textAreaHeight: Int,
+            txtFontSize: Float
     ) {
         pageIndicator[0] = SQLHelper.getChapterId(tableName, chapterName)
         pageIndicator[1] = 1
@@ -149,8 +149,8 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     override fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog> {
         catalog.clear()
         val catalogCursor = SQLHelper.getDB().rawQuery(
-            "select ${SQLHelper.CHAPTERNAME} " +
-                    "from $tableName", null
+                "select ${SQLHelper.CHAPTERNAME} " +
+                        "from $tableName", null
         )
         while (catalogCursor.moveToNext()) {
             catalog.add(ReaderBean.Catalog(catalogCursor.getString(0)))
@@ -187,17 +187,17 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
      * @isNext  1 下一章,pagenum=1 ， -1 上一章 pagenum=pageIndicator[3] ,0 pagenum不变
      */
     private fun getPage(
-        pageIndicator: IntArray,
-        textAreaWidth: Int,
-        textAreaHeight: Int,
-        txtFontSize: Float
+            pageIndicator: IntArray,
+            textAreaWidth: Int,
+            textAreaHeight: Int,
+            txtFontSize: Float
     ) {
         val chapterTxt = chapterCache.getChapter(pageIndicator[0])
         val indexOfDelimiter = chapterTxt.indexOf("|")
         chapterName = chapterTxt.substring(0, indexOfDelimiter)
         chapterText = splitChapterTxt(
-            chapterTxt.substring(indexOfDelimiter + 1), textAreaWidth,
-            textAreaHeight, txtFontSize
+                chapterTxt.substring(indexOfDelimiter + 1), textAreaWidth,
+                textAreaHeight, txtFontSize
         )
     }
 
@@ -223,10 +223,10 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
      * @txtFontSize 字体大小
      */
     private fun splitChapterTxt(
-        chapter: String,
-        textAreaWidth: Int,
-        textAreaHeight: Int,
-        txtFontSize: Float
+            chapter: String,
+            textAreaWidth: Int,
+            textAreaHeight: Int,
+            txtFontSize: Float
     )
             : Vector<ArrayList<String>> {
         if (chapter.length < 1) return Vector()

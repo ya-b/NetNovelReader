@@ -31,30 +31,19 @@ class SearchBook : Cloneable {
      */
     @Throws(ConnectException::class)
     fun search(
-        url: String, redirectFileld: String, redirectSelector: String, noRedirectSelector: String,
-        redirectName: String, noRedirectName: String, redirectImage: String, noRedirectImage: String
+            url: String, redirectFileld: String, redirectSelector: String, noRedirectSelector: String,
+            redirectName: String, noRedirectName: String, redirectImage: String, noRedirectImage: String
     )
             : Array<String> {
         var result: Array<String>
         if (redirectFileld.equals("")) {
             search(url, noRedirectSelector, noRedirectName, noRedirectImage)
         }
-        val conn = URL(url).openConnection() as HttpURLConnection
-        conn.instanceFollowRedirects = false
-        conn.setRequestProperty(
-            "accept",
-            "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-        )
-        conn.setRequestProperty("user-agent", UA)
-        conn.setRequestProperty("Upgrade-Insecure-Requests", "1")
-        conn.setRequestProperty("Connection", "keep-alive")
-        conn.setRequestProperty("Referer", "http://www.${url2Hostname(url)}/")
-        val redirect_url = conn.getHeaderField(redirectFileld)
-        conn.disconnect()
-        if (redirect_url.isNullOrEmpty()) {
+        val redirect_url = redirectToCatalog(url, redirectFileld)
+        if (redirect_url.isEmpty()) {
             result = search(url, noRedirectSelector, noRedirectName, noRedirectImage)
         } else {
-            result = search(url, redirectSelector, redirectName, redirectImage)
+            result = search(redirect_url, redirectSelector, redirectName, redirectImage)
         }
         return result
     }
@@ -62,17 +51,39 @@ class SearchBook : Cloneable {
     @Throws(ConnectException::class)
     fun search(url: String, catalogSelector: String, nameSelector: String, imageSelector: String)
             : Array<String> {
-        val doc: Element = Jsoup.connect(url).headers(getHeaders(url))
-            .timeout(TIMEOUT).get()
+        val doc = Jsoup.connect(url).headers(getHeaders(url))
+                .timeout(TIMEOUT).get()
         val arr = arrayOf(
-            parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),
-            parseImageUrl(doc, imageSelector)
+                parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),
+                parseImageUrl(doc, imageSelector)
         )
         return arr
     }
 
+    fun redirectToCatalog(url: String, redirectFileld: String): String {
+        val conn = URL(url).openConnection() as HttpURLConnection
+        conn.instanceFollowRedirects = false
+        conn.setRequestProperty(
+                "accept",
+                "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        )
+        conn.setRequestProperty("user-agent", UA)
+        conn.setRequestProperty("Upgrade-Insecure-Requests", "1")
+        conn.setRequestProperty("Connection", "keep-alive")
+        conn.setRequestProperty("Referer", "http://www.${url2Hostname(url)}/")
+        var redirect_url = conn.getHeaderField(redirectFileld)
+        if (redirect_url != null && !redirect_url.contains("//")) {
+            redirect_url = url.substring(0, url.lastIndexOf('/') + 1) + redirect_url
+        }
+        conn.disconnect()
+        return if (redirect_url.isNullOrEmpty()) {
+            return url
+        } else {
+            redirectToCatalog(redirect_url, redirectFileld)
+        }
+    }
 
-    fun parseCatalogUrl(doc: Element, url: String, urlSelector: String): String {
+    private fun parseCatalogUrl(doc: Element, url: String, urlSelector: String): String {
         var result = doc.select(urlSelector).select("a").attr("href")
         if (!result!!.contains("//")) {
             result = url.substring(0, url.lastIndexOf('/') + 1) + result
@@ -86,13 +97,17 @@ class SearchBook : Cloneable {
     }
 
 
-    fun parseBookname(doc: Element, nameSelector: String): String {
+    private fun parseBookname(doc: Element, nameSelector: String): String {
         if (nameSelector.equals("")) return ""
-        return doc.select(nameSelector).text()
+        var name = doc.select(nameSelector).text()
+        if (name.isNullOrEmpty()) {
+            name = doc.select(nameSelector).attr("title")
+        }
+        return name
     }
 
 
-    fun parseImageUrl(doc: Element, imageSelector: String): String {
+    private fun parseImageUrl(doc: Element, imageSelector: String): String {
         if (imageSelector.equals("")) return ""
         var url = doc.select(imageSelector).attr("src")
         if (url.startsWith("//")) {

@@ -9,18 +9,18 @@ import com.netnovelreader.R
 object ApplyPreference {
     fun isFullScreen(context: Context): Boolean {
         return context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getBoolean(context.getString(R.string.full_screen_key), false)
+                .getBoolean(context.getString(R.string.full_screen_key), false)
     }
 
     fun getAutoDownNum(context: Context): Int {
         val boolean = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getBoolean(context.getString(R.string.auto_download), true)
+                .getBoolean(context.getString(R.string.auto_download), true)
         return compareValues(boolean, false) * 3
     }
 
     fun setTheme(context: Context) {
         val color = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getString(context.getString(R.string.themeKey), "blue")
+                .getString(context.getString(R.string.themeKey), "black")
 
         when (color) {
             "blue" -> context.setTheme(R.style.AppThemeBlue)

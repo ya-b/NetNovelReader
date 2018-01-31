@@ -33,9 +33,9 @@ class ReaderView : View {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
+            context,
+            attrs,
+            defStyleAttr
     )
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int)
@@ -60,15 +60,15 @@ class ReaderView : View {
         paint.textSize = indacitorFontSize
         //右下角绘制：   第n章：n/n
         canvas.drawText(
-            this.text!![0], width - indacitorFontSize * text!![0].toCharArray().size,
-            height - indacitorFontSize, paint
+                this.text!![0], width - indacitorFontSize * text!![0].toCharArray().size,
+                height - indacitorFontSize, paint
         )
         paint.textSize = txtFontSize
         for (i in 1 until text!!.size) {
             //绘制正文
             canvas.drawText(
-                this.text!![i].replace(" ", "    "), getMarginLeft(),
-                getMarginTop() + (i - 1) * txtFontSize, paint
+                    this.text!![i].replace(" ", "    "), getMarginLeft(),
+                    getMarginTop() + (i - 1) * txtFontSize, paint
             )
         }
     }
@@ -80,7 +80,7 @@ class ReaderView : View {
 
     //正文区域高度
     fun getTextHeight(): Int {
-        return((height - indacitorFontSize) * 0.96f).toInt()
+        return ((height - indacitorFontSize) * 0.96f).toInt()
     }
 
     private fun getMarginLeft(): Float {

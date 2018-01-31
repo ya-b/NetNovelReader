@@ -38,7 +38,9 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
                 result = ""
             }
         }
-        Thread { readToCache(chapterNum) }.start()
+        if (cacheNum != 0) {
+            Thread { readToCache(chapterNum) }.start()
+        }
         return result ?: ""
     }
 
@@ -56,10 +58,10 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         if (!File(chapterPath).exists()) {
             if (!isCurrentChapter) {
                 sb.append(
-                    getFromNet(
-                        "${getSavePath()}/$dirName",
-                        chapterName
-                    )
+                        getFromNet(
+                                "${getSavePath()}/$dirName",
+                                chapterName
+                        )
                 )
             }
         } else {
@@ -86,8 +88,8 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
     @Throws(IOException::class)
     private fun getFromNet(dir: String, chapterName: String): String {
         val download = DownloadChapter(
-            tableName, dir, chapterName,
-            SQLHelper.getChapterUrl(tableName, chapterName)
+                tableName, dir, chapterName,
+                SQLHelper.getChapterUrl(tableName, chapterName)
         )
         var chapterText: String? = null
         try {

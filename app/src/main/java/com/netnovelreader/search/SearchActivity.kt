@@ -36,16 +36,16 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     override fun setViewModel(vm: SearchViewModel) {
         searchViewModel = vm
         val binding =
-            DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
+                DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
         binding.setVariable(BR.clickEvent, BackClickEvent())
     }
 
     override fun init() {
         searchRecycler.layoutManager = LinearLayoutManager(this)
         val mAdapter = BindingAdapter(
-            searchViewModel?.resultList,
-            R.layout.item_search,
-            SearchItemClickEvent()
+                searchViewModel?.resultList,
+                R.layout.item_search,
+                SearchItemClickEvent()
         )
         searchRecycler.adapter = mAdapter
         searchRecycler.itemAnimator = DefaultItemAnimator()
@@ -109,12 +109,12 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             val chapterName = intent.getStringExtra("chapterName")
             val catalogUrl = v.resultUrl.text.toString()
             val tableName =
-                searchViewModel!!.addBookToShelf(v.resultName.text.toString(), catalogUrl)
+                    searchViewModel!!.addBookToShelf(v.resultName.text.toString(), catalogUrl)
             if (!intent.getStringExtra("bookname").isNullOrEmpty() && !chapterName.isNullOrEmpty()) {
                 searchViewModel?.delChapterAfterSrc(tableName, chapterName)
             }
             Toast.makeText(this@SearchActivity, R.string.start_download, Toast.LENGTH_SHORT)
-                .show()
+                    .show()
             val intent = Intent(v.context, DownloadService::class.java)
             intent.putExtra("tableName", tableName)
             intent.putExtra("catalogurl", v.resultUrl.text.toString())

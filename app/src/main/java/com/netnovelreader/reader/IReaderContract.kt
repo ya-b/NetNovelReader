@@ -17,10 +17,10 @@ interface IReaderContract {
         fun pageToNext(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float)
         fun pageToPrevious(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float)
         fun pageByCatalog(
-            chapterName: String,
-            textAreaWidth: Int,
-            textAreaHeight: Int,
-            txtFontSize: Float
+                chapterName: String,
+                textAreaWidth: Int,
+                textAreaHeight: Int,
+                txtFontSize: Float
         )
 
         fun changeFontSize(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float)

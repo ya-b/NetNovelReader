@@ -7,5 +7,7 @@
     <!-- android:radius 弧形的半径 -->
     <corners android:radius="4dip" />
     <!--边框的宽度及颜色-->
-    <stroke android:width="1px" android:color="#FFFFFF" />
+    <stroke
+        android:width="1px"
+        android:color="#FFFFFF" />
 </shape>

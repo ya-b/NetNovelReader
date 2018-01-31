@@ -75,9 +75,9 @@
                 android:gravity="start"
                 android:text="@{itemDetail.bookname??``}"
                 android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/bookCover"
                 app:layout_constraintTop_toTopOf="@+id/bookCover"
-                app:layout_constraintEnd_toEndOf="parent"
                 tools:text="小说名称" />
 >>>>>>> b5b6b92... 新的书架UI界面
 
@@ -90,8 +90,8 @@
                 android:textSize="14sp"
                 android:textStyle="italic"
                 app:layout_constraintBottom_toBottomOf="@+id/bookCover"
-                app:layout_constraintStart_toStartOf="@+id/nameView"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/nameView"
                 tools:text="最新章节  458" />
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>

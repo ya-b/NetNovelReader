@@ -73,20 +73,20 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     private fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, reqCode: Int) {
         var result: Array<String>? = null
         val url =
-            siteinfo[1]!!.replace(SQLHelper.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
+                siteinfo[1]!!.replace(SQLHelper.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
         try {
             if (siteinfo[0].equals("0")) {
                 result = SearchBook().search(
-                    url,
-                    siteinfo[4] ?: "",
-                    siteinfo[6] ?: "",
-                    siteinfo[9] ?: ""
+                        url,
+                        siteinfo[4] ?: "",
+                        siteinfo[6] ?: "",
+                        siteinfo[9] ?: ""
                 )
             } else {
                 result = SearchBook().search(
-                    url, siteinfo[2] ?: "", siteinfo[3] ?: "",
-                    siteinfo[4] ?: "", siteinfo[5] ?: "",
-                    siteinfo[6] ?: "", siteinfo[8] ?: "", siteinfo[9] ?: ""
+                        url, siteinfo[2] ?: "", siteinfo[3] ?: "",
+                        siteinfo[4] ?: "", siteinfo[5] ?: "",
+                        siteinfo[6] ?: "", siteinfo[8] ?: "", siteinfo[9] ?: ""
                 )
             }
         } catch (e: Exception) {
