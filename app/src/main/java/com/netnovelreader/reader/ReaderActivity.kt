@@ -4,6 +4,10 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.databinding.DataBindingUtil
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
@@ -20,6 +24,7 @@ import com.netnovelreader.common.NovelItemDecoration
 import com.netnovelreader.common.PREFERENCE_NAME
 import com.netnovelreader.databinding.ActivityReaderBinding
 import com.netnovelreader.search.SearchActivity
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_reader.*
 import kotlinx.android.synthetic.main.item_catalog.view.*
 
@@ -33,6 +38,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     var dialog: AlertDialog? = null
     private val MIN_MOVE = 80F
     private var brightValue: Int? = null
+    private var selectedBgImageView: CircleImageView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         if (ApplyPreference.isFullScreen(this)) {
             window.setFlags(
@@ -270,5 +276,41 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                     readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
             )
         }
+
+        fun itemChangeBgClick(view: View) {
+
+            //首先将之前选中的CircleImageView边框去掉
+            selectedBgImageView?.borderWidth = 0
+            view as CircleImageView
+            view.borderColor = Color.RED
+            view.borderWidth = 3
+            selectedBgImageView = view
+            when (view.id) {
+                R.id.read_bg_default -> {
+                    readerView.txtFontColorId = R.color.read_font_default
+                    readerView.bgColorId = R.color.read_bg_default
+                }
+                R.id.read_bg_1 -> {
+                    readerView.txtFontColorId = R.color.read_font_1
+                    readerView.bgColorId = R.color.read_bg_1
+                }
+                R.id.read_bg_2 -> {
+                    readerView.txtFontColorId = R.color.read_font_2
+                    readerView.bgColorId = R.color.read_bg_2
+                }
+                R.id.read_bg_3 -> {
+                    readerView.txtFontColorId = R.color.read_font_3
+                    readerView.bgColorId = R.color.read_bg_3
+                }
+                R.id.read_bg_4 -> {
+                    readerView.txtFontColorId = R.color.read_font_4
+                    readerView.bgColorId = R.color.read_bg_4
+                }
+            }
+
+
+        }
     }
+
+
 }
