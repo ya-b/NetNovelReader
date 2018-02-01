@@ -15,6 +15,13 @@ import java.util.*
  */
 
 class ReaderView : View {
+    companion object {
+
+        /**
+         * 行距
+         */
+        val rowSpace = 1.3f
+    }
     /**
      * View显示的内容
      */
@@ -44,7 +51,11 @@ class ReaderView : View {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
 
     init {
@@ -74,14 +85,24 @@ class ReaderView : View {
 
         //绘制正文
         for (i in 1 until text!!.size) {
-            canvas.drawText(this.text!![i].replace(" ", "    "), getMarginLeft(), getMarginTop() + (i - 1) * txtFontSize, mTextPaint)
+            canvas.drawText(
+                this.text!![i].replace(" ", "    "),
+                getMarginLeft(),
+                getMarginTop() + (i - 1) * txtFontSize * rowSpace,
+                mTextPaint
+            )
         }
 
         val date = SimpleDateFormat("HH:mm").format(Date())
         val dateWith = mTextPaint.measureText(date)           //时间宽度
 
         //底部绘制： 时间 、手机电池容量 +  第n章：n/n
-        canvas.drawText(this.text!![0], width - indicatorFontSize * text!![0].toCharArray().size, height - indicatorFontSize, mBottomIndicatorPaint)
+        canvas.drawText(
+            this.text!![0],
+            width - indicatorFontSize * text!![0].toCharArray().size,
+            height - indicatorFontSize,
+            mBottomIndicatorPaint
+        )
         canvas.drawText(date, indicatorFontSize, height - indicatorFontSize, mBottomIndicatorPaint)
         //val rect1Left = indicatorFontSize * 2 + dateWith      //电池外框left位置=靠左边距+日期宽度+一段距离
 
@@ -104,8 +125,9 @@ class ReaderView : View {
     }
 
     private fun getMarginTop(): Float {
-        val count = ((height - indicatorFontSize) * 0.96f).toInt() / txtFontSize.toInt()
-        return ((height - indicatorFontSize) - count * txtFontSize) / 3 + txtFontSize
+        val count =
+            ((height - indicatorFontSize) * 0.96f).toInt() / (txtFontSize * rowSpace).toInt()
+        return ((height - indicatorFontSize) - count * txtFontSize * rowSpace) / 2 + txtFontSize
     }
 
     internal interface FirstDrawListener {

@@ -1,9 +1,6 @@
 package com.netnovelreader.data
 
-import com.netnovelreader.common.TIMEOUT
-import com.netnovelreader.common.UA
-import com.netnovelreader.common.getHeaders
-import com.netnovelreader.common.url2Hostname
+import com.netnovelreader.common.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.net.ConnectException
@@ -31,8 +28,8 @@ class SearchBook : Cloneable {
      */
     @Throws(ConnectException::class)
     fun search(
-            url: String, redirectFileld: String, redirectSelector: String, noRedirectSelector: String,
-            redirectName: String, noRedirectName: String, redirectImage: String, noRedirectImage: String
+        url: String, redirectFileld: String, redirectSelector: String, noRedirectSelector: String,
+        redirectName: String, noRedirectName: String, redirectImage: String, noRedirectImage: String
     )
             : Array<String> {
         var result: Array<String>
@@ -52,10 +49,10 @@ class SearchBook : Cloneable {
     fun search(url: String, catalogSelector: String, nameSelector: String, imageSelector: String)
             : Array<String> {
         val doc = Jsoup.connect(url).headers(getHeaders(url))
-                .timeout(TIMEOUT).get()
+            .timeout(TIMEOUT).get()
         val arr = arrayOf(
-                parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),
-                parseImageUrl(doc, imageSelector)
+            parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),
+            parseImageUrl(doc, imageSelector)
         )
         return arr
     }
@@ -64,16 +61,16 @@ class SearchBook : Cloneable {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.instanceFollowRedirects = false
         conn.setRequestProperty(
-                "accept",
-                "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            "accept",
+            "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
         )
         conn.setRequestProperty("user-agent", UA)
         conn.setRequestProperty("Upgrade-Insecure-Requests", "1")
         conn.setRequestProperty("Connection", "keep-alive")
         conn.setRequestProperty("Referer", "http://www.${url2Hostname(url)}/")
         var redirect_url = conn.getHeaderField(redirectFileld)
-        if (redirect_url != null && !redirect_url.contains("//")) {
-            redirect_url = url.substring(0, url.lastIndexOf('/') + 1) + redirect_url
+        if (redirect_url != null) {
+            redirect_url = fixUrl(url, redirect_url)
         }
         conn.disconnect()
         return if (redirect_url.isNullOrEmpty()) {
@@ -85,11 +82,7 @@ class SearchBook : Cloneable {
 
     private fun parseCatalogUrl(doc: Element, url: String, urlSelector: String): String {
         var result = doc.select(urlSelector).select("a").attr("href")
-        if (!result!!.contains("//")) {
-            result = url.substring(0, url.lastIndexOf('/') + 1) + result
-        } else if (result.startsWith("//")) {
-            result = "http:" + result
-        }
+        result = fixUrl(url, result)
         if (result.contains("qidian.com")) {
             result += "#Catalog"
         }

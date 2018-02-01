@@ -33,7 +33,6 @@
 
         <activity android:name=".reader.ReaderActivity" />
         <activity android:name=".search.SearchActivity" />
-        <activity android:name=".download.SettingActivity" />
 
         <service android:name=".download.DownloadService" />
 

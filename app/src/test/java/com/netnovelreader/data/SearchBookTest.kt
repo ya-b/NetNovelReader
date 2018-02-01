@@ -5,23 +5,28 @@ import com.netnovelreader.common.getHeaders
 import org.jsoup.Jsoup
 import org.junit.Test
 
-import org.junit.Assert.*
-
 /**
  * Created by yangbo on 18-1-28.
  */
 class SearchBookTest {
     @Test
     fun search() {
+        val url = "http://www.b5200.net/modules/article/search.php?searchkey=a"
+        val doc = Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
+
+        println(doc.select(""))
     }
 
     @Test
     fun search1() {
-        SearchBook().search("http://www.b5200.net/modules/article/search.php?searchkey=%E9%9B%AA%E9%B9%B0%E9%A2%86%E4%B8%BB",
+
+        SearchBook().search(
+            "http://www.b5200.net/modules/article/search.php?searchkey=a",
                 "td.odd:nth-child(1) > a:nth-child(1)",
                 "td.odd:nth-child(1) > a:nth-child(1)",
                 "")
                 .forEach { println(it) }
+
     }
 
     @Test

@@ -19,12 +19,9 @@ import android.widget.Toast
 import com.netnovelreader.R
 import com.netnovelreader.base.IClickEvent
 import com.netnovelreader.common.ApplyPreference
-import com.netnovelreader.common.ArrayListChangeListener
 import com.netnovelreader.common.BindingAdapter
-import com.netnovelreader.common.id2TableName
 import com.netnovelreader.data.SQLHelper
 import com.netnovelreader.databinding.ActivityShelfBinding
-import com.netnovelreader.download.DownloadService
 import com.netnovelreader.reader.ReaderActivity
 import com.netnovelreader.search.SearchActivity
 import kotlinx.android.synthetic.main.activity_shelf.*
@@ -33,7 +30,7 @@ import kotlinx.android.synthetic.main.item_shelf.view.*
 class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     var shelfViewModel: ShelfViewModel? = null
-    private var arrayListChangeListener: ArrayListChangeListener<ShelfBean>? = null
+    //    private var arrayListChangeListener: ArrayListChangeListener<ShelfBean>? = null
     private var hasPermission = false
     private var isFragmentShow = false
     private var settingFragment: SettingFragment? = null
@@ -65,10 +62,10 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         shelfRecycler.layoutManager = LinearLayoutManager(this)
         shelfRecycler.itemAnimator = DefaultItemAnimator()
         val mAdapter =
-                BindingAdapter(shelfViewModel?.bookList, R.layout.item_shelf, ShelfClickEvent())
+            BindingAdapter(shelfViewModel?.bookList, R.layout.item_shelf, ShelfClickEvent())
         shelfRecycler.adapter = mAdapter
-        arrayListChangeListener = ArrayListChangeListener(mAdapter)
-        shelfViewModel?.bookList?.addOnListChangedCallback(arrayListChangeListener)
+//        arrayListChangeListener = ArrayListChangeListener(mAdapter)
+//        shelfViewModel?.bookList?.addOnListChangedCallback(arrayListChangeListener)
         shelf_layout.setColorSchemeResources(R.color.gray)
         var time = System.currentTimeMillis()
         shelf_layout.setOnRefreshListener {
@@ -93,7 +90,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     override fun onDestroy() {
         super.onDestroy()
-        shelfViewModel?.bookList?.removeOnListChangedCallback(arrayListChangeListener)
+//        shelfViewModel?.bookList?.removeOnListChangedCallback(arrayListChangeListener)
         shelfViewModel = null
         SQLHelper.closeDB()
     }
@@ -120,7 +117,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
                 isFragmentShow = true
                 settingFragment = SettingFragment()
                 fragmentManager.beginTransaction().replace(R.id.shelfFrameLayout, settingFragment)
-                        .commit()
+                    .commit()
                 shelfToolbar.setTitle(R.string.settings)
                 shelfToolbar.setNavigationIcon(R.drawable.icon_back)
                 shelfToolbar.setNavigationOnClickListener {
@@ -154,9 +151,9 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
      * 请求权限
      */
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
         if (requestCode == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -173,8 +170,8 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     override fun checkPermission(permission: String): Boolean {
         return ActivityCompat.checkSelfPermission(
-                this,
-                permission
+            this,
+            permission
         ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -198,15 +195,15 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
             val listener = DialogClickListener(view.nameView.text.toString())
             val builder = AlertDialog.Builder(this@ShelfActivity)
             builder.setTitle(
-                    getString(R.string.deleteBook).replace(
-                            "book",
-                            view.nameView.text.toString()
-                    )
+                getString(R.string.deleteBook).replace(
+                    "book",
+                    view.nameView.text.toString()
+                )
             )
-                    .setPositiveButton(R.string.yes, listener)
-                    .setNegativeButton(R.string.no, listener)
-                    .create()
-                    .show()
+                .setPositiveButton(R.string.yes, listener)
+                .setNegativeButton(R.string.no, listener)
+                .create()
+                .show()
             return true
         }
     }

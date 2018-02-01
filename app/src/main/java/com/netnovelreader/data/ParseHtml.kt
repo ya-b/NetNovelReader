@@ -1,6 +1,7 @@
 package com.netnovelreader.data
 
 import com.netnovelreader.common.TIMEOUT
+import com.netnovelreader.common.fixUrl
 import com.netnovelreader.common.getHeaders
 import com.netnovelreader.common.url2Hostname
 import org.jsoup.Jsoup
@@ -22,7 +23,7 @@ class ParseHtml {
             txt = getChapterWithSelector(url)
         } else {
             txt = Jsoup.connect(url).headers(getHeaders(url))
-                    .timeout(TIMEOUT).get().select(selector).text()
+                .timeout(TIMEOUT).get().select(selector).text()
         }
         return "    " + txt!!.replace(" ", "\n\n  ")
     }
@@ -35,9 +36,9 @@ class ParseHtml {
         val selector = SQLHelper.getParseRule(url2Hostname(url), SQLHelper.CATALOG_RULE)
         val catalog = LinkedHashMap<String, String>()
         val list = Jsoup.connect(url).headers(getHeaders(url))
-                .timeout(TIMEOUT).get().select(selector).select("a")
+            .timeout(TIMEOUT).get().select(selector).select("a")
         list.forEach {
-            val link = fixChapterUrl(url, it.attr("href"))
+            val link = fixUrl(url, it.attr("href"))
             val name = it.text()
             if (catalog.containsKey(name)) {
                 catalog.remove(name)
@@ -45,16 +46,6 @@ class ParseHtml {
             catalog.put(name, link)
         }
         return catalog
-    }
-
-    private fun fixChapterUrl(catalogUrl: String, chapterUrl: String): String {
-        if (chapterUrl.contains("http")) return chapterUrl
-        if (chapterUrl.startsWith("//")) return "http:" + chapterUrl
-        val arr = chapterUrl.split("/")
-        if (arr.size > 1 && catalogUrl.contains(arr[1])) {
-            return catalogUrl.substring(0, catalogUrl.indexOf(arr[1]) - 1) + chapterUrl
-        }
-        return catalogUrl.substring(0, catalogUrl.lastIndexOf("/")) + chapterUrl
     }
 
     @Throws(IOException::class)

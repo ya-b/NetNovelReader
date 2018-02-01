@@ -4,10 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.databinding.DataBindingUtil
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
@@ -15,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.SeekBar
+import android.widget.TextView
 import com.netnovelreader.BR
 import com.netnovelreader.R
 import com.netnovelreader.base.IClickEvent
@@ -30,8 +28,8 @@ import kotlinx.android.synthetic.main.item_catalog.view.*
 
 
 class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
-        GestureDetector.OnGestureListener,
-        ReaderView.FirstDrawListener, IClickEvent {
+    GestureDetector.OnGestureListener,
+    ReaderView.FirstDrawListener, IClickEvent {
     val FONTSIZE = "FontSize"
     var readerViewModel: ReaderViewModel? = null
     private var detector: GestureDetector? = null
@@ -42,17 +40,17 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun onCreate(savedInstanceState: Bundle?) {
         if (ApplyPreference.isFullScreen(this)) {
             window.setFlags(
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
         ApplyPreference.setTheme(this)
         super.onCreate(savedInstanceState)
         setViewModel(
-                ReaderViewModel(
-                        intent.getStringExtra("bookname"),
-                        ApplyPreference.getAutoDownNum(this)
-                )
+            ReaderViewModel(
+                intent.getStringExtra("bookname"),
+                ApplyPreference.getAutoDownNum(this)
+            )
         )
         init()
     }
@@ -60,7 +58,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun setViewModel(vm: ReaderViewModel) {
         readerViewModel = vm
         val binding =
-                DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
+            DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
         binding.setVariable(BR.clickEvent, ReaderClickEvent())
         binding.setVariable(BR.chapter, readerViewModel)
     }
@@ -69,7 +67,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         readerView.background = getDrawable(R.drawable.bg_readbook_yellow)
         readerView.firstDrawListener = this
         readerView.txtFontSize = getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-                .getFloat(FONTSIZE, 50f)
+            .getFloat(FONTSIZE, 50f)
         detector = GestureDetector(this, this)
 
 
@@ -113,15 +111,15 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
      */
     override fun doDrawPrepare() {
         readerViewModel?.initData(
-                readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+            readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
         )
     }
 
     override fun onFling(
-            e1: MotionEvent,
-            e2: MotionEvent,
-            velocityX: Float,
-            velocityY: Float
+        e1: MotionEvent,
+        e2: MotionEvent,
+        velocityX: Float,
+        velocityY: Float
     ): Boolean {
         if (footView.visibility == View.VISIBLE) {
             headerView.visibility = View.INVISIBLE
@@ -136,11 +134,11 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         } else {
             if (beginX > endX) {
                 readerViewModel!!.pageToNext(
-                        readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+                    readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
                 )
             } else {
                 readerViewModel!!.pageToPrevious(
-                        readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+                    readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
                 )
             }
         }
@@ -158,11 +156,11 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         val y = e.y
         if (x > readerView.width * 3 / 5) {
             readerViewModel!!.pageToNext(
-                    readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+                readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
             )
         } else if (x < readerView.width * 2 / 5) {
             readerViewModel!!.pageToPrevious(
-                    readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+                readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
             )
         } else if (y > readerView.height * 2 / 5 && y < readerView.height * 3 / 5) {
             if (footView.visibility == View.INVISIBLE) {
@@ -185,10 +183,10 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     }
 
     override fun onScroll(
-            e1: MotionEvent?,
-            e2: MotionEvent?,
-            distanceX: Float,
-            distanceY: Float
+        e1: MotionEvent?,
+        e2: MotionEvent?,
+        distanceX: Float,
+        distanceY: Float
     ): Boolean {
         return false
     }
@@ -206,8 +204,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             catalogView.addItemDecoration(NovelItemDecoration(this))
             catalogView.itemAnimator = DefaultItemAnimator()
             catalogView.adapter = BindingAdapter(
-                    readerViewModel?.catalog, R.layout.item_catalog,
-                    CatalogItemClickListener()
+                readerViewModel?.catalog, R.layout.item_catalog,
+                CatalogItemClickListener()
             )
             dialog = builder.setView(view).create()
         }
@@ -220,10 +218,10 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     inner class CatalogItemClickListener : IClickEvent {
         fun onChapterClick(v: View) {
             readerViewModel?.pageByCatalog(
-                    v.itemChapter.text.toString(),
-                    readerView.getTextWidth(),
-                    readerView.getTextHeight(),
-                    readerView.txtFontSize
+                v.itemChapter.text.toString(),
+                readerView.getTextWidth(),
+                readerView.getTextHeight(),
+                readerView.txtFontSize
             )
             dialog?.dismiss()
         }
@@ -263,17 +261,11 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         }
 
         fun onFontSizeClick(v: View) {
-            when (v) {
-                size30 -> readerView.txtFontSize = 30f
-                size40 -> readerView.txtFontSize = 40f
-                size60 -> readerView.txtFontSize = 60f
-                size70 -> readerView.txtFontSize = 70f
-                else -> readerView.txtFontSize = 50f
-            }
+            readerView.txtFontSize = (v as TextView).text.toString().toFloat()
             getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-                    .putFloat(FONTSIZE, readerView.txtFontSize).apply()
+                .putFloat(FONTSIZE, readerView.txtFontSize).apply()
             readerViewModel?.changeFontSize(
-                    readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+                readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
             )
         }
 
@@ -311,6 +303,4 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
 
         }
     }
-
-
 }

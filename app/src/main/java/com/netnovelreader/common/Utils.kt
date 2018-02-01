@@ -31,7 +31,7 @@ fun getSavePath(): String {
 //例如: http://www.hello.com/world/fjwoj/foew.html  中截取 hello.com
 fun url2Hostname(url: String): String {
     var hostname: String? = null
-    var matcher = Pattern.compile(".*?//.*?\\.(.*?)/.*?").matcher(url)
+    val matcher = Pattern.compile(".*?//.*?\\.(.*?)/.*?").matcher(url)
     if (matcher.find())
         hostname = matcher.group(1)
     return hostname ?: "error"
@@ -55,10 +55,22 @@ fun mkdirs(dir: String): String {
 }
 
 fun getHeaders(url: String): HashMap<String, String> {
-    var map = HashMap<String, String>()
+    val map = HashMap<String, String>()
     map.put("accept", "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
     map.put("user-agent", UA)
     map.put("Upgrade-Insecure-Requests", "1")
     map.put("Referer", "http://www.${url2Hostname(url)}/")
     return map
+}
+
+fun fixUrl(referenceUrl: String, fixUrl: String): String {
+    if (fixUrl.startsWith("http")) return fixUrl
+    if (fixUrl.startsWith("//")) return "http:" + fixUrl
+    val arr = fixUrl.split("/")
+    if (arr.size < 2) return referenceUrl.substring(0, referenceUrl.lastIndexOf("/") + 1) + fixUrl
+    if (referenceUrl.contains(arr[1])) {
+        return referenceUrl.substring(0, referenceUrl.indexOf(arr[1]) - 1) + fixUrl
+    } else {
+        return referenceUrl.substring(0, referenceUrl.lastIndexOf("/")) + fixUrl
+    }
 }

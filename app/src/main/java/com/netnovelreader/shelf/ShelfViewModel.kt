@@ -39,8 +39,10 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
     }
 
     override fun cancelUpdateFlag(bookname: String) {
-        SQLHelper.getDB().execSQL("update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.ISUPDATE}='' " +
-                "where ${SQLHelper.BOOKNAME}='$bookname';")
+        SQLHelper.getDB().execSQL(
+            "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.ISUPDATE}='' " +
+                    "where ${SQLHelper.BOOKNAME}='$bookname';"
+        )
     }
 
     /**
@@ -55,12 +57,12 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
                 val bookId = cursor.getInt(cursor.getColumnIndex(SQLHelper.ID))
                 val latestChapter = cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER))
                 val bookBean = ShelfBean(
-                        ObservableInt(bookId),
-                        ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME))),
-                        ObservableField(latestChapter),
-                        ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))),
-                        ObservableField(getBitmap(bookId)),
-                        ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE)))
+                    ObservableInt(bookId),
+                    ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME))),
+                    ObservableField(latestChapter),
+                    ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))),
+                    ObservableField(getBitmap(bookId)),
+                    ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE)))
                 )
                 if (listInDir.contains(id2TableName(bookBean.bookid.get()))) {
                     bookList.add(bookBean)
@@ -111,8 +113,8 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
             bitmap = BitmapFactory.decodeFile(file.path)
         }
         return bitmap ?: Bitmap.createBitmap(
-                IntArray(45 * 60) { _ -> Color.parseColor("#7092bf") },
-                45, 60, Bitmap.Config.RGB_565
+            IntArray(45 * 60) { _ -> Color.parseColor("#7092bf") },
+            45, 60, Bitmap.Config.RGB_565
         )
     }
 }

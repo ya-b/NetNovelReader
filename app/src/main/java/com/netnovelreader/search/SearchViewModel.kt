@@ -1,7 +1,6 @@
 package com.netnovelreader.search
 
 import android.databinding.ObservableArrayList
-import android.databinding.ObservableField
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -73,27 +72,27 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     private fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, reqCode: Int) {
         var result: Array<String>? = null
         val url =
-                siteinfo[1]!!.replace(SQLHelper.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
+            siteinfo[1]!!.replace(SQLHelper.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
         try {
             if (siteinfo[0].equals("0")) {
                 result = SearchBook().search(
-                        url,
-                        siteinfo[4] ?: "",
-                        siteinfo[6] ?: "",
-                        siteinfo[9] ?: ""
+                    url,
+                    siteinfo[4] ?: "",
+                    siteinfo[6] ?: "",
+                    siteinfo[9] ?: ""
                 )
             } else {
                 result = SearchBook().search(
-                        url, siteinfo[2] ?: "", siteinfo[3] ?: "",
-                        siteinfo[4] ?: "", siteinfo[5] ?: "",
-                        siteinfo[6] ?: "", siteinfo[8] ?: "", siteinfo[9] ?: ""
+                    url, siteinfo[2] ?: "", siteinfo[3] ?: "",
+                    siteinfo[4] ?: "", siteinfo[5] ?: "",
+                    siteinfo[6] ?: "", siteinfo[8] ?: "", siteinfo[9] ?: ""
                 )
             }
         } catch (e: Exception) {
             Log.d("reader,searchviewmodel", e.printStackTrace().toString())
         }
         result ?: return
-        if (searchCode == reqCode && ObservableField(result[1]).get().length > 0) { //result[1]==bookname,result[0]==catalogurl
+        if (searchCode == reqCode && result[1].length > 0) { //result[1]==bookname,result[0]==catalogurl
             CatalogCache.addCatalog(result[1], result[0])
             val bean = CatalogCache.cache.get(result[0])
             if (bean != null && bean.url.get() != null) {
@@ -115,7 +114,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
                 val bitmap = BitmapFactory.decodeStream(inputStream)
                 val path = mkdirs(getSavePath() + "/tmp") + "/$bookname.${url2Hostname(imageUrl)}"
                 outputStream = FileOutputStream(path)
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                 outputStream.flush()
             } catch (e: IOException) {
                 Log.d("novel,searchviewmodel", e.printStackTrace().toString())

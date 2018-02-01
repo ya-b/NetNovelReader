@@ -17,7 +17,6 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         tools:context="com.netnovelreader.reader.ReaderActivity">
 
         <com.netnovelreader.reader.ReaderView
@@ -95,29 +94,17 @@
                 app:srcCompat="@drawable/brightness_max" />
 
             <android.support.v7.widget.AppCompatButton
-                android:id="@+id/size30"
+                android:id="@+id/size45"
                 style="@style/function_button_style_2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:onClick="@{clickEvent::onFontSizeClick}"
-                android:text="30"
-                app:layout_constraintEnd_toStartOf="@+id/size40"
+                android:text="45"
+                app:layout_constraintEnd_toStartOf="@+id/size50"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/size40"
-                style="@style/function_button_style_2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:onClick="@{clickEvent::onFontSizeClick}"
-                android:text="40"
-                app:layout_constraintEnd_toStartOf="@+id/size50"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/size30"
-                app:layout_constraintTop_toTopOf="@+id/size30" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size50"
@@ -126,10 +113,22 @@
                 android:layout_height="wrap_content"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="50"
+                app:layout_constraintEnd_toStartOf="@+id/size55"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/size45"
+                app:layout_constraintTop_toTopOf="@+id/size45" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/size55"
+                style="@style/function_button_style_2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="@{clickEvent::onFontSizeClick}"
+                android:text="55"
                 app:layout_constraintEnd_toStartOf="@+id/size60"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/size40"
-                app:layout_constraintTop_toTopOf="@+id/size30" />
+                app:layout_constraintStart_toEndOf="@+id/size50"
+                app:layout_constraintTop_toTopOf="@+id/size45" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size60"
@@ -138,22 +137,22 @@
                 android:layout_height="wrap_content"
                 android:onClick="@{clickEvent::onFontSizeClick}"
                 android:text="60"
-                app:layout_constraintEnd_toStartOf="@+id/size70"
+                app:layout_constraintEnd_toStartOf="@+id/size65"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/size50"
-                app:layout_constraintTop_toTopOf="@+id/size30" />
+                app:layout_constraintStart_toEndOf="@+id/size55"
+                app:layout_constraintTop_toTopOf="@+id/size45" />
 
             <android.support.v7.widget.AppCompatButton
-                android:id="@+id/size70"
+                android:id="@+id/size65"
                 style="@style/function_button_style_2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:onClick="@{clickEvent::onFontSizeClick}"
-                android:text="70"
+                android:text="65"
                 app:layout_constraintEnd_toStartOf="@+id/font_label"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/size60"
-                app:layout_constraintTop_toTopOf="@+id/size30" />
+                app:layout_constraintTop_toTopOf="@+id/size45" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/font_label"
@@ -163,8 +162,8 @@
                 android:text="字体"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/size70"
-                app:layout_constraintTop_toTopOf="@+id/size30" />
+                app:layout_constraintStart_toEndOf="@+id/size65"
+                app:layout_constraintTop_toTopOf="@+id/size45" />
 
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -179,7 +178,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/read_bg_2"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/size30" />
+                app:layout_constraintTop_toBottomOf="@+id/size45" />
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/read_bg_1"

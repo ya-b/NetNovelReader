@@ -52,7 +52,7 @@ class DownloadService : Service() {
         openNotification()
         queue = LinkedBlockingQueue()
         tmpQueue = LinkedList()
-        executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1)
+        executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 3 * 2)
         executeDownload = Thread(ExecuteDownload())
         try {
             executeDownload?.start()
@@ -65,8 +65,8 @@ class DownloadService : Service() {
         synchronized(this) {
             if (queue != null || intent != null) {
                 val t = DownloadTask(
-                        intent!!.getStringExtra("tableName"),
-                        intent.getStringExtra("catalogurl")
+                    intent!!.getStringExtra("tableName"),
+                    intent.getStringExtra("catalogurl")
                 )
                 if (max == -1) {
                     queue!!.offer(t)
@@ -85,16 +85,18 @@ class DownloadService : Service() {
         mNotificationManager = null
         builder = null
         if (failed != 0) {
-            Toast.makeText(this, getString(R.string.downloadfailed).replace("nn", "$failed"),
-                    Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this, getString(R.string.downloadfailed).replace("nn", "$failed"),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
     private fun openNotification() {
         builder = NotificationCompat.Builder(this, "reader")
-                .setTicker(getString(R.string.app_name))
-                .setContentTitle(getString(R.string.prepare_download))
-                .setSmallIcon(R.drawable.ic_launcher_background)
+            .setTicker(getString(R.string.app_name))
+            .setContentTitle(getString(R.string.prepare_download))
+            .setSmallIcon(R.drawable.ic_launcher_background)
         mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
@@ -108,7 +110,7 @@ class DownloadService : Service() {
             str = ",${getString(R.string.wait4download)}".replace("nn", tmpQueue!!.size.toString())
         }
         builder?.setProgress(max, progress, false)
-                ?.setContentTitle("${getString(R.string.downloading)}:${progress}/$max$str")
+            ?.setContentTitle("${getString(R.string.downloading)}:${progress}/$max$str")
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
 
@@ -155,26 +157,26 @@ class DownloadService : Service() {
 
         private fun downEveryItem(downloadUnitList: ArrayList<DownloadChapter>) {
             Observable.fromIterable(downloadUnitList)
-                    .flatMap {
-                        Observable.create<Int> { emitter ->
-                            try {
-                                it.download(it.getChapterTxt())
-                            } catch (e: IOException) {
-                                failed++
-                            } finally {
-                                emitter.onNext(progressIncrement())
-                            }
-                        }.subscribeOn(Schedulers.from(executors!!))
-                    }.observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        synchronized(this) {
-                            if (it > tmp) {
-                                updateNotification(it, max)
-                                stopOrContinue(it, max)
-                                tmp = it
-                            }
+                .flatMap {
+                    Observable.create<Int> { emitter ->
+                        try {
+                            it.download(it.getChapterTxt())
+                        } catch (e: IOException) {
+                            failed++
+                        } finally {
+                            emitter.onNext(progressIncrement())
                         }
-                    })
+                    }.subscribeOn(Schedulers.from(executors!!))
+                }.observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    synchronized(this) {
+                        if (it > tmp) {
+                            updateNotification(it, max)
+                            stopOrContinue(it, max)
+                            tmp = it
+                        }
+                    }
+                })
         }
     }
 }

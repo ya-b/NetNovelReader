@@ -29,9 +29,9 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
         }
         latestChapter ?: return
         SQLHelper.getDB().execSQL(
-                "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.LATESTCHAPTER}=" +
-                        "'$latestChapter',${SQLHelper.ISUPDATE}='$UPDATEFLAG' where ${SQLHelper.ID}=" +
-                        "${tableName2Id(tableName)};"
+            "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.LATESTCHAPTER}=" +
+                    "'$latestChapter',${SQLHelper.ISUPDATE}='$UPDATEFLAG' where ${SQLHelper.ID}=" +
+                    "${tableName2Id(tableName)};"
         )
         CatalogCache.clearCache()
     }
@@ -47,8 +47,8 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     }
 
     fun filtCatalog(
-            map: LinkedHashMap<String, String>,
-            filters: List<String>
+        map: LinkedHashMap<String, String>,
+        filters: List<String>
     ): LinkedHashMap<String, String> {
         val arr = ArrayList<String>()
         map.forEach {
