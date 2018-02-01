@@ -67,6 +67,9 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
         chapterCache.prepare(pageIndicator[0], pageIndicator[2], dirName!!)
         getPage(pageIndicator, textAreaWidth, textAreaHeight, txtFontSize)
         pageIndicator[3] = chapterText.size
+        if(pageIndicator[3] == 0){
+            pageIndicator[1] = 0
+        }
         updateTextAndRecord(pageIndicator)
     }
 

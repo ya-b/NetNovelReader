@@ -27,19 +27,20 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
         bookList = ObservableArrayList()
     }
 
-    //TODO
     override fun updateBooks(): Boolean {
         val threadPoolExecutor = Executors.newFixedThreadPool(5)
-        bookList.forEach {
+        bookList.forEach { bean ->
             threadPoolExecutor.execute {
-                try {
-                    DownloadCatalog(id2TableName(it.bookid.get()), it.downloadURL.get()).download()
-                    refreshBookList()
-                } catch (e: IOException) {
-                }
+                DownloadCatalog(id2TableName(bean.bookid.get()), bean.downloadURL.get()).download()
+                refreshBookList()
             }
         }
         return true
+    }
+
+    override fun cancelUpdateFlag(bookname: String) {
+        SQLHelper.getDB().execSQL("update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.ISUPDATE}='' " +
+                "where ${SQLHelper.BOOKNAME}='$bookname';")
     }
 
     /**
@@ -52,15 +53,14 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
             val cursor = SQLHelper.queryShelfBookList()
             while (cursor.moveToNext()) {
                 val bookId = cursor.getInt(cursor.getColumnIndex(SQLHelper.ID))
+                val latestChapter = cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER))
                 val bookBean = ShelfBean(
                         ObservableInt(bookId),
                         ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME))),
-                        ObservableField(
-                                cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER))
-                                        ?: ""
-                        ),
+                        ObservableField(latestChapter),
                         ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))),
-                        ObservableField(getBitmap(bookId))
+                        ObservableField(getBitmap(bookId)),
+                        ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE)))
                 )
                 if (listInDir.contains(id2TableName(bookBean.bookid.get()))) {
                     bookList.add(bookBean)

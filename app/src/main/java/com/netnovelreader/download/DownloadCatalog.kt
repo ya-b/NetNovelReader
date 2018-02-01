@@ -1,5 +1,6 @@
 package com.netnovelreader.download
 
+import com.netnovelreader.common.UPDATEFLAG
 import com.netnovelreader.common.tableName2Id
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.ParseHtml
@@ -29,7 +30,8 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
         latestChapter ?: return
         SQLHelper.getDB().execSQL(
                 "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.LATESTCHAPTER}=" +
-                        "'$latestChapter' where ${SQLHelper.ID}=${tableName2Id(tableName)}"
+                        "'$latestChapter',${SQLHelper.ISUPDATE}='$UPDATEFLAG' where ${SQLHelper.ID}=" +
+                        "${tableName2Id(tableName)};"
         )
         CatalogCache.clearCache()
     }

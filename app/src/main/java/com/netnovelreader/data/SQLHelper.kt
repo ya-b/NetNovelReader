@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.netnovelreader.ReaderApplication
+import com.netnovelreader.common.UPDATEFLAG
 
 /**
  * Created by yangbo on 17-12-24.
@@ -51,6 +52,7 @@ object SQLHelper {
                 val contentValue = ContentValues()
                 contentValue.put(BOOKNAME, bookname)
                 contentValue.put(DOWNLOADURL, url)
+                contentValue.put(ISUPDATE, UPDATEFLAG)
                 id = getDB().insert(TABLE_SHELF, null, contentValue).toInt()
             }
             cursor.close()
@@ -312,6 +314,8 @@ object SQLHelper {
     val CHARSET = "charset"
     //来源网址
     val DOWNLOADURL = "downloadurl"
+    //是否有更新
+    val ISUPDATE = "isupdate"
 
     val TABLE_SEARCH = "search"
     val SEARCH_HOSTNAME = HOSTNAME
@@ -423,7 +427,7 @@ object SQLHelper {
             db?.execSQL(
                     "create table if not exists $TABLE_SHELF ($ID integer primary key, " +
                             "$BOOKNAME varchar(128) unique, $READRECORD varchar(128), $DOWNLOADURL text, " +
-                            "$LATESTCHAPTER varchar(128));"
+                            "$LATESTCHAPTER varchar(128), $ISUPDATE varchar(128));"
             )
         }
     }

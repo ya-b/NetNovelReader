@@ -3,6 +3,7 @@ package com.netnovelreader.shelf
 import android.databinding.ObservableField
 import android.databinding.ObservableInt
 import android.graphics.Bitmap
+import java.lang.StringBuilder
 
 /**
  * Created by yangbo on 18-1-12.
@@ -12,5 +13,6 @@ data class ShelfBean(
         var bookname: ObservableField<String>,
         var latestChapter: ObservableField<String>,
         var downloadURL: ObservableField<String>,
-        var bitmap: ObservableField<Bitmap>
+        var bitmap: ObservableField<Bitmap>,
+        var isUpdate: ObservableField<String>
 )

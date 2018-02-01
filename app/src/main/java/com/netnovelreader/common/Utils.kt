@@ -16,6 +16,7 @@ val TIMEOUT = 3000
 val UA = "Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0"
 val PREFERENCE_NAME = "com.netnovelreader_preferences"
 val MAINDB_NAME = "com.netnovelreader_db"
+val UPDATEFLAG = "●"
 
 fun getSavePath(): String {
     var path: String?
