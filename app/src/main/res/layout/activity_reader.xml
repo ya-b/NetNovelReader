@@ -170,11 +170,9 @@
                 android:id="@+id/read_bg_default"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginBottom="12dp"
                 android:layout_marginTop="12dp"
                 android:onClick="@{clickEvent::itemChangeBgClick}"
                 android:src="@color/read_bg_default"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/read_bg_2"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
@@ -224,7 +222,69 @@
                 app:layout_constraintStart_toEndOf="@+id/read_bg_1"
                 app:layout_constraintTop_toTopOf="@+id/read_bg_default" />
 
+            <TextView
+                android:id="@+id/tv_default"
+                style="@style/setting_dialog_button"
+                android:layout_marginBottom="12dp"
+                android:layout_marginStart="7dp"
+                android:layout_marginTop="12dp"
+                android:layout_weight="1"
+                android:onClick="@{clickEvent::onFontTypeClick}"
+                android:text="系统款"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tv_beiweikai"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/read_bg_default" />
 
+            <TextView
+                android:id="@+id/tv_beiweikai"
+                style="@style/setting_dialog_button"
+                android:layout_weight="1"
+                android:onClick="@{clickEvent::onFontTypeClick}"
+                android:text="北魏凯"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toStartOf="@+id/tv_bysong"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tv_default"
+                app:layout_constraintTop_toTopOf="@+id/tv_default" />
+
+            <TextView
+                android:id="@+id/tv_bysong"
+                style="@style/setting_dialog_button"
+                android:layout_weight="1"
+                android:onClick="@{clickEvent::onFontTypeClick}"
+                android:text="繁宋体"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toStartOf="@+id/tv_fzkatong"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tv_beiweikai"
+                app:layout_constraintTop_toTopOf="@+id/tv_default" />
+
+            <TextView
+                android:id="@+id/tv_fzkatong"
+                style="@style/setting_dialog_button"
+                android:layout_weight="1"
+                android:onClick="@{clickEvent::onFontTypeClick}"
+                android:text="卡通型"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toStartOf="@+id/tv_zhulang"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tv_bysong"
+                app:layout_constraintTop_toTopOf="@+id/tv_default" />
+
+            <TextView
+                android:id="@+id/tv_zhulang"
+                style="@style/setting_dialog_button"
+                android:layout_weight="1"
+                android:onClick="@{clickEvent::onFontTypeClick}"
+                android:text="晨光体"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tv_fzkatong"
+                app:layout_constraintTop_toTopOf="@+id/tv_default" />
         </android.support.constraint.ConstraintLayout>
 
         <LinearLayout
