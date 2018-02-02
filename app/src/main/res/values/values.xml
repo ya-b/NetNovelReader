@@ -11,4 +11,11 @@
         <item>blue</item>
         <item>gray</item>
     </string-array>
+
+    <string-array name="rowspace">
+        <item>1.25</item>
+        <item>1.50</item>
+        <item>1.75</item>
+        <item>2.00</item>
+    </string-array>
 </resources>

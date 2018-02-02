@@ -2,9 +2,6 @@ package com.netnovelreader.common
 
 import android.databinding.ObservableArrayList
 import java.util.*
-import java.util.function.Consumer
-import java.util.function.Predicate
-import java.util.function.UnaryOperator
 
 class ObservableSyncArrayList<T> : ObservableArrayList<T>() {
 
@@ -58,10 +55,6 @@ class ObservableSyncArrayList<T> : ObservableArrayList<T>() {
         return super.contains(element)
     }
 
-    @Synchronized
-    override fun replaceAll(operator: UnaryOperator<T>) {
-        super<ObservableArrayList>.replaceAll(operator)
-    }
 
     @Synchronized
     override fun listIterator(index: Int): MutableListIterator<T> {
@@ -91,11 +84,6 @@ class ObservableSyncArrayList<T> : ObservableArrayList<T>() {
     @Synchronized
     override fun get(index: Int): T {
         return super.get(index)
-    }
-
-    @Synchronized
-    override fun forEach(action: Consumer<in T>?) {
-        super<ObservableArrayList>.forEach(action)
     }
 
     @Synchronized
@@ -131,16 +119,6 @@ class ObservableSyncArrayList<T> : ObservableArrayList<T>() {
     @Synchronized
     override fun isEmpty(): Boolean {
         return super.isEmpty()
-    }
-
-    @Synchronized
-    override fun sort(c: Comparator<in T>?) {
-        super<ObservableArrayList>.sort(c)
-    }
-
-    @Synchronized
-    override fun removeIf(filter: Predicate<in T>): Boolean {
-        return super<ObservableArrayList>.removeIf(filter)
     }
 
     @Synchronized

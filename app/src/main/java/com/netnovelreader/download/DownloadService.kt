@@ -168,7 +168,7 @@ class DownloadService : Service() {
                         }
                     }.subscribeOn(Schedulers.from(executors!!))
                 }.observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
+                .subscribe {
                     synchronized(this) {
                         if (it > tmp) {
                             updateNotification(it, max)
@@ -176,7 +176,7 @@ class DownloadService : Service() {
                             tmp = it
                         }
                     }
-                })
+                }
         }
     }
 }

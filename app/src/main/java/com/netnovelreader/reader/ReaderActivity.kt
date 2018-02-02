@@ -10,7 +10,9 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowManager
 import android.widget.SeekBar
 import android.widget.TextView
 import com.netnovelreader.BR
@@ -28,30 +30,27 @@ import kotlinx.android.synthetic.main.item_catalog.view.*
 
 
 class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
-        GestureDetector.OnGestureListener,
-        ReaderView.FirstDrawListener, IClickEvent {
+    ReaderView.ReaderPageListener, ReaderView.FirstDrawListener, IClickEvent {
     val FONTSIZE = "FontSize"
     var readerViewModel: ReaderViewModel? = null
-    private var detector: GestureDetector? = null
     var dialog: AlertDialog? = null
-    private val MIN_MOVE = 80F
     private var selectedBgImageView: CircleImageView? = null      //用于记录用户当前选中的背景样式的UI控件
     private var selectedFontTextView: TextView? = null             //用于记录用户当前选中的字体样式的UI控件
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (ApplyPreference.isFullScreen(this)) {
             window.setFlags(
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
         ApplyPreference.setTheme(this)
         super.onCreate(savedInstanceState)
         setViewModel(
-                ReaderViewModel(
-                        intent.getStringExtra("bookname"),
-                        ApplyPreference.getAutoDownNum(this)
-                )
+            ReaderViewModel(
+                intent.getStringExtra("bookname"),
+                ApplyPreference.getAutoDownNum(this)
+            )
         )
         init()
     }
@@ -59,7 +58,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun setViewModel(vm: ReaderViewModel) {
         readerViewModel = vm
         val binding =
-                DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
+            DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
         binding.setVariable(BR.clickEvent, ReaderClickEvent())
         binding.setVariable(BR.chapter, readerViewModel)
     }
@@ -67,9 +66,9 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun init() {
         readerView.background = getDrawable(R.drawable.bg_readbook_yellow)
         readerView.firstDrawListener = this
+        readerView.pageListener = this
         readerView.txtFontSize = getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-                .getFloat(FONTSIZE, 50f)
-        detector = GestureDetector(this, this)
+            .getFloat(FONTSIZE, 50f)
 
 
         sb_brightness.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -112,88 +111,30 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
      */
     override fun doDrawPrepare() {
         readerViewModel?.initData(
-                readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+            readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
         )
     }
 
-    override fun onFling(
-            e1: MotionEvent,
-            e2: MotionEvent,
-            velocityX: Float,
-            velocityY: Float
-    ): Boolean {
-        if (footView.visibility == View.VISIBLE) {
-            headerView.visibility = View.INVISIBLE
-            footView.visibility = View.INVISIBLE
-            fontSetting.visibility = View.INVISIBLE
-            return false
-        }
-        val beginX = e1.x
-        val endX = e2.x
-        if (Math.abs(beginX - endX) < MIN_MOVE) {
-            return false
-        } else {
-            if (beginX > endX) {
-                readerViewModel!!.pageToNext(
-                        readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
-                )
-            } else {
-                readerViewModel!!.pageToPrevious(
-                        readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
-                )
-            }
-        }
-        return false
+    override fun onCenterClick() {
+        if (hideHeaderFoot()) return
+        footView.visibility = View.VISIBLE
+        headerView.visibility = View.VISIBLE
     }
 
-    override fun onSingleTapUp(e: MotionEvent): Boolean {
-        if (footView.visibility == View.VISIBLE) {
-            headerView.visibility = View.INVISIBLE
-            footView.visibility = View.INVISIBLE
-            fontSetting.visibility = View.INVISIBLE
-            return false
-        }
-        val x = e.x
-        val y = e.y
-        if (x > readerView.width * 3 / 5) {
-            readerViewModel!!.pageToNext(
-                    readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
-            )
-        } else if (x < readerView.width * 2 / 5) {
-            readerViewModel!!.pageToPrevious(
-                    readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
-            )
-        } else if (y > readerView.height * 2 / 5 && y < readerView.height * 3 / 5) {
-            if (footView.visibility == View.INVISIBLE) {
-                footView.visibility = View.VISIBLE
-                headerView.visibility = View.VISIBLE
-            }
-        }
-        return false
+    override fun pageToNext() {
+        if (hideHeaderFoot()) return
+        readerViewModel!!.pageToNext(
+            readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+        )
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        return detector!!.onTouchEvent(event)
+    override fun pageToPrevious() {
+        if (hideHeaderFoot()) return
+        readerViewModel!!.pageToPrevious(
+            readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+        )
     }
 
-    override fun onDown(e: MotionEvent?): Boolean {
-        return true
-    }
-
-    override fun onLongPress(e: MotionEvent?) {
-    }
-
-    override fun onScroll(
-            e1: MotionEvent?,
-            e2: MotionEvent?,
-            distanceX: Float,
-            distanceY: Float
-    ): Boolean {
-        return false
-    }
-
-    override fun onShowPress(e: MotionEvent?) {
-    }
 
     override fun showDialog() {
         var catalogView: RecyclerView? = null
@@ -205,8 +146,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             catalogView.addItemDecoration(NovelItemDecoration(this))
             catalogView.itemAnimator = DefaultItemAnimator()
             catalogView.adapter = BindingAdapter(
-                    readerViewModel?.catalog, R.layout.item_catalog,
-                    CatalogItemClickListener()
+                readerViewModel?.catalog, R.layout.item_catalog,
+                CatalogItemClickListener()
             )
             dialog = builder.setView(view).create()
         }
@@ -214,15 +155,26 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         catalogView?.adapter?.notifyDataSetChanged()
         catalogView?.scrollToPosition(readerViewModel!!.pageIndicator[0] - 1)
         dialog?.show()
+        dialog?.window?.setLayout(readerView.width * 5 / 6, readerView.height * 9 / 10)
+    }
+
+    private fun hideHeaderFoot(): Boolean {
+        if (footView.visibility == View.VISIBLE) {
+            headerView.visibility = View.INVISIBLE
+            footView.visibility = View.INVISIBLE
+            fontSetting.visibility = View.INVISIBLE
+            return true
+        }
+        return false
     }
 
     inner class CatalogItemClickListener : IClickEvent {
         fun onChapterClick(v: View) {
             readerViewModel?.pageByCatalog(
-                    v.itemChapter.text.toString(),
-                    readerView.getTextWidth(),
-                    readerView.getTextHeight(),
-                    readerView.txtFontSize
+                v.itemChapter.text.toString(),
+                readerView.getTextWidth(),
+                readerView.getTextHeight(),
+                readerView.txtFontSize
             )
             dialog?.dismiss()
         }
@@ -264,9 +216,9 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         fun onFontSizeClick(v: View) {
             readerView.txtFontSize = (v as TextView).text.toString().toFloat()
             getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-                    .putFloat(FONTSIZE, readerView.txtFontSize).apply()
+                .putFloat(FONTSIZE, readerView.txtFontSize).apply()
             readerViewModel?.changeFontSize(
-                    readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
+                readerView.getTextWidth(), readerView.getTextHeight(), readerView.txtFontSize
             )
         }
 
@@ -275,19 +227,28 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             view as TextView
             val context = view.context
             val typeFacePath =      //根据用户选择获取字体路径
-                    when (view.id) {
-                        R.id.tv_beiweikai -> Config.FONTTYPE_BEIWEIKAISHU
-                        R.id.tv_bysong -> Config.FONTTYPE_BYSONG
-                        R.id.tv_default -> Config.FONTTYPE_DEFAULT
-                        R.id.tv_zhulang -> Config.FONTTYPE_CHENGUANG
-                        R.id.tv_fzkatong -> Config.FONTTYPE_FZKATONG
-                        else -> Config.FONTTYPE_DEFAULT
-                    }
+                when (view.id) {
+                    R.id.tv_beiweikai -> Config.FONTTYPE_BEIWEIKAISHU
+                    R.id.tv_bysong -> Config.FONTTYPE_BYSONG
+                    R.id.tv_default -> Config.FONTTYPE_DEFAULT
+                    R.id.tv_zhulang -> Config.FONTTYPE_CHENGUANG
+                    R.id.tv_fzkatong -> Config.FONTTYPE_FZKATONG
+                    else -> Config.FONTTYPE_DEFAULT
+                }
 
-            readerView.txtFontType = Config.getTypeface(context, typeFacePath)          //根据新的字体重新绘制视图
-            selectedFontTextView?.let { Config.setTextViewSelect(it, false); }  //将前次选中的字体TextView改变背景色
+            readerView.txtFontType =
+                    Config.getTypeface(context, typeFacePath)          //根据新的字体重新绘制视图
+            selectedFontTextView?.let {
+                Config.setTextViewSelect(
+                    it,
+                    false
+                )
+            }  //将前次选中的字体TextView改变背景色
             selectedFontTextView = view
-            Config.setTextViewSelect(view, true)                                 //为当前选中的字体TextView改变背景色
+            Config.setTextViewSelect(
+                view,
+                true
+            )                                 //为当前选中的字体TextView改变背景色
 
         }
 

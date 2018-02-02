@@ -244,7 +244,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
                 for (i in 0..count - 1) {
                     tmplist.add(tmp.substring(i * totalCount, (i + 1) * totalCount))
                 }
-                if (it.length % totalCount != 0) {
+                if (tmp.length > count * totalCount) {
                     tmplist.add(tmp.substring(count * totalCount))
                 }
             } else {
@@ -260,7 +260,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
                 tmplist.subList(i * totalCount, (i + 1) * totalCount).forEach { a.add(it) }
                 arrayList.add(a)
             }
-            if (tmplist.size % totalCount != 0) {
+            if (tmplist.size > count * totalCount) {
                 val b = ObservableArrayList<String>()
                 tmplist.subList(count * totalCount, tmplist.size - 1).forEach { b.add(it) }
                 arrayList.add(b)

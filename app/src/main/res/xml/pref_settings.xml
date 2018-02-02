@@ -14,4 +14,9 @@
         android:key="@string/themeKey"
         android:summary="@string/theme_summary"
         android:title="@string/theme" />
+    <ListPreference
+        android:entries="@array/rowspace"
+        android:entryValues="@array/rowspace"
+        android:key="@string/rowspaceKey"
+        android:title="@string/rowspace" />
 </PreferenceScreen>

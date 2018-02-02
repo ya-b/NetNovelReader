@@ -19,6 +19,7 @@ import android.widget.Toast
 import com.netnovelreader.R
 import com.netnovelreader.base.IClickEvent
 import com.netnovelreader.common.ApplyPreference
+import com.netnovelreader.common.ArrayListChangeListener
 import com.netnovelreader.common.BindingAdapter
 import com.netnovelreader.data.SQLHelper
 import com.netnovelreader.databinding.ActivityShelfBinding
@@ -30,7 +31,7 @@ import kotlinx.android.synthetic.main.item_shelf.view.*
 class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     var shelfViewModel: ShelfViewModel? = null
-    //    private var arrayListChangeListener: ArrayListChangeListener<ShelfBean>? = null
+    private var arrayListChangeListener: ArrayListChangeListener<ShelfBean>? = null
     private var hasPermission = false
     private var isFragmentShow = false
     private var settingFragment: SettingFragment? = null
@@ -64,8 +65,8 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         val mAdapter =
             BindingAdapter(shelfViewModel?.bookList, R.layout.item_shelf, ShelfClickEvent())
         shelfRecycler.adapter = mAdapter
-//        arrayListChangeListener = ArrayListChangeListener(mAdapter)
-//        shelfViewModel?.bookList?.addOnListChangedCallback(arrayListChangeListener)
+        arrayListChangeListener = ArrayListChangeListener(mAdapter)
+        shelfViewModel?.bookList?.addOnListChangedCallback(arrayListChangeListener)
         shelf_layout.setColorSchemeResources(R.color.gray)
         var time = System.currentTimeMillis()
         shelf_layout.setOnRefreshListener {
@@ -90,7 +91,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     override fun onDestroy() {
         super.onDestroy()
-//        shelfViewModel?.bookList?.removeOnListChangedCallback(arrayListChangeListener)
+        shelfViewModel?.bookList?.removeOnListChangedCallback(arrayListChangeListener)
         shelfViewModel = null
         SQLHelper.closeDB()
     }

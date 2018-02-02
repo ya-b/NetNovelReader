@@ -14,6 +14,8 @@
     <string name="theme">主题</string>
     <string name="themeKey">theme</string>
     <string name="theme_summary">选择你喜欢的主题</string>
+    <string name="rowspace">行间距</string>
+    <string name="rowspaceKey">rowspace</string>
 
 
     <string name="search_button">搜索</string>

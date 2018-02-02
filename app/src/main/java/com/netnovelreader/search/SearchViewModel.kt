@@ -1,6 +1,5 @@
 package com.netnovelreader.search
 
-import android.databinding.ObservableArrayList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -19,10 +18,10 @@ import java.net.URLEncoder
 class SearchViewModel : ISearchContract.ISearchViewModel {
     @Volatile
     private var searchCode = 0
-    var resultList: ObservableArrayList<SearchBean>
+    var resultList: ObservableSyncArrayList<SearchBean>
 
     init {
-        resultList = ObservableArrayList()
+        resultList = ObservableSyncArrayList()
     }
 
     /**
@@ -48,7 +47,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         val imagePath = File(mkdirs(getSavePath() + "/$tableName"))
         if (!imageDir.exists()) return
         val list = imageDir.list()
-        for (i in 0..list.size) {
+        for (i in 0..list.size - 1) {
             if (list[i].startsWith(bookname)) {
                 Thread { copyFile(File(imageDir, list[i]), File(imagePath, IMAGENAME)) }.start()
                 break

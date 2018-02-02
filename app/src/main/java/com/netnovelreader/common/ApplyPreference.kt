@@ -28,4 +28,9 @@ object ApplyPreference {
             else -> context.setTheme(R.style.AppThemeBlack)
         }
     }
+
+    fun getRowSpace(context: Context): Float {
+        return context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+            .getString(context.getString(R.string.rowspaceKey), "1.50").toFloat()
+    }
 }

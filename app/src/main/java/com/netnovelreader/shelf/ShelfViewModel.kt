@@ -1,6 +1,5 @@
 package com.netnovelreader.shelf
 
-import android.databinding.ObservableArrayList
 import android.databinding.ObservableField
 import android.databinding.ObservableInt
 import android.graphics.Bitmap
@@ -8,10 +7,13 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.Log
 import com.netnovelreader.common.IMAGENAME
+import com.netnovelreader.common.ObservableSyncArrayList
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.id2TableName
 import com.netnovelreader.data.SQLHelper
 import com.netnovelreader.download.DownloadCatalog
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.Executors
@@ -21,19 +23,28 @@ import java.util.concurrent.Executors
  */
 class ShelfViewModel : IShelfContract.IShelfViewModel {
 
-    var bookList: ObservableArrayList<ShelfBean>
+    var bookList: ObservableSyncArrayList<ShelfBean>
 
     init {
-        bookList = ObservableArrayList()
+        bookList = ObservableSyncArrayList()
     }
 
     override fun updateBooks(): Boolean {
         val threadPoolExecutor = Executors.newFixedThreadPool(5)
-        bookList.forEach { bean ->
-            threadPoolExecutor.execute {
-                DownloadCatalog(id2TableName(bean.bookid.get()), bean.downloadURL.get()).download()
-                refreshBookList()
-            }
+        Observable.fromIterable(bookList).flatMap { bean ->
+            Observable.create<Int> { emitter ->
+                try {
+                    DownloadCatalog(
+                        id2TableName(bean.bookid.get()),
+                        bean.downloadURL.get()
+                    ).download()
+                } catch (e: IOException) {
+                } finally {
+                    emitter.onNext(1)
+                }
+            }.subscribeOn(Schedulers.from(threadPoolExecutor))
+        }.observeOn(Schedulers.single()).subscribe {
+            refreshBookList()
         }
         return true
     }
@@ -49,30 +60,30 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
      * 刷新书架
      */
     override fun refreshBookList() {
-        Thread {
-            bookList.clear()
-            val listInDir = dirBookList()
-            val cursor = SQLHelper.queryShelfBookList()
-            while (cursor.moveToNext()) {
-                val bookId = cursor.getInt(cursor.getColumnIndex(SQLHelper.ID))
-                val latestChapter = cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER))
-                val bookBean = ShelfBean(
-                    ObservableInt(bookId),
-                    ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME))),
-                    ObservableField(latestChapter),
-                    ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))),
-                    ObservableField(getBitmap(bookId)),
-                    ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE)))
-                )
-                if (listInDir.contains(id2TableName(bookBean.bookid.get()))) {
-                    bookList.add(bookBean)
-                    Thread { checkCatalog(bookBean) }.start()
-                } else {
-                    Thread { deleteBook(bookBean.bookname.get()) }.start()
-                }
+        val arrayList = ArrayList<ShelfBean>()
+        val listInDir = dirBookList()
+        val cursor = SQLHelper.queryShelfBookList()
+        while (cursor.moveToNext()) {
+            val bookId = cursor.getInt(cursor.getColumnIndex(SQLHelper.ID))
+            val latestChapter = cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER))
+            val bookBean = ShelfBean(
+                ObservableInt(bookId),
+                ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME))),
+                ObservableField(latestChapter),
+                ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))),
+                ObservableField(getBitmap(bookId)),
+                ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE)))
+            )
+            if (listInDir.contains(id2TableName(bookBean.bookid.get()))) {
+                arrayList.add(bookBean)
+                Thread { checkCatalog(bookBean) }.start()
+            } else {
+                Thread { deleteBook(bookBean.bookname.get()) }.start()
             }
-            cursor.close()
-        }.start()
+        }
+        cursor.close()
+        bookList.clear()
+        bookList.addAll(arrayList)
     }
 
     override fun deleteBook(bookname: String) {
