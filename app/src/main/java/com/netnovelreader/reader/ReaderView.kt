@@ -1,7 +1,7 @@
 package com.netnovelreader.reader
 
 import android.content.Context
-import android.databinding.ObservableArrayList
+import android.databinding.ObservableField
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -14,6 +14,7 @@ import com.netnovelreader.R
 import com.netnovelreader.common.ApplyPreference
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KProperty
 
 /**
@@ -21,36 +22,36 @@ import kotlin.reflect.KProperty
  */
 
 class ReaderView : View, GestureDetector.OnGestureListener {
-    companion object {
-        var rowSpace = 2f                                  //行距
-    }
+    var rowSpace = 2f                                                      //行距
 
-    var txtFontColorId: Int = 0                               //字体颜色
-    var text: ObservableArrayList<String>? by InvalidateAfterSet(null)  //view显示的内容，第 0 item项是章节名字，第i项是第i行文字内容
-    var bgColorId: Int? by InvalidateAfterSet(R.color.read_font_default)      //背景颜色
-    var txtFontType: Typeface? by InvalidateAfterSet(null)              //正文字体类型//背景颜色
-    internal var firstDrawListener: FirstDrawListener? = null
-    var pageListener: ReaderPageListener? = null
+    var txtFontColorId: Int = 0                                            //字体颜色
+    var bgColorId: Int? by InvalidateAfterSet(R.color.read_font_default)   //背景颜色
+    var txtFontType: Typeface? by InvalidateAfterSet(null)            //正文字体类型//背景颜色
+    private val mBottomPaint = Paint()                                     //绘制底部文字部分所用的画笔
+    private val mMainPaint = Paint()                                       //绘制正文部分所用的画笔
+    var txtFontSize: Float? by InvalidateAfterSet(50f)                //正文部分默认画笔的大小,单位是像素px
+    var indicatorFontSize: Float = 35f                                     //底部部分默认画笔的大小，单位是像素px
 
-    private val mBottomPaint = Paint()                //绘制底部文字部分所用的画笔
-    private val mMainPaint = Paint()                  //绘制正文部分所用的画笔
-    var txtFontSize: Float = 50f                      //正文部分默认画笔的大小,单位是像素px
-    var indicatorFontSize: Float = 35f                //底部部分默认画笔的大小，单位是像素px
+    var text: ObservableField<String>? by InvalidateAfterSet(null)    //一个未分割章节,格式：章节名|正文
+    lateinit var textArray: ArrayList<ArrayList<String>>                   //分割后的章节,view显示的内容，第i项是第i行文字内容
+    var title: String? by InvalidateAfterSet("")                      //章节名称
+    var pageNum: Int? by InvalidateAfterSet(1)                        //页数
+    var maxPageNum = 0
+    var pageFlag = 0                                        //0刚进入view，1表示目录跳转，2表示下一页，3表示上一页
 
-
-    private var isFirstDraw = true
     lateinit var timeFormatter: SimpleDateFormat
-    private val MIN_MOVE = 80F //翻页最小滑动距离
+    private val MIN_MOVE = 80F                              //翻页最小滑动距离
     lateinit var detector: GestureDetector
+    private var isFirstDraw = true
 
+    var firstDrawListener: FirstDrawListener? = null
+    var pageListener: ReaderPageListener? = null
 
     constructor(context: Context) : super(context) {
         init()
     }
 
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        init()
-    }
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context,
         attrs,
@@ -60,8 +61,30 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     }
 
 
+    interface FirstDrawListener {
+        /**
+         * 第一次绘制时调用
+         */
+        fun doDrawPrepare()
+    }
+
+
+    interface ReaderPageListener {
+        // 下一章
+        fun nextChapter()
+
+        //上一章
+        fun previousChapter()
+
+        //点击view中间部分
+        fun onCenterClick()
+
+        //当翻页时调用，向前向后翻页，同一章内翻页，翻至其他章节都会调用
+        fun onPageChange()
+    }
+
+
     fun init() {
-        mMainPaint.textSize = 40f
         mBottomPaint.isAntiAlias = true   //抗锯齿开启
         mMainPaint.isAntiAlias = true
         rowSpace = ApplyPreference.getRowSpace(context)
@@ -69,6 +92,8 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         bgColorId = R.color.read_bg_default
         timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
         detector = GestureDetector(context, this)
+        textArray = ArrayList()
+        mBottomPaint.textSize = indicatorFontSize                                    //底部部分画笔大小
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -76,74 +101,46 @@ class ReaderView : View, GestureDetector.OnGestureListener {
             isFirstDraw = false
             firstDrawListener?.doDrawPrepare() //绘制前一些操作
             firstDrawListener = null
+            flushTextArray()
         }
-
-        if (this.text!!.size < 1) return      //正文内容缺乏，直接不绘制了
         super.onDraw(canvas)
-
-
         canvas.drawColor(ContextCompat.getColor(context, bgColorId!!))                      //背景颜色
 
-
-        mBottomPaint.textSize = indicatorFontSize                                    //底部部分画笔大小
         mBottomPaint.color = ContextCompat.getColor(context, txtFontColorId)              //底部部分字体颜色
-        mMainPaint.textSize = txtFontSize                                            //正文部分画笔大小
         mMainPaint.color = ContextCompat.getColor(context, txtFontColorId)                //正文部分字体颜色
         mMainPaint.typeface = txtFontType
-        //绘制正文
-        for (i in 1 until text!!.size) {
-            canvas.drawText(
-                this.text!![i].replace(" ", "    "),
-                getMarginLeft(),
-                getMarginTop() + (i - 1) * txtFontSize * rowSpace,
-                mMainPaint
-            )
-        }
+        mMainPaint.textSize = txtFontSize!!                                     //正文部分画笔大小
+
 
         if (ApplyPreference.isFullScreen(context)) {  //全屏下绘制
             //底部左下角绘制：时间            格式如： 14:40
             val date = timeFormatter.format(System.currentTimeMillis())
             val dateX = getMarginLeft()
             val dateY = height - indicatorFontSize
-            canvas.drawText(
-                date,
-                dateX,
-                dateY,
-                mBottomPaint
-            )//日期的文字 + 绘制日期的X坐标 + 绘制日期的Y坐标 + 绘制底部专用的画笔
+            canvas.drawText(date, dateX, dateY, mBottomPaint)
         }
 
 
         //底部右下角绘制：章节相关信息    格式为:    第 XXX 章节 YYY章节名  ：  n / 该章节总共页数
+        val bottomText = "${title ?: ""} $pageNum/$maxPageNum"
         canvas.drawText(
-            this.text!![0],
-            width - mBottomPaint.measureText(text!![0]) - getMarginLeft(),
+            bottomText,
+            width - mBottomPaint.measureText(bottomText) - getMarginLeft(),
             height - indicatorFontSize,
             mBottomPaint
         )
-    }
 
-    //正文区域宽度
-    fun getTextWidth(): Int {
-        return (width * 0.96f).toInt()
+        if (textArray.size < 1 || pageNum!! < 1) return                                          //正文内容缺乏，直接不绘制了
+        //绘制正文
+        for (i in 0 until textArray[pageNum!! - 1].size) {
+            canvas.drawText(
+                textArray[pageNum!! - 1][i].replace(" ", "    "),
+                getMarginLeft(),
+                getMarginTop() + i * txtFontSize!! * rowSpace,
+                mMainPaint
+            )
+        }
     }
-
-    //正文区域高度
-    fun getTextHeight(): Int {
-        return ((height - indicatorFontSize) * 0.96f).toInt()
-    }
-
-    private fun getMarginLeft(): Float {
-        val count = (width * 0.96f).toInt() / txtFontSize.toInt()
-        return (width - count * txtFontSize) / 2
-    }
-
-    private fun getMarginTop(): Float {
-        val count =
-            ((height - indicatorFontSize) * 0.96f).toInt() / (txtFontSize * rowSpace).toInt()
-        return ((height - indicatorFontSize) - count * txtFontSize * rowSpace) / 2 + txtFontSize
-    }
-
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -160,22 +157,16 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         return true
     }
 
-    override fun onFling(
-        e1: MotionEvent,
-        e2: MotionEvent,
-        velocityX: Float,
-        velocityY: Float
-    ): Boolean {
+    override fun onFling(e1: MotionEvent, e2: MotionEvent, vX: Float, vY: Float): Boolean {
         val beginX = e1.x
         val endX = e2.x
         if (Math.abs(beginX - endX) < MIN_MOVE) {
             return false
+        }
+        if (beginX > endX) {
+            pageToNext()
         } else {
-            if (beginX > endX) {
-                pageListener?.pageToNext()
-            } else {
-                pageListener?.pageToPrevious()
-            }
+            pageToPrevious()
         }
         return false
     }
@@ -184,11 +175,12 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         val x = e.x
         val y = e.y
         if (x > width * 3 / 5) {
-            pageListener?.pageToNext()
+            pageToNext()
         } else if (x < width * 2 / 5) {
-            pageListener?.pageToPrevious()
+            pageToPrevious()
         } else if (y > height * 2 / 5 && y < height * 3 / 5) {
             pageListener?.onCenterClick()
+            pageFlag = 1
         }
         return false
     }
@@ -209,14 +201,78 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     override fun onShowPress(e: MotionEvent?) {
     }
 
-    interface FirstDrawListener {
-        fun doDrawPrepare()
+    //向前翻页
+    private fun pageToPrevious() {
+        pageListener?.onPageChange()
+        pageFlag = 3
+        if (pageNum!! < 2) {
+            pageListener?.previousChapter()
+        } else {
+            pageNum = pageNum!! - 1
+        }
     }
 
-    interface ReaderPageListener {
-        fun pageToNext()
-        fun pageToPrevious()
-        fun onCenterClick()
+    //向后翻页
+    private fun pageToNext() {
+        pageListener?.onPageChange()
+        pageFlag = 2
+        if (pageNum!! < maxPageNum) {
+            pageNum = pageNum!! + 1
+        } else {
+            pageListener?.nextChapter()
+        }
+    }
+
+    private fun flushTextArray() {
+        val str = text?.get()
+        if (str.isNullOrEmpty()) return
+        val indexOfDelimiter = str!!.indexOf("|")       //text格式 ： 章节名|正文
+        title = str.substring(0, indexOfDelimiter)
+        textArray.clear()
+        textArray.addAll(spliteText(str.substring(indexOfDelimiter + 1)))
+        maxPageNum = textArray.size
+        if (textArray.size == 1 && textArray[0].size == 1 && textArray[0][0].trim().isEmpty()) {
+            maxPageNum = 0
+        }
+    }
+
+    private fun spliteText(text: String?): ArrayList<ArrayList<String>> {
+        if (text.isNullOrEmpty()) return ArrayList()
+        val tmpArray = text!!.split("\n")
+        val tmplist = ArrayList<String>()
+        tmpArray.forEach {
+            val tmp = "  " + it.trim()
+            val totalCount = getTextWidth() / txtFontSize!!.toInt() //一行容纳字数
+            for (i in 0..tmp.length / totalCount) {
+                tmplist.add(tmp.filterIndexed { index, c -> index > i * totalCount - 1 && index < (i + 1) * totalCount })
+            }
+        }
+        val arrayList = ArrayList<ArrayList<String>>()
+        val totalCount = getTextHeight() / (txtFontSize!! * rowSpace).toInt()  //一页容纳行数
+        for (i in 0..tmplist.size / totalCount) {
+            arrayList.add(tmplist.filterIndexed { index, s -> index > i * totalCount - 1 && index < (i + 1) * totalCount } as ArrayList<String>)
+        }
+        return arrayList
+    }
+
+    //正文区域宽度
+    private fun getTextWidth(): Int {
+        return (width * 0.96f).toInt()
+    }
+
+    //正文区域高度
+    private fun getTextHeight(): Int {
+        return ((height - indicatorFontSize) * 0.96f).toInt()
+    }
+
+    private fun getMarginLeft(): Float {
+        val count = getTextWidth() / txtFontSize!!.toInt()
+        return (width - count * txtFontSize!!) / 2
+    }
+
+    private fun getMarginTop(): Float {
+        val count = getTextHeight() / (txtFontSize!! * rowSpace).toInt()
+        return ((height - indicatorFontSize) - count * txtFontSize!! * rowSpace) / 2 + txtFontSize!!
     }
 
     inner class InvalidateAfterSet<T>(var value: T? = null) {
@@ -225,9 +281,25 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         }
 
         operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+            @Volatile
             this.value = value
-            invalidate()
+            when (property.name) {
+                "txtFontSize" -> {
+                    val scale = maxPageNum.toFloat() / pageNum!!
+                    flushTextArray()
+                    pageNum = (maxPageNum / scale).toInt()
+                    if (pageNum == 0) pageNum = 1
+                }
+                "text" -> {
+                    flushTextArray()
+                    if (pageFlag < 1 && maxPageNum == 0) {
+                        pageNum = 0
+                        return
+                    }
+                    pageNum = if (pageFlag > 2) maxPageNum else if (maxPageNum == 0) 0 else 1
+                }
+                else -> invalidate()
+            }
         }
     }
-
 }

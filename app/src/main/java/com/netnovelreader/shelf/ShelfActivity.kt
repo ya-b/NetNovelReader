@@ -44,9 +44,6 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         if (!hasPermission) {
             requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)
         }
-        if (!checkPermission(android.Manifest.permission.INTERNET)) {
-            requirePermission(android.Manifest.permission.INTERNET, 2)
-        }
         init()
     }
 
@@ -56,6 +53,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     override fun setViewModel(vm: ShelfViewModel) {
         shelfViewModel = vm
         DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
+
     }
 
     override fun init() {
@@ -163,8 +161,6 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
             } else {
                 Toast.makeText(this, R.string.permission_warnning, Toast.LENGTH_LONG).show()
             }
-        } else if (requestCode == 2 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, R.string.permission_warnning, Toast.LENGTH_LONG).show()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
@@ -196,10 +192,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
             val listener = DialogClickListener(view.nameView.text.toString())
             val builder = AlertDialog.Builder(this@ShelfActivity)
             builder.setTitle(
-                getString(R.string.deleteBook).replace(
-                    "book",
-                    view.nameView.text.toString()
-                )
+                getString(R.string.deleteBook).replace("book", view.nameView.text.toString())
             )
                 .setPositiveButton(R.string.yes, listener)
                 .setNegativeButton(R.string.no, listener)

@@ -9,7 +9,10 @@ import com.netnovelreader.data.SearchBook
 import com.netnovelreader.download.CatalogCache
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 import java.net.URLEncoder
 
 /**
@@ -44,27 +47,19 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
 
     override fun saveBookImage(tableName: String, bookname: String) {
         val imageDir = File(getSavePath() + "/tmp")
-        val imagePath = File(mkdirs(getSavePath() + "/$tableName"))
         if (!imageDir.exists()) return
-        val list = imageDir.list()
-        for (i in 0..list.size - 1) {
-            if (list[i].startsWith(bookname)) {
-                Thread { copyFile(File(imageDir, list[i]), File(imagePath, IMAGENAME)) }.start()
-                break
-            }
-        }
+        Thread {
+            imageDir.listFiles().filter { it.name.startsWith(bookname) }.firstOrNull()
+                ?.copyTo(File(File(mkdirs(getSavePath() + "/$tableName")), IMAGENAME), true)
+        }.start()
     }
 
-    //删除目标及之后的章节,换源重新下载做准备
+    //删除目标及之后的章节,换源重新下载
     fun delChapterAfterSrc(tableName: String, chapterName: String) {
-        val arrayList = SQLHelper.delChapterAfterSrc(tableName, chapterName)
         val fileDir = File(getSavePath() + "/$tableName")
         if (!fileDir.exists()) return
-        fileDir.listFiles().forEach {
-            if (arrayList.contains(it.name)) {
-                it.delete()
-            }
-        }
+        val arrayList = SQLHelper.delChapterAfterSrc(tableName, chapterName)
+        fileDir.listFiles().filter { arrayList.contains(it.name) }.forEach { it.delete() }
     }
 
     //从具体网站搜索，并添加到resultList
@@ -122,18 +117,5 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
                 outputStream?.close()
             }
         }.start()
-    }
-
-    private fun copyFile(srcFile: File, distFile: File) {
-        val fi = FileInputStream(srcFile)
-        val fo = FileOutputStream(distFile)
-        val buffer = ByteArray(100)
-        var length = 0
-        while ({ length = fi.read(buffer); length }() > -1) {
-            fo.write(buffer, 0, length)
-            fo.flush()
-        }
-        fi.close()
-        fo.close()
     }
 }

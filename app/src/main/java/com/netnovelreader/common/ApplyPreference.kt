@@ -1,6 +1,7 @@
 package com.netnovelreader.common
 
 import android.content.Context
+import android.util.Log
 import com.netnovelreader.R
 
 /**
@@ -14,7 +15,9 @@ object ApplyPreference {
 
     fun getAutoDownNum(context: Context): Int {
         val boolean = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getBoolean(context.getString(R.string.auto_download), true)
+            .getBoolean(context.getString(R.string.auto_download_key), true)
+        var a = compareValues(boolean, false) * 3
+        Log.d("==============", "cachenum$boolean")
         return compareValues(boolean, false) * 3
     }
 

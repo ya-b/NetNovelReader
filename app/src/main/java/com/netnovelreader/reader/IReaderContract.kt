@@ -13,17 +13,10 @@ interface IReaderContract {
     }
 
     interface IReaderViewModel : IViewModel<ReaderBean> {
-        fun initData(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float)
-        fun pageToNext(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float)
-        fun pageToPrevious(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float)
-        fun pageByCatalog(
-            chapterName: String,
-            textAreaWidth: Int,
-            textAreaHeight: Int,
-            txtFontSize: Float
-        )
-
-        fun changeFontSize(textAreaWidth: Int, textAreaHeight: Int, txtFontSize: Float)
+        fun initData(): Int
+        fun nextChapter(): Boolean
+        fun previousChapter(): Boolean
+        fun pageByCatalog(chapterName: String?): Boolean
         fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog>
     }
 }

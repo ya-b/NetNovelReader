@@ -16,6 +16,7 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import java.io.File
 import java.io.IOException
+import java.util.*
 import java.util.concurrent.Executors
 
 /**
@@ -31,20 +32,25 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
 
     override fun updateBooks(): Boolean {
         val threadPoolExecutor = Executors.newFixedThreadPool(5)
+        var i = 0
+        var tmp = 0
         Observable.fromIterable(bookList).flatMap { bean ->
             Observable.create<Int> { emitter ->
                 try {
                     DownloadCatalog(
                         id2TableName(bean.bookid.get()),
-                        bean.downloadURL.get()
+                        bean.downloadURL.get() ?: ""
                     ).download()
                 } catch (e: IOException) {
                 } finally {
-                    emitter.onNext(1)
+                    emitter.onNext(++i)
                 }
             }.subscribeOn(Schedulers.from(threadPoolExecutor))
         }.observeOn(Schedulers.single()).subscribe {
-            refreshBookList()
+            if (i > tmp && (i % 3 == 0 || i == bookList.size)) {  //避免刷新太频繁导致recyclerview崩溃
+                refreshBookList()
+                tmp = i
+            }
         }
         return true
     }
@@ -59,6 +65,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
     /**
      * 刷新书架
      */
+    @Synchronized
     override fun refreshBookList() {
         val arrayList = ArrayList<ShelfBean>()
         val listInDir = dirBookList()
@@ -78,7 +85,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
                 arrayList.add(bookBean)
                 Thread { checkCatalog(bookBean) }.start()
             } else {
-                Thread { deleteBook(bookBean.bookname.get()) }.start()
+                Thread { deleteBook(bookBean.bookname.get() ?: "") }.start()
             }
         }
         cursor.close()
@@ -110,7 +117,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
         val tableName = id2TableName(bookBean.bookid.get())
         if (SQLHelper.getChapterCount(tableName) == 0) {
             try {
-                DownloadCatalog(tableName, bookBean.downloadURL.get()).download()
+                DownloadCatalog(tableName, bookBean.downloadURL.get() ?: "").download()
             } catch (e: IOException) {
                 Log.d("Reader:ShelfViewModel", e.printStackTrace().toString())
             }

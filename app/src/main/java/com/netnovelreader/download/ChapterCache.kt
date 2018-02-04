@@ -3,7 +3,6 @@ package com.netnovelreader.download
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.data.SQLHelper
 import java.io.File
-import java.io.FileReader
 import java.io.IOException
 import java.util.*
 
@@ -11,6 +10,9 @@ import java.util.*
  * Created by yangbo on 18-1-15.
  */
 class ChapterCache(private val cacheNum: Int, private val tableName: String) {
+    companion object {
+        val FILENOTFOUND = "            "
+    }
     /**
      * hashTablb<第几章，章节内容>
      */
@@ -20,10 +22,9 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
      */
     private var maxChapterNum = 0
     private var dirName: String? = null
-    fun prepare(chapterNum: Int, maxChapterNum: Int, dirName: String) {
+    fun prepare(maxChapterNum: Int, dirName: String) {
         this.maxChapterNum = maxChapterNum
         this.dirName = dirName
-        Thread { getChapter(chapterNum) }.start()
     }
 
     fun getChapter(chapterNum: Int): String {
@@ -33,15 +34,18 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         } else {
             try {
                 result = getText(chapterNum, true)
-                chapterTxtTable.put(chapterNum, result)
+                val str = result.substring(result.indexOf("|") + 1)
+                if (!str.isEmpty() && str != FILENOTFOUND) {
+                    chapterTxtTable.put(chapterNum, result)
+                }
             } catch (e: IOException) {
-                result = ""
+                result = " |" + FILENOTFOUND
             }
         }
         if (cacheNum != 0) {
             Thread { readToCache(chapterNum) }.start()
         }
-        return result ?: ""
+        return result ?: " |"+FILENOTFOUND
     }
 
     /**
@@ -55,30 +59,17 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         val chapterName = SQLHelper.getChapterName(dirName!!, chapterNum)
         sb.append(chapterName + "|")
         val chapterPath = "${getSavePath()}/$dirName/$chapterName"
-        if (!File(chapterPath).exists()) {
+        val chapterFile = File(chapterPath)
+        if (!chapterFile.exists()) {
             if (!isCurrentChapter) {
-                sb.append(
-                    getFromNet(
-                        "${getSavePath()}/$dirName",
-                        chapterName
-                    )
-                )
+                sb.append(getFromNet("${getSavePath()}/$dirName", chapterName))
+            } else {
+                sb.append(FILENOTFOUND)
             }
         } else {
-            sb.append(getFromFile(chapterPath))
+            val txt = chapterFile.readText()
+            sb.append(txt) //从本地文件获取章节内容
         }
-        return sb.toString()
-    }
-
-    /**
-     * 从本地文件获取章节内容
-     */
-    @Throws(IOException::class)
-    private fun getFromFile(chapterPath: String): String {
-        val sb = StringBuilder()
-        val fr = FileReader(chapterPath)
-        fr.forEachLine { sb.append(it + "\n") }
-        fr.close()
         return sb.toString()
     }
 
@@ -86,7 +77,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
      * 从网络获取章节内容
      */
     @Throws(IOException::class)
-    private fun getFromNet(dir: String, chapterName: String): String {
+    fun getFromNet(dir: String, chapterName: String): String {
         val download = DownloadChapter(
             tableName, dir, chapterName,
             SQLHelper.getChapterUrl(tableName, chapterName)
@@ -96,9 +87,9 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
             chapterText = download.getChapterTxt()
             download.download(chapterText)
         } catch (e: IOException) {
-            chapterText = ""
+            chapterText = FILENOTFOUND
         } finally {
-            return chapterText ?: ""
+            return chapterText ?: FILENOTFOUND
         }
     }
 
@@ -107,15 +98,8 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
      */
     @Throws(IOException::class)
     private fun readToCache(chapterNum: Int) {
-        val arrayList = ArrayList<Int>()
-        chapterTxtTable.forEach {
-            if (it.key + 1 < chapterNum || it.key - cacheNum > chapterNum || it.value.length == 0) {
-                arrayList.add((it.key))
-            }
-        }
-        arrayList.forEach {
-            chapterTxtTable.remove(it)
-        }
+        chapterTxtTable.filter { it.key + 1 < chapterNum || it.key - cacheNum > chapterNum || it.value.length == 0 }
+            .forEach { chapterTxtTable.remove(it.key) }
         if (chapterNum > 1) {
             if (!chapterTxtTable.contains(chapterNum - 1)) {
                 chapterTxtTable.put(chapterNum - 1, getText(chapterNum - 1, false))

@@ -2,6 +2,7 @@ package com.netnovelreader.reader
 
 import android.content.Context
 import android.graphics.Typeface
+import android.support.v4.content.ContextCompat
 import android.widget.TextView
 import com.netnovelreader.R
 
@@ -36,11 +37,16 @@ class Config {
         fun setTextViewSelect(textView: TextView, isSelect: Boolean?) {
             val context = textView.context
             if (isSelect!!) {
-                textView.setBackgroundDrawable(context.resources.getDrawable(R.drawable.button_select_bg))
-                textView.setTextColor(context.resources.getColor(R.color.read_dialog_button_select))
+                ContextCompat.getDrawable(context, R.drawable.button_select_bg)
+                textView.setTextColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.read_dialog_button_select
+                    )
+                )
             } else {
-                textView.setBackgroundDrawable(context.resources.getDrawable(R.drawable.button_bg))
-                textView.setTextColor(context.resources.getColor(R.color.white))
+                ContextCompat.getDrawable(context, R.drawable.button_bg)
+                textView.setTextColor(ContextCompat.getColor(context, R.color.white))
             }
         }
 

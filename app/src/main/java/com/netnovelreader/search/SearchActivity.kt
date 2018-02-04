@@ -107,14 +107,15 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     inner class SearchItemClickEvent : IClickEvent {
         fun onClick(v: View) {
             val chapterName = intent.getStringExtra("chapterName")
-            val catalogUrl = v.resultUrl.text.toString()
             val tableName =
-                searchViewModel!!.addBookToShelf(v.resultName.text.toString(), catalogUrl)
+                searchViewModel!!.addBookToShelf(
+                    v.resultName.text.toString(),
+                    v.resultUrl.text.toString()
+                )
             if (!intent.getStringExtra("bookname").isNullOrEmpty() && !chapterName.isNullOrEmpty()) {
                 searchViewModel?.delChapterAfterSrc(tableName, chapterName)
             }
-            Toast.makeText(this@SearchActivity, R.string.start_download, Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(this@SearchActivity, R.string.start_download, Toast.LENGTH_SHORT).show()
             val intent = Intent(v.context, DownloadService::class.java)
             intent.putExtra("tableName", tableName)
             intent.putExtra("catalogurl", v.resultUrl.text.toString())

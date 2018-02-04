@@ -22,17 +22,19 @@ class SearchBookTest {
 
         SearchBook().search(
             "http://www.b5200.net/modules/article/search.php?searchkey=a",
-                "td.odd:nth-child(1) > a:nth-child(1)",
-                "td.odd:nth-child(1) > a:nth-child(1)",
-                "")
-                .forEach { println(it) }
+            "td.odd:nth-child(1) > a:nth-child(1)",
+            "td.odd:nth-child(1) > a:nth-child(1)",
+            ""
+        )
+            .forEach { println(it) }
 
     }
 
     @Test
     fun parseCatalogUrl() {
-        val p = Jsoup.connect("http://www.b5200.net/2_2598/").headers(getHeaders("http://www.b5200.net/2_2598/"))
-        .timeout(TIMEOUT).get().select("#list > dl:nth-child(1)").select("a")
+        val p = Jsoup.connect("http://www.b5200.net/2_2598/")
+            .headers(getHeaders("http://www.b5200.net/2_2598/"))
+            .timeout(TIMEOUT).get().select("#list > dl:nth-child(1)").select("a")
         println(p)
     }
 

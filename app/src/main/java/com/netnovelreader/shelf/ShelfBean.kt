@@ -1,5 +1,6 @@
 package com.netnovelreader.shelf
 
+import android.databinding.BaseObservable
 import android.databinding.ObservableField
 import android.databinding.ObservableInt
 import android.graphics.Bitmap
@@ -14,4 +15,4 @@ data class ShelfBean(
     var downloadURL: ObservableField<String>,
     var bitmap: ObservableField<Bitmap>,
     var isUpdate: ObservableField<String>
-)
+) : BaseObservable()
