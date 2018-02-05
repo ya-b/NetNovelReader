@@ -19,10 +19,10 @@ import android.view.WindowManager
 import android.widget.SeekBar
 import android.widget.TextView
 import com.netnovelreader.R
-import com.netnovelreader.base.IClickEvent
 import com.netnovelreader.common.*
+import com.netnovelreader.common.base.IClickEvent
+import com.netnovelreader.common.download.ChapterCache
 import com.netnovelreader.databinding.ActivityReaderBinding
-import com.netnovelreader.download.ChapterCache
 import com.netnovelreader.search.SearchActivity
 import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.Observable
@@ -34,26 +34,26 @@ import java.util.*
 
 
 class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
-    ReaderView.ReaderPageListener, ReaderView.FirstDrawListener, IClickEvent {
+        ReaderView.ReaderPageListener, ReaderView.FirstDrawListener, IClickEvent {
     val FONTSIZE = "FontSize"
     var readerViewModel: ReaderViewModel? = null
     var dialog: AlertDialog? = null
     var netStateReceiver: NetChangeReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (ApplyPreference.isFullScreen(this)) {
+        if (PreferenceManager.isFullScreen(this)) {
             window.setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
-        ApplyPreference.setTheme(this)
+        PreferenceManager.setTheme(this)
         super.onCreate(savedInstanceState)
         setViewModel(
-            ReaderViewModel(
-                intent.getStringExtra("bookname"),
-                ApplyPreference.getAutoDownNum(this)
-            )
+                ReaderViewModel(
+                        intent.getStringExtra("bookname"),
+                        PreferenceManager.getAutoDownNum(this)
+                )
         )
         init()
     }
@@ -61,14 +61,14 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun setViewModel(vm: ReaderViewModel) {
         readerViewModel = vm
         val binding =
-            DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
+                DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
         binding.clickEvent = ReaderClickEvent()
         binding.readerViewModel = readerViewModel
         binding.readerView.background = getDrawable(R.drawable.bg_readbook_yellow)
         binding.readerView.firstDrawListener = this
         binding.readerView.pageListener = this
         binding.readerView.txtFontSize = getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getFloat(FONTSIZE, 50f)
+                .getFloat(FONTSIZE, 50f)
     }
 
     override fun init() {
@@ -97,13 +97,14 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(netStateReceiver)
+        if (PreferenceManager.isAutoRemove(this)) {
+            readerViewModel?.autoRemove()
+        }
     }
 
     override fun onBackPressed() {
         if (footView.visibility == View.VISIBLE) {
-            headerView.visibility = View.INVISIBLE
-            footView.visibility = View.INVISIBLE
-            fontSetting.visibility = View.INVISIBLE
+            hideHeaderFoot()
         } else {
             super.onBackPressed()
         }
@@ -152,8 +153,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             var times = 0
             while (str == ChapterCache.FILENOTFOUND && times++ < 10) {
                 str = readerViewModel!!.chapterCache.getFromNet(
-                    getSavePath() + "/" + readerViewModel?.dirName!!,
-                    readerView.title ?: "HELLO"
+                        getSavePath() + "/" + readerViewModel?.dirName!!,
+                        readerView.title ?: "HELLO"
                 )
                 Thread.sleep(500)
             }
@@ -163,9 +164,9 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                 it.onNext(true)
             }
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                if (it && !(readerViewModel?.pageByCatalog(null) ?: true)) loadingbar.hide()
-            }
+                .subscribe {
+                    if (it && !(readerViewModel?.pageByCatalog(null) ?: true)) loadingbar.hide()
+                }
     }
 
     override fun showDialog() {
@@ -178,8 +179,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             catalogView.addItemDecoration(NovelItemDecoration(this))
             catalogView.itemAnimator = DefaultItemAnimator()
             catalogView.adapter = BindingAdapter(
-                readerViewModel?.catalog, R.layout.item_catalog,
-                CatalogItemClickListener()
+                    readerViewModel?.catalog, R.layout.item_catalog,
+                    CatalogItemClickListener()
             )
             dialog = builder.setView(view).create()
         }
@@ -195,6 +196,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             headerView.visibility = View.INVISIBLE
             footView.visibility = View.INVISIBLE
             fontSetting.visibility = View.INVISIBLE
+            backgroundSetting.visibility = View.INVISIBLE
             return true
         }
         return false
@@ -252,13 +254,23 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                     headerView.visibility = View.INVISIBLE
                     footView.visibility = View.INVISIBLE
                     fontSetting.visibility = View.INVISIBLE
+                    backgroundSetting.visibility = View.INVISIBLE
                     showDialog()
                 }
                 fontSizeButton -> {
+                    backgroundSetting.visibility = View.INVISIBLE
                     if (fontSetting.visibility == View.VISIBLE) {
                         fontSetting.visibility = View.INVISIBLE
                     } else {
                         fontSetting.visibility = View.VISIBLE
+                    }
+                }
+                backgroundButton -> {
+                    fontSetting.visibility = View.INVISIBLE
+                    if (backgroundSetting.visibility == View.VISIBLE) {
+                        backgroundSetting.visibility = View.INVISIBLE
+                    } else {
+                        backgroundSetting.visibility = View.VISIBLE
                     }
                 }
             }
@@ -267,7 +279,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         fun onFontSizeClick(v: View) {
             readerView.txtFontSize = (v as TextView).text.toString().toFloat()
             getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-                .putFloat(FONTSIZE, readerView.txtFontSize!!).apply()
+                    .putFloat(FONTSIZE, readerView.txtFontSize!!).apply()
         }
 
         //改变阅读界面字体类型
@@ -275,27 +287,21 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             view as TextView
             val context = view.context
             val typeFacePath =      //根据用户选择获取字体路径
-                when (view.id) {
-                    R.id.tv_beiweikai -> Config.FONTTYPE_BEIWEIKAISHU
-                    R.id.tv_bysong -> Config.FONTTYPE_BYSONG
-                    R.id.tv_default -> Config.FONTTYPE_DEFAULT
-                    R.id.tv_zhulang -> Config.FONTTYPE_CHENGUANG
-                    R.id.tv_fzkatong -> Config.FONTTYPE_FZKATONG
-                    else -> Config.FONTTYPE_DEFAULT
-                }
+                    when (view.id) {
+                        R.id.tv_beiweikai -> Config.FONTTYPE_BEIWEIKAISHU
+                        R.id.tv_bysong -> Config.FONTTYPE_BYSONG
+                        R.id.tv_default -> Config.FONTTYPE_DEFAULT
+                        R.id.tv_zhulang -> Config.FONTTYPE_CHENGUANG
+                        R.id.tv_fzkatong -> Config.FONTTYPE_FZKATONG
+                        else -> Config.FONTTYPE_DEFAULT
+                    }
 
-            readerView.txtFontType = Config.getTypeface(context, typeFacePath)        //根据新的字体重新绘制视图
+            readerView.txtFontType = Config.getTypeface(context, typeFacePath)   //根据新的字体重新绘制视图
             selectedFontTextView?.let {
-                Config.setTextViewSelect(
-                    it,
-                    false
-                )                            //将前次选中的字体TextView改变背景色
+                Config.setTextViewSelect(it, false)                       //将前次选中的字体TextView改变背景色
             }
             selectedFontTextView = view
-            Config.setTextViewSelect(
-                view,
-                true
-            )                               //为当前选中的字体TextView改变背景色
+            Config.setTextViewSelect(view, true)                           //为当前选中的字体TextView改变背景色
 
         }
 

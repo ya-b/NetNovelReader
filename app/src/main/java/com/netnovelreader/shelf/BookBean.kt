@@ -8,7 +8,7 @@ import android.graphics.Bitmap
 /**
  * Created by yangbo on 18-1-12.
  */
-data class ShelfBean(
+data class BookBean(
     var bookid: ObservableInt,
     var bookname: ObservableField<String>,
     var latestChapter: ObservableField<String>,

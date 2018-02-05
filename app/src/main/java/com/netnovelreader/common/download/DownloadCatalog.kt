@@ -1,10 +1,10 @@
-package com.netnovelreader.download
+package com.netnovelreader.common.download
 
 import com.netnovelreader.common.UPDATEFLAG
 import com.netnovelreader.common.tableName2Id
 import com.netnovelreader.common.url2Hostname
-import com.netnovelreader.data.ParseHtml
-import com.netnovelreader.data.SQLHelper
+import com.netnovelreader.common.data.ParseHtml
+import com.netnovelreader.common.data.SQLHelper
 import java.io.IOException
 
 /**

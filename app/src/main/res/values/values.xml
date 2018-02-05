@@ -13,6 +13,13 @@
     </string-array>
 
     <string-array name="rowspace">
+        <item>0.25</item>
+        <item>0.50</item>
+        <item>0.75</item>
+        <item>1.00</item>
+    </string-array>
+
+    <string-array name="rowspace_values">
         <item>1.25</item>
         <item>1.50</item>
         <item>1.75</item>

@@ -1,7 +1,7 @@
 package com.netnovelreader.shelf
 
-import com.netnovelreader.base.IView
-import com.netnovelreader.base.IViewModel
+import com.netnovelreader.common.base.IView
+import com.netnovelreader.common.base.IViewModel
 
 /**
  * Created by yangbo on 18-1-13.
@@ -13,7 +13,7 @@ interface IShelfContract {
         fun requirePermission(permission: String, reqCode: Int)
     }
 
-    interface IShelfViewModel : IViewModel<ShelfBean> {
+    interface IShelfViewModel : IViewModel<BookBean> {
         fun updateBooks(): Boolean
         fun refreshBookList()
         fun cancelUpdateFlag(bookname: String)

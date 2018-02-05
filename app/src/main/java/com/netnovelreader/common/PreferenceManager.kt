@@ -7,7 +7,7 @@ import com.netnovelreader.R
 /**
  * Created by yangbo on 18-1-27.
  */
-object ApplyPreference {
+object PreferenceManager {
     fun isFullScreen(context: Context): Boolean {
         return context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
             .getBoolean(context.getString(R.string.full_screen_key), false)
@@ -16,9 +16,12 @@ object ApplyPreference {
     fun getAutoDownNum(context: Context): Int {
         val boolean = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
             .getBoolean(context.getString(R.string.auto_download_key), true)
-        var a = compareValues(boolean, false) * 3
-        Log.d("==============", "cachenum$boolean")
         return compareValues(boolean, false) * 3
+    }
+
+    fun isAutoRemove(context: Context): Boolean {
+        return context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+                .getBoolean(context.getString(R.string.auto_remove_key), true)
     }
 
     fun setTheme(context: Context) {

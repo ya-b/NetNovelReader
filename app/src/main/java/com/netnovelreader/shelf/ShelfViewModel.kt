@@ -8,10 +8,10 @@ import android.graphics.Color
 import android.util.Log
 import com.netnovelreader.common.IMAGENAME
 import com.netnovelreader.common.ObservableSyncArrayList
+import com.netnovelreader.common.data.SQLHelper
+import com.netnovelreader.common.download.DownloadCatalog
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.id2TableName
-import com.netnovelreader.data.SQLHelper
-import com.netnovelreader.download.DownloadCatalog
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import java.io.File
@@ -24,12 +24,13 @@ import java.util.concurrent.Executors
  */
 class ShelfViewModel : IShelfContract.IShelfViewModel {
 
-    var bookList: ObservableSyncArrayList<ShelfBean>
+    var bookList: ObservableSyncArrayList<BookBean>
 
     init {
         bookList = ObservableSyncArrayList()
     }
 
+    //检查书籍是否有更新
     override fun updateBooks(): Boolean {
         val threadPoolExecutor = Executors.newFixedThreadPool(5)
         var i = 0
@@ -38,8 +39,8 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
             Observable.create<Int> { emitter ->
                 try {
                     DownloadCatalog(
-                        id2TableName(bean.bookid.get()),
-                        bean.downloadURL.get() ?: ""
+                            id2TableName(bean.bookid.get()),
+                            bean.downloadURL.get() ?: ""
                     ).download()
                 } catch (e: IOException) {
                 } finally {
@@ -55,44 +56,35 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
         return true
     }
 
+    //取消书籍更新标志"●",设为最近阅读
     override fun cancelUpdateFlag(bookname: String) {
-        SQLHelper.getDB().execSQL(
-            "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.ISUPDATE}='' " +
-                    "where ${SQLHelper.BOOKNAME}='$bookname';"
-        )
+        SQLHelper.cancelUpdateFlag(bookname)
+        SQLHelper.setLatestRead(bookname)
     }
 
     /**
-     * 刷新书架
+     * 刷新书架，从数据库重新获取
      */
     @Synchronized
     override fun refreshBookList() {
-        val arrayList = ArrayList<ShelfBean>()
-        val listInDir = dirBookList()
-        val cursor = SQLHelper.queryShelfBookList()
-        while (cursor.moveToNext()) {
-            val bookId = cursor.getInt(cursor.getColumnIndex(SQLHelper.ID))
-            val latestChapter = cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER))
-            val bookBean = ShelfBean(
-                ObservableInt(bookId),
-                ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME))),
-                ObservableField(latestChapter),
-                ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL))),
-                ObservableField(getBitmap(bookId)),
-                ObservableField(cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE)))
-            )
-            if (listInDir.contains(id2TableName(bookBean.bookid.get()))) {
+        val arrayList = ArrayList<BookBean>()
+        val bookDirList = dirBookList()
+        val map = SQLHelper.queryShelfBookList()
+        map.forEach {
+            val bookBean = BookBean(ObservableInt(it.key), ObservableField(it.value[0]), ObservableField(it.value[1]),
+                    ObservableField(it.value[2]), ObservableField(getBitmap(it.key)), ObservableField(it.value[3]))
+            if (bookDirList.contains(id2TableName(bookBean.bookid.get()))) {
                 arrayList.add(bookBean)
-                Thread { checkCatalog(bookBean) }.start()
+                Thread { updateCatalog(bookBean) }.start()
             } else {
                 Thread { deleteBook(bookBean.bookname.get() ?: "") }.start()
             }
         }
-        cursor.close()
         bookList.clear()
         bookList.addAll(arrayList)
     }
 
+    //删除书籍
     override fun deleteBook(bookname: String) {
         val id = SQLHelper.removeBookFromShelf(bookname)
         if (id == -1) return
@@ -102,6 +94,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
         }.start()
     }
 
+    //获取文件夹里面的书列表
     private fun dirBookList(): ArrayList<String> {
         val list = ArrayList<String>()
         val file = File(getSavePath())
@@ -113,7 +106,8 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
         return list
     }
 
-    private fun checkCatalog(bookBean: ShelfBean) {
+    //更新目录
+    private fun updateCatalog(bookBean: BookBean) {
         val tableName = id2TableName(bookBean.bookid.get())
         if (SQLHelper.getChapterCount(tableName) == 0) {
             try {
@@ -124,6 +118,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
         }
     }
 
+    //书架将要显示的书籍封面图片
     private fun getBitmap(bookId: Int): Bitmap {
         val file = File(getSavePath() + "/${id2TableName(bookId)}", IMAGENAME)
         var bitmap: Bitmap? = null
@@ -131,8 +126,8 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
             bitmap = BitmapFactory.decodeFile(file.path)
         }
         return bitmap ?: Bitmap.createBitmap(
-            IntArray(45 * 60) { _ -> Color.parseColor("#7092bf") },
-            45, 60, Bitmap.Config.RGB_565
+                IntArray(45 * 60) { _ -> Color.parseColor("#7092bf") },
+                45, 60, Bitmap.Config.RGB_565
         )
     }
 }

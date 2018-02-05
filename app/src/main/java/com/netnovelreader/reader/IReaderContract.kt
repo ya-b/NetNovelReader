@@ -1,8 +1,8 @@
 package com.netnovelreader.reader
 
 import android.databinding.ObservableArrayList
-import com.netnovelreader.base.IView
-import com.netnovelreader.base.IViewModel
+import com.netnovelreader.common.base.IView
+import com.netnovelreader.common.base.IViewModel
 
 /**
  * Created by yangbo on 18-1-13.
@@ -18,5 +18,7 @@ interface IReaderContract {
         fun previousChapter(): Boolean
         fun pageByCatalog(chapterName: String?): Boolean
         fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog>
+        fun setRecord(chapterNum: Int, pageNum: Int)
+        fun autoRemove()
     }
 }

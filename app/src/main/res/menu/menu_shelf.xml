@@ -12,5 +12,10 @@
         android:orderInCategory="100"
         android:title="@string/settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/edit_site_preference"
+        android:orderInCategory="100"
+        android:title="@string/edit_site"
+        app:showAsAction="never"/>
 
 </menu>

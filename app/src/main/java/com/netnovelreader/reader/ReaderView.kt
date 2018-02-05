@@ -11,7 +11,8 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import com.netnovelreader.R
-import com.netnovelreader.common.ApplyPreference
+import com.netnovelreader.common.PreferenceManager
+import com.netnovelreader.common.download.ChapterCache
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -26,14 +27,14 @@ class ReaderView : View, GestureDetector.OnGestureListener {
 
     var txtFontColorId: Int = 0                                            //字体颜色
     var bgColorId: Int? by InvalidateAfterSet(R.color.read_font_default)   //背景颜色
-    var txtFontType: Typeface? by InvalidateAfterSet(null)            //正文字体类型//背景颜色
+    var txtFontType: Typeface? by InvalidateAfterSet(null)           //正文字体类型//背景颜色
     private val mBottomPaint = Paint()                                     //绘制底部文字部分所用的画笔
     private val mMainPaint = Paint()                                       //绘制正文部分所用的画笔
-    var txtFontSize: Float? by InvalidateAfterSet(50f)                //正文部分默认画笔的大小,单位是像素px
+    var txtFontSize: Float? by InvalidateAfterSet(50f)               //正文部分默认画笔的大小,单位是像素px
     var indicatorFontSize: Float = 35f                                     //底部部分默认画笔的大小，单位是像素px
 
     var text: ObservableField<String>? by InvalidateAfterSet(null)    //一个未分割章节,格式：章节名|正文
-    lateinit var textArray: ArrayList<ArrayList<String>>                   //分割后的章节,view显示的内容，第i项是第i行文字内容
+    lateinit var textArray: ArrayList<ArrayList<String>>                    //分割后的章节,view显示的内容，第i项是第i行文字内容
     var title: String? by InvalidateAfterSet("")                      //章节名称
     var pageNum: Int? by InvalidateAfterSet(1)                        //页数
     var maxPageNum = 0
@@ -53,9 +54,9 @@ class ReaderView : View, GestureDetector.OnGestureListener {
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
+            context,
+            attrs,
+            defStyleAttr
     ) {
         init()
     }
@@ -87,13 +88,13 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     fun init() {
         mBottomPaint.isAntiAlias = true   //抗锯齿开启
         mMainPaint.isAntiAlias = true
-        rowSpace = ApplyPreference.getRowSpace(context)
+        rowSpace = PreferenceManager.getRowSpace(context)
         txtFontColorId = R.color.read_font_default
         bgColorId = R.color.read_bg_default
         timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
         detector = GestureDetector(context, this)
         textArray = ArrayList()
-        mBottomPaint.textSize = indicatorFontSize                                    //底部部分画笔大小
+        mBottomPaint.textSize = indicatorFontSize                                  //底部部分画笔大小
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -104,15 +105,15 @@ class ReaderView : View, GestureDetector.OnGestureListener {
             flushTextArray()
         }
         super.onDraw(canvas)
-        canvas.drawColor(ContextCompat.getColor(context, bgColorId!!))                      //背景颜色
+        canvas.drawColor(ContextCompat.getColor(context, bgColorId!!))             //背景颜色
 
-        mBottomPaint.color = ContextCompat.getColor(context, txtFontColorId)              //底部部分字体颜色
-        mMainPaint.color = ContextCompat.getColor(context, txtFontColorId)                //正文部分字体颜色
+        mBottomPaint.color = ContextCompat.getColor(context, txtFontColorId)       //底部部分字体颜色
+        mMainPaint.color = ContextCompat.getColor(context, txtFontColorId)         //正文部分字体颜色
         mMainPaint.typeface = txtFontType
-        mMainPaint.textSize = txtFontSize!!                                     //正文部分画笔大小
+        mMainPaint.textSize = txtFontSize!!                                        //正文部分画笔大小
 
 
-        if (ApplyPreference.isFullScreen(context)) {  //全屏下绘制
+        if (PreferenceManager.isFullScreen(context)) {                             //全屏条件下绘制
             //底部左下角绘制：时间            格式如： 14:40
             val date = timeFormatter.format(System.currentTimeMillis())
             val dateX = getMarginLeft()
@@ -124,20 +125,20 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         //底部右下角绘制：章节相关信息    格式为:    第 XXX 章节 YYY章节名  ：  n / 该章节总共页数
         val bottomText = "${title ?: ""} $pageNum/$maxPageNum"
         canvas.drawText(
-            bottomText,
-            width - mBottomPaint.measureText(bottomText) - getMarginLeft(),
-            height - indicatorFontSize,
-            mBottomPaint
+                bottomText,
+                width - mBottomPaint.measureText(bottomText) - getMarginLeft(),
+                height - indicatorFontSize,
+                mBottomPaint
         )
 
-        if (textArray.size < 1 || pageNum!! < 1) return                                          //正文内容缺乏，直接不绘制了
+        if (textArray.size < 1 || pageNum!! < 1) return              //正文内容缺乏，直接不绘制了
         //绘制正文
         for (i in 0 until textArray[pageNum!! - 1].size) {
             canvas.drawText(
-                textArray[pageNum!! - 1][i].replace(" ", "    "),
-                getMarginLeft(),
-                getMarginTop() + i * txtFontSize!! * rowSpace,
-                mMainPaint
+                    textArray[pageNum!! - 1][i].replace(" ", "    "),
+                    getMarginLeft(),
+                    getMarginTop() + i * txtFontSize!! * rowSpace,
+                    mMainPaint
             )
         }
     }
@@ -190,10 +191,10 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     }
 
     override fun onScroll(
-        e1: MotionEvent?,
-        e2: MotionEvent?,
-        distanceX: Float,
-        distanceY: Float
+            e1: MotionEvent?,
+            e2: MotionEvent?,
+            distanceX: Float,
+            distanceY: Float
     ): Boolean {
         return false
     }
@@ -228,10 +229,11 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         if (str.isNullOrEmpty()) return
         val indexOfDelimiter = str!!.indexOf("|")       //text格式 ： 章节名|正文
         title = str.substring(0, indexOfDelimiter)
+        val tx = str.substring(indexOfDelimiter + 1)
         textArray.clear()
-        textArray.addAll(spliteText(str.substring(indexOfDelimiter + 1)))
+        textArray.addAll(spliteText(tx))
         maxPageNum = textArray.size
-        if (textArray.size == 1 && textArray[0].size == 1 && textArray[0][0].trim().isEmpty()) {
+        if (tx == ChapterCache.FILENOTFOUND) {
             maxPageNum = 0
         }
     }
@@ -292,8 +294,8 @@ class ReaderView : View, GestureDetector.OnGestureListener {
                 }
                 "text" -> {
                     flushTextArray()
-                    if (pageFlag < 1 && maxPageNum == 0) {
-                        pageNum = 0
+                    if (pageFlag < 2) {
+                        if (maxPageNum == 0) pageNum = 0
                         return
                     }
                     pageNum = if (pageFlag > 2) maxPageNum else if (maxPageNum == 0) 0 else 1

@@ -1,4 +1,4 @@
-package com.netnovelreader.data
+package com.netnovelreader.common.data
 
 import com.netnovelreader.common.*
 import org.jsoup.Jsoup

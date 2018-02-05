@@ -27,12 +27,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".reader.ReaderActivity" />
         <activity android:name=".search.SearchActivity" />
 
-        <service android:name=".download.DownloadService" />
+        <service android:name=".service.DownloadService" />
 
+        <activity android:name=".editor.SiteEditorActivity"></activity>
     </application>
 
 </manifest>

@@ -1,9 +1,9 @@
-package com.netnovelreader.download
+package com.netnovelreader.common.download
 
 import android.databinding.ObservableField
 import com.netnovelreader.common.url2Hostname
-import com.netnovelreader.data.ParseHtml
-import com.netnovelreader.data.SQLHelper
+import com.netnovelreader.common.data.ParseHtml
+import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.search.SearchBean
 import java.io.IOException
 import java.util.*

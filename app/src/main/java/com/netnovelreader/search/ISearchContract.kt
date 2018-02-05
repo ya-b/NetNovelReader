@@ -1,7 +1,7 @@
 package com.netnovelreader.search
 
-import com.netnovelreader.base.IView
-import com.netnovelreader.base.IViewModel
+import com.netnovelreader.common.base.IView
+import com.netnovelreader.common.base.IViewModel
 
 /**
  * Created by yangbo on 18-1-14.

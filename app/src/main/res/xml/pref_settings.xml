@@ -8,15 +8,21 @@
         android:defaultValue="true"
         android:key="@string/auto_download_key"
         android:title="@string/auto_download" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/auto_remove_key"
+        android:title="@string/auto_remove"
+        android:summary="@string/auto_remove_summary"/>
+    <ListPreference
+        android:entries="@array/rowspace"
+        android:entryValues="@array/rowspace_values"
+        android:key="@string/rowspaceKey"
+        android:title="@string/rowspace"
+        android:summary="@string/rowspace_summary"/>
     <ListPreference
         android:entries="@array/themes"
         android:entryValues="@array/themes_values"
         android:key="@string/themeKey"
         android:summary="@string/theme_summary"
         android:title="@string/theme" />
-    <ListPreference
-        android:entries="@array/rowspace"
-        android:entryValues="@array/rowspace"
-        android:key="@string/rowspaceKey"
-        android:title="@string/rowspace" />
 </PreferenceScreen>

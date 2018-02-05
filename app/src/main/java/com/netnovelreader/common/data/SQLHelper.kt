@@ -1,8 +1,7 @@
-package com.netnovelreader.data
+package com.netnovelreader.common.data
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.netnovelreader.ReaderApplication
@@ -18,7 +17,7 @@ object SQLHelper {
     fun getDB(): SQLiteDatabase {
         db ?: synchronized(SQLHelper) {
             db ?: kotlin.run {
-                db = NovelSQLHelper(ReaderApplication.appContext!!, dbName, 1).writableDatabase
+                db = NovelSQLHelper(ReaderApplication.appContext, dbName, 1).writableDatabase
             }
         }
         return db!!
@@ -32,9 +31,23 @@ object SQLHelper {
     }
 
     //查询下载的所有书
-    fun queryShelfBookList(): Cursor {
+    fun queryShelfBookList(): HashMap<Int, Array<String>> {
         synchronized(SQLHelper) {
-            return getDB().rawQuery("select * from $TABLE_SHELF;", null)
+            val hashMap =
+                LinkedHashMap<Int, Array<String>>()  //key=id, Array=BOOKNAME,LATESTCHAPTER,DOWNLOADURL,ISUPDATE
+            val cursor =
+                getDB().rawQuery("select * from $TABLE_SHELF order by $LATESTREAD DESC;", null)
+            while (cursor.moveToNext()) {
+                val array = arrayOf(
+                    cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME)),
+                    cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER)),
+                    cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL)),
+                    cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE))
+                )
+                hashMap.put(cursor.getInt(cursor.getColumnIndex(SQLHelper.ID)), array)
+            }
+            cursor.close()
+            return hashMap
         }
     }
 
@@ -77,6 +90,26 @@ object SQLHelper {
         }
     }
 
+    fun cancelUpdateFlag(bookname: String) {
+        synchronized(SQLHelper) {
+            getDB().execSQL(
+                "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.ISUPDATE}='' where ${SQLHelper.BOOKNAME}='$bookname';"
+            )
+        }
+    }
+
+    fun setLatestRead(bookname: String) {
+        synchronized(SQLHelper) {
+            var max = 0L
+            val cursor = getDB().rawQuery("select max($LATESTREAD) from $TABLE_SHELF", null)
+            if (cursor.moveToFirst()) {
+                max = cursor.getLong(0)
+            }
+            cursor.close()
+            getDB().execSQL("update $TABLE_SHELF set $LATESTREAD=${max + 1} where $BOOKNAME='$bookname';")
+        }
+    }
+
     //获取阅读记录
     fun getRecord(bookname: String): Array<String> {
         synchronized(SQLHelper) {
@@ -97,10 +130,7 @@ object SQLHelper {
     //设置阅读记录
     fun setRecord(bookname: String, record: String) {
         synchronized(SQLHelper) {
-            getDB().execSQL(
-                "update $TABLE_SHELF set $READRECORD='$record' where " +
-                        "$BOOKNAME='$bookname';"
-            )
+            getDB().execSQL("update $TABLE_SHELF set $READRECORD='$record' where $BOOKNAME='$bookname';")
         }
     }
 
@@ -260,6 +290,23 @@ object SQLHelper {
         }
     }
 
+    //小于等于id的章节，全部标记为'2'(0为未下载，1为已下载)，并返回更改的章节名列表
+    fun setReaded(tableName: String, id: Int): ArrayList<String> {
+        synchronized(SQLHelper) {
+            val arrayList = ArrayList<String>()
+            val cursor = getDB().rawQuery(
+                "select $CHAPTERNAME from $tableName where $ID<=$id " +
+                        "and $ISDOWNLOADED='1';", null
+            )
+            while (cursor.moveToNext()) {
+                arrayList.add(cursor.getString(0))
+            }
+            cursor.close()
+            getDB().execSQL("update $tableName set $ISDOWNLOADED='2' where $ID<=$id;")
+            return arrayList
+        }
+    }
+
     //搜索该章之后的所有表
     fun delChapterAfterSrc(tableName: String, chapterName: String): ArrayList<String> {
         synchronized(SQLHelper) {
@@ -317,6 +364,7 @@ object SQLHelper {
     val DOWNLOADURL = "downloadurl"
     //是否有更新
     val ISUPDATE = "isupdate"
+    val LATESTREAD = "latest_read"
 
     val TABLE_SEARCH = "search"
     val SEARCH_HOSTNAME = HOSTNAME
@@ -428,7 +476,7 @@ object SQLHelper {
             db?.execSQL(
                 "create table if not exists $TABLE_SHELF ($ID integer primary key, " +
                         "$BOOKNAME varchar(128) unique, $READRECORD varchar(128), $DOWNLOADURL text, " +
-                        "$LATESTCHAPTER varchar(128), $ISUPDATE varchar(128));"
+                        "$LATESTCHAPTER varchar(128), $ISUPDATE varchar(128), $LATESTREAD integer);"
             )
         }
     }

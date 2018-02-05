@@ -8,15 +8,12 @@ import java.util.regex.Pattern
  * Created by yangbo on 17-12-11.
  */
 
-/**
- * 书籍封面图片名
- */
-val IMAGENAME = "image"
+val IMAGENAME = "image" //书籍封面图片名
 val TIMEOUT = 3000
 val UA = "Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0"
 val PREFERENCE_NAME = "com.netnovelreader_preferences"
-val MAINDB_NAME = "com.netnovelreader_db"
-val UPDATEFLAG = "●"
+val UPDATEFLAG = "●"  //书籍有更新，显示该标志
+val NotDeleteNum = 3 //自动删除已读章节，但保留最近3章
 
 fun getSavePath(): String {
     var path: String?

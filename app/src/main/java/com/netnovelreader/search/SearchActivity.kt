@@ -1,5 +1,9 @@
 package com.netnovelreader.search
 
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
@@ -10,23 +14,27 @@ import android.view.View
 import android.widget.Toast
 import com.netnovelreader.BR
 import com.netnovelreader.R
-import com.netnovelreader.base.IClickEvent
-import com.netnovelreader.common.ApplyPreference
-import com.netnovelreader.common.ArrayListChangeListener
-import com.netnovelreader.common.BindingAdapter
-import com.netnovelreader.common.NovelItemDecoration
+import com.netnovelreader.common.*
+import com.netnovelreader.common.base.IClickEvent
+import com.netnovelreader.common.data.SQLHelper
+import com.netnovelreader.common.download.CatalogCache
+import com.netnovelreader.common.download.DownloadCatalog
+import com.netnovelreader.common.download.DownloadChapter
 import com.netnovelreader.databinding.ActivitySearchBinding
-import com.netnovelreader.download.CatalogCache
-import com.netnovelreader.download.DownloadService
+import com.netnovelreader.service.DownloadService
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.item_search.view.*
+import java.io.IOException
 
 class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     var searchViewModel: SearchViewModel? = null
     private lateinit var arrayListChangeListener: ArrayListChangeListener<SearchBean>
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ApplyPreference.setTheme(this)
+        PreferenceManager.setTheme(this)
         super.onCreate(savedInstanceState)
         setViewModel(SearchViewModel())
         init()
@@ -36,16 +44,16 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     override fun setViewModel(vm: SearchViewModel) {
         searchViewModel = vm
         val binding =
-            DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
+                DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
         binding.setVariable(BR.clickEvent, BackClickEvent())
     }
 
     override fun init() {
         searchRecycler.layoutManager = LinearLayoutManager(this)
         val mAdapter = BindingAdapter(
-            searchViewModel?.resultList,
-            R.layout.item_search,
-            SearchItemClickEvent()
+                searchViewModel?.resultList,
+                R.layout.item_search,
+                SearchItemClickEvent()
         )
         searchRecycler.adapter = mAdapter
         searchRecycler.itemAnimator = DefaultItemAnimator()
@@ -64,6 +72,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     }
 
     override fun onBackPressed() {
+        if (searchloadingbar.isShown) return
         CatalogCache.clearCache()
         super.onBackPressed()
     }
@@ -106,22 +115,57 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     //搜索列表item点击事件
     inner class SearchItemClickEvent : IClickEvent {
         fun onClick(v: View) {
+            val catalogUrl = v.resultUrl.text.toString()
+            val tableName = searchViewModel!!.addBookToShelf(v.resultName.text.toString(), catalogUrl)
+            val isChangeSource = !intent.getStringExtra("bookname").isNullOrEmpty()
+            val listener = DialogInterface.OnClickListener { dialog, which ->
+                searchloadingbar.show()
+                Observable.create<Boolean> {
+                    try {
+                        searchViewModel?.saveBookImage(tableName, v.resultName.text.toString())
+                        DownloadCatalog(tableName, catalogUrl).download()
+                        it.onNext(true)
+                    } catch (e: IOException) {
+                        it.onNext(false)
+                    }
+                }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe {
+                    searchloadingbar.hide()
+                    if (it) {
+                        Toast.makeText(this@SearchActivity, R.string.catalog_finish, Toast.LENGTH_SHORT).show()
+                        this@SearchActivity.finish()
+                        if (which == Dialog.BUTTON_POSITIVE) downloadBook(v.context, tableName, catalogUrl, isChangeSource)
+                        if (which == Dialog.BUTTON_NEGATIVE) downNowChapter(tableName, isChangeSource)
+                    } else {
+                        Toast.makeText(this@SearchActivity, R.string.downloadFailed, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            AlertDialog.Builder(this@SearchActivity).setTitle(getString(R.string.downloadAllBook))
+                    .setPositiveButton(R.string.yes, listener)
+                    .setNegativeButton(getString(R.string.no), listener)
+                    .create().show()
+        }
+
+        //下载全书，若该书已存在，则下载所有未读章节
+        private fun downloadBook(context: Context, tableName: String, catalogUrl: String, isChangeSource: Boolean) {
             val chapterName = intent.getStringExtra("chapterName")
-            val tableName =
-                searchViewModel!!.addBookToShelf(
-                    v.resultName.text.toString(),
-                    v.resultUrl.text.toString()
-                )
-            if (!intent.getStringExtra("bookname").isNullOrEmpty() && !chapterName.isNullOrEmpty()) {
+            if (isChangeSource && !chapterName.isNullOrEmpty()) {
                 searchViewModel?.delChapterAfterSrc(tableName, chapterName)
             }
-            Toast.makeText(this@SearchActivity, R.string.start_download, Toast.LENGTH_SHORT).show()
-            val intent = Intent(v.context, DownloadService::class.java)
+            val intent = Intent(context, DownloadService::class.java)
             intent.putExtra("tableName", tableName)
-            intent.putExtra("catalogurl", v.resultUrl.text.toString())
+            intent.putExtra("catalogurl", catalogUrl)
             startService(intent)
-            searchViewModel?.saveBookImage(tableName, v.resultName.text.toString())
-            this@SearchActivity.finish()
+        }
+
+        //换源下载，只下载当前章节
+        private fun downNowChapter(tableName: String, isChangeSource: Boolean) {
+            val chapterName = intent.getStringExtra("chapterName")
+            if (isChangeSource && !chapterName.isNullOrEmpty()) {
+                searchViewModel?.delChapterAfterSrc(tableName, chapterName)
+                DownloadChapter(tableName, "${getSavePath()}/$tableName",
+                        chapterName, SQLHelper.getChapterUrl(tableName, chapterName))
+            }
         }
     }
 }

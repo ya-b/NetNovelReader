@@ -6,23 +6,31 @@
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="settings">设置</string>
+    <string name="edit_site">编辑网站规则</string>
+
 
     <string name="full_screen">阅读界面全屏</string>
     <string name="full_screen_key">fullscreen</string>
     <string name="auto_download">自动下载后面3章</string>
     <string name="auto_download_key">autodownload</string>
+    <string name="auto_remove">自动删除已读章节</string>
+    <string name="auto_remove_key">autoremove</string>
+    <string name="auto_remove_summary">保留最近3章</string>
     <string name="theme">主题</string>
     <string name="themeKey">theme</string>
     <string name="theme_summary">选择你喜欢的主题</string>
     <string name="rowspace">行间距</string>
     <string name="rowspaceKey">rowspace</string>
+    <string name="rowspace_summary">选择适合的行距</string>
 
 
     <string name="search_button">搜索</string>
     <string name="title_activity_search">SearchActivity</string>
-    <string name="start_download">开始下载</string>
+    <string name="catalog_finish">目录下载完成</string>
+    <string name="downloadAllBook">下载所有未读章节</string>
     <string name="prepare_download">更新章节列表，准备下载中。。。</string>
     <string name="downloading">下载中</string>
+    <string name="downloadFailed">下载失败，请重试</string>
     <string name="wait4download">还有nn项待处理</string>
     <string name="downloadfailed">共有nn章下载失败</string>
 

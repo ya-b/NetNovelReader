@@ -2,16 +2,19 @@ package com.netnovelreader.reader
 
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableField
+import com.netnovelreader.common.NotDeleteNum
+import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.id2TableName
-import com.netnovelreader.data.SQLHelper
-import com.netnovelreader.download.ChapterCache
+import com.netnovelreader.common.data.SQLHelper
+import com.netnovelreader.common.download.ChapterCache
+import java.io.File
 
 /**
  * Created by yangbo on 18-1-13.
  */
 
 class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) :
-    IReaderContract.IReaderViewModel {
+        IReaderContract.IReaderViewModel {
     var catalog = ObservableArrayList<ReaderBean.Catalog>()
     /**
      * 一页显示的内容
@@ -36,9 +39,9 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
 
     init {
         val cursor = SQLHelper.getDB().rawQuery(
-            "select ${SQLHelper.ID} from " +
-                    "${SQLHelper.TABLE_SHELF} where ${SQLHelper.BOOKNAME}='$bookName';",
-            null
+                "select ${SQLHelper.ID} from " +
+                        "${SQLHelper.TABLE_SHELF} where ${SQLHelper.BOOKNAME}='$bookName';",
+                null
         )
         if (cursor.moveToFirst()) {
             tableName = id2TableName(cursor.getInt(0))
@@ -95,7 +98,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
      * 保存阅读记录
      */
     @Synchronized
-    fun setRecord(chapterNum: Int, pageNum: Int) {
+    override fun setRecord(chapterNum: Int, pageNum: Int) {
         if (chapterNum < 1) return
         if (pageNum < 1) {
             SQLHelper.setRecord(bookName, "$chapterNum#1")
@@ -111,14 +114,25 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     override fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog> {
         catalog.clear()
         val catalogCursor = SQLHelper.getDB().rawQuery(
-            "select ${SQLHelper.CHAPTERNAME} " +
-                    "from $tableName", null
+                "select ${SQLHelper.CHAPTERNAME} " +
+                        "from $tableName", null
         )
         while (catalogCursor.moveToNext()) {
             catalog.add(ReaderBean.Catalog(catalogCursor.getString(0)))
         }
         catalogCursor.close()
         return catalog
+    }
+
+    override fun autoRemove() {
+        val num = getRecord()[0]
+        if (num < NotDeleteNum) return
+        val id = num - NotDeleteNum
+        Thread{
+            SQLHelper.setReaded(tableName, id)
+                    .map { File("${getSavePath()}/$tableName/$it") }
+                    .forEach { if (it.exists()) it.delete() }
+        }.start()
     }
 
     /**

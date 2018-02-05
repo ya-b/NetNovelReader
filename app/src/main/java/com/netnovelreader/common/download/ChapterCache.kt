@@ -1,7 +1,7 @@
-package com.netnovelreader.download
+package com.netnovelreader.common.download
 
 import com.netnovelreader.common.getSavePath
-import com.netnovelreader.data.SQLHelper
+import com.netnovelreader.common.data.SQLHelper
 import java.io.File
 import java.io.IOException
 import java.util.*
