@@ -70,7 +70,7 @@
             android:gravity="center"
             android:text="大家都在搜"
             android:textColor="@color/black"
-            android:textSize="10sp"
+            android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
@@ -85,7 +85,7 @@
             android:onClick="@{clickEvent::refreshHotWords}"
             android:text="换一批"
             android:textColor="#6f6f6f"
-            android:textSize="10sp"
+            android:textSize="12sp"
             app:layout_constraintBaseline_toBaselineOf="@+id/tvSearchLabel"
             app:layout_constraintEnd_toEndOf="parent" />
 

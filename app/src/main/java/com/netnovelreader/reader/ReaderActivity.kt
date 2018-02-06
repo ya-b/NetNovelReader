@@ -9,6 +9,7 @@ import android.databinding.DataBindingUtil
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
@@ -136,7 +137,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         if (loadingbar.isShown) loadingbar.hide()
         hideHeaderFoot()
         val boolean = readerViewModel?.previousChapter()
-        if (boolean ?: true) downloadChapter()
+        if (boolean != false) downloadChapter()
     }
 
     override fun onPageChange() {
@@ -231,9 +232,9 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
 
     inner class ReaderClickEvent : IClickEvent {
 
-        private var selectedBgImageView: CircleImageView? = null      //用于记录用户当前选中的背景样式的UI控件
-        private var selectedFontTextView: TextView? = null             //用于记录用户当前选中的字体样式的UI控件
-
+        private var selectedBgImageView: CircleImageView? = null       //用于记录用户当前选中的背景样式的UI控件
+        private var selectedFontTypeTextView: TextView? = null             //用于记录用户当前选中的字体样式的UI控件
+        private var selectedFontSizeTextView: TextView? = null             //用于记录用户当前选中的字体样式的UI控件
         fun onHeadViewClick(v: View) {
             when (v) {
                 changeSouce -> {
@@ -280,6 +281,10 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             readerView.txtFontSize = (v as TextView).text.toString().toFloat()
             getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
                     .putFloat(FONTSIZE, readerView.txtFontSize!!).apply()
+
+            v.setTextColor(ContextCompat.getColor(this@ReaderActivity, R.color.lightgray))//为当前选中的字体TextView改变背景色
+            selectedFontSizeTextView?.setTextColor(Color.WHITE)                                  //将前次选中的字体大小TextView改变背景色
+            selectedFontSizeTextView = v
         }
 
         //改变阅读界面字体类型
@@ -297,10 +302,10 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                     }
 
             readerView.txtFontType = Config.getTypeface(context, typeFacePath)   //根据新的字体重新绘制视图
-            selectedFontTextView?.let {
+            selectedFontTypeTextView?.let {
                 Config.setTextViewSelect(it, false)                       //将前次选中的字体TextView改变背景色
             }
-            selectedFontTextView = view
+            selectedFontTypeTextView = view
             Config.setTextViewSelect(view, true)                           //为当前选中的字体TextView改变背景色
 
         }

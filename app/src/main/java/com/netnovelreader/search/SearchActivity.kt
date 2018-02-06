@@ -146,7 +146,8 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                 searchViewModel?.searchBook(query)
                 tmp = query
                 tmpTime = System.currentTimeMillis()
-                searchViewBar.clearFocus()           //提交搜索commit后收起键盘
+                searchViewBar.clearFocus()                    //提交搜索commit后收起键盘
+                searchSuggestRecycler.visibility = View.GONE
             }
             return true
         }

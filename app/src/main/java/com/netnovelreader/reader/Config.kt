@@ -39,10 +39,10 @@ class Config {
             if (isSelect!!) {
                 ContextCompat.getDrawable(context, R.drawable.button_select_bg)
                 textView.setTextColor(
-                    ContextCompat.getColor(
-                        context,
-                        R.color.read_dialog_button_select
-                    )
+                        ContextCompat.getColor(
+                                context,
+                                R.color.lightgray
+                        )
                 )
             } else {
                 ContextCompat.getDrawable(context, R.drawable.button_bg)

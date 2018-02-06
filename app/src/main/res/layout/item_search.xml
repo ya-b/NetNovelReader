@@ -17,8 +17,8 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:background="@color/white"
-        android:onClick="@{clickEvent::onClick}">
+        android:onClick="@{clickEvent::onClick}"
+        tools:background="@color/white">
 
         <TextView
             android:id="@+id/resultName"
