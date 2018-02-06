@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.databinding.DataBindingUtil
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -68,7 +69,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                     for (i in 0 until linearLayout.childCount) {
                         val tvHotWordLabel = linearLayout.getChildAt(i) as TextView
                         tvHotWordLabel.text = it.searchHotWords!![Random().nextInt(100)].word
-                        tvHotWordLabel.setBackgroundColor(ContextCompat.getColor(this@SearchActivity, colorArray[Random().nextInt(17)]))
+                        (tvHotWordLabel.background as GradientDrawable).setColor(ContextCompat.getColor(this@SearchActivity, colorArray[Random().nextInt(17)]))
                     }
                 }
     }
@@ -194,7 +195,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             for (i in 0 until linearLayout.childCount)
                 with(linearLayout.getChildAt(i) as TextView) {
                     text = mSearchHotWord?.searchHotWords!![Random().nextInt(100)].word                                       //设置搜索热词文本，该10个热词是从100个关键个搜索热词中随机抽取的
-                    setBackgroundColor(ContextCompat.getColor(this@SearchActivity, colorArray[Random().nextInt(17)])) //设置搜索热词背景颜色
+                    (background as GradientDrawable).setColor(ContextCompat.getColor(this@SearchActivity, colorArray[Random().nextInt(17)]))
                 }
 
         }
