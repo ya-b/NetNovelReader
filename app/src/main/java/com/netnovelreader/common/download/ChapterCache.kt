@@ -58,18 +58,12 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         val sb = StringBuilder()
         val chapterName = SQLHelper.getChapterName(dirName!!, chapterNum)
         sb.append(chapterName + "|")
-        val chapterPath = "${getSavePath()}/$dirName/$chapterName"
-        val chapterFile = File(chapterPath)
-        if (!chapterFile.exists()) {
-            if (!isCurrentChapter) {
-                sb.append(getFromNet("${getSavePath()}/$dirName", chapterName))
-            } else {
-                sb.append(FILENOTFOUND)
-            }
-        } else {
-            val txt = chapterFile.readText()
-            sb.append(txt) //从本地文件获取章节内容
-        }
+        val chapterFile = File("${getSavePath()}/$dirName/$chapterName")
+        sb .append(
+                if (chapterFile.exists()) chapterFile.readText()
+                else if (isCurrentChapter) FILENOTFOUND
+                else getFromNet("${getSavePath()}/$dirName", chapterName)
+        )
         return sb.toString()
     }
 
@@ -78,6 +72,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
      */
     @Throws(IOException::class)
     fun getFromNet(dir: String, chapterName: String): String {
+        if(dir.isEmpty() || chapterName.isEmpty()) return FILENOTFOUND
         val download = DownloadChapter(
             tableName, dir, chapterName,
             SQLHelper.getChapterUrl(tableName, chapterName)

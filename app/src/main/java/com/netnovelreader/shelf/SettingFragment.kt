@@ -26,8 +26,7 @@ class SettingFragment : PreferenceFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
-        view.setBackgroundColor(Color.WHITE)
-        return view
+        return super.onCreateView(inflater, container, savedInstanceState)
+                .apply { this.setBackgroundColor(Color.WHITE) }
     }
 }

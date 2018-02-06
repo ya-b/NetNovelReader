@@ -16,17 +16,12 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     fun download() {
         SQLHelper.createTable(tableName)
         val cacheMap = CatalogCache.cache.get(catalogUrl)?.catalogMap
-        val map: LinkedHashMap<String, String>
-        if (cacheMap != null && cacheMap.isNotEmpty()) {
-            map = filtExistsInSql(cacheMap)
-        } else {
-            map = filtExistsInSql(getMap(catalogUrl))
-        }
         var latestChapter: String? = null
-        map.forEach {
-            SQLHelper.setChapterFinish(tableName, it.key, it.value, false)
-            latestChapter = it.key
-        }
+        filtExistsInSql(if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
+                .forEach {
+                    SQLHelper.setChapterFinish(tableName, it.key, it.value, false)
+                    latestChapter = it.key
+                }
         latestChapter ?: return
         SQLHelper.getDB().execSQL(
             "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.LATESTCHAPTER}=" +
@@ -37,7 +32,7 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     }
 
     @Throws(IOException::class)
-    fun getMap(catalogUrl: String): LinkedHashMap<String, String> {
+    fun getMapFromNet(catalogUrl: String): LinkedHashMap<String, String> {
         val map = ParseHtml().getCatalog(catalogUrl)
         val filter = SQLHelper.getParseRule(url2Hostname(catalogUrl), SQLHelper.CATALOG_FILTER)
         if (filter.length > 0) {

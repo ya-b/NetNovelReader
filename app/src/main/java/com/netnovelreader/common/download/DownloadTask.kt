@@ -1,8 +1,8 @@
 package com.netnovelreader.common.download
 
-import com.netnovelreader.common.getSavePath
-import com.netnovelreader.common.mkdirs
 import com.netnovelreader.common.data.SQLHelper
+import com.netnovelreader.common.getSavePath
+import java.io.File
 import java.io.IOException
 
 /**
@@ -11,12 +11,12 @@ import java.io.IOException
 class DownloadTask(val tableName: String, val url: String) {
 
     @Throws(IOException::class)
-    fun downloadAll(): ArrayList<DownloadChapter> {
+    fun getList(): ArrayList<DownloadChapter> {
         DownloadCatalog(tableName, url).download()
-        val dir = mkdirs(getSavePath() + "/$tableName")
         val runnables = ArrayList<DownloadChapter>()
-        SQLHelper.getChapterList(tableName, 0).forEach {
-            runnables.add(DownloadChapter(tableName, dir, it.key, it.value))
+        SQLHelper.getChapterNameAndUrl(tableName, 0).forEach {
+            runnables.add(DownloadChapter(tableName,
+                    "${getSavePath()}/$tableName".apply { File(this).mkdirs() }, it.key, it.value))
         }
         return runnables
     }

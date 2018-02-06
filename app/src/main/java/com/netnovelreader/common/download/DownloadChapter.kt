@@ -16,27 +16,23 @@ class DownloadChapter(
 
     @Throws(IOException::class)
     fun download(chapterText: String): Int {
-        if (chapterText.isEmpty()) {
-            SQLHelper.setChapterFinish(tablename, chapterName, chapterUrl, false)
-        } else {
-            val file = File(dir, chapterName)
-            if (file.exists()) return 1
-            file.writeText(chapterText)
-            SQLHelper.setChapterFinish(tablename, chapterName, chapterUrl, true)
-        }
+        if (chapterText.isEmpty()) return 1
+        File(dir, chapterName).takeIf { !it.exists() }
+                ?.run {
+                    this.writeText(chapterText)
+                    SQLHelper.setChapterFinish(tablename, chapterName, chapterUrl, true)
+                }
         return 1
     }
 
     @Throws(IOException::class)
     fun getChapterTxt(): String {
-        if (!chapterUrl.startsWith("http")) return ""
+        if (!chapterUrl.startsWith("http") || File(dir, chapterName).exists()) return ""
         var str = ParseHtml().getChapter(chapterUrl)
-        val filter = SQLHelper.getParseRule(url2Hostname(chapterUrl), SQLHelper.CATALOG_FILTER)
-        if (filter.length > 0) {
-            filter.split("|").forEach {
-                str = str.replace(it, "")
-            }
-        }
+        SQLHelper.getParseRule(url2Hostname(chapterUrl), SQLHelper.CATALOG_FILTER)
+                .takeIf { it.length > 0 }
+                ?.split("|")
+                ?.forEach { str = str.replace(it, "") }
         return str
     }
 }

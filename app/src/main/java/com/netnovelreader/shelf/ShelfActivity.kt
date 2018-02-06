@@ -70,12 +70,6 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         shelf_layout.setOnRefreshListener {
             if (System.currentTimeMillis() - time > 2000) {
                 shelfViewModel!!.updateBooks()
-//                shelfViewModel!!.bookList.forEach {
-//                    val intent = Intent(this, DownloadService::class.java)
-//                    intent.putExtra("tableName", id2TableName(it.bookid.get()))
-//                    intent.putExtra("catalogurl", it.downloadURL.get())
-//                    startService(intent)
-//                }
             }
             time = System.currentTimeMillis()
             shelf_layout.isRefreshing = false
@@ -183,9 +177,8 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         fun itemOnClick(v: View) {
             val bookname = v.nameView.text.toString()
             shelfViewModel?.cancelUpdateFlag(bookname)
-            val intent = Intent(v.context, ReaderActivity::class.java)
-            intent.putExtra("bookname", bookname)
-            v.context.startActivity(intent)
+            v.context.startActivity(Intent(v.context, ReaderActivity::class.java)
+                    .apply { this.putExtra("bookname", bookname) })
         }
 
         fun itemOnLongClick(view: View): Boolean {

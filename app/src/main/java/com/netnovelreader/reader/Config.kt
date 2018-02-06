@@ -37,7 +37,7 @@ class Config {
         fun setTextViewSelect(textView: TextView, isSelect: Boolean?) {
             val context = textView.context
             if (isSelect!!) {
-                ContextCompat.getDrawable(context, R.drawable.button_select_bg)
+                textView.setBackground(ContextCompat.getDrawable(context, R.drawable.button_select_bg))
                 textView.setTextColor(
                         ContextCompat.getColor(
                                 context,
@@ -45,7 +45,7 @@ class Config {
                         )
                 )
             } else {
-                ContextCompat.getDrawable(context, R.drawable.button_bg)
+                textView.setBackground(ContextCompat.getDrawable(context, R.drawable.button_bg))
                 textView.setTextColor(ContextCompat.getColor(context, R.color.white))
             }
         }

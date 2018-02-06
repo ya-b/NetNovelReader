@@ -18,6 +18,7 @@ interface IReaderContract {
         fun previousChapter(): Boolean
         fun pageByCatalog(chapterName: String?): Boolean
         fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog>
+        suspend fun downloadChapter(chapterName: String?): Boolean
         fun setRecord(chapterNum: Int, pageNum: Int)
         fun autoRemove()
     }

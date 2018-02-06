@@ -2,9 +2,8 @@ package com.netnovelreader.common
 
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableList
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 
 /**
  * Created by yangbo on 2018/1/24.
@@ -33,12 +32,8 @@ class ArrayListChangeListener<T>(private val adapter: BindingAdapter<T>) :
     }
 
     fun notifyDataSetChanged() {
-        Observable.just(1)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                val c = it + 1
-                adapter.notifyDataSetChanged()
-            }
+        launch(UI){
+            adapter.notifyDataSetChanged()
+        }
     }
 }

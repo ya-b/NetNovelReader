@@ -18,7 +18,7 @@ object CatalogCache {
     val cache: Hashtable<String, SearchBean>
 
     init {
-        cache = Hashtable<String, SearchBean>()
+        cache = Hashtable()
     }
 
     fun addCatalog(bookname: String, catalogUrl: String) {
