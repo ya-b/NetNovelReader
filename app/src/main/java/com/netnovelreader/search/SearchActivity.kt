@@ -7,13 +7,18 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import com.netnovelreader.BR
 import com.netnovelreader.R
+import com.netnovelreader.api.ApiManager
+import com.netnovelreader.api.bean.KeywordsBean
+import com.netnovelreader.api.bean.SearchHotWord
 import com.netnovelreader.common.*
 import com.netnovelreader.common.base.IClickEvent
 import com.netnovelreader.common.data.SQLHelper
@@ -28,17 +33,44 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.item_search.view.*
 import java.io.IOException
+import java.util.*
 
 class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     var searchViewModel: SearchViewModel? = null
     private lateinit var arrayListChangeListener: ArrayListChangeListener<SearchBean>
+    private lateinit var suggestArrayListChangeListener: ArrayListChangeListener<KeywordsBean>
+    private var mSearchHotWord: SearchHotWord? = null              //搜索热词数组
+    private val colorArray = arrayOf(                              //搜索热词标签的背景颜色列表
+            R.color.hot_label_bg1, R.color.hot_label_bg2, R.color.hot_label_bg3, R.color.hot_label_bg4, R.color.hot_label_bg5,
+            R.color.hot_label_bg6, R.color.hot_label_bg7, R.color.hot_label_bg8, R.color.hot_label_bg9, R.color.hot_label_bg10,
+            R.color.hot_label_bg11, R.color.hot_label_bg12, R.color.hot_label_bg13, R.color.hot_label_bg14, R.color.hot_label_bg15,
+            R.color.hot_label_bg16, R.color.hot_label_bg17
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PreferenceManager.setTheme(this)
         super.onCreate(savedInstanceState)
         setViewModel(SearchViewModel())
+        requestHotWords()
         init()
         changeSource()
+    }
+
+    /**
+     * 请求搜索热词数据
+     */
+    private fun requestHotWords() {
+        ApiManager.mAPI!!.hotWords()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe {
+                    mSearchHotWord = it
+                    for (i in 0 until linearLayout.childCount) {
+                        val tvHotWordLabel = linearLayout.getChildAt(i) as TextView
+                        tvHotWordLabel.text = it.searchHotWords!![Random().nextInt(100)].word
+                        tvHotWordLabel.setBackgroundColor(ContextCompat.getColor(this@SearchActivity, colorArray[Random().nextInt(17)]))
+                    }
+                }
     }
 
     override fun setViewModel(vm: SearchViewModel) {
@@ -60,9 +92,27 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         searchRecycler.addItemDecoration(NovelItemDecoration(this))
         arrayListChangeListener = ArrayListChangeListener(mAdapter)
         searchViewModel?.resultList?.addOnListChangedCallback(arrayListChangeListener)
+
+
         searchViewBar.setOnQueryTextListener(QueryListener())
         searchViewBar.isIconified = false
         searchViewBar.onActionViewExpanded()
+
+
+        searchSuggestRecycler.layoutManager = LinearLayoutManager(this)
+        val adapter = BindingAdapter(
+                searchViewModel?.searchSuggestResultList,
+                R.layout.item_search_suggest,
+                SuggestSearchItemClickEvent()
+        )
+
+        searchSuggestRecycler.adapter = adapter
+        searchSuggestRecycler.itemAnimator = DefaultItemAnimator()
+        searchSuggestRecycler.addItemDecoration(NovelItemDecoration(this))
+        suggestArrayListChangeListener = ArrayListChangeListener(adapter)
+        searchViewModel?.searchSuggestResultList?.addOnListChangedCallback(suggestArrayListChangeListener)
+
+
     }
 
     override fun onDestroy() {
@@ -77,7 +127,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         super.onBackPressed()
     }
 
-    fun changeSource() {
+    private fun changeSource() {
         val bookname = intent.getStringExtra("bookname")
         if (bookname.isNullOrEmpty()) return
         searchViewBar.visibility = View.INVISIBLE
@@ -92,17 +142,44 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
 
         override fun onQueryTextSubmit(query: String): Boolean {
             if (tmp == query && System.currentTimeMillis() - tmpTime < 1000) return true  //点击间隔小于1秒，并且搜索书名相同不再搜索
-            if (query.length > 0) {
+            if (query.isNotEmpty()) {
                 searchViewModel?.searchBook(query)
                 tmp = query
                 tmpTime = System.currentTimeMillis()
+                searchViewBar.clearFocus()           //提交搜索commit后收起键盘
             }
             return true
         }
 
         override fun onQueryTextChange(newText: String?): Boolean {
+            if (newText!!.isEmpty() && searchViewModel?.resultList!!.isEmpty()) {
+                showHotWords()   //搜索框里文字为空并且  -->显示热门搜索标签
+                searchSuggestRecycler.visibility = View.GONE
+            } else {
+                hideHotWords()   //搜索框里文字不为空时  -->隐藏热门搜索标签
+                searchSuggestRecycler.visibility = View.VISIBLE
+                searchViewModel?.searchBookSuggest(newText)
+            }
             return true
         }
+    }
+
+    /**
+     * 显示搜索热词的相关UI界面
+     */
+    private fun showHotWords() {
+        tvSearchLabel.visibility = View.VISIBLE
+        tvRefreshHotWord.visibility = View.VISIBLE
+        linearLayout.visibility = View.VISIBLE
+    }
+
+    /**
+     * 隐藏搜索热词的相关UI界面
+     */
+    private fun hideHotWords() {
+        tvSearchLabel.visibility = View.GONE
+        tvRefreshHotWord.visibility = View.GONE
+        linearLayout.visibility = View.GONE
     }
 
     //backbutton点击事件
@@ -110,7 +187,33 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         fun onClick(v: View) {
             finish()
         }
+
+        //换一批热门搜索词
+        fun refreshHotWords(v: View) {
+            for (i in 0 until linearLayout.childCount)
+                with(linearLayout.getChildAt(i) as TextView) {
+                    text = mSearchHotWord?.searchHotWords!![Random().nextInt(100)].word                                       //设置搜索热词文本，该10个热词是从100个关键个搜索热词中随机抽取的
+                    setBackgroundColor(ContextCompat.getColor(this@SearchActivity, colorArray[Random().nextInt(17)])) //设置搜索热词背景颜色
+                }
+
+        }
+
+        //将搜索热词填充到searchView上但是不触发网络请求
+        fun submitHotWord(v: View) {
+            v as TextView
+            searchViewBar.setQuery(v.text, false)
+        }
     }
+
+    //建议搜索列表item点击事件
+    inner class SuggestSearchItemClickEvent : IClickEvent {
+        fun onClick(v: View) {
+            val textView = v.findViewById<TextView>(R.id.tvSearchSuggest)
+            searchViewBar.setQuery(textView.text, true)
+            searchSuggestRecycler.visibility = View.GONE
+        }
+    }
+
 
     //搜索列表item点击事件
     inner class SearchItemClickEvent : IClickEvent {

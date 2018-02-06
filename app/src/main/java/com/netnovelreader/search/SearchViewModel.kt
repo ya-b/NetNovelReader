@@ -1,10 +1,15 @@
 package com.netnovelreader.search
 
 import android.util.Log
+import com.netnovelreader.api.ApiManager
+import com.netnovelreader.api.bean.KeywordsBean
+import com.netnovelreader.api.bean.QuerySuggest
 import com.netnovelreader.common.*
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.data.SearchBook
 import com.netnovelreader.common.download.CatalogCache
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -19,10 +24,21 @@ import java.util.concurrent.Executors
 class SearchViewModel : ISearchContract.ISearchViewModel {
     @Volatile
     private var searchCode = 0
-    var resultList: ObservableSyncArrayList<SearchBean>
+    var resultList: ObservableSyncArrayList<SearchBean> = ObservableSyncArrayList()
+    var searchSuggestResultList: ObservableSyncArrayList<KeywordsBean> = ObservableSyncArrayList()   //输入部分书名自动补全提示
 
-    init {
-        resultList = ObservableSyncArrayList()
+
+    /**
+     * 在搜索框输入过程中匹配一些输入项并提示
+     */
+    fun searchBookSuggest(queryText: String) {
+        ApiManager.mAPI!!.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe {
+                    searchSuggestResultList.clear()
+                    searchSuggestResultList.addAll(it.keywords!!)
+                }
     }
 
     /**
@@ -40,9 +56,9 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         val executor = Executors.newFixedThreadPool(5)
         SQLHelper.queryAllSearchSite().forEach {
             executor.execute({
-                try{
+                try {
                     searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
-                }catch (e: IOException){
+                } catch (e: IOException) {
                     e.printStackTrace()
                 }
             })

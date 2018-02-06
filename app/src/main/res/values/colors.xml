@@ -35,4 +35,24 @@
 
     <color name="read_dialog_button_select">#E25754</color>
     <color name="read_dialog_bg">#2C2C2C</color>
+
+
+    <color name="hot_label_bg1">#627176</color>
+    <color name="hot_label_bg2">#3fa5d9</color>
+    <color name="hot_label_bg3">#E25754</color>
+    <color name="hot_label_bg4">#ea6f5a</color>
+    <color name="hot_label_bg5">#42c02e</color>
+    <color name="hot_label_bg6">#2C2C2C</color>
+    <color name="hot_label_bg7">#617c99</color>
+    <color name="hot_label_bg8">#7E57C2</color>
+    <color name="hot_label_bg9">#ff874d</color>
+    <color name="hot_label_bg10">#f44336</color>
+    <color name="hot_label_bg11">#18FFFF</color>
+    <color name="hot_label_bg12">#FFF176</color>
+    <color name="hot_label_bg13">#795548</color>
+    <color name="hot_label_bg14">#FF6F00</color>
+    <color name="hot_label_bg15">#69F0AE</color>
+    <color name="hot_label_bg16">#651FFF</color>
+    <color name="hot_label_bg17">#F06292</color>
+
 </resources>

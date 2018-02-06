@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -12,32 +14,50 @@
             type="com.netnovelreader.search.SearchActivity.SearchItemClickEvent" />
     </data>
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::onClick}"
-        android:orientation="vertical">
+        tools:background="@color/white"
+        android:onClick="@{clickEvent::onClick}">
 
         <TextView
             android:id="@+id/resultName"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
             android:text="@{itemDetail.bookname??``}"
-            android:textSize="24sp" />
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="小说名称" />
 
         <TextView
             android:id="@+id/latestChapter"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="@{itemDetail.latestChapter??``}"
-            android:textSize="18sp" />
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@+id/resultName"
+            app:layout_constraintTop_toBottomOf="@+id/resultName"
+            tools:text="最新章节" />
 
         <TextView
             android:id="@+id/resultUrl"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
             android:text="@{itemDetail.url??``}"
-            android:textSize="12sp" />
-    </LinearLayout>
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/latestChapter"
+            app:layout_constraintTop_toBottomOf="@+id/latestChapter"
+            tools:text="来源URl" />
+    </android.support.constraint.ConstraintLayout>
 
 </layout>
