@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -290,12 +291,11 @@ class ReaderView : View, GestureDetector.OnGestureListener {
                 "text" -> {
                     flushTextArray()
                     pageNum = when(pageFlag){
-                        0 -> if(maxPageNum == 0) 0 else pageNum
+                        0 -> if(maxPageNum == 0) 0 else if(pageNum == 0) 1 else pageNum
                         1,2 -> if(maxPageNum == 0) 0 else 1
                         3 -> maxPageNum
                         else -> 1
                     }
-
                 }
                 else -> invalidate()
             }

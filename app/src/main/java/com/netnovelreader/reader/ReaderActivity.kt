@@ -121,7 +121,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                 ?.run {
                     launch(UI) {
                         loadingbar.show()
-                        if (readerViewModel?.downloadChapter(readerView.title) ?: false) loadingbar.hide()
+                        if (readerViewModel?.downloadChapter(readerView.title)
+                                        ?: false) loadingbar.hide()
                     }
                 }
     }
@@ -140,7 +141,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                 ?.run {
                     launch(UI) {
                         loadingbar.show()
-                        if (readerViewModel?.downloadChapter(readerView.title) ?: false) loadingbar.hide()
+                        if (readerViewModel?.downloadChapter(readerView.title) ?: false)
+                            loadingbar.hide()
                     }
                 }
     }
@@ -199,8 +201,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             if (isAvailable && loadingbar.isShown) {
                 launch(UI) {
                     loadingbar.show()
-                    if (readerViewModel?.downloadChapter(readerView.title)
-                                    ?: false) loadingbar.hide()
+                    if (readerViewModel?.downloadChapter(readerView.title) ?: false)
+                        loadingbar.hide()
                 }
             }
         }
@@ -214,8 +216,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                 readerView.title = v.itemChapter.text.toString()
                 launch(UI) {
                     loadingbar.show()
-                    if (readerViewModel?.downloadChapter(readerView.title)
-                                    ?: false) loadingbar.hide()
+                    if (readerViewModel?.downloadChapter(readerView.title) ?: false)
+                        loadingbar.hide()
                 }
             }
             dialog?.dismiss()

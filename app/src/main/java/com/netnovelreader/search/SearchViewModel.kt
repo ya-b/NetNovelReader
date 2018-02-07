@@ -56,7 +56,11 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
             val poolContext = newFixedThreadPoolContext(THREAD_NUM, "DownloadService")
             SQLHelper.queryAllSearchSite().forEach {
                 launch(poolContext) {
-                    searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
+                    try {
+                        searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
+                    }catch (e: IOException){
+                        e.printStackTrace()
+                    }
                 }
             }
         }

@@ -63,7 +63,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
         }
         val array = getRecord()
         chapterNum = array[0]
-        chapterCache.prepare(maxChapterNum, dirName!!)
+        chapterCache.init(maxChapterNum, dirName!!)
         return array[1]
     }
 

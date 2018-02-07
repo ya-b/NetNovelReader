@@ -23,6 +23,7 @@ import com.netnovelreader.common.PreferenceManager
 import com.netnovelreader.common.base.IClickEvent
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.databinding.ActivityShelfBinding
+import com.netnovelreader.editor.SiteEditorActivity
 import com.netnovelreader.reader.ReaderActivity
 import com.netnovelreader.search.SearchActivity
 import kotlinx.android.synthetic.main.activity_shelf.*
@@ -117,6 +118,10 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
                     removeFragment(settingFragment)
                 }
                 findViewById<View>(R.id.search_button).visibility = View.INVISIBLE
+                true
+            }
+            R.id.edit_site_preference -> {
+                startActivity(Intent(this, SiteEditorActivity::class.java))
                 true
             }
             else -> super.onOptionsItemSelected(item)

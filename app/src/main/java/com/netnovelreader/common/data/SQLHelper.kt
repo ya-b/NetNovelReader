@@ -381,10 +381,10 @@ object SQLHelper {
                 "insert into $TABLE_PARSERULES values (2,'yunlaige.com','#contenttable'," +
                         "'#content',NULL,NULL);"
             )
-            db?.execSQL(
-                "insert into $TABLE_PARSERULES values (3,'23zw.me','#chapter_list'," +
-                        "'#chapter_content',NULL,NULL);"
-            )
+//            db?.execSQL(
+//                "insert into $TABLE_PARSERULES values (3,'23zw.me','#chapter_list'," +
+//                        "'#chapter_content',NULL,NULL);"
+//            )
             db?.execSQL(
                 "insert into $TABLE_PARSERULES values (4,'b5200.net','#list > dl:nth-child(1)'," +
                         "'#content',NULL,NULL);"
@@ -416,15 +416,15 @@ object SQLHelper {
                         "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)'," +
                         "'gbk','','');"
             )
-            db?.execSQL(
-                "insert into $TABLE_SEARCH values (3,'23zw.me','1'," +
-                        "'https://www.23zw.me/SearchNovel/?t=articlename&k=$SEARCH_NAME'," +
-                        "'Location','div.chapter_nav:nth-child(1) > div:nth-child(1) > a:nth-child(3)'," +
-                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(3) > a:nth-child(1)'," +
-                        "'div.chapter_nav:nth-child(1) > div:nth-child(1) > a:nth-child(3)'," +
-                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(3) > a:nth-child(1)'," +
-                        "'gbk','','');"
-            )
+//            db?.execSQL(
+//                "insert into $TABLE_SEARCH values (3,'23zw.me','1'," +
+//                        "'https://www.23zw.me/SearchNovel/?t=articlename&k=$SEARCH_NAME'," +
+//                        "'Location','div.chapter_nav:nth-child(1) > div:nth-child(1) > a:nth-child(3)'," +
+//                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(3) > a:nth-child(1)'," +
+//                        "'div.chapter_nav:nth-child(1) > div:nth-child(1) > a:nth-child(3)'," +
+//                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(3) > a:nth-child(1)'," +
+//                        "'gbk','','');"
+//            )
             db?.execSQL(
                 "insert into $TABLE_SEARCH values (4,'b5200.net','0'," +
                         "'http://www.b5200.net/modules/article/search.php?searchkey=$SEARCH_NAME'," +

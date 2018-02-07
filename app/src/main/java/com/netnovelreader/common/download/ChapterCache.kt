@@ -2,6 +2,7 @@ package com.netnovelreader.common.download
 
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.data.SQLHelper
+import kotlinx.coroutines.experimental.launch
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -22,7 +23,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
      */
     private var maxChapterNum = 0
     private var dirName: String? = null
-    fun prepare(maxChapterNum: Int, dirName: String) {
+    fun init(maxChapterNum: Int, dirName: String) {
         this.maxChapterNum = maxChapterNum
         this.dirName = dirName
     }
@@ -43,7 +44,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
             }
         }
         if (cacheNum != 0) {
-            Thread { readToCache(chapterNum) }.start()
+            readToCache(chapterNum)
         }
         return result ?: " |"+FILENOTFOUND
     }
@@ -92,7 +93,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
      * 章节内容读到map里
      */
     @Throws(IOException::class)
-    private fun readToCache(chapterNum: Int) {
+    private fun readToCache(chapterNum: Int) = launch {
         chapterTxtTable.filter { it.key + 1 < chapterNum || it.key - cacheNum > chapterNum || it.value.length == 0 }
             .forEach { chapterTxtTable.remove(it.key) }
         if (chapterNum > 1) {
