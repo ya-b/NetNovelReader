@@ -18,6 +18,13 @@ import java.io.File
 
 class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) :
     IReaderContract.IReaderViewModel {
+
+    enum class CHAPTERCHANGE {
+        NEXT,                       //下一章
+        PREVIOUS,                   //上一章
+        BY_CATALOG                  //通过目录翻页
+    }
+
     var catalog = ObservableArrayList<ReaderBean.Catalog>()
     /**
      * 一页显示的内容
@@ -38,78 +45,49 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     var maxChapterNum = 0
 
     private var tableName = ""
-    val chapterCache: ChapterCache
-
-    init {
-        val cursor = SQLHelper.getDB().rawQuery(
-            "select ${SQLHelper.ID} from " +
-                    "${SQLHelper.TABLE_SHELF} where ${SQLHelper.BOOKNAME}='$bookName';",
-            null
-        )
-        if (cursor.moveToFirst()) {
-            tableName = id2TableName(cursor.getInt(0))
-        }
-        cursor.close()
-        chapterCache = ChapterCache(CACHE_NUM, tableName)
-    }
+    lateinit var chapterCache: ChapterCache
 
     /**
-     * readerView第一次绘制时执行, 返还阅读记录页数，章节名称
+     * readerView第一次绘制时执行, 返还阅读记录页数
      */
-    override suspend fun initData(): Int = async{
-        maxChapterNum = SQLHelper.getChapterCount(tableName)
-        if (maxChapterNum == 0) {
-            return@async 0
+    override suspend fun initData(): Int = async {
+        tableName = id2TableName(SQLHelper.getBookId(bookName))
+        maxChapterNum = SQLHelper.getChapterCount(tableName).takeIf { it != 0 } ?: return@async 0
+        getRecord()
+            .apply {
+                chapterNum = this[0]
+                chapterCache =
+                        ChapterCache(CACHE_NUM, tableName).apply { init(maxChapterNum, dirName!!) }
+            }
+            .let { it[1] }
+    }.await()
+
+    override suspend fun getChapter(type: CHAPTERCHANGE, chapterName: String?): Boolean = async {
+        when (type) {
+            CHAPTERCHANGE.NEXT -> if (chapterNum >= maxChapterNum) return@async false else chapterNum++
+            CHAPTERCHANGE.PREVIOUS -> if (chapterNum < 2) return@async false else chapterNum--
+            CHAPTERCHANGE.BY_CATALOG -> chapterName?.run {
+                chapterNum = SQLHelper.getChapterId(tableName, chapterName)
+            }
         }
-        val array = getRecord()
-        chapterNum = array[0]
-        chapterCache.init(maxChapterNum, dirName!!)
-        array[1]
-    }.await()
-
-    /**
-     * 获取下一章内容，返回章节名称
-     */
-    override suspend fun nextChapter(): Boolean = async{
-        if (chapterNum >= maxChapterNum) return@async false
-        setRecord(chapterNum, 1)
-        chapterCache.getChapter(++chapterNum)
-            .apply { text.set(this) }
-            .let { it.substring(it.indexOf("|") + 1) } == ChapterCache.FILENOTFOUND
-    }.await()
-
-    override suspend fun previousChapter(): Boolean = async {
-        if (chapterNum < 2) return@async false
-        setRecord(chapterNum, 1)
-        chapterCache.getChapter(--chapterNum)
-            .apply { text.set(this) }
-            .let { it.substring(it.indexOf("|") + 1) } == ChapterCache.FILENOTFOUND
-    }.await()
-
-    /**
-     * 翻页到目录中的某章
-     */
-    override suspend fun pageByCatalog(chapterName: String?): Boolean = async {
-        chapterName?.run {
-            chapterNum = SQLHelper.getChapterId(tableName, chapterName)
-            setRecord(chapterNum, 1)
-        }
+        launch { setRecord(chapterNum, 1) }
         chapterCache.getChapter(chapterNum)
             .apply { text.set(this) }
             .let { it.substring(it.indexOf("|") + 1) } == ChapterCache.FILENOTFOUND
     }.await()
 
-    override suspend fun downloadChapter(chapterName: String?): Boolean = async {
+    override suspend fun downloadAndShow(chapterName: String?): Boolean = async {
         var str = ChapterCache.FILENOTFOUND
         var times = 0
         while (str == ChapterCache.FILENOTFOUND && times++ < 10) {
             str = chapterCache.getFromNet(
                 getSavePath() + "/" + dirName!!,
-                chapterName ?: ""
+                chapterName ?: SQLHelper.getChapterName(tableName, chapterNum)
             )
             delay(500)
         }
-        !(str == ChapterCache.FILENOTFOUND || str.isEmpty()) && !(pageByCatalog(null))
+        !(str == ChapterCache.FILENOTFOUND || str.isEmpty())
+                && !(getChapter(CHAPTERCHANGE.BY_CATALOG, null))
     }.await()
 
     /**
@@ -128,7 +106,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     override suspend fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog> = async {
         catalog.clear()
         val catalogCursor = SQLHelper.getDB().rawQuery(
-            "select ${SQLHelper.CHAPTERNAME} " + "from $tableName", null
+            "select ${SQLHelper.CHAPTERNAME} from $tableName order by ${SQLHelper.ID} asc", null
         )
         while (catalogCursor.moveToNext()) {
             catalog.add(ReaderBean.Catalog(catalogCursor.getString(0)))
@@ -142,7 +120,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
         if (num < NotDeleteNum) return
         val id = num - NotDeleteNum
         SQLHelper.setReaded(tableName, id)
-                .forEach { File("${getSavePath()}/$tableName/$it").delete() }
+            .forEach { File("${getSavePath()}/$tableName/$it").delete() }
     }
 
     /**

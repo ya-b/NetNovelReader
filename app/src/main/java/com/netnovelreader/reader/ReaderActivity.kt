@@ -35,7 +35,7 @@ import kotlinx.coroutines.experimental.launch
 
 
 class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
-        ReaderView.ReaderPageListener, ReaderView.FirstDrawListener, IClickEvent {
+    ReaderView.ReaderPageListener, ReaderView.FirstDrawListener, IClickEvent {
     val FONTSIZE = "FontSize"
     var readerViewModel: ReaderViewModel? = null
     var dialog: AlertDialog? = null
@@ -44,17 +44,17 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun onCreate(savedInstanceState: Bundle?) {
         if (PreferenceManager.isFullScreen(this)) {
             window.setFlags(
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
         PreferenceManager.setTheme(this)
         super.onCreate(savedInstanceState)
         setViewModel(
-                ReaderViewModel(
-                        intent.getStringExtra("bookname"),
-                        PreferenceManager.getAutoDownNum(this)
-                )
+            ReaderViewModel(
+                intent.getStringExtra("bookname"),
+                PreferenceManager.getAutoDownNum(this)
+            )
         )
         init()
     }
@@ -62,21 +62,20 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun setViewModel(vm: ReaderViewModel) {
         readerViewModel = vm
         val binding =
-                DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
+            DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
         binding.clickEvent = ReaderClickEvent()
         binding.readerViewModel = readerViewModel
         binding.readerView.background = getDrawable(R.drawable.bg_readbook_yellow)
         binding.readerView.firstDrawListener = this
         binding.readerView.pageListener = this
         binding.readerView.txtFontSize = getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-                .getFloat(FONTSIZE, 50f)
+            .getFloat(FONTSIZE, 50f)
     }
 
     override fun init() {
         loadingbar.hide()
         netStateReceiver = NetChangeReceiver()
-        val filter = IntentFilter()
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+        val filter = IntentFilter().apply { addAction(ConnectivityManager.CONNECTIVITY_ACTION) }
         registerReceiver(netStateReceiver, filter)
 
         sb_brightness.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -117,13 +116,15 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun doDrawPrepare() {
         launch(UI) {
             readerView.pageNum = readerViewModel?.initData()
-            readerViewModel?.pageByCatalog(null)
-                    .takeIf { it ?: true }
-                    ?.run {
-                        loadingbar.show()
-                        if (readerViewModel?.downloadChapter(readerView.title)
-                                        ?: false) loadingbar.hide()
-                    }
+            readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, null)
+                .takeIf { it ?: true }
+                ?.apply {
+                    loadingbar.show()
+                    val chapterName =
+                        if (readerView.title.isNullOrEmpty()) null else readerView.title
+                    readerViewModel?.downloadAndShow(chapterName)
+                        ?.takeIf { it }?.run { loadingbar.hide() }
+                }
         }
     }
 
@@ -137,13 +138,13 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         if (loadingbar.isShown) loadingbar.hide()
         hideHeaderFoot()
         launch(UI) {
-            readerViewModel?.nextChapter()
-                    .takeIf { it ?: true }
-                    ?.run {
-                        loadingbar.show()
-                        if (readerViewModel?.downloadChapter(readerView.title) ?: false)
-                            loadingbar.hide()
-                    }
+            readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.NEXT, null)
+                .takeIf { it ?: true }
+                ?.apply {
+                    loadingbar.show()
+                    readerViewModel?.downloadAndShow(readerView.title)
+                        ?.takeIf { it }?.run { loadingbar.hide() }
+                }
         }
     }
 
@@ -151,10 +152,13 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         if (loadingbar.isShown) loadingbar.hide()
         hideHeaderFoot()
         launch(UI) {
-            readerViewModel?.previousChapter().takeIf { it != false }?.run {
-                loadingbar.show()
-                if (readerViewModel?.downloadChapter(readerView.title) ?: false) loadingbar.hide()
-            }
+            readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.PREVIOUS, null)
+                .takeIf { it != false }
+                ?.apply {
+                    loadingbar.show()
+                    readerViewModel?.downloadAndShow(readerView.title)
+                        ?.takeIf { it }?.run { loadingbar.hide() }
+                }
         }
     }
 
@@ -175,8 +179,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             catalogView.addItemDecoration(NovelItemDecoration(this))
             catalogView.itemAnimator = DefaultItemAnimator()
             catalogView.adapter = BindingAdapter(
-                    readerViewModel?.catalog, R.layout.item_catalog,
-                    CatalogItemClickListener()
+                readerViewModel?.catalog, R.layout.item_catalog,
+                CatalogItemClickListener()
             )
             dialog = builder.setView(view).create()
         }
@@ -203,8 +207,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             if (isAvailable && loadingbar.isShown) {
                 launch(UI) {
                     loadingbar.show()
-                    if (readerViewModel?.downloadChapter(readerView.title) ?: false)
-                        loadingbar.hide()
+                    readerViewModel?.downloadAndShow(readerView.title)
+                        ?.takeIf { it }?.run { loadingbar.hide() }
                 }
             }
         }
@@ -212,17 +216,20 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
 
     inner class CatalogItemClickListener : IClickEvent {
         fun onChapterClick(v: View) {
+            if (loadingbar.isShown) loadingbar.hide()
             launch(UI) {
-                if (loadingbar.isShown) loadingbar.hide()
-                val boolean = readerViewModel?.pageByCatalog(v.itemChapter.text.toString())
-                if (boolean ?: true) {
-                    readerView.title = v.itemChapter.text.toString()
-                    loadingbar.show()
-                    if (readerViewModel?.downloadChapter(readerView.title) ?: false)
-                        loadingbar.hide()
-                }
-                dialog?.dismiss()
+                readerViewModel?.getChapter(
+                    ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, v.itemChapter.text.toString()
+                )
+                    .takeIf { it != false }
+                    ?.apply {
+                        readerView.title = v.itemChapter.text.toString()
+                        loadingbar.show()
+                        readerViewModel?.downloadAndShow(readerView.title)
+                            ?.takeIf { it }?.run { loadingbar.hide() }
+                    }
             }
+            dialog?.dismiss()
         }
     }
 
@@ -276,9 +283,14 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         fun onFontSizeClick(v: View) {
             readerView.txtFontSize = (v as TextView).text.toString().toFloat()
             getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-                    .putFloat(FONTSIZE, readerView.txtFontSize!!).apply()
+                .putFloat(FONTSIZE, readerView.txtFontSize!!).apply()
 
-            v.setTextColor(ContextCompat.getColor(this@ReaderActivity, R.color.lightgray))//为当前选中的字体TextView改变背景色
+            v.setTextColor(
+                ContextCompat.getColor(
+                    this@ReaderActivity,
+                    R.color.lightgray
+                )
+            )//为当前选中的字体TextView改变背景色
             selectedFontSizeTextView?.setTextColor(Color.WHITE)                                  //将前次选中的字体大小TextView改变背景色
             selectedFontSizeTextView = v
         }
@@ -288,14 +300,14 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             view as TextView
             val context = view.context
             val typeFacePath =      //根据用户选择获取字体路径
-                    when (view.id) {
-                        R.id.tv_beiweikai -> Config.FONTTYPE_BEIWEIKAISHU
-                        R.id.tv_bysong -> Config.FONTTYPE_BYSONG
-                        R.id.tv_default -> Config.FONTTYPE_DEFAULT
-                        R.id.tv_zhulang -> Config.FONTTYPE_CHENGUANG
-                        R.id.tv_fzkatong -> Config.FONTTYPE_FZKATONG
-                        else -> Config.FONTTYPE_DEFAULT
-                    }
+                when (view.id) {
+                    R.id.tv_beiweikai -> Config.FONTTYPE_BEIWEIKAISHU
+                    R.id.tv_bysong -> Config.FONTTYPE_BYSONG
+                    R.id.tv_default -> Config.FONTTYPE_DEFAULT
+                    R.id.tv_zhulang -> Config.FONTTYPE_CHENGUANG
+                    R.id.tv_fzkatong -> Config.FONTTYPE_FZKATONG
+                    else -> Config.FONTTYPE_DEFAULT
+                }
 
             readerView.txtFontType = Config.getTypeface(context, typeFacePath)   //根据新的字体重新绘制视图
             selectedFontTypeTextView?.let {

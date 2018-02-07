@@ -89,7 +89,7 @@ class SearchBook : Cloneable {
         var result = doc.select(urlSelector).select("a").attr("href")
         result = fixUrl(url, result)
         if (result.contains("qidian.com")) {
-            result += "#Catalog"
+            result = result.replace("book.qidian.com/info", "m.qidian.com/book") + "/catalog"
         }
         return result
     }

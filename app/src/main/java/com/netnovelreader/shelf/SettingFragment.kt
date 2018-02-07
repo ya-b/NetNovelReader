@@ -16,7 +16,6 @@ class SettingFragment : PreferenceFragment() {
         findPreference(getString(R.string.themeKey)).setOnPreferenceChangeListener { preference, newValue ->
             startActivity(Intent(activity, activity.javaClass))
             activity.finish()
-//            activity.recreate()
             true
         }
     }

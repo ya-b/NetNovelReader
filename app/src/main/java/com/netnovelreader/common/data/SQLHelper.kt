@@ -33,15 +33,15 @@ object SQLHelper {
     //查询下载的所有书
     fun queryShelfBookList(): HashMap<Int, Array<String>> {
         val hashMap =
-            LinkedHashMap<Int, Array<String>>()  //key=id, Array=BOOKNAME,LATESTCHAPTER,DOWNLOADURL,ISUPDATE
+                LinkedHashMap<Int, Array<String>>()  //key=id, Array=BOOKNAME,LATESTCHAPTER,DOWNLOADURL,ISUPDATE
         val cursor =
-            getDB().rawQuery("select * from $TABLE_SHELF order by $LATESTREAD DESC;", null)
+                getDB().rawQuery("select * from $TABLE_SHELF order by $LATESTREAD DESC;", null)
         while (cursor.moveToNext()) {
             val array = arrayOf(
-                cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME)),
-                cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER)),
-                cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL)),
-                cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE))
+                    cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME)),
+                    cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER)),
+                    cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL)),
+                    cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE))
             )
             hashMap.put(cursor.getInt(cursor.getColumnIndex(SQLHelper.ID)), array)
         }
@@ -54,8 +54,8 @@ object SQLHelper {
         synchronized(SQLHelper) {
             var id = 0
             val cursor = getDB().rawQuery(
-                "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
-                null
+                    "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
+                    null
             )
             if (cursor.moveToFirst()) {
                 id = cursor.getInt(0)
@@ -75,8 +75,8 @@ object SQLHelper {
     fun removeBookFromShelf(bookname: String): Int {
         synchronized(SQLHelper) {
             val cursor = getDB().rawQuery(
-                "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
-                null
+                    "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
+                    null
             )
             var id = -1
             if (cursor.moveToFirst()) {
@@ -88,9 +88,22 @@ object SQLHelper {
         }
     }
 
+    fun getBookId(bookname: String): Int {
+        var id = 1
+        val cursor = SQLHelper.getDB().rawQuery(
+                "select ${SQLHelper.ID} from " +
+                        "${SQLHelper.TABLE_SHELF} where ${SQLHelper.BOOKNAME}='$bookname';", null
+        )
+        if (cursor.moveToFirst()) {
+            id = cursor.getInt(0)
+        }
+        cursor.close()
+        return id
+    }
+
     fun cancelUpdateFlag(bookname: String) {
         getDB().execSQL(
-            "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.ISUPDATE}='' where ${SQLHelper.BOOKNAME}='$bookname';"
+                "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.ISUPDATE}='' where ${SQLHelper.BOOKNAME}='$bookname';"
         )
     }
 
@@ -108,8 +121,8 @@ object SQLHelper {
     fun getRecord(bookname: String): Array<String> {
         val result = Array(2) { "" }
         val cursor = getDB().rawQuery(
-            "select $ID,$READRECORD from $TABLE_SHELF where " +
-                    "$BOOKNAME='$bookname';", null
+                "select $ID,$READRECORD from $TABLE_SHELF where " +
+                        "$BOOKNAME='$bookname';", null
         )
         if (cursor.moveToFirst()) {
             result[0] = cursor.getString(0) ?: ""
@@ -139,8 +152,8 @@ object SQLHelper {
     fun getParseRule(hostname: String, field: String): String {
         var rule: String? = null
         val cursor = getDB().rawQuery(
-            "select $field from $TABLE_PARSERULES " +
-                    "where $HOSTNAME='$hostname';", null
+                "select $field from $TABLE_PARSERULES " +
+                        "where $HOSTNAME='$hostname';", null
         )
         if (cursor!!.moveToFirst()) {
             rule = cursor.getString(0)
@@ -153,9 +166,9 @@ object SQLHelper {
     fun createTable(tableName: String) {
         synchronized(SQLHelper) {
             getDB().execSQL(
-                "create table if not exists $tableName ($ID " +
-                        "integer primary key,$CHAPTERNAME varchar(128), " +
-                        "$CHAPTERURL indicator, $ISDOWNLOADED var char(128));"
+                    "create table if not exists $tableName ($ID " +
+                            "integer primary key unique,$CHAPTERNAME text unique, " +
+                            "$CHAPTERURL text, $ISDOWNLOADED var char(128));"
             )
         }
     }
@@ -166,34 +179,16 @@ object SQLHelper {
             getDB().execSQL("drop table if exists $tableName;")
         }
     }
-
     //设置章节是否下载完成
     fun setChapterFinish(
-        tableName: String,
-        chaptername: String,
-        url: String,
-        isDownloadSuccess: Boolean
+            tableName: String,
+            chaptername: String,
+            url: String,
+            isDownloadSuccess: Boolean
     ) {
-        synchronized(SQLHelper) {
-            val cursor = getDB().rawQuery(
-                "select * from $tableName where " +
-                        "$CHAPTERNAME='$chaptername';", null
-            )
-            if (!cursor.moveToFirst()) {
-                getDB().execSQL(
-                    "insert into $tableName ($CHAPTERNAME, " +
-                            "$CHAPTERURL, $ISDOWNLOADED) values ('$chaptername'," +
-                            "'$url','${compareValues(isDownloadSuccess, false)}')"
-                )
-            } else {
-                getDB().execSQL(
-                    "update $tableName set $ISDOWNLOADED=" +
-                            "'${compareValues(isDownloadSuccess, false)}' " +
-                            "where $CHAPTERNAME='$chaptername';"
-                )
-            }
-            cursor.close()
-        }
+        val getId = "(select $ID from $tableName where $CHAPTERNAME='$chaptername')"
+        getDB().execSQL("replace into $tableName ($ID, $CHAPTERNAME, $CHAPTERURL, $ISDOWNLOADED) " +
+                "values ($getId, '$chaptername', '$url', '$isDownloadSuccess')")
     }
 
     /**
@@ -203,9 +198,9 @@ object SQLHelper {
     fun getChapterNameAndUrl(tableName: String, isDownloaded: Int): LinkedHashMap<String, String> {
         val map = LinkedHashMap<String, String>()
         val cursor = getDB().rawQuery(
-            "select $CHAPTERNAME," +
-                    "$CHAPTERURL from $tableName where $ISDOWNLOADED=" +
-                    "'$isDownloaded';", null
+                "select $CHAPTERNAME," +
+                        "$CHAPTERURL from $tableName where $ISDOWNLOADED=" +
+                        "'$isDownloaded';", null
         )
         while (cursor.moveToNext()) {
             map.put(cursor.getString(0), cursor.getString(1))
@@ -229,8 +224,8 @@ object SQLHelper {
     fun getChapterName(tableName: String, id: Int): String {
         var chapterName: String? = null
         val cursor = getDB().rawQuery(
-            "select $CHAPTERNAME from $tableName where " +
-                    "$ID=$id;", null
+                "select $CHAPTERNAME from $tableName where " +
+                        "$ID=$id;", null
         )
         if (cursor.moveToFirst()) {
             chapterName = cursor.getString(0)
@@ -243,8 +238,8 @@ object SQLHelper {
     fun getChapterUrl(tableName: String, chapterName: String): String {
         var chapterUrl: String? = null
         val cursor = getDB().rawQuery(
-            "select $CHAPTERURL from $tableName where " +
-                    "$CHAPTERNAME='$chapterName';", null
+                "select $CHAPTERURL from $tableName where " +
+                        "$CHAPTERNAME='$chapterName';", null
         )
         if (cursor.moveToFirst()) {
             chapterUrl = cursor.getString(0)
@@ -256,8 +251,8 @@ object SQLHelper {
     fun getChapterId(tableName: String, chapterName: String): Int {
         var id = 1
         val cursor = getDB().rawQuery(
-            "select $ID from $tableName where " +
-                    "$CHAPTERNAME='$chapterName';", null
+                "select $ID from $tableName where " +
+                        "$CHAPTERNAME='$chapterName';", null
         )
         if (cursor.moveToFirst()) {
             id = cursor.getInt(0)
@@ -270,8 +265,8 @@ object SQLHelper {
     fun setReaded(tableName: String, id: Int): ArrayList<String> {
         val arrayList = ArrayList<String>()
         val cursor = getDB().rawQuery(
-            "select $CHAPTERNAME from $tableName where $ID<=$id " +
-                    "and $ISDOWNLOADED='1';", null
+                "select $CHAPTERNAME from $tableName where $ID<=$id " +
+                        "and $ISDOWNLOADED='1';", null
         )
         while (cursor.moveToNext()) {
             arrayList.add(cursor.getString(0))
@@ -286,7 +281,7 @@ object SQLHelper {
         val arrayList = ArrayList<String>()
         val id = getChapterId(tableName, chapterName)
         val cursor =
-            getDB().rawQuery("select $CHAPTERNAME from $tableName where $ID>=$id;", null)
+                getDB().rawQuery("select $CHAPTERNAME from $tableName where $ID>=$id;", null)
         while (cursor.moveToNext()) {
             arrayList.add(cursor.getString(0))
         }
@@ -299,7 +294,7 @@ object SQLHelper {
      * 获取章节总数
      */
     fun getChapterCount(tableName: String): Int {
-        var c = -1
+        var c = 0
         createTable(tableName)
         val cursor = getDB().rawQuery("select count(*) from $tableName;", null)
         if (cursor.moveToFirst()) {
@@ -357,7 +352,7 @@ object SQLHelper {
     val SEARCH_NAME = "searchname"
 
     class NovelSQLHelper(val context: Context, val name: String, val version: Int) :
-        SQLiteOpenHelper(context, name, null, version) {
+            SQLiteOpenHelper(context, name, null, version) {
 
         override fun onCreate(db: SQLiteDatabase?) {
             initTable(db)
@@ -374,8 +369,8 @@ object SQLHelper {
                             "$CATALOG_FILTER varchar(128),$CHAPTER_FILTER text);"
             )
             db?.execSQL(
-                    "insert into $TABLE_PARSERULES values (1,'qidian.com','.volume-wrap'," +
-                            "'.read-content','分卷阅读|订阅本卷',NULL);"
+                    "insert into $TABLE_PARSERULES values (1,'qidian.com','#volumes'," +
+                            "'.read-section','分卷阅读|订阅本卷',NULL);"
             )
             db?.execSQL(
                     "insert into $TABLE_PARSERULES values (2,'yunlaige.com','#contenttable'," +

@@ -15,13 +15,13 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import com.netnovelreader.R
 import com.netnovelreader.common.ArrayListChangeListener
 import com.netnovelreader.common.BindingAdapter
 import com.netnovelreader.common.PreferenceManager
 import com.netnovelreader.common.base.IClickEvent
 import com.netnovelreader.common.data.SQLHelper
+import com.netnovelreader.common.toast
 import com.netnovelreader.databinding.ActivityShelfBinding
 import com.netnovelreader.editor.SiteEditorActivity
 import com.netnovelreader.reader.ReaderActivity
@@ -161,7 +161,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
                 hasPermission = true
                 updateShelf()
             } else {
-                Toast.makeText(this, R.string.permission_warnning, Toast.LENGTH_LONG).show()
+                toast(getString(R.string.permission_warnning))
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -197,7 +197,6 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
                         shelfViewModel?.refreshBookList()
                     }
                 }
-                dialog.dismiss()
             }
             AlertDialog.Builder(this@ShelfActivity)
                     .setTitle(getString(R.string.deleteBook).replace("book", view.nameView.text.toString()))

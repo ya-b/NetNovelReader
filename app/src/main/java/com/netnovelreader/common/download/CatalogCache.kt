@@ -31,16 +31,10 @@ object CatalogCache {
         } catch (e: IOException) {
             return
         }
-        val filters = SQLHelper.getParseRule(url2Hostname(catalogUrl), SQLHelper.CATALOG_FILTER)
-        val arr = ArrayList<String>()
         var latestChapter: String? = null
         map.forEach {
-            filters.split("|").forEach { filter ->
-                if (it.key.contains(filter)) arr.add(it.key)
-                latestChapter = it.key
-            }
+            latestChapter = it.key
         }
-        arr.forEach { map.remove(it) }
         cache.put(
                 catalogUrl, SearchBean(
                 ObservableField(bookname),

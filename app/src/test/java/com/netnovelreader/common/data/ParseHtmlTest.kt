@@ -1,10 +1,5 @@
 package com.netnovelreader.common.data
 
-import com.netnovelreader.common.TIMEOUT
-import com.netnovelreader.common.fixUrl
-import com.netnovelreader.common.getHeaders
-import com.netnovelreader.common.url2Hostname
-import org.jsoup.Jsoup
 import org.junit.Test
 
 internal class ParseHtmlTest {
@@ -15,5 +10,16 @@ internal class ParseHtmlTest {
 
     @Test
     fun getCatalog() {
+        var arraylist = ArrayList<Int>()
+        for(i in 0 ..10){
+            arraylist.add(i)
+        }
+        val it = arraylist.iterator()
+        while (it.hasNext()){
+            val a = it.next()
+            if(a > 5){
+                arraylist.remove(a)
+            }
+        }
     }
 }

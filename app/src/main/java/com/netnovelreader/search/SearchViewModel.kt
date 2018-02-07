@@ -1,5 +1,6 @@
 package com.netnovelreader.search
 
+import com.netnovelreader.ReaderApplication.Companion.threadPool
 import com.netnovelreader.api.ApiManager
 import com.netnovelreader.api.bean.KeywordsBean
 import com.netnovelreader.common.*
@@ -11,7 +12,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newFixedThreadPoolContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -54,9 +54,9 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         searchCode++
         resultList.clear()
         CatalogCache.clearCache()
-        val poolContext = newFixedThreadPoolContext(THREAD_NUM, "DownloadService")
         SQLHelper.queryAllSearchSite().forEach {
-            launch(poolContext) {
+            launch(threadPool) {
+                Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
                 searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
             }
         }
@@ -74,8 +74,8 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     //删除目标及之后的章节,换源重新下载
     override suspend fun delChapterAfterSrc(tableName: String, chapterName: String) {
         val list = SQLHelper.delChapterAfterSrc(tableName, chapterName)
-        File(getSavePath() + "/$tableName")
-                .takeIf { it.exists() }
+        File(getSavePath() + "/$tableName") //目录
+            .takeIf { it.exists() }             //是否存在
                 ?.let { list.map { item -> File(it, item) }.forEach { it.delete() } }
     }
 
@@ -98,13 +98,19 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
             )
         }
         if (searchCode == reqCode && result[1].isNotEmpty()) { //result[1]==bookname,result[0]==catalogurl
-            launch { CatalogCache.addCatalog(result[1], result[0]) }.join()
+            CatalogCache.addCatalog(result[1], result[0])
             val bean = CatalogCache.cache[result[0]]
             if (bean != null && !bean.url.get().isNullOrEmpty()) {
                 resultList.add(bean)
             }
+            launch {
+                try{
+                    downloadImage(result[1], result[2])           //下载书籍封面图片
+                }catch (e: IOException){
+                    e.printStackTrace()
+                }
+            }
         }
-        launch { downloadImage(result[1], result[2]) }                 //下载书籍封面图片
     }
 
     @Throws(IOException::class)

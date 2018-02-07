@@ -17,11 +17,17 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
         SQLHelper.createTable(tableName)
         val cacheMap = CatalogCache.cache.get(catalogUrl)?.catalogMap
         var latestChapter: String? = null
-        filtExistsInSql(if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
-                .forEach {
-                    SQLHelper.setChapterFinish(tableName, it.key, it.value, false)
-                    latestChapter = it.key
-                }
+        try {
+            SQLHelper.getDB().beginTransaction()
+            filtExistsInSql(if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
+                    .forEach {
+                        SQLHelper.setChapterFinish(tableName, it.key, it.value, false)
+                        latestChapter = it.key
+                    }
+            SQLHelper.getDB().setTransactionSuccessful()
+        }finally {
+            SQLHelper.getDB().endTransaction()
+        }
         latestChapter ?: return
         SQLHelper.getDB().execSQL(
             "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.LATESTCHAPTER}=" +

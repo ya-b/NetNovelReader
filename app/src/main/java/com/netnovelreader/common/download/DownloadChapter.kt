@@ -1,8 +1,8 @@
 package com.netnovelreader.common.download
 
-import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.common.data.ParseHtml
 import com.netnovelreader.common.data.SQLHelper
+import com.netnovelreader.common.url2Hostname
 import java.io.File
 import java.io.IOException
 
@@ -27,7 +27,8 @@ class DownloadChapter(
 
     @Throws(IOException::class)
     fun getChapterTxt(): String {
-        if (!chapterUrl.startsWith("http") || File(dir, chapterName).exists()) return ""
+        if (!chapterUrl.startsWith("http")) return ""
+        File(dir, chapterName).takeIf { it.exists() }?.run { return this.readText() }
         var str = ParseHtml().getChapter(chapterUrl)
         SQLHelper.getParseRule(url2Hostname(chapterUrl), SQLHelper.CATALOG_FILTER)
                 .takeIf { it.length > 0 }
