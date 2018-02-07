@@ -28,6 +28,7 @@ import com.netnovelreader.reader.ReaderActivity
 import com.netnovelreader.search.SearchActivity
 import kotlinx.android.synthetic.main.activity_shelf.*
 import kotlinx.android.synthetic.main.item_shelf.view.*
+import kotlinx.coroutines.experimental.launch
 
 class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
@@ -91,8 +92,10 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     //刷新书架数据
     override fun updateShelf() {
-        if (hasPermission) {
-            shelfViewModel?.refreshBookList()
+        launch {
+            if (hasPermission) {
+                shelfViewModel?.refreshBookList()
+            }
         }
     }
 
@@ -181,7 +184,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     inner class ShelfClickEvent : IClickEvent {
         fun itemOnClick(v: View) {
             val bookname = v.nameView.text.toString()
-            shelfViewModel?.cancelUpdateFlag(bookname)
+            launch { shelfViewModel?.cancelUpdateFlag(bookname) }
             v.context.startActivity(Intent(v.context, ReaderActivity::class.java)
                     .apply { this.putExtra("bookname", bookname) })
         }
@@ -189,8 +192,10 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         fun itemOnLongClick(view: View): Boolean {
             val listener = DialogInterface.OnClickListener { dialog, which ->
                 if (which == Dialog.BUTTON_POSITIVE) {
-                    shelfViewModel?.deleteBook(view.nameView.text.toString())
-                    shelfViewModel?.refreshBookList()
+                    launch {
+                        shelfViewModel?.deleteBook(view.nameView.text.toString())
+                        shelfViewModel?.refreshBookList()
+                    }
                 }
                 dialog.dismiss()
             }

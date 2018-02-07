@@ -99,7 +99,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         super.onDestroy()
         unregisterReceiver(netStateReceiver)
         if (PreferenceManager.isAutoRemove(this)) {
-            readerViewModel?.autoRemove()
+            launch { readerViewModel?.autoRemove() }
         }
     }
 
@@ -115,16 +115,16 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
      * readerview第一次绘制时调用
      */
     override fun doDrawPrepare() {
-        readerView.pageNum = readerViewModel?.initData()
-        readerViewModel?.pageByCatalog(null)
-                .takeIf { it ?: true }
-                ?.run {
-                    launch(UI) {
+        launch(UI) {
+            readerView.pageNum = readerViewModel?.initData()
+            readerViewModel?.pageByCatalog(null)
+                    .takeIf { it ?: true }
+                    ?.run {
                         loadingbar.show()
                         if (readerViewModel?.downloadChapter(readerView.title)
                                         ?: false) loadingbar.hide()
                     }
-                }
+        }
     }
 
     override fun onCenterClick() {
@@ -136,22 +136,22 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun nextChapter() {
         if (loadingbar.isShown) loadingbar.hide()
         hideHeaderFoot()
-        readerViewModel?.nextChapter()
-                .takeIf { it ?: true }
-                ?.run {
-                    launch(UI) {
+        launch(UI) {
+            readerViewModel?.nextChapter()
+                    .takeIf { it ?: true }
+                    ?.run {
                         loadingbar.show()
                         if (readerViewModel?.downloadChapter(readerView.title) ?: false)
                             loadingbar.hide()
                     }
-                }
+        }
     }
 
     override fun previousChapter() {
         if (loadingbar.isShown) loadingbar.hide()
         hideHeaderFoot()
-        readerViewModel?.previousChapter().takeIf { it != false }?.run {
-            launch(UI) {
+        launch(UI) {
+            readerViewModel?.previousChapter().takeIf { it != false }?.run {
                 loadingbar.show()
                 if (readerViewModel?.downloadChapter(readerView.title) ?: false) loadingbar.hide()
             }
@@ -160,7 +160,9 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
 
     override fun onPageChange() {
         hideHeaderFoot()
-        readerViewModel?.setRecord(readerViewModel?.chapterNum ?: 1, readerView.pageNum ?: 1)
+        launch {
+            readerViewModel?.setRecord(readerViewModel?.chapterNum ?: 1, readerView.pageNum ?: 1)
+        }
     }
 
     override fun showDialog() {
@@ -178,7 +180,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             )
             dialog = builder.setView(view).create()
         }
-        readerViewModel?.updateCatalog()
+        launch { readerViewModel?.updateCatalog() }
         catalogView?.adapter?.notifyDataSetChanged()
         catalogView?.scrollToPosition(readerViewModel!!.chapterNum - 1)
         dialog?.show()
@@ -210,17 +212,17 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
 
     inner class CatalogItemClickListener : IClickEvent {
         fun onChapterClick(v: View) {
-            if (loadingbar.isShown) loadingbar.hide()
-            val boolean = readerViewModel?.pageByCatalog(v.itemChapter.text.toString())
-            if (boolean ?: true) {
-                readerView.title = v.itemChapter.text.toString()
-                launch(UI) {
+            launch(UI) {
+                if (loadingbar.isShown) loadingbar.hide()
+                val boolean = readerViewModel?.pageByCatalog(v.itemChapter.text.toString())
+                if (boolean ?: true) {
+                    readerView.title = v.itemChapter.text.toString()
                     loadingbar.show()
                     if (readerViewModel?.downloadChapter(readerView.title) ?: false)
                         loadingbar.hide()
                 }
+                dialog?.dismiss()
             }
-            dialog?.dismiss()
         }
     }
 

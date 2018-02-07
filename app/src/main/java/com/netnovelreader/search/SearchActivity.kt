@@ -32,6 +32,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.item_search.view.*
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -115,7 +116,6 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
 
 
         searchViewBar.setOnQueryTextListener(QueryListener())
-        searchViewBar.isIconified = false
         searchViewBar.onActionViewExpanded()
 
 
@@ -155,18 +155,24 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         searchViewBar.visibility = View.INVISIBLE
         searchViewText.visibility = View.VISIBLE
         searchViewText.text = bookname
-        searchViewModel?.searchBook(bookname)
+        launch {
+            searchViewModel?.searchBook(bookname)
+        }
     }
 
     inner class QueryListener : android.support.v7.widget.SearchView.OnQueryTextListener {
         private var tmp = ""
         private var tmpTime = System.currentTimeMillis()
+        private var job: Job? = null
 
         override fun onQueryTextSubmit(query: String): Boolean {
             searchloadingbar.hide()
             if (tmp == query && System.currentTimeMillis() - tmpTime < 1000) return true  //点击间隔小于1秒，并且搜索书名相同不再搜索
             if (query.isNotEmpty()) {
-                searchViewModel?.searchBook(query)
+                launch {
+                    job?.cancel()
+                    job = searchViewModel?.searchBook(query)
+                }
                 tmp = query
                 tmpTime = System.currentTimeMillis()
                 searchViewBar.clearFocus()                    //提交搜索commit后收起键盘
@@ -216,8 +222,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         fun refreshHotWords(v: View) {
             for (i in 0 until linearLayout.childCount)
                 with(linearLayout.getChildAt(i) as TextView) {
-                    text =
-                            mSearchHotWord?.searchHotWords!![Random().nextInt(100)].word                                       //设置搜索热词文本，该10个热词是从100个关键个搜索热词中随机抽取的
+                    text = mSearchHotWord?.searchHotWords!![Random().nextInt(100)].word     //设置搜索热词文本，该10个热词是从100个关键个搜索热词中随机抽取的
                     (background as GradientDrawable).setColor(
                             ContextCompat.getColor(
                                     this@SearchActivity,
@@ -252,18 +257,20 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             if (searchloadingbar.isShown) return
 
             val listener = DialogInterface.OnClickListener { dialog, which ->
-                val catalogUrl = v.resultUrl.text.toString()
-                val bookname = v.resultName.text.toString()
-                val tableName = searchViewModel!!.addBookToShelf(bookname, catalogUrl)
-                val isChangeSource = !intent.getStringExtra("bookname").isNullOrEmpty()
-                when (which) {
-                    Dialog.BUTTON_POSITIVE -> {
-                        download(bookname, catalogUrl,
-                                { downloadBook(v.context, tableName, catalogUrl, isChangeSource) }
-                        )
-                    }
-                    Dialog.BUTTON_NEGATIVE -> {
-                        download(bookname, catalogUrl, { downNowChapter(tableName, isChangeSource) })
+                launch(UI) {
+                    val catalogUrl = v.resultUrl.text.toString()
+                    val bookname = v.resultName.text.toString()
+                    val tableName = searchViewModel!!.addBookToShelf(bookname, catalogUrl)
+                    val isChangeSource = !intent.getStringExtra("bookname").isNullOrEmpty()
+                    when (which) {
+                        Dialog.BUTTON_POSITIVE -> {
+                            download(bookname, catalogUrl,
+                                    { downloadBook(v.context, tableName, catalogUrl, isChangeSource) }
+                            )
+                        }
+                        Dialog.BUTTON_NEGATIVE -> {
+                            download(bookname, catalogUrl, { launch { downNowChapter(tableName, isChangeSource) } })
+                        }
                     }
                 }
             }
@@ -304,7 +311,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         ) {
             val chapterName = intent.getStringExtra("chapterName")
             if (isChangeSource && !chapterName.isNullOrEmpty()) {
-                searchViewModel?.delChapterAfterSrc(tableName, chapterName)
+                launch { searchViewModel?.delChapterAfterSrc(tableName, chapterName) }
             }
             val intent = Intent(context, DownloadService::class.java)
             intent.putExtra("tableName", tableName)
@@ -313,10 +320,10 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         }
 
         //换源下载，只下载当前章节
-        private fun downNowChapter(tableName: String, isChangeSource: Boolean) {
+        private suspend fun downNowChapter(tableName: String, isChangeSource: Boolean) {
             val chapterName = intent.getStringExtra("chapterName")
             if (isChangeSource && !chapterName.isNullOrEmpty()) {
-                searchViewModel?.delChapterAfterSrc(tableName, chapterName)
+                launch { searchViewModel?.delChapterAfterSrc(tableName, chapterName) }
                 DownloadChapter(
                         tableName, "${getSavePath()}/$tableName",
                         chapterName, SQLHelper.getChapterUrl(tableName, chapterName)

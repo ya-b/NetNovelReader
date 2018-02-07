@@ -297,7 +297,7 @@ class ReaderView : View, GestureDetector.OnGestureListener {
                         else -> 1
                     }
                 }
-                else -> invalidate()
+                else -> postInvalidate()
             }
         }
     }

@@ -33,7 +33,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
      * 章节数,最大章节数
      */
     @Volatile
-    var chapterNum = 0
+    var chapterNum = 1
     @Volatile
     var maxChapterNum = 0
 
@@ -56,48 +56,48 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     /**
      * readerView第一次绘制时执行, 返还阅读记录页数，章节名称
      */
-    override fun initData(): Int {
+    override suspend fun initData(): Int = async{
         maxChapterNum = SQLHelper.getChapterCount(tableName)
         if (maxChapterNum == 0) {
-            return 0
+            return@async 0
         }
         val array = getRecord()
         chapterNum = array[0]
         chapterCache.init(maxChapterNum, dirName!!)
-        return array[1]
-    }
+        array[1]
+    }.await()
 
     /**
      * 获取下一章内容，返回章节名称
      */
-    override fun nextChapter(): Boolean {
-        if (chapterNum >= maxChapterNum) return false
+    override suspend fun nextChapter(): Boolean = async{
+        if (chapterNum >= maxChapterNum) return@async false
         setRecord(chapterNum, 1)
-        return chapterCache.getChapter(++chapterNum)
+        chapterCache.getChapter(++chapterNum)
             .apply { text.set(this) }
             .let { it.substring(it.indexOf("|") + 1) } == ChapterCache.FILENOTFOUND
-    }
+    }.await()
 
-    override fun previousChapter(): Boolean {
-        if (chapterNum < 2) return false
+    override suspend fun previousChapter(): Boolean = async {
+        if (chapterNum < 2) return@async false
         setRecord(chapterNum, 1)
-        return chapterCache.getChapter(--chapterNum)
+        chapterCache.getChapter(--chapterNum)
             .apply { text.set(this) }
             .let { it.substring(it.indexOf("|") + 1) } == ChapterCache.FILENOTFOUND
-    }
+    }.await()
 
     /**
      * 翻页到目录中的某章
      */
-    override fun pageByCatalog(chapterName: String?): Boolean {
+    override suspend fun pageByCatalog(chapterName: String?): Boolean = async {
         chapterName?.run {
             chapterNum = SQLHelper.getChapterId(tableName, chapterName)
             setRecord(chapterNum, 1)
         }
-        return chapterCache.getChapter(chapterNum)
+        chapterCache.getChapter(chapterNum)
             .apply { text.set(this) }
             .let { it.substring(it.indexOf("|") + 1) } == ChapterCache.FILENOTFOUND
-    }
+    }.await()
 
     override suspend fun downloadChapter(chapterName: String?): Boolean = async {
         var str = ChapterCache.FILENOTFOUND
@@ -116,18 +116,16 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
      * 保存阅读记录
      */
     @Synchronized
-    override fun setRecord(chapterNum: Int, pageNum: Int) {
+    override suspend fun setRecord(chapterNum: Int, pageNum: Int) {
         if (chapterNum < 1) return
-        launch {
-            SQLHelper.setRecord(bookName, "$chapterNum#${if (pageNum < 1) 1 else pageNum}")
-        }
+        SQLHelper.setRecord(bookName, "$chapterNum#${if (pageNum < 1) 1 else pageNum}")
     }
 
     /**
      * 重新读取目录
      */
     @Synchronized
-    override fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog> {
+    override suspend fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog> = async {
         catalog.clear()
         val catalogCursor = SQLHelper.getDB().rawQuery(
             "select ${SQLHelper.CHAPTERNAME} " + "from $tableName", null
@@ -136,23 +134,21 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
             catalog.add(ReaderBean.Catalog(catalogCursor.getString(0)))
         }
         catalogCursor.close()
-        return catalog
-    }
+        catalog
+    }.await()
 
-    override fun autoRemove() {
+    override suspend fun autoRemove() {
         val num = getRecord()[0]
         if (num < NotDeleteNum) return
         val id = num - NotDeleteNum
-        launch {
-            SQLHelper.setReaded(tableName, id)
+        SQLHelper.setReaded(tableName, id)
                 .forEach { File("${getSavePath()}/$tableName/$it").delete() }
-        }
     }
 
     /**
      * 获取阅读记录
      */
-    private fun getRecord(): IntArray {
+    private suspend fun getRecord(): IntArray {
         val queryResult = SQLHelper.getRecord(bookName) //阅读记录 3#2 表示第3章第2页
         dirName = id2TableName(queryResult[0])
         val array = queryResult[1]
