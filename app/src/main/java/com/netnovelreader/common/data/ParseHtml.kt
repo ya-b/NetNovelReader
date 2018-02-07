@@ -4,6 +4,7 @@ import com.netnovelreader.common.TIMEOUT
 import com.netnovelreader.common.fixUrl
 import com.netnovelreader.common.getHeaders
 import com.netnovelreader.common.url2Hostname
+import com.orhanobut.logger.Logger
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.io.IOException
@@ -23,7 +24,7 @@ class ParseHtml {
             txt = getChapterWithSelector(url)
         } else {
             txt = Jsoup.connect(url).headers(getHeaders(url))
-                .timeout(TIMEOUT).get().select(selector).text()
+                    .timeout(TIMEOUT).get().select(selector).text()
         }
         return "    " + txt!!.replace(" ", "\n\n  ")
     }
@@ -34,9 +35,13 @@ class ParseHtml {
     @Throws(IOException::class)
     fun getCatalog(url: String): LinkedHashMap<String, String> {
         val selector = SQLHelper.getParseRule(url2Hostname(url), SQLHelper.CATALOG_RULE)
+
+
         val catalog = LinkedHashMap<String, String>()
         val list = Jsoup.connect(url).headers(getHeaders(url))
-            .timeout(TIMEOUT).get().select(selector).select("a")
+                .timeout(TIMEOUT).get().select(selector).select("a")
+
+        Logger.i("解析的网页为：【$url】,元素选择器为：【$selector】,解析出的内容为：【$list】")
         list.forEach {
             val link = fixUrl(url, it.attr("href"))
             val name = it.text()

@@ -6,6 +6,7 @@ import com.netnovelreader.common.*
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.data.SearchBook
 import com.netnovelreader.common.download.CatalogCache
+import com.orhanobut.logger.Logger
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.launch
@@ -25,8 +26,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     private var searchCode = 0
     var resultList: ObservableSyncArrayList<SearchBean> = ObservableSyncArrayList()
     var searchSuggestResultList: ObservableSyncArrayList<KeywordsBean> = ObservableSyncArrayList()   //输入部分书名自动补全提示
-
-
+    private val poolContext = newFixedThreadPoolContext(6, "DownloadService")         //新建一个名为“DownloadService”线程池调度器，线程数目为2/3cpu核心数
     /**
      * 在搜索框输入过程中匹配一些输入项并提示
      */
@@ -53,14 +53,12 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         launch {
             resultList.clear()
             CatalogCache.clearCache()
-            val poolContext = newFixedThreadPoolContext(THREAD_NUM, "DownloadService")
+
             SQLHelper.queryAllSearchSite().forEach {
                 launch(poolContext) {
-                    try {
-                        searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
-                    }catch (e: IOException){
-                        e.printStackTrace()
-                    }
+                    //创建并马上启动一个协程执行任务
+                  //  Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
+                    searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
                 }
             }
         }
@@ -90,7 +88,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     @Throws(IOException::class)
     private fun searchBookFromSite(bookname: String, siteinfo: Array<String?>, reqCode: Int) {
         val url = siteinfo[1]!!.replace(SQLHelper.SEARCH_NAME, URLEncoder.encode(bookname, siteinfo[7]))
-        val result = if (siteinfo[0].equals("0")) {
+        val result = if (siteinfo[0].equals("0")) {    //是否重定向
             SearchBook().search(
                     url,
                     siteinfo[4] ?: "",
@@ -104,20 +102,23 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
                     siteinfo[6] ?: "", siteinfo[8] ?: "", siteinfo[9] ?: ""
             )
         }
-        if (searchCode == reqCode && result[1].length > 0) { //result[1]==bookname,result[0]==catalogurl
+        if (searchCode == reqCode && result[1].isNotEmpty()) { //result[1]==bookname,result[0]==catalogurl
+
             CatalogCache.addCatalog(result[1], result[0])
-            val bean = CatalogCache.cache.get(result[0])
+            val bean = CatalogCache.cache[result[0]]
             if (bean != null && !bean.url.get().isNullOrEmpty()) {
                 resultList.add(bean)
             }
         }
         downloadImage(result[1], result[2])               //下载书籍封面图片
+
     }
 
     @Throws(IOException::class)
     private fun downloadImage(bookname: String, imageUrl: String) {
         launch {
-            if (!imageUrl.equals("")){
+            if (imageUrl != "") {
+              //  Logger.i("步骤2.从网站下载图书【$bookname】的图片,URL为【$imageUrl】")
                 val request = Request.Builder().url(imageUrl).build()
                 val inputStream = OkHttpClient().newCall(request).execute().body()?.byteStream()
                 val path = "${getSavePath()}/tmp".apply { File(this).mkdirs() } + "/$bookname.${url2Hostname(imageUrl)}"

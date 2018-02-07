@@ -5,6 +5,7 @@ import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.common.data.ParseHtml
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.search.SearchBean
+import com.orhanobut.logger.Logger
 import java.io.IOException
 import java.util.*
 
@@ -22,6 +23,8 @@ object CatalogCache {
     }
 
     fun addCatalog(bookname: String, catalogUrl: String) {
+
+        Logger.i("步骤3.正准备从目录Url【$catalogUrl】中解析出书籍【$bookname】的最新章节名")
         val map: LinkedHashMap<String, String>
         try {
             map = ParseHtml().getCatalog(catalogUrl)
@@ -39,12 +42,12 @@ object CatalogCache {
         }
         arr.forEach { map.remove(it) }
         cache.put(
-            catalogUrl, SearchBean(
+                catalogUrl, SearchBean(
                 ObservableField(bookname),
                 ObservableField(catalogUrl),
                 ObservableField(latestChapter),
                 map
-            )
+        )
         )
     }
 

@@ -1,7 +1,9 @@
 package com.netnovelreader.common.data
 
 import com.netnovelreader.common.*
+import com.orhanobut.logger.Logger
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.net.ConnectException
 import java.net.HttpURLConnection
@@ -28,8 +30,8 @@ class SearchBook : Cloneable {
      */
     @Throws(ConnectException::class)
     fun search(
-        url: String, redirectFileld: String, redirectSelector: String, noRedirectSelector: String,
-        redirectName: String, noRedirectName: String, redirectImage: String, noRedirectImage: String
+            url: String, redirectFileld: String, redirectSelector: String, noRedirectSelector: String,
+            redirectName: String, noRedirectName: String, redirectImage: String, noRedirectImage: String
     )
             : Array<String> {
         var result: Array<String>
@@ -45,14 +47,17 @@ class SearchBook : Cloneable {
         return result
     }
 
-    @Throws(ConnectException::class)
     fun search(url: String, catalogSelector: String, nameSelector: String, imageSelector: String)
             : Array<String> {
-        val doc = Jsoup.connect(url).headers(getHeaders(url))
-            .timeout(TIMEOUT).get()
+        val doc = try {
+            Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
+        } catch (e: Exception) {
+            Logger.e("异常：使用Jsoup解析页面${url} 出错了,异常为:" + e.toString())
+        } as? Document ?: return arrayOf("", "", "")
+
         val arr = arrayOf(
-            parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),
-            parseImageUrl(doc, imageSelector)
+                parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),
+                parseImageUrl(doc, imageSelector)
         )
         return arr
     }
@@ -61,8 +66,8 @@ class SearchBook : Cloneable {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.instanceFollowRedirects = false
         conn.setRequestProperty(
-            "accept",
-            "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+                "accept",
+                "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
         )
         conn.setRequestProperty("user-agent", UA)
         conn.setRequestProperty("Upgrade-Insecure-Requests", "1")

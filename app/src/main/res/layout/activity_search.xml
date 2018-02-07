@@ -31,7 +31,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="24dp"
                     android:background="@drawable/icon_back"
                     android:contentDescription="@string/app_name"
                     android:onClick="@{clickEvent::onClick}" />
@@ -50,7 +50,7 @@
                     android:id="@+id/searchViewBar"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="15dp"
                     android:layout_weight="1"
                     android:iconifiedByDefault="false"
                     android:textSize="10sp"

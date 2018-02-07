@@ -177,7 +177,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
 
         override fun onQueryTextChange(newText: String?): Boolean {
             if (newText!!.isEmpty() && searchViewModel?.resultList!!.isEmpty()) {
-                showHotWords()   //搜索框里文字为空并且  -->显示热门搜索标签
+                showHotWords()   //搜索框里文字为空并且仍未搜索过  -->显示热门搜索标签
                 searchSuggestRecycler.visibility = View.GONE
             } else {
                 hideHotWords()   //搜索框里文字不为空时  -->隐藏热门搜索标签
