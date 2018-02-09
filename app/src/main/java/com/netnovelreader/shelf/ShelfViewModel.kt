@@ -3,6 +3,7 @@ package com.netnovelreader.shelf
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableField
 import android.databinding.ObservableInt
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.netnovelreader.ReaderApplication.Companion.threadPool
 import com.netnovelreader.common.IMAGENAME
@@ -74,7 +75,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
                 ObservableField(getBitmap(it.key).await()),
                 ObservableField(it.value[3])
             )
-            if (bookDirList.contains(id2TableName(bookBean.bookid.get()))) {
+            if (bookDirList?.contains(id2TableName(bookBean.bookid.get())) ?: false) {
                 willDel.add(bookBean)
                 updateCatalog(bookBean, false)
             } else {
@@ -93,11 +94,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
     }
 
     //获取文件夹里面的书列表
-    private fun dirBookList(): ArrayList<String> {
-        val list = ArrayList<String>()
-        File(getSavePath()).takeIf { it.exists() }?.list()?.forEach { list.add(it) }
-        return list
-    }
+    private fun dirBookList(): Array<String>? = File(getSavePath()).takeIf { it.exists() }?.list()
 
     //更新目录
     private fun updateCatalog(bookBean: BookBean, must: Boolean) =

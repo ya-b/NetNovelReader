@@ -1,19 +1,21 @@
 package com.netnovelreader.search
 
+import android.databinding.ObservableArrayList
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.netnovelreader.ReaderApplication.Companion.threadPool
 import com.netnovelreader.api.ApiManager
 import com.netnovelreader.api.bean.KeywordsBean
-import com.netnovelreader.common.*
+import com.netnovelreader.common.IMAGENAME
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.data.SearchBook
 import com.netnovelreader.common.download.CatalogCache
-import com.orhanobut.logger.Logger
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import com.netnovelreader.common.enqueueCall
+import com.netnovelreader.common.getSavePath
+import com.netnovelreader.common.id2TableName
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import kotlinx.coroutines.experimental.runBlocking
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -25,21 +27,18 @@ import java.net.URLEncoder
 class SearchViewModel : ISearchContract.ISearchViewModel {
     @Volatile
     private var searchCode = 0
-    var resultList: ObservableSyncArrayList<SearchBean> = ObservableSyncArrayList()
-    var searchSuggestResultList: ObservableSyncArrayList<KeywordsBean> = ObservableSyncArrayList()   //输入部分书名自动补全提示
+    var resultList: ObservableArrayList<SearchBean> = ObservableArrayList()
+    var suggestList: ObservableArrayList<KeywordsBean> = ObservableArrayList()   //输入部分书名自动补全提示
 
 
     /**
      * 在搜索框输入过程中匹配一些输入项并提示
      */
-    fun searchBookSuggest(queryText: String) {
-        ApiManager.mAPI!!.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe {
-                    searchSuggestResultList.clear()
-                    searchSuggestResultList.addAll(it.keywords!!)
-                }
+    fun searchBookSuggest(queryText: String) = runBlocking {
+        ApiManager.mAPI!!.searchSuggest(queryText, "com.ushaqi.zhuishushenqi").enqueueCall {
+            suggestList.clear()
+            it?.keywords?.toHashSet()?.toList()?.apply { suggestList.addAll(this) }
+        }
     }
 
     /**
@@ -75,7 +74,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     override suspend fun delChapterAfterSrc(tableName: String, chapterName: String) {
         val list = SQLHelper.delChapterAfterSrc(tableName, chapterName)
         File(getSavePath() + "/$tableName") //目录
-            .takeIf { it.exists() }             //是否存在
+                .takeIf { it.exists() }             //是否存在
                 ?.let { list.map { item -> File(it, item) }.forEach { it.delete() } }
     }
 
@@ -104,9 +103,9 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
                 resultList.add(bean)
             }
             launch {
-                try{
+                try {
                     downloadImage(result[1], result[2])           //下载书籍封面图片
-                }catch (e: IOException){
+                } catch (e: IOException) {
                     e.printStackTrace()
                 }
             }
@@ -115,15 +114,17 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
 
     @Throws(IOException::class)
     private suspend fun downloadImage(bookname: String, imageUrl: String) {
-        if (imageUrl != ""){
+        val path = "${getSavePath()}/tmp".apply { File(this).mkdirs() } + "/$bookname.png"
+        if (imageUrl != "" && !File(path).exists()) {
             //  Logger.i("步骤2.从网站下载图书【$bookname】的图片,URL为【$imageUrl】")
-            val request = Request.Builder().url(imageUrl).build()
-            val inputStream = OkHttpClient().newCall(request).execute().body()?.byteStream()
-            val path = "${getSavePath()}/tmp".apply { File(this).mkdirs() } + "/$bookname.${url2Hostname(imageUrl)}"
-            val outputStream = FileOutputStream(path)
-            inputStream?.copyTo(outputStream)
-            inputStream?.close()
-            outputStream.close()
+            ApiManager.mAPI?.getPicture(imageUrl)?.enqueueCall {
+                val inputStream = it?.byteStream()
+                val outputStream = FileOutputStream(path)
+                BitmapFactory.decodeStream(inputStream).compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                outputStream.flush()
+                inputStream?.close()
+                outputStream.close()
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
@@ -26,6 +27,7 @@ import com.netnovelreader.databinding.ActivityShelfBinding
 import com.netnovelreader.editor.SiteEditorActivity
 import com.netnovelreader.reader.ReaderActivity
 import com.netnovelreader.search.SearchActivity
+import kotlinx.android.synthetic.main.activity_reader.*
 import kotlinx.android.synthetic.main.activity_shelf.*
 import kotlinx.android.synthetic.main.item_shelf.view.*
 import kotlinx.coroutines.experimental.launch
@@ -56,6 +58,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         shelfViewModel = vm
         DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
 
+
     }
 
     override fun init() {
@@ -80,6 +83,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     override fun onResume() {
         super.onResume()
+        shelfViewModel?.bookList?.clear()
         updateShelf()
     }
 

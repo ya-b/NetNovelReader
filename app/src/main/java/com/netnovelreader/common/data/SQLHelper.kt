@@ -13,6 +13,7 @@ import com.netnovelreader.common.UPDATEFLAG
 object SQLHelper {
     private var db: SQLiteDatabase? = null
     private val dbName = "netnovelreader.db"
+    var doTransaction = false
 
     fun getDB(): SQLiteDatabase {
         db ?: synchronized(SQLHelper) {
@@ -25,8 +26,10 @@ object SQLHelper {
 
     fun closeDB() {
         synchronized(SQLHelper) {
-            db?.close()
-            db = null
+            if(doTransaction == false){
+                db?.close()
+                db = null
+            }
         }
     }
 

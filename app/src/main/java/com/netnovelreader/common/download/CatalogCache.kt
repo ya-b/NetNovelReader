@@ -1,11 +1,9 @@
 package com.netnovelreader.common.download
 
 import android.databinding.ObservableField
-import com.netnovelreader.common.url2Hostname
+import android.util.LruCache
 import com.netnovelreader.common.data.ParseHtml
-import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.search.SearchBean
-import com.orhanobut.logger.Logger
 import java.io.IOException
 import java.util.*
 
@@ -16,10 +14,10 @@ object CatalogCache {
     /**
      * HashMap<目录页url, LinkedHashMap<章节名, 章节url>>
      */
-    val cache: Hashtable<String, SearchBean>
+    val cache: LruCache<String, SearchBean>
 
     init {
-        cache = Hashtable()
+        cache = LruCache(10)
     }
 
     fun addCatalog(bookname: String, catalogUrl: String) {
@@ -46,6 +44,6 @@ object CatalogCache {
     }
 
     fun clearCache() {
-        cache.clear()
+        cache.evictAll()
     }
 }

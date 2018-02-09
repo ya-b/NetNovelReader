@@ -6,6 +6,7 @@ import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication.Companion.threadPool
+import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.download.DownloadTask
 import com.netnovelreader.common.toast
 import kotlinx.coroutines.experimental.launch
@@ -51,7 +52,17 @@ class DownloadService : IntentService {
         launch {
             DownloadTask(tableName!!, catalogUrl!!).getList().apply { max = this.size }
                 .forEach {
-                    launch(threadPool) { it.download(it.getChapterTxt()) }.invokeOnCompletion {
+                    launch(threadPool) {
+                        try{
+                            SQLHelper.doTransaction = true
+                            SQLHelper.getDB().beginTransaction()
+                            it.download(it.getChapterTxt())
+                            SQLHelper.getDB().setTransactionSuccessful()
+                        }finally {
+                            SQLHelper.getDB().endTransaction()
+                            SQLHelper.doTransaction = false
+                        }
+                    }.invokeOnCompletion {
                         synchronized(IntentService::class.java) {
                             it?.apply { failed.incrementAndGet() } ?: progress.incrementAndGet()
                             updateNotification(progress.get(), max)
@@ -69,6 +80,7 @@ class DownloadService : IntentService {
         if (failed.get() > 0) {
             toast(getString(R.string.downloadfailed).replace("nn", "$failed"))
         }
+        SQLHelper.closeDB()
     }
 
     private fun openNotification() {

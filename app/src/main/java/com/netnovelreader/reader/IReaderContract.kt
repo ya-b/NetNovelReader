@@ -16,7 +16,7 @@ interface IReaderContract {
         suspend fun initData(): Int
         suspend fun getChapter(type: ReaderViewModel.CHAPTERCHANGE, chapterName: String?): Boolean
         suspend fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog>
-        suspend fun downloadAndShow(chapterName: String?): Boolean
+        suspend fun downloadAndShow(): Boolean
         suspend fun setRecord(chapterNum: Int, pageNum: Int)
         suspend fun autoRemove()
     }

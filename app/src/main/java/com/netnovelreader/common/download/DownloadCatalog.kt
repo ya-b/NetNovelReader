@@ -18,6 +18,7 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
         val cacheMap = CatalogCache.cache.get(catalogUrl)?.catalogMap
         var latestChapter: String? = null
         try {
+            SQLHelper.doTransaction = true
             SQLHelper.getDB().beginTransaction()
             filtExistsInSql(if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
                     .forEach {
@@ -27,6 +28,7 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
             SQLHelper.getDB().setTransactionSuccessful()
         }finally {
             SQLHelper.getDB().endTransaction()
+            SQLHelper.doTransaction = false
         }
         latestChapter ?: return
         SQLHelper.getDB().execSQL(

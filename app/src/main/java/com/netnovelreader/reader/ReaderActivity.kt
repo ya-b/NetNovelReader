@@ -120,9 +120,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                 .takeIf { it ?: true }
                 ?.apply {
                     loadingbar.show()
-                    val chapterName =
-                        if (readerView.title.isNullOrEmpty()) null else readerView.title
-                    readerViewModel?.downloadAndShow(chapterName)
+                    readerViewModel?.downloadAndShow()
                         ?.takeIf { it }?.run { loadingbar.hide() }
                 }
         }
@@ -142,7 +140,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                 .takeIf { it ?: true }
                 ?.apply {
                     loadingbar.show()
-                    readerViewModel?.downloadAndShow(readerView.title)
+                    readerViewModel?.downloadAndShow()
                         ?.takeIf { it }?.run { loadingbar.hide() }
                 }
         }
@@ -156,7 +154,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                 .takeIf { it != false }
                 ?.apply {
                     loadingbar.show()
-                    readerViewModel?.downloadAndShow(readerView.title)
+                    readerViewModel?.downloadAndShow()
                         ?.takeIf { it }?.run { loadingbar.hide() }
                 }
         }
@@ -207,7 +205,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             if (isAvailable && loadingbar.isShown) {
                 launch(UI) {
                     loadingbar.show()
-                    readerViewModel?.downloadAndShow(readerView.title)
+                    readerViewModel?.downloadAndShow()
                         ?.takeIf { it }?.run { loadingbar.hide() }
                 }
             }
@@ -223,9 +221,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                 )
                     .takeIf { it != false }
                     ?.apply {
-                        readerView.title = v.itemChapter.text.toString()
                         loadingbar.show()
-                        readerViewModel?.downloadAndShow(readerView.title)
+                        readerViewModel?.downloadAndShow()
                             ?.takeIf { it }?.run { loadingbar.hide() }
                     }
             }

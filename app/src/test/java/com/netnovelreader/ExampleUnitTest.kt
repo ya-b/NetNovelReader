@@ -17,21 +17,14 @@ import java.util.concurrent.atomic.AtomicInteger
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        launch {
-            List(10){
-                launch {
-                    delay(1000)
-                    println(it)
-                }
-            }
+        val list = ArrayList<String>()
+        for(i in 0.. 10){
+            list.add("$i")
         }
-        Thread.sleep(10000)
-
-    }
-    suspend fun hello(): Int{
-        return async {
-            delay(2000)
-            1
-        }.await()
+        for(i in 3.. 7){
+            list.add("$i")
+        }
+        val set = HashSet<String>()
+        list.filter { set.add(it) }.forEach { println(it) }
     }
 }

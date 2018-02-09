@@ -2,6 +2,7 @@ package com.netnovelreader.reader
 
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableField
+import android.util.Log
 import com.netnovelreader.common.NotDeleteNum
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.download.ChapterCache
@@ -76,7 +77,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
             .let { it.substring(it.indexOf("|") + 1) } == ChapterCache.FILENOTFOUND
     }.await()
 
-    override suspend fun downloadAndShow(chapterName: String?): Boolean = async {
+    override suspend fun downloadAndShow(): Boolean = async {
         var str = ChapterCache.FILENOTFOUND
         var times = 0
         while (str == ChapterCache.FILENOTFOUND && times++ < 10) {

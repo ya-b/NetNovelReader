@@ -1,16 +1,14 @@
 package com.netnovelreader.api
 
-import com.netnovelreader.api.bean.NovelIntroduce
-import com.netnovelreader.api.bean.QueryNovel
-import com.netnovelreader.api.bean.QuerySuggest
-import com.netnovelreader.api.bean.SearchHotWord
-import io.reactivex.Observable
+import com.netnovelreader.api.bean.*
+import okhttp3.ResponseBody
+import retrofit2.Call
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 /**
  * 文件： ApiManager
@@ -25,7 +23,6 @@ object ApiManager {
                     field = Retrofit.Builder()
                             .baseUrl("http://api.zhuishushenqi.com")
                             .addConverterFactory(GsonConverterFactory.create())
-                            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                             .build()
                             .create(ZhuiShuShenQiAPI::class.java)
                 }
@@ -42,25 +39,33 @@ interface ZhuiShuShenQiAPI {
      * 作用：追书神器搜索热词（大约100个搜索热词）
      */
     @GET("http://api.zhuishushenqi.com/book/search-hotwords")
-    fun hotWords(): Observable<SearchHotWord>
+    fun hotWords(): Call<SearchHotWord>
+
+        /**
+         * 完整Url:http://api05iye5.zhuishushenqi.com/book/auto-suggest?query={搜索关键字}&packageName=com.ushaqi.zhuishushenqi
+         * 作用：根据搜索关键字提供搜索建议列表
+         */
+        @GET("http://api05iye5.zhuishushenqi.com/book/auto-suggest?")
+        fun searchSuggest(@Query("query") query: String, @Query("packageName") packageName: String): Call<QuerySuggest>
 
 
-    /**
-     * 完整Url:http://api05iye5.zhuishushenqi.com/book/auto-suggest?query={搜索关键字}&packageName=com.ushaqi.zhuishushenqi
-     * 作用：根据搜索关键字提供搜索建议列表
-     */
-    @GET("http://api05iye5.zhuishushenqi.com/book/auto-suggest?")
-    fun searchSuggest(@Query("query") query: String, @Query("packageName") packageName: String): Observable<QuerySuggest>
+        @GET("http://api.zhuishushenqi.com/book/{id}")
+        fun getNovelIntroduce(@Path("id") id: String?): Call<NovelIntroduce>
+
+        /**
+         * 作用：根据搜索书名返回书籍列表
+         */
+        @GET("http://api.zhuishushenqi.com/book/fuzzy-search?")
+        fun searchBook(@Query("query") query: String): Call<QueryNovel>
+
+        /**
+         * 作用：根据准确已有的作者名字返回该作者名下的所有书籍
+         */
+        @GET("http://api.zhuishushenqi.com/book/accurate-search?")
+        fun searchBookByAuthor(@Query("author") author: String): Call<QueryNovelByAuthor>
 
 
-    @GET("http://api.zhuishushenqi.com/book/{id}")
-    fun getNovelIntroduce(@Path("id") id: String?): Observable<NovelIntroduce>
+        @GET
+        fun getPicture(@Url url: String): Call<ResponseBody>
 
-    /**
-     * 作用：根据搜索书名返回书籍列表
-     */
-    @GET("http://api.zhuishushenqi.com/book/fuzzy-search?")
-    fun searchBook(@Query("query") query: String): Observable<QueryNovel>
 }
-
-
