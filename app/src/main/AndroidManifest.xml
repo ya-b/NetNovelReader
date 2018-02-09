@@ -32,7 +32,10 @@
 
         <service android:name=".service.DownloadService" />
 
-        <activity android:name=".editor.SiteEditorActivity"></activity>
+        <activity android:name=".editor.SiteEditorActivity" />
+        <activity
+            android:name=".noveldetail.NovelDetailActivity"
+            android:theme="@style/AppThemeBlack" />
     </application>
 
 </manifest>

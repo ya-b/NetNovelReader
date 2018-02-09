@@ -33,10 +33,9 @@ class ParseHtml {
     fun getCatalog(url: String): LinkedHashMap<String, String> {
         val selector = SQLHelper.getParseRule(url2Hostname(url), SQLHelper.CATALOG_RULE)
         val catalog = LinkedHashMap<String, String>()
-        val list = Jsoup.connect(url).headers(getHeaders(url))
-                .timeout(TIMEOUT).get().select(selector).select("a")
+        val list = Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get().select(selector).select("a")
 
-        Logger.i("解析的网页为：【$url】,元素选择器为：【$selector】")
+        Logger.i("解析的目录网页来源为：【$url】,元素选择器为：【$selector】")
         list.forEach {
             val link = fixUrl(url, it.attr("href"))
             val name = it.text()

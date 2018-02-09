@@ -24,7 +24,7 @@ object CatalogCache {
 
     fun addCatalog(bookname: String, catalogUrl: String) {
 
-        Logger.i("步骤3.正准备从目录Url【$catalogUrl】中解析出书籍【$bookname】的最新章节名")
+       // Logger.i("步骤3.正准备从目录Url【$catalogUrl】中解析出书籍【$bookname】的最新章节名")
         val map: LinkedHashMap<String, String>
         try {
             map = ParseHtml().getCatalog(catalogUrl)

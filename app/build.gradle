@@ -60,8 +60,12 @@ dependencies {
     //内存泄漏检查框架
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    //强大的图片加载框架    glide
+    implementation 'com.github.bumptech.glide:glide:4.4.0'
+    kapt 'com.github.bumptech.glide:compiler:4.4.0'
 }
 
 kapt {
     useBuildCache = true
+    generateStubs = true
 }

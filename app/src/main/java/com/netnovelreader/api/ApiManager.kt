@@ -1,5 +1,7 @@
 package com.netnovelreader.api
 
+import com.netnovelreader.api.bean.NovelIntroduce
+import com.netnovelreader.api.bean.QueryNovel
 import com.netnovelreader.api.bean.QuerySuggest
 import com.netnovelreader.api.bean.SearchHotWord
 import io.reactivex.Observable
@@ -49,6 +51,16 @@ interface ZhuiShuShenQiAPI {
      */
     @GET("http://api05iye5.zhuishushenqi.com/book/auto-suggest?")
     fun searchSuggest(@Query("query") query: String, @Query("packageName") packageName: String): Observable<QuerySuggest>
+
+
+    @GET("http://api.zhuishushenqi.com/book/{id}")
+    fun getNovelIntroduce(@Path("id") id: String?): Observable<NovelIntroduce>
+
+    /**
+     * 作用：根据搜索书名返回书籍列表
+     */
+    @GET("http://api.zhuishushenqi.com/book/fuzzy-search?")
+    fun searchBook(@Query("query") query: String): Observable<QueryNovel>
 }
 
 

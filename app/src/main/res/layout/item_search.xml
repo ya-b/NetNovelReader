@@ -17,7 +17,7 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::onClick}"
+        android:onClick="@{clickEvent::onClickDetail}"
         tools:background="@color/white">
 
         <TextView
@@ -58,6 +58,30 @@
             app:layout_constraintStart_toStartOf="@+id/latestChapter"
             app:layout_constraintTop_toBottomOf="@+id/latestChapter"
             tools:text="来源URl" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/downloadButton"
+            android:layout_width="60dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="4dp"
+            android:background="@color/hot_label_bg3"
+            android:gravity="center"
+            android:onClick="@{clickEvent::onClickDownload}"
+            android:paddingBottom="6dp"
+            android:paddingEnd="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="6dp"
+            android:text="下载"
+            android:textColor="@color/cardview_light_background"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/resultName" />
+
+
+
     </android.support.constraint.ConstraintLayout>
 
 </layout>

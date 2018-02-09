@@ -52,8 +52,8 @@ class SearchBook : Cloneable {
         val doc = try {
             Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
         } catch (e: Exception) {
-            Logger.e("异常：使用Jsoup解析页面${url} 出错了,异常为:" + e.toString())
-        } as? Document ?: return arrayOf("", "", "")
+          //  Logger.e("异常：使用Jsoup解析页面${url} 出错了,异常为:" + e.toString())
+        } as? Document ?: return arrayOf("", "", "")      //搜索图书连接出错直接返回空数据集，不再进行其它操作
 
         val arr = arrayOf(
                 parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),

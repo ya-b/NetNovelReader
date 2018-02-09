@@ -8,6 +8,7 @@ import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
@@ -26,6 +27,7 @@ import com.netnovelreader.common.download.CatalogCache
 import com.netnovelreader.common.download.DownloadCatalog
 import com.netnovelreader.common.download.DownloadChapter
 import com.netnovelreader.databinding.ActivitySearchBinding
+import com.netnovelreader.noveldetail.NovelDetailActivity
 import com.netnovelreader.service.DownloadService
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -43,24 +45,25 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     private lateinit var suggestArrayListChangeListener: ArrayListChangeListener<KeywordsBean>
     private var job: Job? = null
     private var mSearchHotWord: SearchHotWord? = null              //搜索热词数组
+    private var mLastCommitQueryString: String? = null
     private val colorArray = arrayOf(                              //搜索热词标签的背景颜色列表
-        R.color.hot_label_bg1,
-        R.color.hot_label_bg2,
-        R.color.hot_label_bg3,
-        R.color.hot_label_bg4,
-        R.color.hot_label_bg5,
-        R.color.hot_label_bg6,
-        R.color.hot_label_bg7,
-        R.color.hot_label_bg8,
-        R.color.hot_label_bg9,
-        R.color.hot_label_bg10,
-        R.color.hot_label_bg11,
-        R.color.hot_label_bg12,
-        R.color.hot_label_bg13,
-        R.color.hot_label_bg14,
-        R.color.hot_label_bg15,
-        R.color.hot_label_bg16,
-        R.color.hot_label_bg17
+            R.color.hot_label_bg1,
+            R.color.hot_label_bg2,
+            R.color.hot_label_bg3,
+            R.color.hot_label_bg4,
+            R.color.hot_label_bg5,
+            R.color.hot_label_bg6,
+            R.color.hot_label_bg7,
+            R.color.hot_label_bg8,
+            R.color.hot_label_bg9,
+            R.color.hot_label_bg10,
+            R.color.hot_label_bg11,
+            R.color.hot_label_bg12,
+            R.color.hot_label_bg13,
+            R.color.hot_label_bg14,
+            R.color.hot_label_bg15,
+            R.color.hot_label_bg16,
+            R.color.hot_label_bg17
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,36 +80,36 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
      */
     private fun requestHotWords() {
         ApiManager.mAPI!!.hotWords()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe {
-                mSearchHotWord = it
-                for (i in 0 until linearLayout.childCount) {
-                    val tvHotWordLabel = linearLayout.getChildAt(i) as TextView
-                    tvHotWordLabel.text = it.searchHotWords!![Random().nextInt(100)].word
-                    (tvHotWordLabel.background as GradientDrawable).setColor(
-                        ContextCompat.getColor(
-                            this@SearchActivity,
-                            colorArray[Random().nextInt(17)]
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe {
+                    mSearchHotWord = it
+                    for (i in 0 until linearLayout.childCount) {
+                        val tvHotWordLabel = linearLayout.getChildAt(i) as TextView
+                        tvHotWordLabel.text = it.searchHotWords!![Random().nextInt(100)].word
+                        (tvHotWordLabel.background as GradientDrawable).setColor(
+                                ContextCompat.getColor(
+                                        this@SearchActivity,
+                                        colorArray[Random().nextInt(17)]
+                                )
                         )
-                    )
+                    }
                 }
-            }
     }
 
     override fun setViewModel(vm: SearchViewModel) {
         searchViewModel = vm
         val binding =
-            DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
+                DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
         binding.setVariable(BR.clickEvent, BackClickEvent())
     }
 
     override fun init() {
         searchRecycler.layoutManager = LinearLayoutManager(this)
         val mAdapter = BindingAdapter(
-            searchViewModel?.resultList,
-            R.layout.item_search,
-            SearchItemClickEvent()
+                searchViewModel?.resultList,
+                R.layout.item_search,
+                SearchItemClickEvent()
         )
         searchRecycler.adapter = mAdapter
         searchRecycler.itemAnimator = DefaultItemAnimator()
@@ -121,9 +124,9 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
 
         searchSuggestRecycler.layoutManager = LinearLayoutManager(this)
         val adapter = BindingAdapter(
-            searchViewModel?.searchSuggestResultList,
-            R.layout.item_search_suggest,
-            SuggestSearchItemClickEvent()
+                searchViewModel?.searchSuggestResultList,
+                R.layout.item_search_suggest,
+                SuggestSearchItemClickEvent()
         )
 
         searchSuggestRecycler.adapter = adapter
@@ -131,7 +134,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         searchSuggestRecycler.addItemDecoration(NovelItemDecoration(this))
         suggestArrayListChangeListener = ArrayListChangeListener(adapter)
         searchViewModel?.searchSuggestResultList?.addOnListChangedCallback(
-            suggestArrayListChangeListener
+                suggestArrayListChangeListener
         )
 
 
@@ -177,6 +180,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                 tmpTime = System.currentTimeMillis()
                 searchViewBar.clearFocus()                    //提交搜索commit后收起键盘
                 searchSuggestRecycler.visibility = View.GONE
+                mLastCommitQueryString = query
             }
             return true
         }
@@ -225,7 +229,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                     //设置搜索热词文本，该10个热词是从100个关键个搜索热词中随机抽取的
                     text = mSearchHotWord?.searchHotWords!![Random().nextInt(100)].word
                     (background as GradientDrawable).setColor(
-                        ContextCompat.getColor(context, colorArray[Random().nextInt(17)])
+                            ContextCompat.getColor(context, colorArray[Random().nextInt(17)])
                     )
                 }
         }
@@ -250,32 +254,61 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     //搜索列表item点击事件
     inner class SearchItemClickEvent : IClickEvent {
 
-        fun onClick(v: View) {
+        fun onClickDetail(v: View) {
+
+            val itemText = v.findViewById<TextView>(R.id.resultName).text.toString()
+            ApiManager.mAPI!!.searchBook(mLastCommitQueryString!!)
+                    .flatMap {
+                        val id = it.books?.firstOrNull { it.title == itemText }?._id
+                        ApiManager.mAPI?.getNovelIntroduce(id ?: "")
+                    }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe {
+                        when (it._id) {
+                            null -> {
+                                Snackbar.make(searchRoot, "没有搜索到相关小说的介绍", Snackbar.LENGTH_SHORT).show()
+                            }
+                            else -> {
+                                val intent = Intent(this@SearchActivity, NovelDetailActivity::class.java)
+                                intent.putExtra("data", it)
+                                this@SearchActivity.startActivity(intent)
+                            }
+                        }
+
+                    }
+
+        }
+
+        //搜索列表item下载事件
+        fun onClickDownload(v: View) {
+
+            val container = v.parent as View      //获取下载按钮的父元素 即ItemView
             if (searchloadingbar.isShown) return
 
             val listener = DialogInterface.OnClickListener { dialog, which ->
                 launch(UI) {
-                    val catalogUrl = v.resultUrl.text.toString()
-                    val bookname = v.resultName.text.toString()
+                    val catalogUrl = container.resultUrl.text.toString()
+                    val bookname = container.resultName.text.toString()
                     val tableName = searchViewModel!!.addBookToShelf(bookname, catalogUrl)
                     val isChangeSource = !intent.getStringExtra("bookname").isNullOrEmpty()
                     when (which) {
                         Dialog.BUTTON_POSITIVE -> download(bookname, catalogUrl,
-                            { downloadBook(v.context, tableName, catalogUrl, isChangeSource) }
+                                { downloadBook(v.context, tableName, catalogUrl, isChangeSource) }
                         )
                         Dialog.BUTTON_NEGATIVE -> download(
-                            bookname,
-                            catalogUrl,
-                            { launch { downNowChapter(tableName, isChangeSource) } }
+                                bookname,
+                                catalogUrl,
+                                { launch { downNowChapter(tableName, isChangeSource) } }
                         )
                     }
                 }
             }
             AlertDialog.Builder(this@SearchActivity).setTitle(getString(R.string.downloadAllBook))
-                .setPositiveButton(R.string.yes, listener)
-                .setNegativeButton(getString(R.string.no), listener)
-                .setNeutralButton(getString(R.string.cancel), null)
-                .create().show()
+                    .setPositiveButton(R.string.yes, listener)
+                    .setNegativeButton(getString(R.string.no), listener)
+                    .setNeutralButton(getString(R.string.cancel), null)
+                    .create().show()
         }
 
         private fun download(bookname: String, catalogUrl: String, method: () -> Unit) {
@@ -290,20 +323,20 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                     searchloadingbar.hide()
                     it?.apply { toast(getString(R.string.downloadFailed)) }
                             ?: kotlin.run {
-                                toast(getString(R.string.catalog_finish))
-                                this@SearchActivity.finish()
-                                method()
-                            }
+                        toast(getString(R.string.catalog_finish))
+                        this@SearchActivity.finish()
+                        method()
+                    }
                 }
             }
         }
 
         //下载全书，若该书已存在，则下载所有未读章节
         private fun downloadBook(
-            context: Context,
-            tableName: String,
-            catalogUrl: String,
-            isChangeSource: Boolean
+                context: Context,
+                tableName: String,
+                catalogUrl: String,
+                isChangeSource: Boolean
         ) {
             val chapterName = intent.getStringExtra("chapterName")
             if (isChangeSource && !chapterName.isNullOrEmpty()) {
@@ -321,8 +354,8 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             if (isChangeSource && !chapterName.isNullOrEmpty()) {
                 launch { searchViewModel?.delChapterAfterSrc(tableName, chapterName) }
                 DownloadChapter(
-                    tableName, "${getSavePath()}/$tableName",
-                    chapterName, SQLHelper.getChapterUrl(tableName, chapterName)
+                        tableName, "${getSavePath()}/$tableName",
+                        chapterName, SQLHelper.getChapterUrl(tableName, chapterName)
                 )
             }
         }
