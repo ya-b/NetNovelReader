@@ -80,12 +80,12 @@ data class NovelIntroduce(
         var serializeWordCount: String? = null,
         var retentionRatio: String? = null,
         var updated: String? = null,         //上次更新日期
-        var isIsSerial: Boolean = false,
+        var isSerial: Boolean? = false,
         var chaptersCount: String? = null,
         var lastChapter: String? = null,
         var isAdvertRead: Boolean = false,
         var cat: String? = null,
-        var rating: Any? = null,
+        var rating: RatingBean? = RatingBean(-1, "暂无评分", false),
         var isDonate: Boolean = false,
         var is_gg: Boolean = false,
         var discount: Any? = null,
@@ -94,4 +94,17 @@ data class NovelIntroduce(
         var apptype: List<Int>? = null,
         var gender: List<String>? = null,
         var tags: List<String>? = null
+) : Serializable
+
+
+data class RatingBean(
+        /**
+         * count : 27456
+         * score : 9.219
+         * isEffect : true
+         */
+
+        var count: Int = 0,
+        var score: String = "暂无评分",
+        var isIsEffect: Boolean = false
 ) : Serializable

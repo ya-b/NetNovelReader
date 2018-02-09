@@ -12,7 +12,7 @@
     <color name="colorPrimaryDarkGray">#000</color>
     <color name="colorAccentGray">#FF4081</color>
 
-    <color name="black">#000</color>
+    <color name="black">#000000</color>
     <color name="white">#ffffff</color>
     <color name="lightgray">#f90</color>
     <color name="gray">#999</color>

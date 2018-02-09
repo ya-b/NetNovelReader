@@ -24,11 +24,14 @@ class NovelDetailActivity : AppCompatActivity() {
         setSupportActionBar({ toolbar.title = "书籍详情";toolbar }())
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val mydetail = intent.getSerializableExtra("data") as NovelIntroduce
+
+
         with(mydetail) {
             //对数据进行进一步的处理再显示
             if (!cover!!.contains("http://")) {
                 cover = "http://statics.zhuishushenqi.com$cover-covers"     //补全图片Url,并且加载图片
             }
+            serialState.text = if (mydetail.isSerial!!) "连载中" else "已完结"
             updated = updated?.replace("T", "  ")
             updated = "上次更新： $updated"
             updated = updated!!.substring(0, updated!!.lastIndexOf(":"))
@@ -37,6 +40,8 @@ class NovelDetailActivity : AppCompatActivity() {
             longIntro = longIntro?.replace("\n", "\n\u3000\u3000")
             longIntro = "\u3000\u3000" + longIntro                           //首行缩进两个空格
             retentionRatio = "$retentionRatio%"
+            chaptersCount += "章"
+
             GlideApp.with(this@NovelDetailActivity)
                     .load(cover)
                     .error(ContextCompat.getDrawable(this@NovelDetailActivity, R.drawable.cover_default))

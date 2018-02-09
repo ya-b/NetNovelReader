@@ -11,221 +11,301 @@
 
     </data>
 
-    <android.support.constraint.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        tools:background="#e6e6e6">
+        android:layout_height="wrap_content">
 
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/appBarLayout2"
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            android:theme="@style/AppTheme.AppBarOverlay"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            tools:background="#e6e6e6">
 
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/appBarLayout2"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:title="书籍详情"
-                app:titleTextColor="#FFFFFF" />
-
-        </android.support.design.widget.AppBarLayout>
-
-        <ImageView
-            android:id="@+id/novelCover"
-            android:layout_width="60dp"
-            android:layout_height="80dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/appBarLayout2"
-            tools:background="@drawable/ic_launcher_background" />
-
-        <TextView
-            android:id="@+id/novelName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="@{detail.title}"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toEndOf="@+id/novelCover"
-            app:layout_constraintTop_toTopOf="@+id/novelCover"
-            tools:text="永夜君王" />
-
-        <TextView
-            android:id="@+id/novelAuthor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@{detail.author}"
-            android:textColor="#e75d5d"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="@+id/novelName"
-            app:layout_constraintTop_toBottomOf="@+id/novelName"
-            tools:text="烟雨江南" />
-
-        <TextView
-            android:id="@+id/novelType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@{detail.cat}"
-            android:textSize="12sp"
-            app:layout_constraintStart_toEndOf="@+id/novelAuthor"
-            app:layout_constraintTop_toTopOf="@+id/novelAuthor"
-            tools:text="玄幻" />
-
-        <TextView
-            android:id="@+id/wordCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@{detail.wordCount}"
-            android:textSize="12sp"
-            app:layout_constraintStart_toEndOf="@+id/novelType"
-            app:layout_constraintTop_toTopOf="@+id/novelType"
-            tools:text="12万字" />
-
-        <TextView
-            android:id="@+id/lastUpdate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@{detail.updated}"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="@+id/novelAuthor"
-            app:layout_constraintTop_toBottomOf="@+id/novelAuthor"
-            tools:text="上次更新：2017-09-18  17:21" />
-
-        <View
-            android:id="@+id/divide1"
-            android:layout_width="0dp"
-            android:layout_height="0.5dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
-            android:background="@color/text_gray"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/novelCover" />
-
-        <View
-            android:id="@+id/divide2"
-            android:layout_width="0dp"
-            android:layout_height="0.5dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:background="@color/text_gray"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/latelyFollower" />
-
-        <TextView
-            android:id="@+id/latelyFollowerLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="追书人数"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@+id/retentionRatioLabel"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/divide1" />
-
-        <TextView
-            android:id="@+id/retentionRatioLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="读者留存率"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@+id/serializeWordCountLabel"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/latelyFollowerLabel"
-            app:layout_constraintTop_toTopOf="@+id/latelyFollowerLabel" />
-
-        <TextView
-            android:id="@+id/serializeWordCountLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="日更新字数"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/retentionRatioLabel"
-            app:layout_constraintTop_toTopOf="@+id/latelyFollowerLabel" />
-
-        <TextView
-            android:id="@+id/latelyFollower"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="@{detail.latelyFollower}"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="@+id/latelyFollowerLabel"
-            app:layout_constraintTop_toBottomOf="@+id/latelyFollowerLabel"
-            tools:text="229196" />
-
-        <TextView
-            android:id="@+id/retentionRatio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:gravity="center"
-            android:text="@{detail.retentionRatio}"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="@+id/retentionRatioLabel"
-            app:layout_constraintTop_toTopOf="@+id/latelyFollower"
-            tools:text="70.2%" />
-
-        <TextView
-            android:id="@+id/serializeWordCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:gravity="center"
-            android:text="@{detail.serializeWordCount}"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="@+id/serializeWordCountLabel"
-            app:layout_constraintTop_toTopOf="@+id/latelyFollower"
-            tools:text="5318" />
+                android:fitsSystemWindows="true"
+                android:theme="@style/AppTheme.AppBarOverlay"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
 
-        <TextView
-            android:id="@+id/longIntro"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:lineSpacingExtra="8dp"
-            android:padding="17dp"
-            android:text="@{detail.longIntro}"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divide2"
-            tools:text="一念成沧海，一念化桑田。一念斩千魔，一念诛万仙。\n    唯我念……永恒\n    这是耳根继《仙逆》《求魔》《我欲封天》后，创作的第四部长篇小说《一念永恒》" />
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="?attr/colorPrimary"
+                    app:popupTheme="@style/AppTheme.PopupOverlay"
+                    app:title="书籍详情"
+                    app:titleTextColor="#FFFFFF" />
 
-        <View
-            android:id="@+id/divide3"
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            android:background="#e7e7e7"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/longIntro" />
-    </android.support.constraint.ConstraintLayout>
+            </android.support.design.widget.AppBarLayout>
+
+            <ImageView
+                android:id="@+id/novelCover"
+                android:layout_width="60dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/appBarLayout2"
+                tools:background="@drawable/ic_launcher_background" />
+
+            <TextView
+                android:id="@+id/novelName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@{detail.title}"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:layout_constraintStart_toEndOf="@+id/novelCover"
+                app:layout_constraintTop_toTopOf="@+id/novelCover"
+                tools:text="永夜君王" />
+
+            <TextView
+                android:id="@+id/novelAuthor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@{detail.author}"
+                android:textColor="#e75d5d"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@+id/novelName"
+                app:layout_constraintTop_toBottomOf="@+id/novelName"
+                tools:text="烟雨江南" />
+
+            <TextView
+                android:id="@+id/novelType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@{detail.cat}"
+                android:textSize="12sp"
+                app:layout_constraintStart_toEndOf="@+id/novelAuthor"
+                app:layout_constraintTop_toTopOf="@+id/novelAuthor"
+                tools:text="玄幻" />
+
+            <TextView
+                android:id="@+id/wordCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@{detail.wordCount}"
+                android:textSize="12sp"
+                app:layout_constraintStart_toEndOf="@+id/novelType"
+                app:layout_constraintTop_toTopOf="@+id/novelType"
+                tools:text="12万字" />
+
+            <TextView
+                android:id="@+id/lastUpdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@{detail.updated}"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@+id/novelAuthor"
+                app:layout_constraintTop_toBottomOf="@+id/novelAuthor"
+                tools:text="上次更新：2017-09-18  17:21" />
+
+
+            <View
+                android:id="@+id/divide1"
+                android:layout_width="0dp"
+                android:layout_height="0.5dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/text_gray"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/novelCover" />
+
+            <TextView
+                android:id="@+id/stateLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="连载状态"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toStartOf="@+id/chaperCountLabel"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divide1" />
+
+            <TextView
+                android:id="@+id/chaperCountLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="连载章节数"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toStartOf="@+id/scoreLabel"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/stateLabel"
+                app:layout_constraintTop_toTopOf="@+id/stateLabel" />
+
+            <TextView
+                android:id="@+id/scoreLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="星级平均分"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/chaperCountLabel"
+                app:layout_constraintTop_toTopOf="@+id/stateLabel" />
+
+            <TextView
+                android:id="@+id/serialState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@+id/stateLabel"
+                app:layout_constraintTop_toBottomOf="@+id/stateLabel"
+                tools:text="已完结" />
+
+            <TextView
+                android:id="@+id/chapterCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minWidth="58dp"
+                android:text="@{detail.chaptersCount}"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@+id/chaperCountLabel"
+                app:layout_constraintTop_toTopOf="@+id/serialState"
+                tools:text="189章" />
+
+            <TextView
+                android:id="@+id/score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minWidth="58dp"
+                android:text="@{detail.rating.score}"
+                android:textColor="@color/lightgray"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@+id/scoreLabel"
+                app:layout_constraintTop_toTopOf="@+id/serialState"
+                tools:text="8.85" />
+
+
+            <TextView
+                android:id="@+id/latelyFollowerLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="追书人数"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toStartOf="@+id/retentionRatioLabel"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/serialState" />
+
+            <TextView
+                android:id="@+id/retentionRatioLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="读者留存率"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toStartOf="@+id/serializeWordCountLabel"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/latelyFollowerLabel"
+                app:layout_constraintTop_toTopOf="@+id/latelyFollowerLabel" />
+
+            <TextView
+                android:id="@+id/serializeWordCountLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="日更新字数"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/retentionRatioLabel"
+                app:layout_constraintTop_toTopOf="@+id/latelyFollowerLabel" />
+
+            <TextView
+                android:id="@+id/latelyFollower"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:minWidth="46dp"
+                android:text="@{detail.latelyFollower}"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@+id/latelyFollowerLabel"
+                app:layout_constraintTop_toBottomOf="@+id/latelyFollowerLabel"
+                tools:text="229196" />
+
+            <TextView
+                android:id="@+id/retentionRatio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minWidth="58dp"
+                android:text="@{detail.retentionRatio}"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@+id/retentionRatioLabel"
+                app:layout_constraintTop_toTopOf="@+id/latelyFollower"
+                tools:text="70.2%" />
+
+            <TextView
+                android:id="@+id/serializeWordCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minWidth="58dp"
+                android:text="@{detail.serializeWordCount}"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@+id/serializeWordCountLabel"
+                app:layout_constraintTop_toTopOf="@+id/latelyFollower"
+                tools:text="5318" />
+
+            <View
+                android:id="@+id/divide3"
+                android:layout_width="0dp"
+                android:layout_height="0.5dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/text_gray"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/latelyFollower" />
+
+            <TextView
+                android:id="@+id/longIntro"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="8dp"
+                android:padding="17dp"
+                android:text="@{detail.longIntro}"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divide3"
+                tools:text="一念成沧海，一念化桑田。一念斩千魔，一念诛万仙。\n    唯我念……永恒\n    这是耳根继《仙逆》《求魔》《我欲封天》后，创作的第四部长篇小说《一念永恒》" />
+
+            <View
+                android:id="@+id/divide4"
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#e7e7e7"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/longIntro" />
+
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
 </layout>
