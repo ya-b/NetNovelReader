@@ -112,6 +112,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         }
     }
 
+    //下载书籍图片，搜索时调用(搜索时顺便获取图片链接)
     @Throws(IOException::class)
     private suspend fun downloadImage(bookname: String, imageUrl: String) {
         val path = "${getSavePath()}/tmp".apply { File(this).mkdirs() } + "/$bookname.png"

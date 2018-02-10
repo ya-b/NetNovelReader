@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
@@ -27,7 +26,6 @@ import com.netnovelreader.databinding.ActivityShelfBinding
 import com.netnovelreader.editor.SiteEditorActivity
 import com.netnovelreader.reader.ReaderActivity
 import com.netnovelreader.search.SearchActivity
-import kotlinx.android.synthetic.main.activity_reader.*
 import kotlinx.android.synthetic.main.activity_shelf.*
 import kotlinx.android.synthetic.main.item_shelf.view.*
 import kotlinx.coroutines.experimental.launch
@@ -137,7 +135,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     override fun onBackPressed() {
         if (isFragmentShow) {
-            removeFragment(settingFragment)
+            removeFragment(settingFragment)  //退出设置页面
         } else {
             super.onBackPressed()
         }
@@ -153,7 +151,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     }
 
     /**
-     * 请求权限
+     * 请求权限的结果
      */
     override fun onRequestPermissionsResult(
             requestCode: Int,
@@ -178,6 +176,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    //请求权限
     override fun requirePermission(permission: String, reqCode: Int) {
         ActivityCompat.requestPermissions(this, Array(1) { permission }, reqCode)
     }

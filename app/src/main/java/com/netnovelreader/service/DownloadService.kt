@@ -10,6 +10,7 @@ import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.download.DownloadTask
 import com.netnovelreader.common.toast
 import kotlinx.coroutines.experimental.launch
+import java.io.IOException
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -49,29 +50,22 @@ class DownloadService : IntentService {
         val tableName = intent?.getStringExtra("tableName")
         val catalogUrl = intent?.getStringExtra("catalogurl")
         if (intent == null || tableName.isNullOrEmpty() || catalogUrl.isNullOrEmpty()) return
-        launch {
-            DownloadTask(tableName!!, catalogUrl!!).getList().apply { max = this.size }
-                .forEach {
-                    launch(threadPool) {
-                        try{
-                            SQLHelper.doTransaction = true
-                            SQLHelper.getDB().beginTransaction()
-                            it.download(it.getChapterTxt())
-                            SQLHelper.getDB().setTransactionSuccessful()
-                        }finally {
-                            SQLHelper.getDB().endTransaction()
-                            SQLHelper.doTransaction = false
-                        }
-                    }.invokeOnCompletion {
-                        synchronized(IntentService::class.java) {
-                            it?.apply { failed.incrementAndGet() } ?: progress.incrementAndGet()
-                            updateNotification(progress.get(), max)
-                            if (progress.get() + failed.get() == max) lock.offer(1)
-                        }
+        DownloadTask(tableName!!, catalogUrl!!).getList().apply { max = this.size }   //获取要下载的章节列表
+            .forEach {
+                launch(threadPool) {
+                    try {
+                        it.download(it.getChapterTxt())     //下载每一章
+                    } catch (e: IOException) {
+                    }
+                }.invokeOnCompletion {
+                    synchronized(IntentService::class.java) {
+                        it?.apply { failed.incrementAndGet() } ?: progress.incrementAndGet()
+                        updateNotification(progress.get(), max)
+                        if (progress.get() + failed.get() == max) lock.offer(1)   //下载完成，取消阻塞
                     }
                 }
-        }
-        lock.take()
+            }
+        lock.take()  //用阻塞队列阻塞住线程，一次只下载一本书
     }
 
     override fun onDestroy() {

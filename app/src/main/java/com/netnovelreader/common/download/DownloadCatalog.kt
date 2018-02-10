@@ -1,10 +1,10 @@
 package com.netnovelreader.common.download
 
 import com.netnovelreader.common.UPDATEFLAG
-import com.netnovelreader.common.tableName2Id
-import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.common.data.ParseHtml
 import com.netnovelreader.common.data.SQLHelper
+import com.netnovelreader.common.tableName2Id
+import com.netnovelreader.common.url2Hostname
 import java.io.IOException
 
 /**
@@ -12,6 +12,9 @@ import java.io.IOException
  */
 class DownloadCatalog(val tableName: String, val catalogUrl: String) {
 
+    /**
+     * 下载目录并保存到数据库
+     */
     @Throws(IOException::class)
     fun download() {
         SQLHelper.createTable(tableName)
@@ -21,10 +24,10 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
             SQLHelper.doTransaction = true
             SQLHelper.getDB().beginTransaction()
             filtExistsInSql(if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
-                    .forEach {
-                        SQLHelper.setChapterFinish(tableName, it.key, it.value, false)
-                        latestChapter = it.key
-                    }
+                .forEach {
+                    SQLHelper.setChapterFinish(tableName, it.key, it.value, 0)
+                    latestChapter = it.key
+                }
             SQLHelper.getDB().setTransactionSuccessful()
         }finally {
             SQLHelper.getDB().endTransaction()
@@ -39,6 +42,9 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
         CatalogCache.clearCache()
     }
 
+    /**
+     * 从网上下载目录
+     */
     @Throws(IOException::class)
     fun getMapFromNet(catalogUrl: String): LinkedHashMap<String, String> {
         val map = ParseHtml().getCatalog(catalogUrl)
@@ -49,6 +55,9 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
         return map
     }
 
+    /**
+     * 过滤目录的某些章节，从map中过滤掉filter
+     */
     fun filtCatalog(
         map: LinkedHashMap<String, String>,
         filters: List<String>
@@ -65,6 +74,9 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
         return map
     }
 
+    /**
+     * 过滤掉已经存在的目录
+     */
     fun filtExistsInSql(map: LinkedHashMap<String, String>): LinkedHashMap<String, String> {
         val arrlist = SQLHelper.getAllChapter(tableName)
         val result = LinkedHashMap<String, String>()

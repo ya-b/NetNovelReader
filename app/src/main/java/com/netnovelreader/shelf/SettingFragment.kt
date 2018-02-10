@@ -9,6 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.netnovelreader.R
 
+/**
+ * 设置页面
+ */
 class SettingFragment : PreferenceFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +29,6 @@ class SettingFragment : PreferenceFragment() {
         savedInstanceState: Bundle?
     ): View {
         return super.onCreateView(inflater, container, savedInstanceState)
-                .apply { this.setBackgroundColor(Color.WHITE) }
+            .apply { this.setBackgroundColor(Color.WHITE) }
     }
 }

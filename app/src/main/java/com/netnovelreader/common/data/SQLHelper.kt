@@ -184,10 +184,10 @@ object SQLHelper {
     }
     //设置章节是否下载完成
     fun setChapterFinish(
-            tableName: String,
-            chaptername: String,
-            url: String,
-            isDownloadSuccess: Boolean
+        tableName: String,
+        chaptername: String,
+        url: String,
+        isDownloadSuccess: Int
     ) {
         val getId = "(select $ID from $tableName where $CHAPTERNAME='$chaptername')"
         getDB().execSQL("replace into $tableName ($ID, $CHAPTERNAME, $CHAPTERURL, $ISDOWNLOADED) " +

@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -144,14 +143,10 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+        if (event.action == MotionEvent.ACTION_DOWN) {
             performClick()
         }
         return detector.onTouchEvent(event)
-    }
-
-    override fun performClick(): Boolean {
-        return super.performClick()
     }
 
     override fun onDown(e: MotionEvent?): Boolean {
@@ -224,6 +219,7 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         pageListener?.onPageChange()
     }
 
+    //章节改变时调用，分割内容
     private fun flushTextArray() {
         val str = text?.get()
         if (str.isNullOrEmpty()) return
@@ -263,11 +259,13 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         return ((height - indicatorFontSize) * 0.96f).toInt()
     }
 
+    //左边距
     private fun getMarginLeft(): Float {
         val count = getTextWidth() / txtFontSize!!.toInt()
         return (width - count * txtFontSize!!) / 2
     }
 
+    //上边距
     private fun getMarginTop(): Float {
         val count = getTextHeight() / (txtFontSize!! * rowSpace).toInt()
         return ((height - indicatorFontSize) - count * txtFontSize!! * rowSpace) / 2 + txtFontSize!!
@@ -297,7 +295,7 @@ class ReaderView : View, GestureDetector.OnGestureListener {
                         else -> 1
                     }
                 }
-                else -> postInvalidate()
+                else -> postInvalidate()  //刷新view
             }
         }
     }

@@ -2,7 +2,6 @@ package com.netnovelreader.reader
 
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableField
-import android.util.Log
 import com.netnovelreader.common.NotDeleteNum
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.download.ChapterCache
@@ -63,6 +62,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
             .let { it[1] }
     }.await()
 
+    //获取章节内容
     override suspend fun getChapter(type: CHAPTERCHANGE, chapterName: String?): Boolean = async {
         when (type) {
             CHAPTERCHANGE.NEXT -> if (chapterNum >= maxChapterNum) return@async false else chapterNum++
@@ -77,6 +77,7 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
             .let { it.substring(it.indexOf("|") + 1) } == ChapterCache.FILENOTFOUND
     }.await()
 
+    //下载并显示，阅读到未下载章节时调用
     override suspend fun downloadAndShow(): Boolean = async {
         var str = ChapterCache.FILENOTFOUND
         var times = 0
@@ -116,6 +117,9 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
         catalog
     }.await()
 
+    /**
+     * 自动删除已读章节，但保留最近[NotDeleteNum]章
+     */
     override suspend fun autoRemove() {
         val num = getRecord()[0]
         if (num < NotDeleteNum) return

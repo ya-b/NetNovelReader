@@ -10,7 +10,7 @@ import java.io.IOException
  * Created by yangbo on 18-1-27.
  */
 class DownloadChapter(
-    private val tablename: String, private val dir: String, private val chapterName: String,
+    private val tablename: String, private val dir: String, val chapterName: String,
     private val chapterUrl: String
 ) {
 
@@ -20,7 +20,7 @@ class DownloadChapter(
         File(dir, chapterName).takeIf { !it.exists() }
                 ?.run {
                     this.writeText(chapterText)
-                    SQLHelper.setChapterFinish(tablename, chapterName, chapterUrl, true)
+                    SQLHelper.setChapterFinish(tablename, chapterName, chapterUrl, 1)
                 }
         return 1
     }

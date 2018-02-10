@@ -54,6 +54,7 @@ fun getHeaders(url: String): HashMap<String, String> {
     return map
 }
 
+//对不合法url修复
 fun fixUrl(referenceUrl: String, fixUrl: String): String {
     if (fixUrl.startsWith("http")) return fixUrl
     if (fixUrl.startsWith("//")) return "http:" + fixUrl
@@ -70,10 +71,14 @@ fun getDefaultCover(): Bitmap = Bitmap.createBitmap(
     45, 60, Bitmap.Config.RGB_565
 )
 
+//简化书写
 fun Context.toast(message: String) = launch(UI) {
     Toast.makeText(this@toast, message, Toast.LENGTH_LONG).show()
 }
 
+/**
+ * 简化[Call.enqueue]书写
+ */
 inline fun <T> Call<T>.enqueueCall(crossinline block: (t: T?) -> Unit) {
     this.enqueue(object : Callback<T> {
         override fun onFailure(call: Call<T>?, t: Throwable?) {

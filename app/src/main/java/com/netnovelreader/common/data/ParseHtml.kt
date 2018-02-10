@@ -1,7 +1,9 @@
 package com.netnovelreader.common.data
 
-import com.netnovelreader.common.*
-import com.orhanobut.logger.Logger
+import com.netnovelreader.common.TIMEOUT
+import com.netnovelreader.common.fixUrl
+import com.netnovelreader.common.getHeaders
+import com.netnovelreader.common.url2Hostname
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.io.IOException
@@ -18,7 +20,7 @@ class ParseHtml {
         val txt: String?
         val selector = SQLHelper.getParseRule(url2Hostname(url), SQLHelper.CHAPTER_RULE)
         if (selector.isEmpty() || selector.length < 2) {
-            txt = getChapterWithSelector(url)
+            txt = getChapterWithOutSelector(url)
         } else {
             txt = Jsoup.connect(url).headers(getHeaders(url))
                     .timeout(TIMEOUT).get().select(selector).text()
@@ -47,8 +49,11 @@ class ParseHtml {
         return catalog
     }
 
+    /**
+     * 解析章节,没有选择器
+     */
     @Throws(IOException::class)
-    private fun getChapterWithSelector(url: String): String {
+    private fun getChapterWithOutSelector(url: String): String {
         val elements = Jsoup.connect(url).get().allElements
         val indexList = ArrayList<Element>()
         if (elements.size > 1) {

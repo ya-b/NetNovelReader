@@ -41,31 +41,31 @@ interface ZhuiShuShenQiAPI {
     @GET("http://api.zhuishushenqi.com/book/search-hotwords")
     fun hotWords(): Call<SearchHotWord>
 
-        /**
-         * 完整Url:http://api05iye5.zhuishushenqi.com/book/auto-suggest?query={搜索关键字}&packageName=com.ushaqi.zhuishushenqi
-         * 作用：根据搜索关键字提供搜索建议列表
-         */
-        @GET("http://api05iye5.zhuishushenqi.com/book/auto-suggest?")
-        fun searchSuggest(@Query("query") query: String, @Query("packageName") packageName: String): Call<QuerySuggest>
+    /**
+     * 完整Url:http://api05iye5.zhuishushenqi.com/book/auto-suggest?query={搜索关键字}&packageName=com.ushaqi.zhuishushenqi
+     * 作用：根据搜索关键字提供搜索建议列表
+     */
+    @GET("http://api05iye5.zhuishushenqi.com/book/auto-suggest?")
+    fun searchSuggest(@Query("query") query: String, @Query("packageName") packageName: String): Call<QuerySuggest>
 
 
-        @GET("http://api.zhuishushenqi.com/book/{id}")
-        fun getNovelIntroduce(@Path("id") id: String?): Call<NovelIntroduce>
+    @GET("http://api.zhuishushenqi.com/book/{id}")
+    fun getNovelIntroduce(@Path("id") id: String?): Call<NovelIntroduce>
 
-        /**
-         * 作用：根据搜索书名返回书籍列表
-         */
-        @GET("http://api.zhuishushenqi.com/book/fuzzy-search?")
-        fun searchBook(@Query("query") query: String): Call<QueryNovel>
+    /**
+     * 作用：根据搜索书名返回书籍列表
+     */
+    @GET("http://api.zhuishushenqi.com/book/fuzzy-search?")
+    fun searchBook(@Query("query") query: String): Call<QueryNovel>
 
-        /**
-         * 作用：根据准确已有的作者名字返回该作者名下的所有书籍
-         */
-        @GET("http://api.zhuishushenqi.com/book/accurate-search?")
-        fun searchBookByAuthor(@Query("author") author: String): Call<QueryNovelByAuthor>
+    /**
+     * 作用：根据准确已有的作者名字返回该作者名下的所有书籍
+     */
+    @GET("http://api.zhuishushenqi.com/book/accurate-search?")
+    fun searchBookByAuthor(@Query("author") author: String): Call<QueryNovelByAuthor>
 
 
-        @GET
-        fun getPicture(@Url url: String): Call<ResponseBody>
+    @GET
+    fun getPicture(@Url url: String): Call<ResponseBody>
 
 }

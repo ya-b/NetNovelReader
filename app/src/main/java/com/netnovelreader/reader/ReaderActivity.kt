@@ -76,7 +76,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         loadingbar.hide()
         netStateReceiver = NetChangeReceiver()
         val filter = IntentFilter().apply { addAction(ConnectivityManager.CONNECTIVITY_ACTION) }
-        registerReceiver(netStateReceiver, filter)
+        registerReceiver(netStateReceiver, filter)  //网络变化广播接收器
 
         sb_brightness.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -104,7 +104,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
 
     override fun onBackPressed() {
         if (footView.visibility == View.VISIBLE) {
-            hideHeaderFoot()
+            hideHeadFoot()
         } else {
             super.onBackPressed()
         }
@@ -126,15 +126,16 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         }
     }
 
+    //点击屏幕中间
     override fun onCenterClick() {
-        if (hideHeaderFoot()) return
+        if (hideHeadFoot()) return
         footView.visibility = View.VISIBLE
         headerView.visibility = View.VISIBLE
     }
 
     override fun nextChapter() {
         if (loadingbar.isShown) loadingbar.hide()
-        hideHeaderFoot()
+        hideHeadFoot()
         launch(UI) {
             readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.NEXT, null)
                 .takeIf { it ?: true }
@@ -148,7 +149,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
 
     override fun previousChapter() {
         if (loadingbar.isShown) loadingbar.hide()
-        hideHeaderFoot()
+        hideHeadFoot()
         launch(UI) {
             readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.PREVIOUS, null)
                 .takeIf { it != false }
@@ -161,12 +162,13 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     }
 
     override fun onPageChange() {
-        hideHeaderFoot()
+        hideHeadFoot()
         launch {
             readerViewModel?.setRecord(readerViewModel?.chapterNum ?: 1, readerView.pageNum ?: 1)
         }
     }
 
+    //显示目录
     override fun showDialog() {
         var catalogView: RecyclerView? = null
         if (dialog == null) {
@@ -189,7 +191,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         dialog?.window?.setLayout(readerView.width * 5 / 6, readerView.height * 9 / 10)
     }
 
-    private fun hideHeaderFoot(): Boolean {
+    private fun hideHeadFoot(): Boolean {
         return (footView.visibility == View.VISIBLE).apply {
             headerView.visibility = View.INVISIBLE
             footView.visibility = View.INVISIBLE
@@ -198,11 +200,12 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         }
     }
 
+    //网络变化广播接收器
     inner class NetChangeReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val isAvailable = cm.activeNetworkInfo?.isAvailable ?: false
-            if (isAvailable && loadingbar.isShown) {
+            if (isAvailable && loadingbar.isShown) {   //当网络变为连接状态，并且加载条显示时，下载章节内容
                 launch(UI) {
                     loadingbar.show()
                     readerViewModel?.downloadAndShow()
@@ -212,6 +215,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         }
     }
 
+    //点击目录，跳转章节
     inner class CatalogItemClickListener : IClickEvent {
         fun onChapterClick(v: View) {
             if (loadingbar.isShown) loadingbar.hide()
@@ -235,6 +239,8 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         private var selectedBgImageView: CircleImageView? = null       //用于记录用户当前选中的背景样式的UI控件
         private var selectedFontTypeTextView: TextView? = null             //用于记录用户当前选中的字体样式的UI控件
         private var selectedFontSizeTextView: TextView? = null             //用于记录用户当前选中的字体样式的UI控件
+
+        //换源下载
         fun onHeadViewClick(v: View) {
             when (v) {
                 changeSouce -> {

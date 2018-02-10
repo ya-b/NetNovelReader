@@ -3,7 +3,6 @@ package com.netnovelreader.shelf
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableField
 import android.databinding.ObservableInt
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.netnovelreader.ReaderApplication.Companion.threadPool
 import com.netnovelreader.common.IMAGENAME
@@ -45,15 +44,15 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
     }
 
     /**
-     * 刷新书架，从数据库重新获取
+     * 刷新书架，重新读数据库（数据库有没有更新）
      */
     override suspend fun refreshBookList() {
         val bookDirList = dirBookList()
-        val bookMap = SQLHelper.queryShelfBookList()
+        val bookMap = SQLHelper.queryShelfBookList()   //数据库里面的所有书
         val willDel = ArrayList<BookBean>()
         bookList.forEach { bean ->
             val value = bookMap.get(bean.bookid.get())
-            if (value != null) {
+            if (value != null) {       //如果该书在数据库里面，则更新该书状态，比如最新章节的变化
                 value[0].takeIf { it != bean.bookname.get() }?.apply { bean.bookname.set(this) }
                 value[1].takeIf { it != bean.latestChapter.get() }
                     ?.apply { bean.latestChapter.set(this) }
@@ -61,7 +60,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
                     ?.apply { bean.downloadURL.set(this) }
                 value[3].takeIf { it != bean.isUpdate.get() }?.apply { bean.isUpdate.set(this) }
             } else {
-                willDel.add(bean)
+                willDel.add(bean) //如果该书不在数据库里面，则删除（删除书籍时调用）
             }
             bookMap.remove(bean.bookid.get())
         }
@@ -75,7 +74,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
                 ObservableField(getBitmap(it.key).await()),
                 ObservableField(it.value[3])
             )
-            if (bookDirList?.contains(id2TableName(bookBean.bookid.get())) ?: false) {
+            if (bookDirList?.contains(id2TableName(bookBean.bookid.get())) == true) { //有没有新添加的书籍
                 willDel.add(bookBean)
                 updateCatalog(bookBean, false)
             } else {
@@ -96,18 +95,20 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
     //获取文件夹里面的书列表
     private fun dirBookList(): Array<String>? = File(getSavePath()).takeIf { it.exists() }?.list()
 
-    //更新目录
-    private fun updateCatalog(bookBean: BookBean, must: Boolean) =
-        launch(threadPool) {
-            val tableName = id2TableName(bookBean.bookid.get())
-            if (must || SQLHelper.getChapterCount(tableName) == 0) {
-                try {
-                    DownloadCatalog(tableName, bookBean.downloadURL.get() ?: "").download()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
+    /**
+     * @must  false时：判断[SQLHelper.getChapterCount]目录为空，则更新
+     * 更新目录
+     */
+    private fun updateCatalog(bookBean: BookBean, must: Boolean) = launch(threadPool) {
+        val tableName = id2TableName(bookBean.bookid.get())
+        if (must || SQLHelper.getChapterCount(tableName) == 0) {
+            try {
+                DownloadCatalog(tableName, bookBean.downloadURL.get() ?: "").download()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
+    }
 
     //书架将要显示的书籍封面图片
     private fun getBitmap(bookId: Int) = async(threadPool) {
