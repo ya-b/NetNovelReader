@@ -8,6 +8,7 @@ import android.view.MenuItem
 import com.netnovelreader.GlideApp
 import com.netnovelreader.R
 import com.netnovelreader.api.bean.NovelIntroduce
+import com.netnovelreader.common.PreferenceManager
 import com.netnovelreader.databinding.ActivityDetailBinding
 import com.orhanobut.logger.Logger
 import kotlinx.android.synthetic.main.activity_detail.*
@@ -19,6 +20,7 @@ import kotlinx.android.synthetic.main.activity_detail.*
  */
 class NovelDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        PreferenceManager.setTheme(this)
         super.onCreate(savedInstanceState)
         val binding = DataBindingUtil.setContentView<ActivityDetailBinding>(this, R.layout.activity_detail)
         setSupportActionBar({ toolbar.title = "书籍详情";toolbar }())
@@ -28,25 +30,16 @@ class NovelDetailActivity : AppCompatActivity() {
 
         with(mydetail) {
             //对数据进行进一步的处理再显示
-            if (!cover!!.contains("http://")) {
-                cover = "http://statics.zhuishushenqi.com$cover-covers"     //补全图片Url,并且加载图片
-            }
             serialState.text = if (mydetail.isSerial!!) "连载中" else "已完结"
             updated = updated?.replace("T", "  ")
             updated = "上次更新： $updated"
             updated = updated!!.substring(0, updated!!.lastIndexOf(":"))
             wordCount += "字"
+            chaptersCount += "章"
             longIntro = longIntro?.replace("  ", "")
             longIntro = longIntro?.replace("\n", "\n\u3000\u3000")
             longIntro = "\u3000\u3000" + longIntro                           //首行缩进两个空格
             retentionRatio = "$retentionRatio%"
-            chaptersCount += "章"
-
-            GlideApp.with(this@NovelDetailActivity)
-                    .load(cover)
-                    .error(ContextCompat.getDrawable(this@NovelDetailActivity, R.drawable.cover_default))
-                    .centerCrop()
-                    .into(novelCover)
         }
         binding.detail = mydetail
 

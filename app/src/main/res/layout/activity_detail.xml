@@ -43,7 +43,7 @@
 
             </android.support.design.widget.AppBarLayout>
 
-            <ImageView
+            <com.netnovelreader.shelf.BookCoverImage
                 android:id="@+id/novelCover"
                 android:layout_width="60dp"
                 android:layout_height="80dp"
@@ -51,6 +51,7 @@
                 android:layout_marginTop="16dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/appBarLayout2"
+                app:url="@{detail.cover}"
                 tools:background="@drawable/ic_launcher_background" />
 
             <TextView
@@ -304,7 +305,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/longIntro" />
-
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>

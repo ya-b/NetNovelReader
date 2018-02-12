@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="itemDetail"
+            type="com.netnovelreader.api.bean.NovelList.BooksBean" />
+
+        <variable
+            name="clickEvent"
+            type="com.netnovelreader.novelCatagory.NovelListFragment.NovelListItemClickEvent" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{clickEvent::onClickDetail}">
+
+        <com.netnovelreader.shelf.BookCoverImage
+            android:id="@+id/imageView3"
+            android:layout_width="55dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:url="@{itemDetail.cover}" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@{itemDetail.title}"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toEndOf="@+id/imageView3"
+            app:layout_constraintTop_toTopOf="@+id/imageView3"
+            tools:text="逍遥小书生" />
+
+        <TextView
+            android:id="@+id/bookId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@{itemDetail._id}"
+            android:visibility="invisible"
+            app:layout_constraintStart_toEndOf="@+id/title"
+            app:layout_constraintTop_toTopOf="@+id/title" />
+
+        <TextView
+            android:id="@+id/author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@{itemDetail.author}"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@+id/title"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            tools:text="荣小荣" />
+
+        <TextView
+            android:id="@+id/shortIntro"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:lines="1"
+            android:singleLine="true"
+            android:text="@{itemDetail.shortIntro}"
+            android:textColor="#5a5a5a"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageView3"
+            app:layout_constraintTop_toBottomOf="@+id/author" />
+
+        <TextView
+            android:id="@+id/laterlyFollower"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text='@{itemDetail.latelyFollower+@string/follow}'
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@+id/shortIntro"
+            app:layout_constraintTop_toBottomOf="@+id/shortIntro"
+            tools:text="104394人在追" />
+
+        <TextView
+            android:id="@+id/retentionRatio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text='@{itemDetail.retentionRatio+@string/retent}'
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/laterlyFollower"
+            app:layout_constraintTop_toTopOf="@+id/laterlyFollower"
+            tools:text="70.56%读者留存" />
+
+        <TextView
+            android:id="@+id/majorCate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="@{itemDetail.minorCate}"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/author"
+            app:layout_constraintTop_toTopOf="@+id/author"
+            tools:text="历史" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="0.3dp"
+            android:layout_marginTop="10dp"
+            android:background="#ccc"
+            app:layout_constraintStart_toStartOf="@+id/laterlyFollower"
+            app:layout_constraintTop_toBottomOf="@+id/laterlyFollower" />
+    </android.support.constraint.ConstraintLayout>
+</layout>

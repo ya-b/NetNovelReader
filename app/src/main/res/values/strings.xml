@@ -40,4 +40,6 @@
     <string name="setting">设置</string>
     <string name="backgroundButton">背景</string>
     <string name="followSystem">跟随系统</string>
+    <string name="follow">人在追</string>
+    <string name="retent">%读者留存</string>
 </resources>

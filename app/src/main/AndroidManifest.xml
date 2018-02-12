@@ -23,7 +23,6 @@
             android:theme="@style/AppTheme.AppBarOverlay">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -33,9 +32,9 @@
         <service android:name=".service.DownloadService" />
 
         <activity android:name=".editor.SiteEditorActivity" />
-        <activity
-            android:name=".noveldetail.NovelDetailActivity"
-            android:theme="@style/AppThemeBlack" />
+        <activity android:name=".noveldetail.NovelDetailActivity" />
+        <activity android:name=".novelCatagory.CatalogGridActivity"></activity>
+        <activity android:name=".novelCatagory.NovelCatalogDetailActivity"></activity>
     </application>
 
 </manifest>

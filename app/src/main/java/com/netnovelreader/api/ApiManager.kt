@@ -65,6 +65,20 @@ interface ZhuiShuShenQiAPI {
     fun searchBookByAuthor(@Query("author") author: String): Call<QueryNovelByAuthor>
 
 
+
+    @GET("http://api.zhuishushenqi.com/book/by-categories?")
+    fun seachBookListByTypeAndMajor(@Query("gender") gender:String?="male",
+                            @Query("type") type:String?,
+                            @Query("major") major:String?,
+                            @Query("minor") minor:String?="",
+                            @Query("start") start:String?="0",
+                            @Query("limit") limit:String?="50"):Call<NovelList>
+
+
+    @GET("http://api.zhuishushenqi.com/cats/lv2/statistics")
+    fun getNovelCatalogData(): Call<NovelCatalog>
+
+
     @GET
     fun getPicture(@Url url: String): Call<ResponseBody>
 

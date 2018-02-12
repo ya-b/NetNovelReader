@@ -207,9 +207,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             with(linearLayout.getChildAt(i) as TextView) {
                 //设置搜索热词文本，该10个热词是从100个关键个搜索热词中随机抽取的
                 text = li[i].word
-                (background as GradientDrawable).setColor(
-                    ContextCompat.getColor(context, colorArray[Random().nextInt(17)])
-                )
+                (background as GradientDrawable).setColor(ContextCompat.getColor(context, colorArray[Random().nextInt(17)]))
             }
     }
 
@@ -251,15 +249,9 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                 val id = it?.books?.firstOrNull { it.title == itemText }?._id
                 ApiManager.mAPI?.getNovelIntroduce(id ?: "")?.enqueueCall {
                     when (it?._id) {
-                        null -> {
-                            launch(UI) {
-                                Snackbar.make(searchRoot, "没有搜索到相关小说的介绍", Snackbar.LENGTH_SHORT)
-                                    .show()
-                            }
-                        }
+                        null ->   launch(UI) { Snackbar.make(searchRoot, "没有搜索到相关小说的介绍", Snackbar.LENGTH_SHORT).show() }
                         else -> {
-                            val intent =
-                                Intent(this@SearchActivity, NovelDetailActivity::class.java)
+                            val intent = Intent(this@SearchActivity, NovelDetailActivity::class.java)
                             intent.putExtra("data", it)
                             this@SearchActivity.startActivity(intent)
                         }
@@ -276,17 +268,17 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
 
             val listener = DialogInterface.OnClickListener { _, which ->
                 searchloadingbar.show()
-                launch(UI) {
+                launch(UI) {                                                                         //在UI线程中执行一些操作
                     val catalogUrl = container.resultUrl.text.toString()
                     val bookname = container.resultName.text.toString()
-                    val tableName = searchViewModel!!.addBookToShelf(bookname, catalogUrl)
+                    val tableName = searchViewModel!!.addBookToShelf(bookname, catalogUrl)           //addBookToShelf方法需要被suspend修饰？
                     val isChangeSource = !intent.getStringExtra("bookname").isNullOrEmpty()
                     when (which) {
                         Dialog.BUTTON_POSITIVE -> download(bookname, catalogUrl) {
                             downloadBook(v.context, tableName, catalogUrl, isChangeSource)
                         }
                         Dialog.BUTTON_NEGATIVE -> download(bookname, catalogUrl) {
-                            launch { downNowChapter(tableName, isChangeSource) }
+                            launch { downNowChapter(tableName, isChangeSource) }                     //新启动一个线程执行下载任务
                         }
                     }
                 }
@@ -301,7 +293,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         /**
          * 下载，调用[downloadBook]或[downNowChapter]
          */
-        private fun download(bookname: String, catalogUrl: String, method: () -> Unit) {
+        private fun download(bookname: String, catalogUrl: String, method: () -> Unit) {         //函数A作为函数B的参数传递进来，然后在函数B里执行函数A
             async {
                 searchViewModel!!.addBookToShelf(bookname, catalogUrl).apply {
                     searchViewModel?.saveBookImage(this, bookname)
@@ -309,12 +301,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                 }
             }.invokeOnCompletion {
                 launch(UI) {
-                    it?.apply { toast(getString(R.string.downloadFailed)) }
-                            ?: kotlin.run {
-                                toast(getString(R.string.catalog_finish))
-                                this@SearchActivity.finish()
-                                method()
-                            }
+                    it?.apply { toast(getString(R.string.downloadFailed)) } ?: kotlin.run { toast(getString(R.string.catalog_finish));this@SearchActivity.finish();method() }
                     searchloadingbar.hide()
                 }
             }

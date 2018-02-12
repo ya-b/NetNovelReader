@@ -35,8 +35,7 @@
 
     <color name="read_dialog_button_select">#E25754</color>
     <color name="read_dialog_bg">#2C2C2C</color>
-
-
+    <color name="filter">#FF7043</color>
     <color name="hot_label_bg1">#627176</color>
     <color name="hot_label_bg2">#3fa5d9</color>
     <color name="hot_label_bg3">#E25754</color>
