@@ -36,6 +36,7 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import java.io.IOException
 import java.util.*
 
 class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
@@ -207,7 +208,9 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             with(linearLayout.getChildAt(i) as TextView) {
                 //设置搜索热词文本，该10个热词是从100个关键个搜索热词中随机抽取的
                 text = li[i].word
-                (background as GradientDrawable).setColor(ContextCompat.getColor(context, colorArray[Random().nextInt(17)]))
+                (background as GradientDrawable).setColor(
+                    ContextCompat.getColor(context, colorArray[Random().nextInt(17)])
+                )
             }
     }
 
@@ -249,7 +252,12 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                 val id = it?.books?.firstOrNull { it.title == itemText }?._id
                 ApiManager.mAPI?.getNovelIntroduce(id ?: "")?.enqueueCall {
                     when (it?._id) {
-                        null ->   launch(UI) { Snackbar.make(searchRoot, "没有搜索到相关小说的介绍", Snackbar.LENGTH_SHORT).show() }
+                        null -> {
+                            launch(UI) {
+                                Snackbar.make(searchRoot, "没有搜索到相关小说的介绍", Snackbar.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
                         else -> {
                             val intent = Intent(this@SearchActivity, NovelDetailActivity::class.java)
                             intent.putExtra("data", it)
@@ -272,13 +280,12 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
                     val catalogUrl = container.resultUrl.text.toString()
                     val bookname = container.resultName.text.toString()
                     val tableName = searchViewModel!!.addBookToShelf(bookname, catalogUrl)           //addBookToShelf方法需要被suspend修饰？
-                    val isChangeSource = !intent.getStringExtra("bookname").isNullOrEmpty()
                     when (which) {
                         Dialog.BUTTON_POSITIVE -> download(bookname, catalogUrl) {
-                            downloadBook(v.context, tableName, catalogUrl, isChangeSource)
+                            downloadBook(v.context, tableName, catalogUrl)
                         }
                         Dialog.BUTTON_NEGATIVE -> download(bookname, catalogUrl) {
-                            launch { downNowChapter(tableName, isChangeSource) }                     //新启动一个线程执行下载任务
+                            launch { downNowChapter(tableName) }                     //新启动一个线程执行下载任务
                         }
                     }
                 }
@@ -293,30 +300,43 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         /**
          * 下载，调用[downloadBook]或[downNowChapter]
          */
-        private fun download(bookname: String, catalogUrl: String, method: () -> Unit) {         //函数A作为函数B的参数传递进来，然后在函数B里执行函数A
+        private fun download(bookname: String, catalogUrl: String, method: suspend () -> Unit) {         //函数A作为函数B的参数传递进来，然后在函数B里执行函数A
             async {
                 searchViewModel!!.addBookToShelf(bookname, catalogUrl).apply {
                     searchViewModel?.saveBookImage(this, bookname)
-                    DownloadCatalog(this, catalogUrl).download()
+                    try{
+                        DownloadCatalog(this, catalogUrl).download()
+                    }catch (e: IOException){
+                        e.printStackTrace()
+                    }
                 }
             }.invokeOnCompletion {
                 launch(UI) {
-                    it?.apply { toast(getString(R.string.downloadFailed)) } ?: kotlin.run { toast(getString(R.string.catalog_finish));this@SearchActivity.finish();method() }
+                    it?.apply { toast(getString(R.string.downloadFailed)) }
+                            ?: kotlin.run {
+                                toast(getString(R.string.catalog_finish))
+                                method()
+                                this@SearchActivity.finish()
+                            }
                     searchloadingbar.hide()
                 }
             }
         }
 
         //下载全书，若该书已存在，则下载所有未读章节
-        private fun downloadBook(
+        private suspend fun downloadBook(
             context: Context,
             tableName: String,
-            catalogUrl: String,
-            isChangeSource: Boolean
+            catalogUrl: String
         ) {
             val chapterName = intent.getStringExtra("chapterName")
-            if (isChangeSource && !chapterName.isNullOrEmpty()) {
-                launch { searchViewModel?.delChapterAfterSrc(tableName, chapterName) }
+            if (!chapterName.isNullOrEmpty()) {
+                searchViewModel?.delChapterAfterSrc(tableName, chapterName)
+                try{
+                    launch { DownloadCatalog(tableName, catalogUrl).download() }.join()
+                }catch (e: IOException){
+                    e.printStackTrace()
+                }
             }
             val intent = Intent(context, DownloadService::class.java)
             intent.putExtra("tableName", tableName)
@@ -325,10 +345,10 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         }
 
         //换源下载，只下载当前章节
-        private suspend fun downNowChapter(tableName: String, isChangeSource: Boolean) {
+        private suspend fun downNowChapter(tableName: String) {
             val chapterName = intent.getStringExtra("chapterName")
-            if (isChangeSource && !chapterName.isNullOrEmpty()) {
-                launch { searchViewModel?.delChapterAfterSrc(tableName, chapterName) }
+            if (!chapterName.isNullOrEmpty()) {
+                searchViewModel?.delChapterAfterSrc(tableName, chapterName)
                 DownloadChapter(
                     tableName, "${getSavePath()}/$tableName",
                     chapterName, SQLHelper.getChapterUrl(tableName, chapterName)

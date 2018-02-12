@@ -244,7 +244,7 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         val arrayList = ArrayList<ArrayList<String>>()
         val totalCount = getTextHeight() / (txtFontSize!! * rowSpace).toInt()  //一页容纳行数
         for (i in 0..tmplist.size / totalCount) {
-            arrayList.add(tmplist.filterIndexed { index, s -> index > i * totalCount - 1 && index < (i + 1) * totalCount } as ArrayList<String>)
+            arrayList.add(tmplist.filterIndexed { index, _ -> index > i * totalCount - 1 && index < (i + 1) * totalCount } as ArrayList<String>)
         }
         return arrayList
     }

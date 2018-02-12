@@ -55,7 +55,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         CatalogCache.clearCache()
         SQLHelper.queryAllSearchSite().forEach {
             launch(threadPool) {
-               // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
+                // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
                 searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
             }
         }
@@ -64,7 +64,7 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
     override suspend fun saveBookImage(tableName: String, bookname: String) {
         File(getSavePath() + "/tmp")
                 .takeIf { it.exists() }
-                ?.listFiles { dir, name -> name.startsWith(bookname) }
+                ?.listFiles { _, name -> name.startsWith(bookname) }
                 ?.firstOrNull()
                 ?.copyTo(File("${getSavePath()}/$tableName"
                         .apply { File(this).mkdirs() }, IMAGENAME), true)

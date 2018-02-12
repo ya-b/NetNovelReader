@@ -16,7 +16,7 @@ class SettingFragment : PreferenceFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addPreferencesFromResource(R.xml.pref_settings)
-        findPreference(getString(R.string.themeKey)).setOnPreferenceChangeListener { preference, newValue ->
+        findPreference(getString(R.string.themeKey)).setOnPreferenceChangeListener { _, _ ->
             startActivity(Intent(activity, activity.javaClass))
             activity.finish()
             true

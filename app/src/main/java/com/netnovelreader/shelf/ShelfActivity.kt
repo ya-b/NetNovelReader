@@ -199,7 +199,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         }
 
         fun itemOnLongClick(view: View): Boolean {
-            val listener = DialogInterface.OnClickListener { dialog, which ->
+            val listener = DialogInterface.OnClickListener { _, which ->
                 if (which == Dialog.BUTTON_POSITIVE) {
                     launch {
                         shelfViewModel?.deleteBook(view.nameView.text.toString())

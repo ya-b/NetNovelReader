@@ -54,41 +54,36 @@ object SQLHelper {
 
     //添加书
     fun addBookToShelf(bookname: String, url: String): Int {
-        synchronized(SQLHelper) {
-            var id = 0
-            val cursor = getDB().rawQuery(
-                    "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
-                    null
-            )
-            if (cursor.moveToFirst()) {
-                id = cursor.getInt(0)
-            } else {
-                val contentValue = ContentValues()
-                contentValue.put(BOOKNAME, bookname)
-                contentValue.put(DOWNLOADURL, url)
-                contentValue.put(ISUPDATE, UPDATEFLAG)
-                id = getDB().insert(TABLE_SHELF, null, contentValue).toInt()
-            }
-            cursor.close()
-            return id
+        val cursor = getDB().rawQuery(
+                "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
+                null
+        )
+        val id = if (cursor.moveToFirst()) {
+            cursor.getInt(0)
+        } else {
+            val contentValue = ContentValues()
+            contentValue.put(BOOKNAME, bookname)
+            contentValue.put(DOWNLOADURL, url)
+            contentValue.put(ISUPDATE, UPDATEFLAG)
+            getDB().insert(TABLE_SHELF, null, contentValue).toInt()
         }
+        cursor.close()
+        return id
     }
 
     //删除书
     fun removeBookFromShelf(bookname: String): Int {
-        synchronized(SQLHelper) {
-            val cursor = getDB().rawQuery(
-                    "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
-                    null
-            )
-            var id = -1
-            if (cursor.moveToFirst()) {
-                id = cursor.getInt(0)
-                getDB().execSQL("delete from $TABLE_SHELF where $ID=$id;")
-            }
-            cursor.close()
-            return id
+        val cursor = getDB().rawQuery(
+                "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
+                null
+        )
+        var id = -1
+        if (cursor.moveToFirst()) {
+            id = cursor.getInt(0)
+            getDB().execSQL("delete from $TABLE_SHELF where $ID=$id;")
         }
+        cursor.close()
+        return id
     }
 
     fun getBookId(bookname: String): Int {

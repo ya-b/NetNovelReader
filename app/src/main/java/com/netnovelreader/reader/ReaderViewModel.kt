@@ -72,9 +72,10 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
             }
         }
         launch { setRecord(chapterNum, 1) }
-        chapterCache.getChapter(chapterNum)
-            .apply { text.set(this) }
-            .let { it.substring(it.indexOf("|") + 1) } == ChapterCache.FILENOTFOUND
+        val str = chapterCache.getChapter(chapterNum)
+        text.set(str)
+        this@ReaderViewModel.chapterName = str.substring(0, str.indexOf("|"))
+        str.substring(str.indexOf("|") + 1) == ChapterCache.FILENOTFOUND
     }.await()
 
     //下载并显示，阅读到未下载章节时调用
