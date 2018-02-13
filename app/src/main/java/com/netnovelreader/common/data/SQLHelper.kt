@@ -367,8 +367,8 @@ object SQLHelper {
                             "$CATALOG_FILTER varchar(128),$CHAPTER_FILTER text);"
             )
             db?.execSQL(
-                    "insert into $TABLE_PARSERULES values (1,'qidian.com','#volumes'," +
-                            "'.read-section','分卷阅读|订阅本卷',NULL);"
+                    "insert into $TABLE_PARSERULES values (1,'qidian.com','.volume-wrap'," +
+                            "'.read-content','分卷阅读|订阅本卷',NULL);"
             )
             db?.execSQL(
                     "insert into $TABLE_PARSERULES values (2,'yunlaige.com','#contenttable'," +

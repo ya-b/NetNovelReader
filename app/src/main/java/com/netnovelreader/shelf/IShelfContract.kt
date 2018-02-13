@@ -14,7 +14,7 @@ interface IShelfContract {
     }
 
     interface IShelfViewModel : IViewModel<BookBean> {
-        fun updateBooks()
+        suspend fun updateBooks()
         suspend fun refreshBookList()
         suspend fun cancelUpdateFlag(bookname: String)
         suspend fun deleteBook(bookname: String)

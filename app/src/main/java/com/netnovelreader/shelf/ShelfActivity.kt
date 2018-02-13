@@ -30,6 +30,7 @@ import com.netnovelreader.reader.ReaderActivity
 import com.netnovelreader.search.SearchActivity
 import kotlinx.android.synthetic.main.activity_shelf.*
 import kotlinx.android.synthetic.main.item_shelf.view.*
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 
 class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
@@ -39,6 +40,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     private var hasPermission = false
     private var isFragmentShow = false
     private var settingFragment: SettingFragment? = null
+    var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PreferenceManager.setTheme(this)
@@ -74,7 +76,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
         var time = System.currentTimeMillis()
         shelf_layout.setOnRefreshListener {
             if (System.currentTimeMillis() - time > 2000) {
-                shelfViewModel!!.updateBooks()
+                job = launch { shelfViewModel!!.updateBooks() }
             }
             time = System.currentTimeMillis()
             shelf_layout.isRefreshing = false
@@ -89,7 +91,9 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
 
     override fun onDestroy() {
         super.onDestroy()
+        job?.cancel()
         shelfViewModel?.bookList?.removeOnListChangedCallback(arrayListChangeListener)
+        shelfViewModel?.bookList?.forEach { it.bitmap.get()?.recycle() }
         shelfViewModel = null
         SQLHelper.closeDB()
     }

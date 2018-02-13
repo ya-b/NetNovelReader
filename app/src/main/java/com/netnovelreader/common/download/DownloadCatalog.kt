@@ -39,7 +39,6 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
                     "'$latestChapter',${SQLHelper.ISUPDATE}='$UPDATEFLAG' where ${SQLHelper.ID}=" +
                     "${tableName2Id(tableName)};"
         )
-        CatalogCache.clearCache()
     }
 
     /**

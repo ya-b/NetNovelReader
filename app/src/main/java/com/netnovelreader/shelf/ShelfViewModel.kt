@@ -25,7 +25,7 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
     var bookList = ObservableArrayList<BookBean>()
 
     //检查书籍是否有更新
-    override fun updateBooks() {
+    override suspend fun updateBooks() {
         var i = 0
         bookList.forEach {
             updateCatalog(it, true).invokeOnCompletion {
