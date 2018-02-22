@@ -30,6 +30,7 @@ import com.netnovelreader.search.SearchActivity
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_reader.*
 import kotlinx.android.synthetic.main.item_catalog.view.*
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 
@@ -40,6 +41,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     var readerViewModel: ReaderViewModel? = null
     var dialog: AlertDialog? = null
     var netStateReceiver: NetChangeReceiver? = null
+    var deferred: Deferred<Boolean>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (PreferenceManager.isFullScreen(this)) {
@@ -48,7 +50,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
-        PreferenceManager.setTheme(this)
+        PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
         setViewModel(
             ReaderViewModel(
@@ -96,6 +98,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
 
     override fun onDestroy() {
         super.onDestroy()
+        deferred?.cancel()
         unregisterReceiver(netStateReceiver)
         if (PreferenceManager.isAutoRemove(this)) {
             launch { readerViewModel?.autoRemove() }
@@ -116,12 +119,15 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
     override fun doDrawPrepare() {
         launch(UI) {
             readerView.pageNum = readerViewModel?.initData()
-            readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, null)
+            readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, null)?.await()
                 .takeIf { it ?: true }
                 ?.apply {
                     loadingbar.show()
-                    readerViewModel?.downloadAndShow()
-                        ?.takeIf { it }?.run { loadingbar.hide() }
+                    deferred = readerViewModel!!.downloadAndShow()
+                    (deferred!!.await() && !readerViewModel!!.getChapter(
+                        ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, null
+                    ).await())
+                        .takeIf { it }?.run { loadingbar.hide() }
                 }
         }
     }
@@ -137,13 +143,17 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         if (loadingbar.isShown) loadingbar.hide()
         hideHeadFoot()
         launch(UI) {
-            readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.NEXT, null)
+            readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.NEXT, null)?.await()
                 .takeIf { it ?: true }
                 ?.apply {
                     loadingbar.show()
-                    readerViewModel?.downloadAndShow()
-                        ?.takeIf { it }?.run { loadingbar.hide() }
+                    deferred = readerViewModel!!.downloadAndShow()
+                    (deferred!!.await() && !readerViewModel!!.getChapter(
+                        ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, null
+                    ).await())
+                        .takeIf { it }?.run { loadingbar.hide() }
                 }
+            readerViewModel?.setRecord(readerViewModel?.chapterNum ?: 1, readerView.pageNum ?: 1)
         }
     }
 
@@ -151,13 +161,18 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
         if (loadingbar.isShown) loadingbar.hide()
         hideHeadFoot()
         launch(UI) {
-            readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.PREVIOUS, null)
+            readerViewModel?.getChapter(ReaderViewModel.CHAPTERCHANGE.PREVIOUS, null)?.await()
                 .takeIf { it != false }
                 ?.apply {
                     loadingbar.show()
-                    readerViewModel?.downloadAndShow()
-                        ?.takeIf { it }?.run { loadingbar.hide() }
+                    deferred = readerViewModel!!.downloadAndShow()
+                    (deferred!!.await() && !readerViewModel!!.getChapter(
+                        ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, null
+                    ).await())
+                        .takeIf { it }?.run { loadingbar.hide() }
                 }
+
+            readerViewModel?.setRecord(readerViewModel?.chapterNum ?: 1, readerView.pageNum ?: 1)
         }
     }
 
@@ -184,7 +199,7 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             )
             dialog = builder.setView(view).create()
         }
-        launch { readerViewModel?.updateCatalog() }
+        launch { readerViewModel?.getCatalog() }
         catalogView?.adapter?.notifyDataSetChanged()
         catalogView?.scrollToPosition(readerViewModel!!.chapterNum - 1)
         dialog?.show()
@@ -208,8 +223,16 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             if (isAvailable && loadingbar.isShown) {   //当网络变为连接状态，并且加载条显示时，下载章节内容
                 launch(UI) {
                     loadingbar.show()
-                    readerViewModel?.downloadAndShow()
-                        ?.takeIf { it }?.run { loadingbar.hide() }
+                    deferred = readerViewModel!!.downloadAndShow()
+                    (deferred!!.await() && !readerViewModel!!.getChapter(
+                        ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, null
+                    ).await())
+                        .takeIf { it }?.run { loadingbar.hide() }
+
+                    readerViewModel?.setRecord(
+                        readerViewModel?.chapterNum ?: 1,
+                        readerView.pageNum ?: 1
+                    )
                 }
             }
         }
@@ -222,13 +245,18 @@ class ReaderActivity : AppCompatActivity(), IReaderContract.IReaderView,
             launch(UI) {
                 readerViewModel?.getChapter(
                     ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, v.itemChapter.text.toString()
+                )?.await().takeIf { it != false }?.apply {
+                    loadingbar.show()
+                    deferred = readerViewModel!!.downloadAndShow()
+                    (deferred!!.await() && !readerViewModel!!.getChapter(
+                        ReaderViewModel.CHAPTERCHANGE.BY_CATALOG, null
+                    ).await())
+                        .takeIf { it }?.run { loadingbar.hide() }
+                }
+                readerViewModel?.setRecord(
+                    readerViewModel?.chapterNum ?: 1,
+                    readerView.pageNum ?: 1
                 )
-                    .takeIf { it != false }
-                    ?.apply {
-                        loadingbar.show()
-                        readerViewModel?.downloadAndShow()
-                            ?.takeIf { it }?.run { loadingbar.hide() }
-                    }
             }
             dialog?.dismiss()
         }

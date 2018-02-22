@@ -50,13 +50,11 @@ class DownloadService : IntentService {
         val tableName = intent?.getStringExtra("tableName")
         val catalogUrl = intent?.getStringExtra("catalogurl")
         if (intent == null || tableName.isNullOrEmpty() || catalogUrl.isNullOrEmpty()) return
-        DownloadTask(tableName!!, catalogUrl!!).getList().apply { max = this.size }   //获取要下载的章节列表
-            .forEach {
+        try {
+            DownloadTask(tableName!!, catalogUrl!!).getList().apply { max = this.size }.forEach {
+                //获取要下载的章节列表
                 launch(threadPool) {
-                    try {
-                        it.download(it.getChapterTxt())     //下载每一章
-                    } catch (e: IOException) {
-                    }
+                    it.download(it.getChapterTxt())     //下载每一章
                 }.invokeOnCompletion {
                     synchronized(IntentService::class.java) {
                         it?.apply { failed.incrementAndGet() } ?: progress.incrementAndGet()
@@ -65,6 +63,9 @@ class DownloadService : IntentService {
                     }
                 }
             }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
         lock.take()  //用阻塞队列阻塞住线程，一次只下载一本书
     }
 

@@ -1,7 +1,7 @@
 package com.netnovelreader.common.download
 
-import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.data.SQLHelper
+import com.netnovelreader.common.getSavePath
 import kotlinx.coroutines.experimental.launch
 import java.io.File
 import java.io.IOException
@@ -29,24 +29,25 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
     }
 
     fun getChapter(chapterNum: Int): String {
-        var result: String?
-        if (chapterTxtTable.containsKey(chapterNum)) {
-            result = chapterTxtTable.get(chapterNum)
+        try {
+            readToCache(chapterNum)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return if (chapterTxtTable.containsKey(chapterNum)) {
+            chapterTxtTable.get(chapterNum) ?: " |"+FILENOTFOUND
         } else {
             try {
-                result = getText(chapterNum, true)
-                val str = result.substring(result.indexOf("|") + 1)
-                if (!str.isEmpty() && str != FILENOTFOUND) {
-                    chapterTxtTable.put(chapterNum, result)
+                getText(chapterNum, true).apply {
+                    val str = this.substring(this.indexOf("|") + 1)
+                    if (!str.isEmpty() && str != FILENOTFOUND) {
+                        chapterTxtTable.put(chapterNum, this)
+                    }
                 }
             } catch (e: IOException) {
-                result = " |" + FILENOTFOUND
+                " |" + FILENOTFOUND
             }
         }
-        if (cacheNum != 0) {
-            readToCache(chapterNum)
-        }
-        return result ?: " |"+FILENOTFOUND
     }
 
     /**
@@ -60,7 +61,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         val chapterName = SQLHelper.getChapterName(dirName!!, chapterNum)
         sb.append(chapterName + "|")
         val chapterFile = File("${getSavePath()}/$dirName/$chapterName")
-        sb .append(
+        sb.append(
                 if (chapterFile.exists() && chapterFile.isFile) chapterFile.readText()
                 else if (isCurrentChapter) FILENOTFOUND
                 else getFromNet("${getSavePath()}/$dirName", chapterName)
@@ -71,35 +72,29 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
     /**
      * 从网络获取章节内容
      */
-    @Throws(IOException::class)
     fun getFromNet(dir: String, chapterName: String): String {
         if(dir.isEmpty() || chapterName.isEmpty()) return FILENOTFOUND
         val download = DownloadChapter(
             tableName, dir, chapterName,
             SQLHelper.getChapterUrl(tableName, chapterName)
         )
-        var chapterText: String? = null
-        try {
-            chapterText = download.getChapterTxt()
-            download.download(chapterText)
+        return try {
+            download.getChapterTxt().apply { download.download(this) }
         } catch (e: IOException) {
-            chapterText = FILENOTFOUND
-        } finally {
-            return chapterText ?: FILENOTFOUND
+            FILENOTFOUND
         }
     }
 
     /**
-     * 章节内容读到map里
+     * 读取章节内容到缓存里（不包括正在阅读的章节）
      */
     @Throws(IOException::class)
     private fun readToCache(chapterNum: Int) = launch {
+        if (cacheNum == 0) return@launch
         chapterTxtTable.filter { it.key + 1 < chapterNum || it.key - cacheNum > chapterNum || it.value.length == 0 }
             .forEach { chapterTxtTable.remove(it.key) }
-        if (chapterNum > 1) {
-            if (!chapterTxtTable.contains(chapterNum - 1)) {
-                chapterTxtTable.put(chapterNum - 1, getText(chapterNum - 1, false))
-            }
+        if (chapterNum > 1 && !chapterTxtTable.contains(chapterNum - 1)) {
+            chapterTxtTable.put(chapterNum - 1, getText(chapterNum - 1, false))
         }
         for (i in 1..cacheNum) {
             if (chapterNum + i <= maxChapterNum && !chapterTxtTable.contains(chapterNum + i)) {

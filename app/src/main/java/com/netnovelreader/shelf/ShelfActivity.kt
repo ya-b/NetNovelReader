@@ -2,7 +2,6 @@ package com.netnovelreader.shelf
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.app.Fragment
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -23,11 +22,10 @@ import com.netnovelreader.common.base.IClickEvent
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.toast
 import com.netnovelreader.databinding.ActivityShelfBinding
-import com.netnovelreader.editor.SiteEditorActivity
 import com.netnovelreader.novelCatagory.CatalogGridActivity
-import com.netnovelreader.novelCatagory.NovelCatalogDetailActivity
 import com.netnovelreader.reader.ReaderActivity
 import com.netnovelreader.search.SearchActivity
+import com.netnovelreader.setting.SettingActivity
 import kotlinx.android.synthetic.main.activity_shelf.*
 import kotlinx.android.synthetic.main.item_shelf.view.*
 import kotlinx.coroutines.experimental.Job
@@ -38,12 +36,11 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     var shelfViewModel: ShelfViewModel? = null
     private var arrayListChangeListener: ArrayListChangeListener<BookBean>? = null
     private var hasPermission = false
-    private var isFragmentShow = false
-    private var settingFragment: SettingFragment? = null
+    private var themeId = 0
     var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferenceManager.setTheme(this)
+        themeId = PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
         setViewModel(ShelfViewModel())
         hasPermission = checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -59,12 +56,10 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
     override fun setViewModel(vm: ShelfViewModel) {
         shelfViewModel = vm
         DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
-
-
     }
 
     override fun init() {
-        setSupportActionBar({ shelfToolbar.setTitle(R.string.shelf_activity_title); shelfToolbar }())
+        setSupportActionBar(shelfToolbar.apply { setTitle(R.string.shelf_activity_title) })
         shelfRecycler.layoutManager = LinearLayoutManager(this)
         shelfRecycler.itemAnimator = DefaultItemAnimator()
         val mAdapter =
@@ -80,6 +75,17 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
             }
             time = System.currentTimeMillis()
             shelf_layout.isRefreshing = false
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (themeId != PreferenceManager.getThemeId(this)) {
+            val intent = intent
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            finish()
+            overridePendingTransition(0, 0)
+            startActivity(intent)
         }
     }
 
@@ -119,20 +125,11 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
                 true
             }
             R.id.action_settings -> {
-                isFragmentShow = true
-                settingFragment = SettingFragment()
-                fragmentManager.beginTransaction().replace(R.id.shelfFrameLayout, settingFragment)
-                        .commit()
-                shelfToolbar.setTitle(R.string.settings)
-                shelfToolbar.setNavigationIcon(R.drawable.icon_back)
-                shelfToolbar.setNavigationOnClickListener {
-                    removeFragment(settingFragment)
-                }
-                findViewById<View>(R.id.search_button).visibility = View.INVISIBLE
+                startActivity(Intent(this, SettingActivity::class.java))
                 true
             }
             R.id.edit_site_preference -> {
-                startActivity(Intent(this, SiteEditorActivity::class.java))
+                startActivity(Intent(this, SettingActivity::class.java))
                 true
             }
             R.id.classfied->{
@@ -141,23 +138,6 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onBackPressed() {
-        if (isFragmentShow) {
-            removeFragment(settingFragment)  //退出设置页面
-        } else {
-            super.onBackPressed()
-        }
-    }
-
-    fun removeFragment(fragment: Fragment?) {
-        fragment ?: return
-        fragmentManager.beginTransaction().remove(fragment).commit()
-        shelfToolbar.setTitle(R.string.shelf_activity_title)
-        shelfToolbar.navigationIcon = null
-        findViewById<View>(R.id.search_button).visibility = View.VISIBLE
-        isFragmentShow = false
     }
 
     /**
@@ -196,6 +176,7 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
      */
     inner class ShelfClickEvent : IClickEvent {
         fun itemOnClick(v: View) {
+            job?.cancel()
             val bookname = v.nameView.text.toString()
             launch { shelfViewModel?.cancelUpdateFlag(bookname) }
             v.context.startActivity(Intent(v.context, ReaderActivity::class.java)
@@ -207,7 +188,6 @@ class ShelfActivity : AppCompatActivity(), IShelfContract.IShelfView {
                 if (which == Dialog.BUTTON_POSITIVE) {
                     launch {
                         shelfViewModel?.deleteBook(view.nameView.text.toString())
-                        shelfViewModel?.refreshBookList()
                     }
                 }
             }

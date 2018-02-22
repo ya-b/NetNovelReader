@@ -1,7 +1,6 @@
 package com.netnovelreader.common
 
 import android.content.Context
-import android.util.Log
 import com.netnovelreader.R
 
 /**
@@ -24,14 +23,14 @@ object PreferenceManager {
                 .getBoolean(context.getString(R.string.auto_remove_key), true)
     }
 
-    fun setTheme(context: Context) {
+    fun getThemeId(context: Context): Int {
         val color = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
             .getString(context.getString(R.string.themeKey), "black")
 
-        when (color) {
-            "blue" -> context.setTheme(R.style.AppThemeBlue)
-            "gray" -> context.setTheme(R.style.AppThemeGray)
-            else -> context.setTheme(R.style.AppThemeBlack)
+        return when (color) {
+            "blue" -> R.style.AppThemeBlue
+            "gray" -> R.style.AppThemeGray
+            else -> R.style.AppThemeBlack
         }
     }
 

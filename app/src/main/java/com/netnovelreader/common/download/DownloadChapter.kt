@@ -17,11 +17,10 @@ class DownloadChapter(
     @Throws(IOException::class)
     fun download(chapterText: String): Int {
         if (chapterText.isEmpty()) return 1
-        File(dir, chapterName).takeIf { !it.exists() }
-                ?.run {
-                    this.writeText(chapterText)
-                    SQLHelper.setChapterFinish(tablename, chapterName, chapterUrl, 1)
-                }
+        File(dir, chapterName).takeIf { !it.exists() }?.run {
+            writeText(chapterText)
+            SQLHelper.setChapterFinish(tablename, chapterName, chapterUrl, 1)
+        }
         return 1
     }
 

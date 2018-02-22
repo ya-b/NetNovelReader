@@ -16,7 +16,7 @@ object SQLHelper {
     var doTransaction = false
 
     fun getDB(): SQLiteDatabase {
-        db ?: synchronized(SQLHelper) {
+        db ?: synchronized(SQLHelper::class) {
             db ?: kotlin.run {
                 db = NovelSQLHelper(ReaderApplication.appContext, dbName, 1).writableDatabase
             }
@@ -25,8 +25,8 @@ object SQLHelper {
     }
 
     fun closeDB() {
-        synchronized(SQLHelper) {
-            if(doTransaction == false){
+        synchronized(SQLHelper::class) {
+            if (doTransaction == false) {
                 db?.close()
                 db = null
             }
@@ -36,17 +36,17 @@ object SQLHelper {
     //查询下载的所有书
     fun queryShelfBookList(): HashMap<Int, Array<String>> {
         val hashMap =
-                LinkedHashMap<Int, Array<String>>()  //key=id, Array=BOOKNAME,LATESTCHAPTER,DOWNLOADURL,ISUPDATE
+            LinkedHashMap<Int, Array<String>>()  //key=id, Array=BOOKNAME,LATESTCHAPTER,DOWNLOADURL,ISUPDATE
         val cursor =
-                getDB().rawQuery("select * from $TABLE_SHELF order by $LATESTREAD DESC;", null)
+            getDB().rawQuery("select * from $TABLE_SHELF order by $LATESTREAD DESC;", null)
         while (cursor.moveToNext()) {
             val array = arrayOf(
-                    cursor.getString(cursor.getColumnIndex(SQLHelper.BOOKNAME)),
-                    cursor.getString(cursor.getColumnIndex(SQLHelper.LATESTCHAPTER)),
-                    cursor.getString(cursor.getColumnIndex(SQLHelper.DOWNLOADURL)),
-                    cursor.getString(cursor.getColumnIndex(SQLHelper.ISUPDATE))
+                cursor.getString(cursor.getColumnIndex(BOOKNAME)),
+                cursor.getString(cursor.getColumnIndex(LATESTCHAPTER)),
+                cursor.getString(cursor.getColumnIndex(DOWNLOADURL)),
+                cursor.getString(cursor.getColumnIndex(ISUPDATE))
             )
-            hashMap.put(cursor.getInt(cursor.getColumnIndex(SQLHelper.ID)), array)
+            hashMap.put(cursor.getInt(cursor.getColumnIndex(ID)), array)
         }
         cursor.close()
         return hashMap
@@ -55,8 +55,8 @@ object SQLHelper {
     //添加书
     fun addBookToShelf(bookname: String, url: String): Int {
         val cursor = getDB().rawQuery(
-                "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
-                null
+            "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
+            null
         )
         val id = if (cursor.moveToFirst()) {
             cursor.getInt(0)
@@ -74,8 +74,8 @@ object SQLHelper {
     //删除书
     fun removeBookFromShelf(bookname: String): Int {
         val cursor = getDB().rawQuery(
-                "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
-                null
+            "select $ID from $TABLE_SHELF where $BOOKNAME='$bookname';",
+            null
         )
         var id = -1
         if (cursor.moveToFirst()) {
@@ -88,9 +88,9 @@ object SQLHelper {
 
     fun getBookId(bookname: String): Int {
         var id = 1
-        val cursor = SQLHelper.getDB().rawQuery(
-                "select ${SQLHelper.ID} from " +
-                        "${SQLHelper.TABLE_SHELF} where ${SQLHelper.BOOKNAME}='$bookname';", null
+        val cursor = getDB().rawQuery(
+            "select ${ID} from " +
+                    "${TABLE_SHELF} where ${BOOKNAME}='$bookname';", null
         )
         if (cursor.moveToFirst()) {
             id = cursor.getInt(0)
@@ -99,28 +99,56 @@ object SQLHelper {
         return id
     }
 
+    fun getCatalogUrl(bookname: String): String {
+        var url = ""
+        val cursor = getDB().rawQuery(
+            "select $DOWNLOADURL from $TABLE_SHELF where $BOOKNAME = " +
+                    "'$bookname';", null
+        )
+        if (cursor.moveToFirst()) {
+            url = cursor.getString(0)
+        }
+        cursor.close()
+        return url
+    }
+
     fun cancelUpdateFlag(bookname: String) {
         getDB().execSQL(
-                "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.ISUPDATE}='' where ${SQLHelper.BOOKNAME}='$bookname';"
+            "update ${TABLE_SHELF} set ${ISUPDATE}='' where ${BOOKNAME}='$bookname';"
         )
     }
 
     fun setLatestRead(bookname: String) {
-        var max = 0L
-        val cursor = getDB().rawQuery("select max($LATESTREAD) from $TABLE_SHELF", null)
+        getDB().execSQL(
+            "update $TABLE_SHELF set $LATESTREAD=(select max($LATESTREAD) " +
+                    "from $TABLE_SHELF) + 1 where $BOOKNAME='$bookname';"
+        )
+        val cursor = getDB().rawQuery("select min($LATESTREAD) from $TABLE_SHELF", null)
         if (cursor.moveToFirst()) {
-            max = cursor.getLong(0)
+            val min = cursor.getInt(0)
+            if (min > 0) {
+                getDB().execSQL(
+                    "update $TABLE_SHELF set $LATESTREAD=$LATESTREAD - " +
+                            "(select min($LATESTREAD) from $TABLE_SHELF);"
+                )
+            }
         }
         cursor.close()
-        getDB().execSQL("update $TABLE_SHELF set $LATESTREAD=${max + 1} where $BOOKNAME='$bookname';")
+    }
+
+    fun setLatestChapter(latestChapter: String?, id: String) {
+        latestChapter ?: return
+        getDB().execSQL(
+            "update $TABLE_SHELF set $LATESTCHAPTER='$latestChapter',$ISUPDATE='$UPDATEFLAG' where $ID=$id;"
+        )
     }
 
     //获取阅读记录
     fun getRecord(bookname: String): Array<String> {
         val result = Array(2) { "" }
         val cursor = getDB().rawQuery(
-                "select $ID,$READRECORD from $TABLE_SHELF where " +
-                        "$BOOKNAME='$bookname';", null
+            "select $ID,$READRECORD from $TABLE_SHELF where " +
+                    "$BOOKNAME='$bookname';", null
         )
         if (cursor.moveToFirst()) {
             result[0] = cursor.getString(0) ?: ""
@@ -150,8 +178,8 @@ object SQLHelper {
     fun getParseRule(hostname: String, field: String): String {
         var rule: String? = null
         val cursor = getDB().rawQuery(
-                "select $field from $TABLE_PARSERULES " +
-                        "where $HOSTNAME='$hostname';", null
+            "select $field from $TABLE_PARSERULES " +
+                    "where $HOSTNAME='$hostname';", null
         )
         if (cursor!!.moveToFirst()) {
             rule = cursor.getString(0)
@@ -162,21 +190,22 @@ object SQLHelper {
 
     //创建表，添加书的时侯用到，里面保存章节目录
     fun createTable(tableName: String) {
-        synchronized(SQLHelper) {
+        synchronized(SQLHelper::class) {
             getDB().execSQL(
-                    "create table if not exists $tableName ($ID " +
-                            "integer primary key unique,$CHAPTERNAME text unique, " +
-                            "$CHAPTERURL text, $ISDOWNLOADED var char(128));"
+                "create table if not exists $tableName ($ID " +
+                        "integer primary key unique,$CHAPTERNAME text unique, " +
+                        "$CHAPTERURL text, $ISDOWNLOADED var char(128));"
             )
         }
     }
 
 
     fun dropTable(tableName: String) {
-        synchronized(SQLHelper) {
+        synchronized(SQLHelper::class) {
             getDB().execSQL("drop table if exists $tableName;")
         }
     }
+
     //设置章节是否下载完成
     fun setChapterFinish(
         tableName: String,
@@ -185,8 +214,10 @@ object SQLHelper {
         isDownloadSuccess: Int
     ) {
         val getId = "(select $ID from $tableName where $CHAPTERNAME='$chaptername')"
-        getDB().execSQL("replace into $tableName ($ID, $CHAPTERNAME, $CHAPTERURL, $ISDOWNLOADED) " +
-                "values ($getId, '$chaptername', '$url', '$isDownloadSuccess')")
+        getDB().execSQL(
+            "replace into $tableName ($ID, $CHAPTERNAME, $CHAPTERURL, $ISDOWNLOADED) " +
+                    "values ($getId, '$chaptername', '$url', '$isDownloadSuccess')"
+        )
     }
 
     /**
@@ -196,9 +227,9 @@ object SQLHelper {
     fun getChapterNameAndUrl(tableName: String, isDownloaded: Int): LinkedHashMap<String, String> {
         val map = LinkedHashMap<String, String>()
         val cursor = getDB().rawQuery(
-                "select $CHAPTERNAME," +
-                        "$CHAPTERURL from $tableName where $ISDOWNLOADED=" +
-                        "'$isDownloaded';", null
+            "select $CHAPTERNAME," +
+                    "$CHAPTERURL from $tableName where $ISDOWNLOADED=" +
+                    "'$isDownloaded';", null
         )
         while (cursor.moveToNext()) {
             map.put(cursor.getString(0), cursor.getString(1))
@@ -210,7 +241,10 @@ object SQLHelper {
     //所有章节列表
     fun getAllChapter(tableName: String): ArrayList<String> {
         val arrayList = ArrayList<String>()
-        val cursor = getDB().rawQuery("select $CHAPTERNAME from $tableName;", null)
+        val cursor = getDB().rawQuery(
+            "select $CHAPTERNAME from $tableName order by ${SQLHelper.ID} asc;",
+            null
+        )
         while (cursor.moveToNext()) {
             arrayList.add(cursor.getString(0))
         }
@@ -222,8 +256,8 @@ object SQLHelper {
     fun getChapterName(tableName: String, id: Int): String {
         var chapterName: String? = null
         val cursor = getDB().rawQuery(
-                "select $CHAPTERNAME from $tableName where " +
-                        "$ID=$id;", null
+            "select $CHAPTERNAME from $tableName where " +
+                    "$ID=$id;", null
         )
         if (cursor.moveToFirst()) {
             chapterName = cursor.getString(0)
@@ -236,8 +270,8 @@ object SQLHelper {
     fun getChapterUrl(tableName: String, chapterName: String): String {
         var chapterUrl: String? = null
         val cursor = getDB().rawQuery(
-                "select $CHAPTERURL from $tableName where " +
-                        "$CHAPTERNAME='$chapterName';", null
+            "select $CHAPTERURL from $tableName where " +
+                    "$CHAPTERNAME='$chapterName';", null
         )
         if (cursor.moveToFirst()) {
             chapterUrl = cursor.getString(0)
@@ -249,8 +283,8 @@ object SQLHelper {
     fun getChapterId(tableName: String, chapterName: String): Int {
         var id = 1
         val cursor = getDB().rawQuery(
-                "select $ID from $tableName where " +
-                        "$CHAPTERNAME='$chapterName';", null
+            "select $ID from $tableName where " +
+                    "$CHAPTERNAME='$chapterName';", null
         )
         if (cursor.moveToFirst()) {
             id = cursor.getInt(0)
@@ -263,8 +297,8 @@ object SQLHelper {
     fun setReaded(tableName: String, id: Int): ArrayList<String> {
         val arrayList = ArrayList<String>()
         val cursor = getDB().rawQuery(
-                "select $CHAPTERNAME from $tableName where $ID<=$id " +
-                        "and $ISDOWNLOADED='1';", null
+            "select $CHAPTERNAME from $tableName where $ID<=$id " +
+                    "and $ISDOWNLOADED='1';", null
         )
         while (cursor.moveToNext()) {
             arrayList.add(cursor.getString(0))
@@ -279,7 +313,7 @@ object SQLHelper {
         val arrayList = ArrayList<String>()
         val id = getChapterId(tableName, chapterName)
         val cursor =
-                getDB().rawQuery("select $CHAPTERNAME from $tableName where $ID>=$id;", null)
+            getDB().rawQuery("select $CHAPTERNAME from $tableName where $ID>=$id;", null)
         while (cursor.moveToNext()) {
             arrayList.add(cursor.getString(0))
         }
@@ -350,10 +384,16 @@ object SQLHelper {
     val SEARCH_NAME = "searchname"
 
     class NovelSQLHelper(val context: Context, val name: String, val version: Int) :
-            SQLiteOpenHelper(context, name, null, version) {
+        SQLiteOpenHelper(context, name, null, version) {
 
         override fun onCreate(db: SQLiteDatabase?) {
-            initTable(db)
+            try {
+                db?.beginTransaction()
+                initTable(db)
+                db?.setTransactionSuccessful()
+            } finally {
+                db?.endTransaction()
+            }
         }
 
         override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -362,110 +402,80 @@ object SQLHelper {
 
         private fun initTable(db: SQLiteDatabase?) {
             db?.execSQL(
-                    "create table if not exists $TABLE_PARSERULES ($ID integer primary key," +
-                            "$HOSTNAME varchar(128) unique,$CATALOG_RULE text,$CHAPTER_RULE text," +
-                            "$CATALOG_FILTER varchar(128),$CHAPTER_FILTER text);"
+                "create table if not exists $TABLE_PARSERULES ($ID integer primary key," +
+                        "$HOSTNAME varchar(128) unique,$CATALOG_RULE text,$CHAPTER_RULE text," +
+                        "$CATALOG_FILTER varchar(128),$CHAPTER_FILTER text);"
             )
             db?.execSQL(
-                    "insert into $TABLE_PARSERULES values (1,'qidian.com','.volume-wrap'," +
-                            "'.read-content','分卷阅读|订阅本卷',NULL);"
+                "create table if not exists $TABLE_SEARCH ($ID integer primary key, " +
+                        "$SEARCH_HOSTNAME varchar(128) unique, $ISREDIRECT varchar(128), $SEARCHURL text, " +
+                        "$REDIRECTFILELD varchar(128), ${REDIRECTSELECTOR} varchar(128), $NOREDIRECTSELECTOR " +
+                        "varchar(128), $REDIRECTNAME varchar(128), $NOREDIRECTNAME varchar(128), " +
+                        "$SEARCHCHARSET varchar(128),$REDIRECTIMAGE text,$NOREDIRECTIMAGE text);"
             )
             db?.execSQL(
-                    "insert into $TABLE_PARSERULES values (2,'yunlaige.com','#contenttable'," +
-                            "'#content',NULL,NULL);"
+                "create table if not exists $TABLE_SHELF ($ID integer primary key, " +
+                        "$BOOKNAME varchar(128) unique, $READRECORD varchar(128), $DOWNLOADURL text, " +
+                        "$LATESTCHAPTER varchar(128), $ISUPDATE varchar(128), $LATESTREAD integer);"
             )
             db?.execSQL(
-                    "insert into $TABLE_PARSERULES values (3,'yssm.org','.chapterlist'," +
-                            "'#content',NULL,NULL);"
+                "insert into $TABLE_PARSERULES values " +
+                        "(1,'qidian.com','.volume-wrap','.read-content','分卷阅读|订阅本卷',NULL)," +
+                        "(2,'yunlaige.com','#contenttable','#content',NULL,NULL)," +
+                        "(3,'yssm.org','.chapterlist','#content',NULL,NULL)," +
+                        "(4,'b5200.net','#list > dl:nth-child(1)','#content',NULL,NULL)," +
+                        "(5,'shudaizi.org','#list > dl:nth-child(1)','#content',NULL,NULL)," +
+                        "(6,'81xsw.com','#list > dl:nth-child(1)','#content',NULL,NULL)," +
+                        "(7,'sqsxs.com','#list > dl:nth-child(1)','#content',NULL,NULL);"
             )
             db?.execSQL(
-                    "insert into $TABLE_PARSERULES values (4,'b5200.net','#list > dl:nth-child(1)'," +
-                            "'#content',NULL,NULL);"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_PARSERULES values (5,'shudaizi.org','#list > dl:nth-child(1)'," +
-                            "'#content',NULL,NULL);"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_PARSERULES values (6,'81xsw.com','#list > dl:nth-child(1)'," +
-                            "'#content',NULL,NULL);"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_PARSERULES values (7,'sqsxs.com','#list > dl:nth-child(1)'," +
-                            "'#content',NULL,NULL);"
-            )
-            db?.execSQL(
-                    "create table if not exists $TABLE_SEARCH ($ID integer primary key, " +
-                            "$SEARCH_HOSTNAME varchar(128) unique, $ISREDIRECT varchar(128), $SEARCHURL text, " +
-                            "$REDIRECTFILELD varchar(128), ${REDIRECTSELECTOR} varchar(128), $NOREDIRECTSELECTOR " +
-                            "varchar(128), $REDIRECTNAME varchar(128), $NOREDIRECTNAME varchar(128), " +
-                            "$SEARCHCHARSET varchar(128),$REDIRECTIMAGE text,$NOREDIRECTIMAGE text);"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_SEARCH values (1,'qidian.com','0'," +
-                            "'https://www.qidian.com/search/?kw=$SEARCH_NAME','',''," +
-                            "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)',''," +
-                            "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)'," +
-                            "'utf-8','','.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)');"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_SEARCH values (2,'yunlaige.com','1'," +
-                            "'http://www.yunlaige.com/modules/article/search.php?searchkey=$SEARCH_NAME&action=login&submit='," +
-                            "'location','.readnow'," +
-                            "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)'," +
-                            "'#content > div.book-info > div.info > h2 > a'," +
-                            "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)'," +
-                            "'gbk','','');"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_SEARCH values (3,'yssm.org','0'," +
-                            "'http://zhannei.baidu.com/cse/search?s=7295900583126281660&q=$SEARCH_NAME'," +
-                            "'',''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "'utf-8','','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)');"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_SEARCH values (4,'b5200.net','0'," +
-                            "'http://www.b5200.net/modules/article/search.php?searchkey=$SEARCH_NAME'," +
-                            "'',''," +
-                            "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
-                            "'utf-8','','');"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_SEARCH values (5,'shudaizi.org','0'," +
-                            "'http://zhannei.baidu.com/cse/search?q=$SEARCH_NAME&click=1&entry=1&s=16961354726626188066&nsid='," +
-                            "'',''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "'utf-8','','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)');"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_SEARCH values (6,'81xsw.com','0'," +
-                            "'http://zhannei.baidu.com/cse/search?s=16095493717575840686&q=$SEARCH_NAME'," +
-                            "'',''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "'utf-8','','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)');"
-            )
-            db?.execSQL(
-                    "insert into $TABLE_SEARCH values (7,'sqsxs.com','0'," +
-                            "'https://www.sqsxs.com/modules/article/search.php?searchkey=$SEARCH_NAME'," +
-                            "'',''," +
-                            "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
-                            "'gbk','','');"
-            )
-            db?.execSQL(
-                    "create table if not exists $TABLE_SHELF ($ID integer primary key, " +
-                            "$BOOKNAME varchar(128) unique, $READRECORD varchar(128), $DOWNLOADURL text, " +
-                            "$LATESTCHAPTER varchar(128), $ISUPDATE varchar(128), $LATESTREAD integer);"
+                "insert into $TABLE_SEARCH values (1,'qidian.com','0'," +
+                        "'https://www.qidian.com/search/?kw=$SEARCH_NAME','',''," +
+                        "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)',''," +
+                        "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)'," +
+                        "'utf-8','','.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)')," +
+                        "(2,'yunlaige.com','1'," +
+                        "'http://www.yunlaige.com/modules/article/search.php?searchkey=$SEARCH_NAME&action=login&submit='," +
+                        "'location','.readnow'," +
+                        "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)'," +
+                        "'#content > div.book-info > div.info > h2 > a'," +
+                        "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)'," +
+                        "'gbk','','')," +
+                        "(3,'yssm.org','0'," +
+                        "'http://zhannei.baidu.com/cse/search?s=7295900583126281660&q=$SEARCH_NAME'," +
+                        "'',''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "'utf-8','','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)')," +
+                        "(4,'b5200.net','0'," +
+                        "'http://www.b5200.net/modules/article/search.php?searchkey=$SEARCH_NAME'," +
+                        "'',''," +
+                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
+                        "'utf-8','','')," +
+                        "(5,'shudaizi.org','0'," +
+                        "'http://zhannei.baidu.com/cse/search?q=$SEARCH_NAME&click=1&entry=1&s=16961354726626188066&nsid='," +
+                        "'',''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "'utf-8','','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)')," +
+                        "(6,'81xsw.com','0'," +
+                        "'http://zhannei.baidu.com/cse/search?s=16095493717575840686&q=$SEARCH_NAME'," +
+                        "'',''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "'utf-8','','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)')," +
+                        "(7,'sqsxs.com','0'," +
+                        "'https://www.sqsxs.com/modules/article/search.php?searchkey=$SEARCH_NAME'," +
+                        "'',''," +
+                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
+                        "'gbk','','');"
             )
         }
     }

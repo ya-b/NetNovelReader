@@ -25,13 +25,23 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
     var bookList = ObservableArrayList<BookBean>()
 
     //检查书籍是否有更新
+    @Synchronized
     override suspend fun updateBooks() {
-        var i = 0
         bookList.forEach {
-            updateCatalog(it, true).invokeOnCompletion {
-                synchronized(bookList) {
-                    (++i).takeIf { it > bookList.size - 1 || it % 3 == 0 }
-                        ?.run { launch { refreshBookList() } }
+            updateCatalog(it).invokeOnCompletion {
+                val bookMap = SQLHelper.queryShelfBookList()
+                bookList.forEach { bean ->
+                    val value = bookMap.get(bean.bookid.get())
+                    if (value != null) {       //如果该书在数据库里面，则更新该书状态，比如最新章节的变化
+                        value[0].takeIf { it != bean.bookname.get() }
+                            ?.apply { bean.bookname.set(this) }
+                        value[1].takeIf { it != bean.latestChapter.get() }
+                            ?.apply { bean.latestChapter.set(this) }
+                        value[2].takeIf { it != bean.downloadURL.get() }
+                            ?.apply { bean.downloadURL.set(this) }
+                        value[3].takeIf { it != bean.isUpdate.get() }
+                            ?.apply { bean.isUpdate.set(this) }
+                    }
                 }
             }
         }
@@ -47,24 +57,10 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
      * 刷新书架，重新读数据库（数据库有没有更新）
      */
     override suspend fun refreshBookList() {
+        bookList.clear()
         val bookDirList = dirBookList()
         val bookMap = SQLHelper.queryShelfBookList()   //数据库里面的所有书
-        val willDel = ArrayList<BookBean>()
-        bookList.forEach { bean ->
-            val value = bookMap.get(bean.bookid.get())
-            if (value != null) {       //如果该书在数据库里面，则更新该书状态，比如最新章节的变化
-                value[0].takeIf { it != bean.bookname.get() }?.apply { bean.bookname.set(this) }
-                value[1].takeIf { it != bean.latestChapter.get() }
-                    ?.apply { bean.latestChapter.set(this) }
-                value[2].takeIf { it != bean.downloadURL.get() }
-                    ?.apply { bean.downloadURL.set(this) }
-                value[3].takeIf { it != bean.isUpdate.get() }?.apply { bean.isUpdate.set(this) }
-            } else {
-                willDel.add(bean) //如果该书不在数据库里面，则删除（删除书籍时调用）
-            }
-            bookMap.remove(bean.bookid.get())
-        }
-        willDel.apply { forEach { bookList.remove(it) } }.clear()
+        val temp = ArrayList<BookBean>()
         bookMap.forEach {
             val bookBean = BookBean(
                 ObservableInt(it.key),
@@ -75,13 +71,15 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
                 ObservableField(it.value[3])
             )
             if (bookDirList?.contains(id2TableName(bookBean.bookid.get())) == true) { //有没有新添加的书籍
-                willDel.add(bookBean)
-                updateCatalog(bookBean, false)
+                temp.add(bookBean)
+                if (SQLHelper.getChapterCount(id2TableName(bookBean.bookid.get())) == 0) {
+                    updateCatalog(bookBean)
+                }
             } else {
                 bookBean.bookname.get()?.run { deleteBook(this) }
             }
         }
-        bookList.addAll(willDel)
+        bookList.addAll(temp)
     }
 
     //删除书籍
@@ -89,6 +87,12 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
         SQLHelper.removeBookFromShelf(bookname).takeIf { it > -1 }?.apply {
             SQLHelper.dropTable(id2TableName(this))
             File(getSavePath(), id2TableName(this)).deleteRecursively()
+            for (i in 0 until bookList.size) {
+                if (bookList[i].bookname.get() == bookname) {
+                    bookList.removeAt(i)
+                    break
+                }
+            }
         }
     }
 
@@ -99,14 +103,12 @@ class ShelfViewModel : IShelfContract.IShelfViewModel {
      * @must  false时：判断[SQLHelper.getChapterCount]目录为空，则更新
      * 更新目录
      */
-    private fun updateCatalog(bookBean: BookBean, must: Boolean) = launch(threadPool) {
+    private fun updateCatalog(bookBean: BookBean) = launch(threadPool) {
         val tableName = id2TableName(bookBean.bookid.get())
-        if (must || SQLHelper.getChapterCount(tableName) == 0) {
-            try {
-                DownloadCatalog(tableName, bookBean.downloadURL.get() ?: "").download()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
+        try {
+            DownloadCatalog(tableName, bookBean.downloadURL.get() ?: "").download()
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
     }
 

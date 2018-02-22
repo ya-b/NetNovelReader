@@ -66,7 +66,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferenceManager.setTheme(this)
+        PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
         setViewModel(SearchViewModel())
         requestHotWords()
@@ -332,11 +332,13 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             val chapterName = intent.getStringExtra("chapterName")
             if (!chapterName.isNullOrEmpty()) {
                 searchViewModel?.delChapterAfterSrc(tableName, chapterName)
-                try{
-                    launch { DownloadCatalog(tableName, catalogUrl).download() }.join()
-                }catch (e: IOException){
-                    e.printStackTrace()
-                }
+                launch {
+                    try {
+                        DownloadCatalog(tableName, catalogUrl).download()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }.join()
             }
             val intent = Intent(context, DownloadService::class.java)
             intent.putExtra("tableName", tableName)

@@ -5,8 +5,10 @@ import android.databinding.ObservableField
 import com.netnovelreader.common.NotDeleteNum
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.download.ChapterCache
+import com.netnovelreader.common.download.DownloadCatalog
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.id2TableName
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
@@ -63,7 +65,8 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
     }.await()
 
     //获取章节内容
-    override suspend fun getChapter(type: CHAPTERCHANGE, chapterName: String?): Boolean = async {
+    override suspend fun getChapter(type: CHAPTERCHANGE, chapterName: String?): Deferred<Boolean> =
+        async {
         when (type) {
             CHAPTERCHANGE.NEXT -> if (chapterNum >= maxChapterNum) return@async false else chapterNum++
             CHAPTERCHANGE.PREVIOUS -> if (chapterNum < 2) return@async false else chapterNum--
@@ -71,15 +74,15 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
                 chapterNum = SQLHelper.getChapterId(tableName, chapterName)
             }
         }
-        launch { setRecord(chapterNum, 1) }
+            launch { if (chapterNum == maxChapterNum) updateCatalog() }
         val str = chapterCache.getChapter(chapterNum)
         text.set(str)
         this@ReaderViewModel.chapterName = str.substring(0, str.indexOf("|"))
         str.substring(str.indexOf("|") + 1) == ChapterCache.FILENOTFOUND
-    }.await()
+        }
 
     //下载并显示，阅读到未下载章节时调用
-    override suspend fun downloadAndShow(): Boolean = async {
+    override suspend fun downloadAndShow(): Deferred<Boolean> = async {
         var str = ChapterCache.FILENOTFOUND
         var times = 0
         while (str == ChapterCache.FILENOTFOUND && times++ < 10) {
@@ -89,9 +92,9 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
             )
             delay(500)
         }
-        !(str == ChapterCache.FILENOTFOUND || str.isEmpty())
-                && !(getChapter(CHAPTERCHANGE.BY_CATALOG, null))
-    }.await()
+        str != ChapterCache.FILENOTFOUND && str.isNotEmpty()
+
+    }
 
     /**
      * 保存阅读记录
@@ -106,18 +109,10 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
      * 重新读取目录
      */
     @Synchronized
-    override suspend fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog> = async {
+    override suspend fun getCatalog() {
         catalog.clear()
-        val catalogCursor = SQLHelper.getDB().rawQuery(
-            "select ${SQLHelper.CHAPTERNAME} from $tableName order by ${SQLHelper.ID} asc", null
-        )
-        while (catalogCursor.moveToNext()) {
-            catalog.add(ReaderBean.Catalog(catalogCursor.getString(0)))
-        }
-        catalogCursor.close()
-        catalog
-    }.await()
-
+        catalog.addAll(SQLHelper.getAllChapter(tableName).map { ReaderBean.Catalog(it) })
+    }
     /**
      * 自动删除已读章节，但保留最近[NotDeleteNum]章
      */
@@ -139,5 +134,10 @@ class ReaderViewModel(private val bookName: String, private val CACHE_NUM: Int) 
             .let { if (it.length < 1) "1#1" else it }
             .split("#")
         return IntArray(2) { i -> array[i].toInt() }
+    }
+
+    private fun updateCatalog() {
+        DownloadCatalog(tableName, SQLHelper.getCatalogUrl(bookName)).download()
+        maxChapterNum = SQLHelper.getChapterCount(tableName)
     }
 }

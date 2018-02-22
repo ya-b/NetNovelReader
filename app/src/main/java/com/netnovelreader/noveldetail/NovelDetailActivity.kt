@@ -2,15 +2,12 @@ package com.netnovelreader.noveldetail
 
 import android.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
-import com.netnovelreader.GlideApp
 import com.netnovelreader.R
 import com.netnovelreader.api.bean.NovelIntroduce
 import com.netnovelreader.common.PreferenceManager
 import com.netnovelreader.databinding.ActivityDetailBinding
-import com.orhanobut.logger.Logger
 import kotlinx.android.synthetic.main.activity_detail.*
 
 /**
@@ -20,7 +17,7 @@ import kotlinx.android.synthetic.main.activity_detail.*
  */
 class NovelDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferenceManager.setTheme(this)
+        PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
         val binding = DataBindingUtil.setContentView<ActivityDetailBinding>(this, R.layout.activity_detail)
         setSupportActionBar({ toolbar.title = "书籍详情";toolbar }())

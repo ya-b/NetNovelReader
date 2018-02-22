@@ -11,3 +11,9 @@
 .idea/kotlinc.xml
 .idea/shelf/
 app/libs/
+/.idea/checkstyle-idea.xml
+将删除 .idea/caches/
+将删除 .idea/codeStyles/
+将删除 hs_err_pid28773.log
+将删除 projectFilesBackup/
+将删除 replay_pid28773.log

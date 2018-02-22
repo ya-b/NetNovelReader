@@ -56,7 +56,11 @@ class SearchViewModel : ISearchContract.ISearchViewModel {
         SQLHelper.queryAllSearchSite().forEach {
             launch(threadPool) {
                 // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
-                searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
+                try {
+                    searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
             }
         }
     }

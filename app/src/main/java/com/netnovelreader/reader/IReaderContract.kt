@@ -1,8 +1,8 @@
 package com.netnovelreader.reader
 
-import android.databinding.ObservableArrayList
 import com.netnovelreader.common.base.IView
 import com.netnovelreader.common.base.IViewModel
+import kotlinx.coroutines.experimental.Deferred
 
 /**
  * Created by yangbo on 18-1-13.
@@ -14,9 +14,13 @@ interface IReaderContract {
 
     interface IReaderViewModel : IViewModel<ReaderBean> {
         suspend fun initData(): Int
-        suspend fun getChapter(type: ReaderViewModel.CHAPTERCHANGE, chapterName: String?): Boolean
-        suspend fun updateCatalog(): ObservableArrayList<ReaderBean.Catalog>
-        suspend fun downloadAndShow(): Boolean
+        suspend fun getChapter(
+            type: ReaderViewModel.CHAPTERCHANGE,
+            chapterName: String?
+        ): Deferred<Boolean>
+
+        suspend fun getCatalog()
+        suspend fun downloadAndShow(): Deferred<Boolean>
         suspend fun setRecord(chapterNum: Int, pageNum: Int)
         suspend fun autoRemove()
     }

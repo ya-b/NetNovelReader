@@ -21,7 +21,6 @@ import com.netnovelreader.common.PreferenceManager
 import com.netnovelreader.common.base.IClickEvent
 import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.databinding.ActivityCatalogGridBinding
-import com.orhanobut.logger.Logger
 import kotlinx.android.synthetic.main.activity_catalog_grid.*
 
 /**
@@ -36,7 +35,7 @@ class CatalogGridActivity : AppCompatActivity() {
     private var resultList: ObservableArrayList<NovelCatalog.Bean> = ObservableArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferenceManager.setTheme(this)
+        PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
         DataBindingUtil.setContentView<ActivityCatalogGridBinding>(this, R.layout.activity_catalog_grid)
 

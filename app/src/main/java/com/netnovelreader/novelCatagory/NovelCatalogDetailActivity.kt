@@ -29,7 +29,7 @@ class NovelCatalogDetailActivity : AppCompatActivity() {
     private var filterAdapter: BindingAdapter<FilterBean>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferenceManager.setTheme(this)
+        PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
 
 

@@ -1,6 +1,5 @@
 package com.netnovelreader.common.download
 
-import com.netnovelreader.common.UPDATEFLAG
 import com.netnovelreader.common.data.ParseHtml
 import com.netnovelreader.common.data.SQLHelper
 import com.netnovelreader.common.tableName2Id
@@ -19,26 +18,23 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     fun download() {
         SQLHelper.createTable(tableName)
         val cacheMap = CatalogCache.cache.get(catalogUrl)?.catalogMap
+        var map =
+            if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl)
+        map = filtExistsInSql(map)
         var latestChapter: String? = null
         try {
             SQLHelper.doTransaction = true
             SQLHelper.getDB().beginTransaction()
-            filtExistsInSql(if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
-                .forEach {
-                    SQLHelper.setChapterFinish(tableName, it.key, it.value, 0)
-                    latestChapter = it.key
-                }
+            map.forEach {
+                SQLHelper.setChapterFinish(tableName, it.key, it.value, 0)
+                latestChapter = it.key
+            }
             SQLHelper.getDB().setTransactionSuccessful()
         }finally {
             SQLHelper.getDB().endTransaction()
             SQLHelper.doTransaction = false
         }
-        latestChapter ?: return
-        SQLHelper.getDB().execSQL(
-            "update ${SQLHelper.TABLE_SHELF} set ${SQLHelper.LATESTCHAPTER}=" +
-                    "'$latestChapter',${SQLHelper.ISUPDATE}='$UPDATEFLAG' where ${SQLHelper.ID}=" +
-                    "${tableName2Id(tableName)};"
-        )
+        SQLHelper.setLatestChapter(latestChapter, tableName2Id(tableName))
     }
 
     /**
