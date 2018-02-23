@@ -26,7 +26,6 @@
 
 
     <string name="search_button">搜索</string>
-    <string name="title_activity_search">SearchActivity</string>
     <string name="catalog_finish">目录下载完成</string>
     <string name="downloadAllBook">下载所有未读章节</string>
     <string name="prepare_download">更新章节列表，准备下载中。。。</string>

@@ -1,9 +1,10 @@
 package com.netnovelreader.common
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Color
 import android.os.Environment
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.widget.Toast
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
@@ -47,29 +48,25 @@ fun tableName2Id(tableName: String): String = tableName.replace("BOOK", "")
 
 fun getHeaders(url: String): HashMap<String, String> {
     val map = HashMap<String, String>()
-    map.put("accept", "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-    map.put("user-agent", UA)
-    map.put("Upgrade-Insecure-Requests", "1")
-    map.put("Referer", "http://www.${url2Hostname(url)}/")
+    map["accept"] = "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    map["user-agent"] = UA
+    map["Upgrade-Insecure-Requests"] = "1"
+    map["Referer"] = "http://www.${url2Hostname(url)}/"
     return map
 }
 
 //对不合法url修复
 fun fixUrl(referenceUrl: String, fixUrl: String): String {
+    if (fixUrl.isEmpty()) return ""
     if (fixUrl.startsWith("http")) return fixUrl
     if (fixUrl.startsWith("//")) return "http:" + fixUrl
-    val arr = fixUrl.split("/")
-    if (arr.size < 2) return referenceUrl.substring(0, referenceUrl.lastIndexOf("/") + 1) + fixUrl
+    val str = if (fixUrl.startsWith("/")) fixUrl else "/" + fixUrl
+    val arr = str.split("/")
+    if (arr.size < 2) return referenceUrl.substring(0, referenceUrl.lastIndexOf("/")) + str
     if (referenceUrl.contains(arr[1]))
-        return referenceUrl.substring(0, referenceUrl.indexOf(arr[1]) - 1) + fixUrl
-    return referenceUrl.substring(0, referenceUrl.lastIndexOf("/")) + fixUrl
+        return referenceUrl.substring(0, referenceUrl.indexOf(arr[1]) - 1) + str
+    return referenceUrl.substring(0, referenceUrl.lastIndexOf("/")) + str
 }
-
-//默认书籍封面图片
-fun getDefaultCover(): Bitmap = Bitmap.createBitmap(
-    IntArray(45 * 60) { _ -> Color.parseColor("#7092bf") },
-    45, 60, Bitmap.Config.RGB_565
-)
 
 //简化书写
 fun Context.toast(message: String) = launch(UI) {
@@ -89,4 +86,16 @@ inline fun <T> Call<T>.enqueueCall(crossinline block: (t: T?) -> Unit) {
             block(response?.body())
         }
     })
+}
+
+fun <T> RecyclerView.init(
+    adapter: RecyclerAdapter<T>,
+    decor: RecyclerView.ItemDecoration? = NovelItemDecoration(this.context),
+    layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this.context),
+    animator: RecyclerView.ItemAnimator = DefaultItemAnimator()
+) {
+    this.layoutManager = layoutManager
+    this.adapter = adapter
+    this.itemAnimator = animator
+    if (decor != null) this.addItemDecoration(decor)
 }

@@ -26,7 +26,7 @@ class NovelItemDecoration(val context: Context) : RecyclerView.ItemDecoration() 
         val left = parent.left
         val right = parent.right
         val count = parent.childCount
-        for (i in 0..count - 1) {
+        for (i in 0 until count) {
             val child = parent.getChildAt(i)
             val params = child.layoutParams as RecyclerView.LayoutParams
             val top = child.bottom + params.bottomMargin

@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.netnovelreader.shelf.ShelfActivity">
+    tools:context="com.netnovelreader.ui.ShelfActivity">
     <item
         android:id="@+id/search_button"
         android:icon="@drawable/ic_search_white_24dp"
@@ -16,12 +16,12 @@
         android:id="@+id/edit_site_preference"
         android:orderInCategory="100"
         android:title="@string/edit_site"
-        app:showAsAction="never"/>
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/classfied"
         android:orderInCategory="100"
         android:title="分类"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
 
 </menu>

@@ -7,79 +7,51 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.shelf.BookBean" />
+            type="com.netnovelreader.bean.BookBean" />
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.shelf.ShelfActivity.ShelfClickEvent" />
+            type="com.netnovelreader.ui.ShelfActivity.ShelfClickEvent" />
     </data>
 
-<<<<<<< HEAD
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal">
-
-        <com.netnovelreader.shelf.BookCoverImage
-            android:id="@+id/bookCover"
-            android:layout_width="45dp"
-            android:layout_height="60dp"
-            android:layout_gravity="center_vertical"
-            android:text="@{itemDetail.bitmap}"/>
-
-        <android.support.constraint.ConstraintLayout
-            android:layout_width="0dp"
-=======
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="10dp"
+        android:layout_marginRight="8dp"
         app:cardCornerRadius="3dp"
         app:cardElevation="3dp">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
->>>>>>> b5b6b92... 新的书架UI界面
             android:layout_height="match_parent"
-            android:onClick="@{clickEvent::itemOnClick}"
-            android:onLongClick="@{clickEvent::itemOnLongClick}">
-<<<<<<< HEAD
-=======
+            android:onClick="@{(bookname) -> clickEvent.itemOnClick(itemDetail.bookname??``)}"
+            android:onLongClick="@{(bookname) -> clickEvent.itemOnLongClick(itemDetail.bookname??``)}">
 
-            <com.netnovelreader.shelf.BookCoverImage
+            <ImageView
                 android:id="@+id/bookCover"
                 android:layout_width="45dp"
                 android:layout_height="60dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginBottom="10dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
-                android:text="@{itemDetail.bitmap}"
+                android:layout_marginBottom="10dp"
+                android:layout_gravity="center_vertical"
+                android:src="@{itemDetail.bitmap}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
->>>>>>> b5b6b92... 新的书架UI界面
 
             <TextView
                 android:id="@+id/nameView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-<<<<<<< HEAD
                 android:text="@{itemDetail.bookname??``}"
                 android:textSize="24sp"
-                app:layout_constraintTop_toTopOf="parent"/>
-=======
-                android:layout_marginStart="16dp"
-                android:gravity="start"
-                android:text="@{itemDetail.bookname??``}"
-                android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/bookCover"
                 app:layout_constraintTop_toTopOf="@+id/bookCover"
                 tools:text="小说名称" />
->>>>>>> b5b6b92... 新的书架UI界面
 
             <TextView
                 android:id="@+id/latestChapter"
@@ -97,10 +69,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
                 android:text="@{itemDetail.isUpdate??``}"
                 android:textColor="@color/red"
                 android:textSize="12sp"

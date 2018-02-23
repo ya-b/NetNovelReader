@@ -7,7 +7,7 @@
 
         <variable
             name="catalog"
-            type="com.netnovelreader.api.bean.NovelCatalog" />
+            type="com.netnovelreader.bean.NovelCatalog" />
 
     </data>
 

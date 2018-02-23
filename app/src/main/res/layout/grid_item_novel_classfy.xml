@@ -8,17 +8,17 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.api.bean.NovelCatalog.Bean" />
+            type="com.netnovelreader.bean.NovelCatalog.Bean" />
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.novelCatagory.CatalogGridActivity.CatalogItemClick" />
+            type="com.netnovelreader.ui.CatalogGridActivity.CatalogItemClick" />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::onItemClick}">
+        android:onClick="@{(name) -> clickEvent.onItemClick(itemDetail.name)}">
 
         <TextView
             android:id="@+id/tvCatalog"
@@ -35,14 +35,14 @@
             android:id="@+id/tvBookCount"
             android:layout_width="wrap_content"
             android:layout_height="13dp"
-            android:layout_marginBottom="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
             android:text="@{itemDetail.bookCount}"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvCatalog"
+            app:layout_constraintTop_toBottomOf="@id/tvCatalog"
             tools:text="506637本" />
     </android.support.constraint.ConstraintLayout>
 </layout>

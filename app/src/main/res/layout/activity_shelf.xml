@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context="com.netnovelreader.shelf.ShelfActivity">
+        tools:context="com.netnovelreader.ui.ShelfActivity">
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/mtoolbar"
@@ -24,7 +24,8 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
                 app:layout_scrollFlags="scroll"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:title="@string/shelf_activity_title" />
 
         </android.support.design.widget.AppBarLayout>
 

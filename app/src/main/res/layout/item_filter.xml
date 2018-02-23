@@ -9,28 +9,28 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.novelCatagory.FilterBean" />
+            type="com.netnovelreader.bean.FilterBean" />
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.novelCatagory.NovelCatalogDetailActivity.FilterNovelItemClickListener" />
+            type="com.netnovelreader.ui.NovelCatalogDetailActivity.FilterNovelItemClickListener" />
     </data>
 
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::onItemClick}">
+        android:onClick="@{(bean) -> clickEvent.onItemClick(itemDetail)}">
 
         <TextView
             android:id="@+id/filterName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             android:text="@{itemDetail.minorType}"
-            android:textColor='@{itemDetail.selected ? @color/filter : @color/black}'
+            android:textColor='@{safeUnbox(itemDetail.selected) ? @color/filter : @color/black}'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -41,9 +41,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
-            android:visibility="@{itemDetail.selected ? View.VISIBLE : View.GONE}"
+            android:visibility="@{safeUnbox(itemDetail.selected) ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/filterName"
+            app:layout_constraintTop_toTopOf="@id/filterName"
             app:srcCompat="@drawable/check" />
     </android.support.constraint.ConstraintLayout>
 

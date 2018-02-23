@@ -20,7 +20,7 @@ object PreferenceManager {
 
     fun isAutoRemove(context: Context): Boolean {
         return context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-                .getBoolean(context.getString(R.string.auto_remove_key), true)
+            .getBoolean(context.getString(R.string.auto_remove_key), true)
     }
 
     fun getThemeId(context: Context): Int {

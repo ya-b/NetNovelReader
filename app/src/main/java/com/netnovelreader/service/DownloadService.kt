@@ -6,9 +6,9 @@ import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication.Companion.threadPool
-import com.netnovelreader.common.data.SQLHelper
-import com.netnovelreader.common.download.DownloadTask
 import com.netnovelreader.common.toast
+import com.netnovelreader.data.db.ReaderDbManager
+import com.netnovelreader.data.network.DownloadTask
 import kotlinx.coroutines.experimental.launch
 import java.io.IOException
 import java.util.concurrent.LinkedBlockingQueue
@@ -75,14 +75,14 @@ class DownloadService : IntentService {
         if (failed.get() > 0) {
             toast(getString(R.string.downloadfailed).replace("nn", "$failed"))
         }
-        SQLHelper.closeDB()
+        ReaderDbManager.closeDB()
     }
 
     private fun openNotification() {
         builder = NotificationCompat.Builder(this, "reader")
             .setTicker(getString(R.string.app_name))
             .setContentTitle(getString(R.string.prepare_download))
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.drawable.notification_icon)
         mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
@@ -91,7 +91,7 @@ class DownloadService : IntentService {
         val str = if (remainder != 0) ",${getString(R.string.wait4download)}"
             .replace("nn", "$remainder") else ""
         builder?.setProgress(max, progress, false)
-            ?.setContentTitle("${getString(R.string.downloading)}:${progress}/$max$str")
+            ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
 }

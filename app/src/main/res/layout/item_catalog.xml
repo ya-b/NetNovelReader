@@ -5,27 +5,27 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.reader.ReaderBean.Catalog" />
+            type="com.netnovelreader.bean.ReaderBean" />
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.reader.ReaderActivity.CatalogItemClickListener" />
+            type="com.netnovelreader.ui.ReaderActivity.CatalogItemClickListener" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
-        android:onClick="@{clickEvent::onChapterClick}"
+        android:onClick="@{(chapterName) -> clickEvent.onChapterClick(itemDetail.catalogItem)}"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/itemChapter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            android:layout_marginLeft="15dp"
+            android:layout_marginStart="15dp"
             android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
             android:text="@{itemDetail.catalogItem??``}"
             android:textSize="13sp" />
 

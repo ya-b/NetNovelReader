@@ -7,7 +7,7 @@
 
         <variable
             name="detail"
-            type="com.netnovelreader.api.bean.NovelIntroduce" />
+            type="com.netnovelreader.bean.NovelIntroduce" />
 
     </data>
 
@@ -17,7 +17,7 @@
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             tools:background="#e6e6e6">
 
@@ -43,16 +43,16 @@
 
             </android.support.design.widget.AppBarLayout>
 
-            <com.netnovelreader.shelf.BookCoverImage
+            <ImageView
                 android:id="@+id/novelCover"
                 android:layout_width="60dp"
                 android:layout_height="80dp"
-                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
+                android:src="@{detail.cover}"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/appBarLayout2"
-                app:url="@{detail.cover}"
-                tools:background="@drawable/ic_launcher_background" />
+                tools:background="@drawable/notification_icon" />
 
             <TextView
                 android:id="@+id/novelName"
@@ -116,9 +116,9 @@
                 android:id="@+id/divide1"
                 android:layout_width="0dp"
                 android:layout_height="0.5dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
                 android:background="@color/text_gray"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -275,9 +275,9 @@
                 android:id="@+id/divide3"
                 android:layout_width="0dp"
                 android:layout_height="0.5dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
                 android:background="@color/text_gray"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

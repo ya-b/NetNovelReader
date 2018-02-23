@@ -11,14 +11,14 @@
     <SwitchPreference
         android:defaultValue="true"
         android:key="@string/auto_remove_key"
-        android:title="@string/auto_remove"
-        android:summary="@string/auto_remove_summary"/>
+        android:summary="@string/auto_remove_summary"
+        android:title="@string/auto_remove" />
     <ListPreference
         android:entries="@array/rowspace"
         android:entryValues="@array/rowspace_values"
         android:key="@string/rowspaceKey"
-        android:title="@string/rowspace"
-        android:summary="@string/rowspace_summary"/>
+        android:summary="@string/rowspace_summary"
+        android:title="@string/rowspace" />
     <ListPreference
         android:entries="@array/themes"
         android:entryValues="@array/themes_values"

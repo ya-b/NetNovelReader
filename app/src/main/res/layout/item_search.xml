@@ -7,17 +7,17 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.search.SearchBean" />
+            type="com.netnovelreader.bean.SearchBean" />
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.search.SearchActivity.SearchItemClickEvent" />
+            type="com.netnovelreader.ui.SearchActivity.SearchItemClickEvent" />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::onClickDetail}"
+        android:onClick="@{(itemText) -> clickEvent.onClickDetail(itemDetail.bookname??``)}"
         tools:background="@color/white">
 
         <TextView
@@ -40,16 +40,16 @@
             android:text="@{itemDetail.latestChapter??``}"
             android:textAllCaps="false"
             android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="@+id/resultName"
-            app:layout_constraintTop_toBottomOf="@+id/resultName"
+            app:layout_constraintStart_toStartOf="@id/resultName"
+            app:layout_constraintTop_toBottomOf="@id/resultName"
             tools:text="最新章节" />
 
         <TextView
             android:id="@+id/resultUrl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:text="@{itemDetail.url??``}"
             android:textAllCaps="false"
             android:textSize="12sp"
@@ -63,11 +63,11 @@
             android:id="@+id/downloadButton"
             android:layout_width="60dp"
             android:layout_height="30dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
             android:background="@color/hot_label_bg3"
             android:gravity="center"
-            android:onClick="@{clickEvent::onClickDownload}"
+            android:onClick="@{(searchBean) -> clickEvent.onClickDownload(itemDetail)}"
             android:paddingBottom="6dp"
             android:paddingEnd="16dp"
             android:paddingLeft="16dp"
@@ -78,8 +78,7 @@
             android:textColor="@color/cardview_light_background"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/resultName" />
-
+            app:layout_constraintTop_toBottomOf="@id/resultName" />
 
 
     </android.support.constraint.ConstraintLayout>

@@ -8,29 +8,29 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.api.bean.NovelList.BooksBean" />
+            type="com.netnovelreader.bean.NovelList.BooksBean" />
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.novelCatagory.NovelListFragment.NovelListItemClickEvent" />
+            type="com.netnovelreader.ui.NovelListFragment.NovelListItemClickEvent" />
     </data>
 
     <android.support.constraint.ConstraintLayout
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{clickEvent::onClickDetail}">
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:onClick="@{(id) -> clickEvent.onClickDetail(itemDetail._id)}">
 
-        <com.netnovelreader.shelf.BookCoverImage
+        <ImageView
             android:id="@+id/imageView3"
             android:layout_width="55dp"
             android:layout_height="70dp"
             android:layout_marginStart="12dp"
             android:layout_marginTop="12dp"
+            android:src="@{itemDetail.cover}"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:url="@{itemDetail.cover}" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/title"
@@ -68,9 +68,9 @@
             android:id="@+id/shortIntro"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
             android:lines="1"
             android:singleLine="true"
             android:text="@{itemDetail.shortIntro}"
