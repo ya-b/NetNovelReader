@@ -9,17 +9,20 @@ import android.view.ViewGroup
 
 import com.netnovelreader.BR
 import com.netnovelreader.interfaces.IClickEvent
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 
 /**
  * Created by yangbo on 18-1-12.
  */
 
 class RecyclerAdapter<T>(
-        private var itemDetails: ObservableArrayList<T>?,
-        private val resId: Int,
-        val clickEvent: IClickEvent?
+    private var itemDetails: ObservableArrayList<T>?,
+    private val resId: Int,
+    val clickEvent: IClickEvent?
 ) : RecyclerView.Adapter<RecyclerAdapter.BindingViewHolder<T>>() {
-    val listener: ArrayListChangeListener<T> = ArrayListChangeListener { this.notifyDataSetChanged() }
+    val listener: ArrayListChangeListener<T> =
+        ArrayListChangeListener { launch(UI) { this@RecyclerAdapter.notifyDataSetChanged() } }
 
     init {
         itemDetails?.addOnListChangedCallback(listener)
@@ -27,8 +30,8 @@ class RecyclerAdapter<T>(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<T> {
         val binding = DataBindingUtil.inflate<ViewDataBinding>(
-                LayoutInflater.from(parent.context),
-                resId, parent, false
+            LayoutInflater.from(parent.context),
+            resId, parent, false
         )
         return BindingViewHolder(binding)
     }
@@ -47,7 +50,7 @@ class RecyclerAdapter<T>(
     }
 
     class BindingViewHolder<in T>(private val binding: ViewDataBinding) :
-            RecyclerView.ViewHolder(binding.root) {
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(itemData: T?, clickEvent: IClickEvent?) {
             binding.setVariable(BR.itemDetail, itemData)
             binding.setVariable(BR.clickEvent, clickEvent)

@@ -88,10 +88,11 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
     }
 
     private fun changeSource() {
+        searchViewModel?.isChangeSource?.set(true)
         val bookname = intent.getStringExtra("bookname")
         searchViewText.text = bookname
         launch {
-            searchViewModel?.searchBook(bookname)
+            searchViewModel?.searchBook(bookname, intent.getStringExtra("chapterName"))
         }
     }
 
@@ -101,7 +102,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         override fun onQueryTextSubmit(query: String): Boolean {
             launch {
                 job?.cancel()
-                job = launch { searchViewModel?.searchBook(query) }
+                job = launch { searchViewModel?.searchBook(query, null) }
             }
             searchViewBar.clearFocus()                    //提交搜索commit后收起键盘
             return true
@@ -109,6 +110,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
 
         override fun onQueryTextChange(newText: String?): Boolean {
             launch(UI) {
+                if (searchViewBar.visibility != View.VISIBLE) return@launch
                 deffered?.cancel()
                 deffered = async { searchViewModel?.onQueryTextChange(newText) }
                 suggestCursor = deffered?.await()
@@ -133,7 +135,7 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
         override fun onSuggestionClick(position: Int): Boolean {
             if (suggestCursor?.moveToPosition(position) == true) {
                 searchViewBar.setQuery(suggestCursor?.getString(0), true)
-                job = launch { searchViewModel?.searchBook(suggestCursor?.getString(0)) }
+                job = launch { searchViewModel?.searchBook(suggestCursor?.getString(0), null) }
             }
             return true
         }

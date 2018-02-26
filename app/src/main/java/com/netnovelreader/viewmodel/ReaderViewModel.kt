@@ -58,7 +58,7 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
     var maxChapterNum = 0
 
     private var tableName = ""
-    lateinit var chapterCache: ChapterCache
+    var chapterCache: ChapterCache? = null
 
     private lateinit var bookName: String
     private var CACHE_NUM: Int = 0
@@ -88,7 +88,7 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
         }
         isLoading.set(true)
         launch { if (chapterNum == maxChapterNum) updateCatalog() }
-        val str = chapterCache.getChapter(chapterNum, false)
+        val str = chapterCache!!.getChapter(chapterNum, false)
         text.set(str)
         this.chapterName = str.substring(0, str.indexOf("|"))
         if (str.substring(str.indexOf("|") + 1) == ChapterCache.FILENOTFOUND) {
@@ -100,10 +100,11 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
 
     //下载并显示，阅读到未下载章节时调用
     override suspend fun downloadAndShow() {
+        chapterCache ?: return
         var str = ChapterCache.FILENOTFOUND
         var times = 0
         while (str == ChapterCache.FILENOTFOUND && times++ < 10) {
-            str = chapterCache.getChapter(chapterNum)
+            str = chapterCache!!.getChapter(chapterNum)
             delay(500)
         }
         if (str != ChapterCache.FILENOTFOUND && str.isNotEmpty()) {
@@ -112,11 +113,17 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
         }
     }
 
+    override suspend fun reloadCurrentChapter() {
+        chapterCache ?: return
+        chapterCache!!.clearCache()
+        getChapter(CHAPTERCHANGE.BY_CATALOG, null)
+    }
+
     /**
      * 保存阅读记录
      */
     @Synchronized
-    override suspend fun setRecord(chapterNum: Int, pageNum: Int) {
+    override suspend fun setRecord(pageNum: Int) {
         if (chapterNum < 1) return
         ReaderDbManager.setRecord(bookName, "$chapterNum#${if (pageNum < 1) 1 else pageNum}")
     }

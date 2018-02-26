@@ -42,8 +42,8 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context),
             value = ObservableArrayList(); value!!
         }
     }
-    val isChangeSource = ObservableBoolean(false)                                         //是否为换源下载
-    val showSearchSuggest = ObservableBoolean(false)                                      //是否显示搜索建议
+    val isChangeSource =
+        ObservableBoolean(false)                                          //是否显示搜索建议
     val showHotWord = ObservableBoolean(false)                                            //是否显示搜索热词
     val searchHotWords = Array<ObservableField<String>>(10) { ObservableField("") }  //显示的搜索热词
     val colors = Array(10) { ObservableInt(R.color.hot_label_bg1) }        //显示的搜索热词颜色
@@ -100,18 +100,15 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context),
         resultList.clear()
         return if (newText!!.isEmpty()) {
             showHotWord.set(true)
-            showSearchSuggest.set(false)
             null
         } else {
             showHotWord.set(false)
-            showSearchSuggest.set(true)
             searchBookSuggest(newText)
         }
     }
 
-    override suspend fun searchBook(bookname: String?) {
+    override suspend fun searchBook(bookname: String?, chapterName: String?) {
         showHotWord.set(false)
-        showSearchSuggest.set(false)
         if (queryText == bookname && System.currentTimeMillis() - queryTime < 1000) return
         bookname ?: return
         searchCode++
@@ -121,7 +118,12 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context),
             launch(threadPool) {
                 // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
                 try {
-                    searchBookFromSite(bookname, it, searchCode)      //查询所有搜索站点设置，然后逐个搜索
+                    searchBookFromSite(
+                        bookname,
+                        it,
+                        searchCode,
+                        chapterName
+                    )      //查询所有搜索站点设置，然后逐个搜索
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
@@ -172,14 +174,14 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context),
      * 在搜索框输入过程中匹配一些输入项并提示
      */
     private fun searchBookSuggest(queryText: String): Cursor? {
-        return try{
-            val suggestCursor = MatrixCursor(arrayOf("text","_id"))
+        return try {
+            val suggestCursor = MatrixCursor(arrayOf("text", "_id"))
             ApiManager.mAPI.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
-                    .execute().body()?.keywords?.filter { it.tag == "bookname" }
-                    ?.map { it.text }?.toHashSet()
-                    ?.forEachIndexed { index, s -> suggestCursor.addRow(arrayOf(s, index)) }
+                .execute().body()?.keywords?.filter { it.tag == "bookname" }
+                ?.map { it.text }?.toHashSet()
+                ?.forEachIndexed { index, s -> suggestCursor.addRow(arrayOf(s, index)) }
             suggestCursor
-        }catch (e: IOException){
+        } catch (e: IOException) {
             null
         }
     }
@@ -189,7 +191,8 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context),
     private fun searchBookFromSite(
         bookname: String,
         siteinfo: Array<String?>,
-        reqCode: Int
+        reqCode: Int,
+        chapterName: String?
     ) {
         val result = SearchBook().search(
             siteinfo[1]!!.replace(
@@ -208,7 +211,9 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context),
             CatalogCache.addCatalog(result[1], result[0])
             val bean = CatalogCache.cache[result[0]]
             if (bean != null && !bean.url.get().isNullOrEmpty() && !bean.latestChapter.get().isNullOrEmpty()) {
-                resultList.add(bean)
+                if (chapterName.isNullOrEmpty() || bean.catalogMap.containsKey(chapterName)) {
+                    resultList.add(bean)
+                }
             }
             launch { downloadImage(result[1], result[2]) }           //下载书籍封面图片
         }

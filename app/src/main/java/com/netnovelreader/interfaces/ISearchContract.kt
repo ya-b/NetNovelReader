@@ -12,7 +12,7 @@ interface ISearchContract {
     interface ISearchViewModel : IViewModel {
         fun onQueryTextChange(newText: String?): Cursor?
         fun refreshHotWords(): Job
-        suspend fun searchBook(bookname: String?)
+        suspend fun searchBook(bookname: String?, chapterName: String?)
         suspend fun detailClick(itemText: String): NovelIntroduce?
         suspend fun downloadCatalog(
             bookname: String,

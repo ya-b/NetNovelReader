@@ -51,6 +51,10 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         }
     }
 
+    fun clearCache() {
+        chapterTxtTable.clear()
+    }
+
     /**
      * 获取小说章节内容
      * @chapterNum:Int 章节数

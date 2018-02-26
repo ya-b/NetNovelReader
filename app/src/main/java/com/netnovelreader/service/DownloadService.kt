@@ -6,10 +6,13 @@ import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication.Companion.threadPool
+import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.toast
 import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.network.DownloadTask
+import com.netnovelreader.data.network.DownloadCatalog
+import com.netnovelreader.data.network.DownloadChapter
 import kotlinx.coroutines.experimental.launch
+import java.io.File
 import java.io.IOException
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
@@ -51,7 +54,7 @@ class DownloadService : IntentService {
         val catalogUrl = intent?.getStringExtra("catalogurl")
         if (intent == null || tableName.isNullOrEmpty() || catalogUrl.isNullOrEmpty()) return
         try {
-            DownloadTask(tableName!!, catalogUrl!!).getList().apply { max = this.size }.forEach {
+            getList(tableName!!, catalogUrl!!).apply { max = this.size }.forEach {
                 //获取要下载的章节列表
                 launch(threadPool) {
                     it.download(it.getChapterTxt())     //下载每一章
@@ -93,5 +96,20 @@ class DownloadService : IntentService {
         builder?.setProgress(max, progress, false)
             ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
         mNotificationManager?.notify(NOTIFYID, builder?.build())
+    }
+
+    @Throws(IOException::class)
+    fun getList(tableName: String, url: String): ArrayList<DownloadChapter> {
+        DownloadCatalog(tableName, url).download()
+        val runnables = ArrayList<DownloadChapter>()
+        ReaderDbManager.getChapterNameAndUrl(tableName, 0).forEach {
+            runnables.add(
+                DownloadChapter(
+                    tableName,
+                    "${getSavePath()}/$tableName".apply { File(this).mkdirs() }, it.key, it.value
+                )
+            )
+        }
+        return runnables
     }
 }

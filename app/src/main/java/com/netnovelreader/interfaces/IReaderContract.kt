@@ -16,10 +16,10 @@ interface IReaderContract {
             type: ReaderViewModel.CHAPTERCHANGE,
             chapterName: String?
         )
-
         suspend fun downloadAndShow()
+        suspend fun reloadCurrentChapter()
         suspend fun getCatalog()
-        suspend fun setRecord(chapterNum: Int, pageNum: Int)
+        suspend fun setRecord(pageNum: Int)
         suspend fun autoRemove()
     }
 }
