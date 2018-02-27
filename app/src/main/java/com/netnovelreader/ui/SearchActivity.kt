@@ -179,18 +179,14 @@ class SearchActivity : AppCompatActivity(), ISearchContract.ISearchView {
             val listener = DialogInterface.OnClickListener { _, which ->
                 launch(UI) {
                     val str = async {
-                        searchViewModel!!.downloadCatalog(
+                        searchViewModel!!.downloadBook(
                                 itemDetail.bookname.get() ?: "",
                                 itemDetail.url.get() ?: "",
                                 intent.getStringExtra("chapterName"), which
                         )
                     }.await()
-                    if (str == "0") {
-                        toast(getString(R.string.downloadFailed))
-                        return@launch
-                    }
                     toast(getString(R.string.catalog_finish))
-                    if (str != "1") {
+                    if (!str.isNullOrEmpty()) {
                         val intent = Intent(this@SearchActivity, DownloadService::class.java)
                         intent.putExtra("tableName", str)
                         intent.putExtra("catalogurl", itemDetail.url.get() ?: "")

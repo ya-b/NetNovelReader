@@ -16,16 +16,17 @@ data class QuerySuggest(
  * ok : true
  */
 
-
-data class KeywordsBean(
-    var text: String? = null,
-    var tag: String? = null,
-    var contentType: String? = null
-)
-/**
- * text : 腹黑
- * tag : tag
- * contentType : txt
- * id : 5836323138bcc1c615e5832b
- * author : 寻找失落的爱情
- */
+{
+    data class KeywordsBean(
+            var text: String? = null,
+            var tag: String? = null,
+            var contentType: String? = null
+    )
+    /**
+     * text : 腹黑
+     * tag : tag
+     * contentType : txt
+     * id : 5836323138bcc1c615e5832b
+     * author : 寻找失落的爱情
+     */
+}

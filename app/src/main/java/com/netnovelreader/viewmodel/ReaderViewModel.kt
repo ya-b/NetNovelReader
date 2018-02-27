@@ -2,15 +2,14 @@ package com.netnovelreader.viewmodel
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
 import com.netnovelreader.bean.ReaderBean
 import com.netnovelreader.common.NotDeleteNum
 import com.netnovelreader.common.getSavePath
-import com.netnovelreader.common.id2TableName
 import com.netnovelreader.data.db.ReaderDbManager
+import com.netnovelreader.data.db.ShelfBean
 import com.netnovelreader.data.network.ChapterCache
 import com.netnovelreader.data.network.DownloadCatalog
 import com.netnovelreader.interfaces.IReaderContract
@@ -24,7 +23,7 @@ import java.io.IOException
  */
 
 class ReaderViewModel(context: Application) : AndroidViewModel(context),
-    IReaderContract.IReaderViewModel {
+        IReaderContract.IReaderViewModel {
 
     enum class CHAPTERCHANGE {
         NEXT,                       //下一章
@@ -32,20 +31,13 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
         BY_CATALOG                  //通过目录翻页
     }
 
-    val catalog by lazy {
-        MutableLiveData<ObservableArrayList<ReaderBean>>().run {
-            value = ObservableArrayList(); value!!
-        }
-    }
+    val catalog by lazy { ObservableArrayList<ReaderBean>() }
     /**
      * 一页显示的内容
      */
     var text: ObservableField<String> = ObservableField("")
 
     var isLoading = ObservableBoolean(true)
-
-    @Volatile
-    var dirName: String? = null
 
     @Volatile
     var chapterName: String? = null
@@ -57,7 +49,6 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
     @Volatile
     var maxChapterNum = 0
 
-    private var tableName = ""
     var chapterCache: ChapterCache? = null
 
     private lateinit var bookName: String
@@ -68,12 +59,10 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
     override suspend fun initData(bookName: String, CACHE_NUM: Int): Int {
         this.bookName = bookName
         this.CACHE_NUM = CACHE_NUM
-        tableName = id2TableName(ReaderDbManager.getBookId(bookName))
-        maxChapterNum = ReaderDbManager.getChapterCount(tableName).takeIf { it != 0 } ?: return 0
+        maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?: return 0
         val record = getRecord()
         chapterNum = record[0]
-        dirName = id2TableName(record[2])
-        chapterCache = ChapterCache(CACHE_NUM, tableName).apply { init(maxChapterNum, dirName!!) }
+        chapterCache = ChapterCache(CACHE_NUM, bookName).apply { init(maxChapterNum, bookName) }
         return record[1]
     }
 
@@ -83,7 +72,7 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
             CHAPTERCHANGE.NEXT -> if (chapterNum >= maxChapterNum) return else chapterNum++
             CHAPTERCHANGE.PREVIOUS -> if (chapterNum < 2) return else chapterNum--
             CHAPTERCHANGE.BY_CATALOG -> chapterName?.run {
-                chapterNum = ReaderDbManager.getChapterId(tableName, chapterName)
+                chapterNum = ReaderDbManager.getChapterId(bookName, chapterName)
             }
         }
         isLoading.set(true)
@@ -115,6 +104,8 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
 
     override suspend fun reloadCurrentChapter() {
         chapterCache ?: return
+        updateCatalog()
+        getCatalog()
         chapterCache!!.clearCache()
         getChapter(CHAPTERCHANGE.BY_CATALOG, null)
     }
@@ -125,7 +116,8 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
     @Synchronized
     override suspend fun setRecord(pageNum: Int) {
         if (chapterNum < 1) return
-        ReaderDbManager.setRecord(bookName, "$chapterNum#${if (pageNum < 1) 1 else pageNum}")
+        ReaderDbManager.getRoomDB().shelfDao().replace(ShelfBean(bookName = bookName,
+                 readRecord = "$chapterNum#${if (pageNum < 1) 1 else pageNum}"))
     }
 
     /**
@@ -134,7 +126,7 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
     @Synchronized
     override suspend fun getCatalog() {
         catalog.clear()
-        catalog.addAll(ReaderDbManager.getAllChapter(tableName).map { ReaderBean(it) })
+        catalog.addAll(ReaderDbManager.getAllChapter(bookName).map { ReaderBean(it) })
     }
 
     /**
@@ -144,27 +136,27 @@ class ReaderViewModel(context: Application) : AndroidViewModel(context),
         val num = getRecord()[0]
         if (num < NotDeleteNum) return
         val id = num - NotDeleteNum
-        ReaderDbManager.setReaded(tableName, id)
-            .forEach { File("${getSavePath()}/$tableName/$it").delete() }
+        ReaderDbManager.setReaded(bookName, id)
+                .forEach { File("${getSavePath()}/$bookName/$it").delete() }
     }
 
     /**
      * 获取阅读记录
      */
     private fun getRecord(): Array<Int> {
-        val queryResult = ReaderDbManager.getRecord(bookName) //阅读记录 3#2 表示第3章第2页
-        val array = queryResult[1]
-            .let { if (it.isEmpty()) "1#1" else it }
-            .split("#")
-        return arrayOf(array[0].toInt(), array[1].toInt(), queryResult[0].toInt())
+
+        val queryResult = ReaderDbManager.getRoomDB().shelfDao().getBookInfo(bookName)?.readRecord
+                ?.split("#")?.map { it.toInt() }          //阅读记录 3#2 表示第3章第2页
+        return arrayOf(queryResult?.get(0) ?: 1, queryResult?.get(1) ?: 1)
     }
 
     private fun updateCatalog() {
         try {
-            DownloadCatalog(tableName, ReaderDbManager.getCatalogUrl(bookName)).download()
-        }catch (e: IOException){
+            DownloadCatalog(bookName, ReaderDbManager.getRoomDB().shelfDao().getBookInfo(bookName)?.downloadUrl
+                    ?: "").download()
+        } catch (e: IOException) {
             e.printStackTrace()
         }
-        maxChapterNum = ReaderDbManager.getChapterCount(tableName)
+        maxChapterNum = ReaderDbManager.getChapterCount(bookName)
     }
 }

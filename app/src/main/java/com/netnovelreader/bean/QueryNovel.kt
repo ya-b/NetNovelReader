@@ -17,51 +17,53 @@ data class QueryNovel(
  * total : 41
  * ok : true
  */
+{
 
 
-data class BooksBean(
-    var _id: String? = null,
-    var isHasCp: Boolean = false,
-    var title: String? = null,
-    var aliases: String? = null,
-    var cat: String? = null,
-    var author: String? = null,
-    var site: String? = null,
-    var cover: String? = null,
-    var shortIntro: String? = null,
-    var lastChapter: String? = null,
-    var retentionRatio: Double = 0.toDouble(),
-    var banned: Int = 0,
-    var latelyFollower: Int = 0,
-    var wordCount: Int = 0,
-    var contentType: String? = null,
-    var superscript: String? = null,
-    var sizetype: Int = 0,
-    var highlight: HighlightBean? = null
-)
+    data class BooksBean(
+            var _id: String? = null,
+            var isHasCp: Boolean = false,
+            var title: String? = null,
+            var aliases: String? = null,
+            var cat: String? = null,
+            var author: String? = null,
+            var site: String? = null,
+            var cover: String? = null,
+            var shortIntro: String? = null,
+            var lastChapter: String? = null,
+            var retentionRatio: Double = 0.toDouble(),
+            var banned: Int = 0,
+            var latelyFollower: Int = 0,
+            var wordCount: Int = 0,
+            var contentType: String? = null,
+            var superscript: String? = null,
+            var sizetype: Int = 0,
+            var highlight: HighlightBean? = null
+    )
 
-data class HighlightBean(var title: List<String>? = null)
-/**
- * _id : 53115e30173bfacb4904897e
- * hasCp : true
- * title : 永夜君王
- * aliases :
- * cat : 玄幻
- * author : 烟雨江南
- * site : zhuishuvip
- * cover : /agent/http%3A%2F%2Fimg.1391.com%2Fapi%2Fv1%2Fbookcenter%2Fcover%2F1%2F683452%2F_683452_259086.jpg%2F
- * shortIntro : 千夜自困苦中崛起，在背叛中坠落。自此一个人，一把枪，行在永夜与黎明之间，却走出一段传奇。若永夜注定是他的命运，那他也要成为主宰的王。
- * lastChapter : 永夜之王旗飞扬 章七十七 原雾森林
- * retentionRatio : 55.97
- * banned : 0
- * latelyFollower : 71782
- * wordCount : 4290334
- * contentType : txt
- * superscript :
- * sizetype : -1
- * highlight : {"title":["永","夜","君","王"]}
- */
+    data class HighlightBean(var title: List<String>? = null)
+    /**
+     * _id : 53115e30173bfacb4904897e
+     * hasCp : true
+     * title : 永夜君王
+     * aliases :
+     * cat : 玄幻
+     * author : 烟雨江南
+     * site : zhuishuvip
+     * cover : /agent/http%3A%2F%2Fimg.1391.com%2Fapi%2Fv1%2Fbookcenter%2Fcover%2F1%2F683452%2F_683452_259086.jpg%2F
+     * shortIntro : 千夜自困苦中崛起，在背叛中坠落。自此一个人，一把枪，行在永夜与黎明之间，却走出一段传奇。若永夜注定是他的命运，那他也要成为主宰的王。
+     * lastChapter : 永夜之王旗飞扬 章七十七 原雾森林
+     * retentionRatio : 55.97
+     * banned : 0
+     * latelyFollower : 71782
+     * wordCount : 4290334
+     * contentType : txt
+     * superscript :
+     * sizetype : -1
+     * highlight : {"title":["永","夜","君","王"]}
+     */
 
+}
 
 
 

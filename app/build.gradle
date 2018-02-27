@@ -61,6 +61,10 @@ dependencies {
     kapt "android.arch.lifecycle:compiler:$rootProject.archLifecycleVersion"
     testImplementation "android.arch.core:core-testing:$rootProject.archLifecycleVersion"
 
+    implementation "android.arch.persistence.room:runtime:1.0.0"
+    kapt "android.arch.persistence.room:compiler:1.0.0"
+    testImplementation "android.arch.persistence.room:testing:1.0.0"
+
     // Dependencies for local unit tests
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"

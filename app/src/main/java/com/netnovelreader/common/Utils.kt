@@ -41,11 +41,6 @@ fun url2Hostname(url: String): String {
     return hostname ?: "error"
 }
 
-//根据shelf书名对应的id作为这本书目录表的表名（不能用数字作为开头）
-fun id2TableName(id: Any): String = "BOOK" + id.toString()
-
-fun tableName2Id(tableName: String): String = tableName.replace("BOOK", "")
-
 fun getHeaders(url: String): HashMap<String, String> {
     val map = HashMap<String, String>()
     map["accept"] = "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"

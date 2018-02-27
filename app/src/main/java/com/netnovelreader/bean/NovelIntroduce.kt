@@ -98,17 +98,17 @@ data class NovelIntroduce(
     var apptype: List<Int>? = null,
     var gender: List<String>? = null,
     var tags: List<String>? = null
-) : Serializable
+) : Serializable{
+    data class RatingBean(
+            /**
+             * count : 27456
+             * score : 9.219
+             * isEffect : true
+             */
 
+            var count: Int = 0,
+            var score: String = "暂无评分",
+            var isIsEffect: Boolean = false
+    ) : Serializable
+}
 
-data class RatingBean(
-    /**
-     * count : 27456
-     * score : 9.219
-     * isEffect : true
-     */
-
-    var count: Int = 0,
-    var score: String = "暂无评分",
-    var isIsEffect: Boolean = false
-) : Serializable

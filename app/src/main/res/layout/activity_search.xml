@@ -4,6 +4,7 @@
     xmlns:tool="http://schemas.android.com/tools">
 
     <data>
+
         <import type="android.view.View" />
         <variable
             name="viewModel"
@@ -14,18 +15,20 @@
             type="com.netnovelreader.ui.SearchActivity.ActivityClickEvent" />
     </data>
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/searchRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-
         <android.support.design.widget.AppBarLayout
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -67,38 +70,37 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvSearchLabel"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="@{viewModel.showHotWord ? View.VISIBLE : View.GONE}">
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="10dp"
+            android:gravity="center"
+            android:text="大家都在搜"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:visibility="@{viewModel.showHotWord ? View.VISIBLE : View.GONE}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
-            <TextView
-                android:id="@+id/tvSearchLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_alignParentStart="true"
-                android:gravity="center"
-                android:text="大家都在搜"
-                android:textColor="@color/black"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/tvRefreshHotWord"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="10dp"
-                android:layout_alignParentEnd="true"
-                android:drawablePadding="2dp"
-                android:drawableStart="@drawable/refresh"
-                android:gravity="center"
-                android:onClick="@{() -> viewModel.refreshHotWords()}"
-                android:text="换一批"
-                android:textColor="#6f6f6f"
-                android:textSize="12sp" />
-        </RelativeLayout>
+        <TextView
+            android:id="@+id/tvRefreshHotWord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="10dp"
+            android:layout_alignParentEnd="true"
+            android:drawablePadding="2dp"
+            android:drawableStart="@drawable/refresh"
+            android:gravity="center"
+            android:onClick="@{() -> viewModel.refreshHotWords()}"
+            android:text="换一批"
+            android:textColor="#6f6f6f"
+            android:textSize="12sp"
+            android:visibility="@{viewModel.showHotWord ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
         <com.netnovelreader.customview.FlowLayout
             android:id="@+id/linearLayout"
@@ -184,9 +186,26 @@
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/searchRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:background="#ffffff"
-            android:scrollbars="vertical" />
-    </LinearLayout>
+            android:scrollbars="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+
+        <!--加载进度条-->
+        <android.support.v4.widget.ContentLoadingProgressBar
+            android:id="@+id/searloadingbar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{viewModel.isLoading ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 </layout>

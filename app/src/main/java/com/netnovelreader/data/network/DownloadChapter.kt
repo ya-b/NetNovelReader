@@ -2,7 +2,6 @@ package com.netnovelreader.data.network
 
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.ReaderSQLHelper
 import java.io.File
 import java.io.IOException
 
@@ -29,7 +28,7 @@ class DownloadChapter(
         if (!chapterUrl.startsWith("http")) return ""
         File(dir, chapterName).takeIf { it.exists() }?.run { return this.readText() }
         var str = ParseHtml().getChapter(chapterUrl)
-        ReaderDbManager.getParseRule(url2Hostname(chapterUrl), ReaderSQLHelper.CATALOG_FILTER)
+        ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(chapterUrl)).catalogFilter
             .takeIf { it.isNotEmpty() }
             ?.split("|")
             ?.forEach { str = str.replace(it, "") }

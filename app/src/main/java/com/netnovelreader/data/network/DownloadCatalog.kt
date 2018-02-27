@@ -1,9 +1,9 @@
 package com.netnovelreader.data.network
 
-import com.netnovelreader.common.tableName2Id
+import com.netnovelreader.common.UPDATEFLAG
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.ReaderSQLHelper
+import com.netnovelreader.data.db.ShelfBean
 import java.io.IOException
 
 /**
@@ -18,8 +18,7 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     fun download() {
         ReaderDbManager.createTable(tableName)
         val cacheMap = CatalogCache.cache.get(catalogUrl)?.catalogMap
-        var map =
-            if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl)
+        var map = if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl)
         map = filtExistsInSql(map)
         var latestChapter: String? = null
         try {
@@ -34,7 +33,9 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
             ReaderDbManager.getDB().endTransaction()
             ReaderDbManager.doTransaction = false
         }
-        ReaderDbManager.setLatestChapter(latestChapter, tableName2Id(tableName))
+
+        ReaderDbManager.getRoomDB().shelfDao().replace(ShelfBean(bookName = tableName,isUpdate = UPDATEFLAG,
+                latestChapter = latestChapter))
     }
 
     /**
@@ -43,8 +44,7 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     @Throws(IOException::class)
     fun getMapFromNet(catalogUrl: String): LinkedHashMap<String, String> {
         val map = ParseHtml().getCatalog(catalogUrl)
-        val filter =
-            ReaderDbManager.getParseRule(url2Hostname(catalogUrl), ReaderSQLHelper.CATALOG_FILTER)
+        val filter = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(catalogUrl)).catalogFilter
         if (filter.isNotEmpty()) {
             filtCatalog(map, filter.split("|"))
         }
@@ -55,8 +55,8 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
      * 过滤目录的某些章节，从map中过滤掉filter
      */
     fun filtCatalog(
-        map: LinkedHashMap<String, String>,
-        filters: List<String>
+            map: LinkedHashMap<String, String>,
+            filters: List<String>
     ): LinkedHashMap<String, String> {
         val arr = ArrayList<String>()
         map.forEach {

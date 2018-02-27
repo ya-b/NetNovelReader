@@ -14,11 +14,11 @@ interface ISearchContract {
         fun refreshHotWords(): Job
         suspend fun searchBook(bookname: String?, chapterName: String?)
         suspend fun detailClick(itemText: String): NovelIntroduce?
-        suspend fun downloadCatalog(
+        suspend fun downloadBook(
             bookname: String,
             catalogUrl: String,
             chapterName: String?,
             which: Int
-        ): String
+        ): String?
     }
 }

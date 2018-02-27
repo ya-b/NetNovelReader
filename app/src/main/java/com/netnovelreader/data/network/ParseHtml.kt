@@ -5,7 +5,6 @@ import com.netnovelreader.common.fixUrl
 import com.netnovelreader.common.getHeaders
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.ReaderSQLHelper
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.io.IOException
@@ -19,10 +18,7 @@ class ParseHtml {
      */
     @Throws(IOException::class)
     fun getChapter(url: String): String {
-        val selector = ReaderDbManager.getParseRule(
-            url2Hostname(url),
-            ReaderSQLHelper.CHAPTER_RULE
-        )
+        val selector = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(url)).chapterSelector
         val txt = if (selector.isEmpty() || selector.length < 2) {
             getChapterWithOutSelector(url)
         } else {
@@ -37,10 +33,7 @@ class ParseHtml {
      */
     @Throws(IOException::class)
     fun getCatalog(url: String): LinkedHashMap<String, String> {
-        val selector = ReaderDbManager.getParseRule(
-            url2Hostname(url),
-            ReaderSQLHelper.CATALOG_RULE
-        )
+        val selector = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(url)).catalogSelector
         val catalog = LinkedHashMap<String, String>()
         val list =
             Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get().select(selector)
