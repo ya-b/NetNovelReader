@@ -4,15 +4,10 @@
     xmlns:tool="http://schemas.android.com/tools">
 
     <data>
-
         <import type="android.view.View" />
         <variable
             name="viewModel"
             type="com.netnovelreader.viewmodel.SearchViewModel" />
-
-        <variable
-            name="clickEvent"
-            type="com.netnovelreader.ui.SearchActivity.ActivityClickEvent" />
     </data>
 
     <android.support.constraint.ConstraintLayout
@@ -43,7 +38,7 @@
                     android:layout_gravity="center_vertical"
                     android:background="@drawable/icon_back"
                     android:contentDescription="@string/app_name"
-                    android:onClick="@{() -> clickEvent.onBackClick()}" />
+                    android:onClick="@{() -> viewModel.activityExitTask()}" />
 
                 <TextView
                     android:id="@+id/searchViewText"
@@ -114,70 +109,70 @@
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[0]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[0] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[0] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[0] ?? ``}"
                 tool:text="搜索热词1" />
 
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[1]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[1] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[1] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[1] ?? ``}"
                 tool:text="搜索热词2" />
 
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[2]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[2] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[2] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[2] ?? ``}"
                 tool:text="搜索热词3" />
 
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[3]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[3] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[3] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[3] ?? ``}"
                 tool:text="搜索热词4" />
 
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[4]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[4] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[4] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[4] ?? ``}"
                 tool:text="搜索热词5" />
 
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[5]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[5] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[5] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[5] ?? ``}"
                 tool:text="搜索热词6" />
 
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[6]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[6] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[6] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[6] ?? ``}"
                 tool:text="搜索热词7" />
 
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[7]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[7] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[7] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[7] ?? ``}"
                 tool:text="搜索热词" />
 
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[8]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[8] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[8] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[8] ?? ``}"
                 tool:text="搜索热词8" />
 
             <TextView
                 style="@style/hot_label_text_view"
                 android:background="@{viewModel.colors[9]}"
-                android:onClick="@{(word) -> clickEvent.submitHotWord(viewModel.searchHotWords[9] ?? ``)}"
+                android:onClick="@{(word) -> viewModel.selectHotWordTask(viewModel.searchHotWords[9] ?? ``)}"
                 android:text="@{viewModel.searchHotWords[9] ?? ``}"
                 tool:text="搜索热词9" />
 

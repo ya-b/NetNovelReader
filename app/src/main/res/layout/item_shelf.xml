@@ -11,7 +11,7 @@
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.ui.ShelfActivity.ShelfClickEvent" />
+            type="com.netnovelreader.viewmodel.ShelfViewModel" />
     </data>
 
     <android.support.v7.widget.CardView
@@ -26,8 +26,8 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:onClick="@{(bookname) -> clickEvent.itemOnClick(itemDetail.bookname??``)}"
-            android:onLongClick="@{(bookname) -> clickEvent.itemOnLongClick(itemDetail.bookname??``)}">
+            android:onClick="@{(bookname) -> clickEvent.readBookTask(itemDetail.bookname??``)}"
+            android:onLongClick="@{(bookname) -> clickEvent.deleteBookTask(itemDetail.bookname??``)}">
 
             <ImageView
                 android:id="@+id/bookCover"

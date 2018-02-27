@@ -24,6 +24,10 @@ android {
         enabled = true
     }
     buildToolsVersion rootProject.ext.buildToolsVersion
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -33,37 +37,41 @@ dependencies {
     implementation "com.android.support:cardview-v7:$rootProject.ext.supportLibraryVersion"
     implementation "com.android.support:design:$rootProject.ext.supportLibraryVersion"
     implementation "com.android.support:support-v4:$rootProject.ext.supportLibraryVersion"
-    implementation "com.android.support.constraint:constraint-layout:1.0.2"
-
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.22.1"
-
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:0.22.1'
     kapt "com.android.databinding:compiler:$gradle_version"
-    //Retrofit2所需要的包
-    implementation "com.squareup.retrofit2:retrofit:2.3.0"
-    implementation "com.squareup.retrofit2:converter-scalars:2.3.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.3.0"
-    //日志调试框架
-    implementation "com.orhanobut:logger:2.1.1"
 
+    //Retrofit2所需要的包
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+
+    //日志调试框架
+    implementation 'com.orhanobut:logger:2.1.1'
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
+    implementation 'org.jsoup:jsoup:1.10.3'
+
+<<<<<<< HEAD
     implementation 'com.squareup.okhttp3:okhttp:3.9.1'
     implementation 'org.jsoup:jsoup:1.11.2'
 
     implementation 'de.hdodenhof:circleimageview:2.2.0'
+=======
+>>>>>>> b32abc2... 代码优化
     //内存泄漏检查框架
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:1.5.4"
-    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:1.5.4"
-    //强大的图片加载框架    glide
-    implementation "com.github.bumptech.glide:glide:4.4.0"
-    kapt "com.github.bumptech.glide:compiler:4.4.0"
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
+    //强大的图片加载框架    glide
+    implementation 'com.github.bumptech.glide:glide:4.4.0'
+    kapt "com.github.bumptech.glide:compiler:4.4.0"
     implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
     kapt "android.arch.lifecycle:compiler:$rootProject.archLifecycleVersion"
     testImplementation "android.arch.core:core-testing:$rootProject.archLifecycleVersion"
-
-    implementation "android.arch.persistence.room:runtime:1.0.0"
+    implementation 'android.arch.persistence.room:runtime:1.0.0'
     kapt "android.arch.persistence.room:compiler:1.0.0"
-    testImplementation "android.arch.persistence.room:testing:1.0.0"
+    testImplementation 'android.arch.persistence.room:testing:1.0.0'
 
     // Dependencies for local unit tests
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
@@ -71,10 +79,10 @@ dependencies {
     testImplementation "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
 
     // Android Testing Support Library's runner and rules
-    androidTestImplementation ("com.android.support.test:runner:$rootProject.ext.runnerVersion"){
+    androidTestImplementation("com.android.support.test:runner:$rootProject.ext.runnerVersion") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
-    androidTestImplementation ("com.android.support.test:rules:$rootProject.ext.rulesVersion"){
+    androidTestImplementation("com.android.support.test:rules:$rootProject.ext.rulesVersion") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
@@ -97,7 +105,7 @@ dependencies {
     androidTestImplementation "com.android.support:support-compat:$rootProject.supportLibraryVersion"
     androidTestImplementation "com.android.support:design:$rootProject.supportLibraryVersion"
     androidTestImplementation "com.android.support.test.espresso.idling:idling-concurrent:$rootProject.espressoVersion"
-    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
 kapt {

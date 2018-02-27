@@ -11,6 +11,7 @@ import com.netnovelreader.common.toast
 import com.netnovelreader.data.db.ReaderDbManager
 import com.netnovelreader.data.network.DownloadCatalog
 import com.netnovelreader.data.network.DownloadChapter
+import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import java.io.File
 import java.io.IOException
@@ -53,21 +54,21 @@ class DownloadService : IntentService {
         val tableName = intent?.getStringExtra("tableName")
         val catalogUrl = intent?.getStringExtra("catalogurl")
         if (intent == null || tableName.isNullOrEmpty() || catalogUrl.isNullOrEmpty()) return
-        try {
-            getList(tableName!!, catalogUrl!!).apply { max = this.size }.forEach {
-                //获取要下载的章节列表
-                launch(threadPool) {
+        getList(tableName!!, catalogUrl!!).apply { max = this.size }.forEach {
+            //获取要下载的章节列表
+            launch(threadPool) {
+                try {
                     it.download(it.getChapterTxt())     //下载每一章
-                }.invokeOnCompletion {
-                    synchronized(IntentService::class.java) {
-                        it?.apply { failed.incrementAndGet() } ?: progress.incrementAndGet()
-                        updateNotification(progress.get(), max)
-                        if (progress.get() + failed.get() == max) lock.offer(1)   //下载完成，取消阻塞
-                    }
+                    progress.incrementAndGet()
+                } catch (e: IOException) {
+                    failed.incrementAndGet()
+                    e.printStackTrace()
+                }
+                synchronized(IntentService::class.java) {
+                    updateNotification(progress.get(), max)
+                    if (progress.get() + failed.get() == max) lock.offer(1)   //下载完成，取消阻塞
                 }
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
         lock.take()  //用阻塞队列阻塞住线程，一次只下载一本书
     }
@@ -78,37 +79,36 @@ class DownloadService : IntentService {
         if (failed.get() > 0) {
             toast(getString(R.string.downloadfailed).replace("nn", "$failed"))
         }
-        ReaderDbManager.closeDB()
     }
 
     private fun openNotification() {
         builder = NotificationCompat.Builder(this, "reader")
-            .setTicker(getString(R.string.app_name))
-            .setContentTitle(getString(R.string.prepare_download))
-            .setSmallIcon(R.drawable.notification_icon)
+                .setTicker(getString(R.string.app_name))
+                .setContentTitle(getString(R.string.prepare_download))
+                .setSmallIcon(R.drawable.notification_icon)
         mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
 
     fun updateNotification(progress: Int, max: Int) {
         val str = if (remainder != 0) ",${getString(R.string.wait4download)}"
-            .replace("nn", "$remainder") else ""
+                .replace("nn", "$remainder") else ""
         builder?.setProgress(max, progress, false)
-            ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
-        mNotificationManager?.notify(NOTIFYID, builder?.build())
+                ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
+        launch(UI) { mNotificationManager?.notify(NOTIFYID, builder?.build()) }
     }
 
-    @Throws(IOException::class)
     fun getList(tableName: String, url: String): ArrayList<DownloadChapter> {
-        DownloadCatalog(tableName, url).download()
         val runnables = ArrayList<DownloadChapter>()
+        try {
+            DownloadCatalog(tableName, url).download()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return runnables
+        }
+        val path = "${getSavePath()}/$tableName".apply { File(this).mkdirs() }
         ReaderDbManager.getChapterNameAndUrl(tableName, 0).forEach {
-            runnables.add(
-                DownloadChapter(
-                    tableName,
-                    "${getSavePath()}/$tableName".apply { File(this).mkdirs() }, it.key, it.value
-                )
-            )
+            runnables.add(DownloadChapter(tableName, path, it.key, it.value))
         }
         return runnables
     }

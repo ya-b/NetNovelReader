@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 
 import com.netnovelreader.BR
-import com.netnovelreader.interfaces.IClickEvent
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 
@@ -16,11 +15,11 @@ import kotlinx.coroutines.experimental.launch
  * Created by yangbo on 18-1-12.
  */
 
-class RecyclerAdapter<T>(
+class RecyclerAdapter<T, E>(
     private var itemDetails: ObservableArrayList<T>?,
     private val resId: Int,
-    val clickEvent: IClickEvent?
-) : RecyclerView.Adapter<RecyclerAdapter.BindingViewHolder<T>>() {
+    val clickEvent: E
+) : RecyclerView.Adapter<RecyclerAdapter.BindingViewHolder<T, E>>() {
     val listener: ArrayListChangeListener<T> =
         ArrayListChangeListener { launch(UI) { this@RecyclerAdapter.notifyDataSetChanged() } }
 
@@ -28,7 +27,7 @@ class RecyclerAdapter<T>(
         itemDetails?.addOnListChangedCallback(listener)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<T> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<T, E> {
         val binding = DataBindingUtil.inflate<ViewDataBinding>(
             LayoutInflater.from(parent.context),
             resId, parent, false
@@ -36,7 +35,7 @@ class RecyclerAdapter<T>(
         return BindingViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: BindingViewHolder<T>, position: Int) {
+    override fun onBindViewHolder(holder: BindingViewHolder<T, E>, position: Int) {
         holder.bind(itemDetails?.get(position), clickEvent)
     }
 
@@ -49,9 +48,9 @@ class RecyclerAdapter<T>(
         itemDetails?.removeOnListChangedCallback(listener)
     }
 
-    class BindingViewHolder<in T>(private val binding: ViewDataBinding) :
+    class BindingViewHolder<in T, in E>(private val binding: ViewDataBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(itemData: T?, clickEvent: IClickEvent?) {
+        fun bind(itemData: T?, clickEvent: E?) {
             binding.setVariable(BR.itemDetail, itemData)
             binding.setVariable(BR.clickEvent, clickEvent)
             binding.executePendingBindings()

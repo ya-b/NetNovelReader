@@ -23,7 +23,10 @@
     <string name="rowspace">行间距</string>
     <string name="rowspaceKey">rowspace</string>
     <string name="rowspace_summary">选择适合的行距</string>
-
+    <string name="fontSizeKey">FontSize</string>
+    <string name="fontTypeKey">FontType</string>
+    <string name="fontColorKey">FontColor</string>
+    <string name="backgroundColorKey">backgroundColor</string>
 
     <string name="search_button">搜索</string>
     <string name="catalog_finish">目录下载完成</string>

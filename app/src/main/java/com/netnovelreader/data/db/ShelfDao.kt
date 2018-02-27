@@ -5,13 +5,13 @@ import android.arch.persistence.room.*
 @Dao
 interface ShelfDao {
 
-    @Query("SELECT * FROM shelf order by latest_read DESC")
+    @Query("SELECT * FROM ${ReaderDatabase.TABLE_SHELF} order by ${ReaderDatabase.LATESTREAD} DESC")
     fun getAll(): List<ShelfBean>?
 
-    @Query("SELECT * FROM shelf WHERE book_name LIKE :bookname")
+    @Query("SELECT * FROM ${ReaderDatabase.TABLE_SHELF} WHERE ${ReaderDatabase.BOOKNAME} LIKE :bookname")
     fun getBookInfo(bookname: String): ShelfBean?
 
-    @Query("SELECT max(latest_read) from shelf")
+    @Query("SELECT max(${ReaderDatabase.LATESTREAD}) from ${ReaderDatabase.TABLE_SHELF}")
     fun getLatestReaded(): Int?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -19,21 +19,4 @@ interface ShelfDao {
 
     @Delete
     fun delete(bean: ShelfBean)
-
-    fun replace(bean: ShelfBean){
-        val old = getBookInfo(bean.bookName!!)
-        if(old == null){
-            insert(bean)
-        }else{
-            ShelfBean(
-                    bean._id ?: old._id,
-                    bean.bookName,
-                    bean.downloadUrl ?: old.downloadUrl,
-                    bean.readRecord ?: old.readRecord,
-                    bean.isUpdate ?: old.isUpdate,
-                    bean.latestChapter ?: old.latestChapter,
-                    bean.latestRead ?: old.latestRead
-            ).apply { insert(this) }
-        }
-    }
 }

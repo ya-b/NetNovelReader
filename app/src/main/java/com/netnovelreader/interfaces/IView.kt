@@ -6,4 +6,5 @@ package com.netnovelreader.interfaces
 interface IView {
     fun initView()
     fun initViewModel()
+    fun initLiveData()
 }

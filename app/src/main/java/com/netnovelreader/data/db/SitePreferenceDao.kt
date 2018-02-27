@@ -4,10 +4,10 @@ import android.arch.persistence.room.*
 
 @Dao
 interface SitePreferenceDao {
-    @Query("SELECT * FROM sitepreference")
+    @Query("SELECT * FROM ${ReaderDatabase.TABLE_SP}")
     fun getAll(): List<SitePreferenceBean>
 
-    @Query("SELECT * FROM sitepreference WHERE hostname LIKE :hostname")
+    @Query("SELECT * FROM ${ReaderDatabase.TABLE_SP} WHERE ${ReaderDatabase.HOSTNAME} LIKE :hostname")
     fun getRule(hostname: String): SitePreferenceBean
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

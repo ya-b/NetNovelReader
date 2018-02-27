@@ -13,7 +13,6 @@ import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.common.init
 import com.netnovelreader.data.network.ApiManager
-import com.netnovelreader.interfaces.IClickEvent
 import kotlinx.android.synthetic.main.fragment_novel_list.*
 
 /**
@@ -58,7 +57,7 @@ class NovelListFragment : Fragment() {
         }
     }
 
-    inner class NovelListItemClickEvent : IClickEvent {
+    inner class NovelListItemClickEvent {
 
         fun onClickDetail(id: String) {
             ApiManager.mAPI.getNovelIntroduce(id).enqueueCall {

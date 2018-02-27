@@ -8,15 +8,15 @@
             type="com.netnovelreader.bean.ReaderBean" />
 
         <variable
-            name="clickEvent"
-            type="com.netnovelreader.ui.ReaderActivity.CatalogItemClickListener" />
+            name="viewModel"
+            type="com.netnovelreader.viewmodel.ReaderViewModel" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
-        android:onClick="@{(chapterName) -> clickEvent.onChapterClick(itemDetail.catalogItem)}"
+        android:onClick="@{(chapterName) -> viewModel.pageByCatalog(itemDetail.catalogItem)}"
         android:orientation="vertical">
 
         <TextView

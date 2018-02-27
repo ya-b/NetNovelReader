@@ -3,6 +3,7 @@ package com.netnovelreader.customview
 import android.content.Context
 import android.databinding.ObservableField
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
@@ -23,21 +24,18 @@ import kotlin.reflect.KProperty
  */
 
 class ReaderView : View, GestureDetector.OnGestureListener {
-    var rowSpace = 2f                                                      //行距
-
-    var txtFontColorId: Int = 0                                            //字体颜色
-    var bgColorId: Int? by InvalidateAfterSet(R.color.read_font_default)   //背景颜色
-    var txtFontType: Typeface? by InvalidateAfterSet(null)           //正文字体类型//背景颜色
-    private val mBottomPaint = Paint()                                     //绘制底部文字部分所用的画笔
-    private val mMainPaint = Paint()                                       //绘制正文部分所用的画笔
-    var txtFontSize: Float? by InvalidateAfterSet(50f)               //正文部分默认画笔的大小
-    var indicatorFontSize: Float = 35f                                     //底部部分默认画笔的大小
-
-    var text: ObservableField<String>? by InvalidateAfterSet(null)    //一个未分割章节,格式：章节名|正文
-    var textArray: ArrayList<ArrayList<String>>? =
-        null                     //分割后的章节,view显示的内容，第i项是第i行文字内容
-    var title: String? by InvalidateAfterSet("")                      //章节名称
-    var pageNum: Int? by InvalidateAfterSet(1)                        //页数
+    var rowSpace = 2f                                                   //行距
+    var txtFontColor: Int = Color.BLACK                                 //字体颜色
+    var bgColor: Int? by InvalidateAfterSet()                           //背景颜色
+    var txtFontType: Typeface? by InvalidateAfterSet(null)        //正文字体类型//背景颜色
+    private val mBottomPaint = Paint()                                  //绘制底部文字部分所用的画笔
+    private val mMainPaint = Paint()                                    //绘制正文部分所用的画笔
+    var txtFontSize: Float? by InvalidateAfterSet(50f)            //正文部分默认画笔的大小
+    var indicatorFontSize: Float = 35f                                  //底部部分默认画笔的大小
+    var text: ObservableField<String>? by InvalidateAfterSet(null)//一个未分割章节,格式：章节名|正文
+    var textArray: ArrayList<ArrayList<String>>? = null                 //分割后的章节,第i项是第i行文字内容
+    var title: String? by InvalidateAfterSet("")                  //章节名称
+    var pageNum: Int? by InvalidateAfterSet(1)                    //页数
     var maxPageNum = 0
     var pageFlag = 0                                        //0刚进入view，1表示目录跳转，2表示下一页，3表示上一页
 
@@ -46,8 +44,11 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     lateinit var detector: GestureDetector
     private var isFirstDraw = true
 
-    var firstDrawListener: FirstDrawListener? = null
-    var pageListener: ReaderPageListener? = null
+    var doDrawPrepare: DoDrawPrepare? = null            //第一次绘制时调用
+    var nextChapter: NextChapter? = null              // 下一章
+    var previousChapter: PreviousChapter? = null          //上一章
+    var onCenterClick: OnCenterClick? = null            //点击view中间部分
+    var onPageChange: OnPageChange? = null   //当翻页时调用，向前向后翻页，同一章内翻页，翻至其他章节都会调用
 
     constructor(context: Context) : super(context) {
         init()
@@ -62,36 +63,11 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         init()
     }
 
-
-    interface FirstDrawListener {
-        /**
-         * 第一次绘制时调用
-         */
-        fun doDrawPrepare()
-    }
-
-
-    interface ReaderPageListener {
-        // 下一章
-        fun nextChapter()
-
-        //上一章
-        fun previousChapter()
-
-        //点击view中间部分
-        fun onCenterClick()
-
-        //当翻页时调用，向前向后翻页，同一章内翻页，翻至其他章节都会调用
-        fun onPageChange()
-    }
-
-
     fun init() {
         mBottomPaint.isAntiAlias = true   //抗锯齿开启
         mMainPaint.isAntiAlias = true
+        bgColor = ContextCompat.getColor(context, R.color.read_bg_default)
         rowSpace = PreferenceManager.getRowSpace(context)
-        txtFontColorId = R.color.read_font_default
-        bgColorId = R.color.read_bg_default
         timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
         detector = GestureDetector(context, this)
         mBottomPaint.textSize = indicatorFontSize                                  //底部部分画笔大小
@@ -100,15 +76,15 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     override fun onDraw(canvas: Canvas) {
         if (isFirstDraw) {
             isFirstDraw = false
-            firstDrawListener?.doDrawPrepare() //绘制前一些操作
-            firstDrawListener = null
+            pageNum = doDrawPrepare?.doDrawPrepare() //绘制前一些操作
             flushTextArray()
         }
         super.onDraw(canvas)
-        canvas.drawColor(ContextCompat.getColor(context, bgColorId!!))             //背景颜色
+        canvas.drawColor(bgColor!!)             //背景颜色
 
-        mBottomPaint.color = ContextCompat.getColor(context, txtFontColorId)       //底部部分字体颜色
-        mMainPaint.color = ContextCompat.getColor(context, txtFontColorId)         //正文部分字体颜色
+
+        mBottomPaint.color = txtFontColor                                          //底部部分字体颜色
+        mMainPaint.color = txtFontColor                                            //正文部分字体颜色
         mMainPaint.typeface = txtFontType
         mMainPaint.textSize = txtFontSize!!                                        //正文部分画笔大小
 
@@ -176,7 +152,7 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         } else if (x < width * 2 / 5) {
             pageToPrevious()
         } else if (y > height * 2 / 5 && y < height * 3 / 5) {
-            pageListener?.onCenterClick()
+            onCenterClick?.onCenterClick()
             pageFlag = 1
         }
         return false
@@ -202,11 +178,10 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     private fun pageToPrevious() {
         pageFlag = 3
         if (pageNum!! < 2) {
-            pageListener?.previousChapter()
+            previousChapter?.previousChapter()
         } else {
             pageNum = pageNum!! - 1
         }
-        pageListener?.onPageChange()
     }
 
     //向后翻页
@@ -215,9 +190,8 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         if (pageNum!! < maxPageNum) {
             pageNum = pageNum!! + 1
         } else {
-            pageListener?.nextChapter()
+            nextChapter?.nextChapter()
         }
-        pageListener?.onPageChange()
     }
 
     //章节改变时调用，分割内容
@@ -296,8 +270,37 @@ class ReaderView : View, GestureDetector.OnGestureListener {
                         else -> 1
                     }.let { if (it!! > maxPageNum) maxPageNum else it }
                 }
+                "pageNum" -> {
+                    onPageChange?.onPageChange(pageNum!!)
+                    postInvalidate()
+                }
                 else -> postInvalidate()  //刷新view
             }
         }
+    }
+
+    @FunctionalInterface
+    interface DoDrawPrepare {
+        fun doDrawPrepare(): Int
+    }
+
+    @FunctionalInterface
+    interface OnCenterClick {
+        fun onCenterClick()
+    }
+
+    @FunctionalInterface
+    interface NextChapter {
+        fun nextChapter()
+    }
+
+    @FunctionalInterface
+    interface PreviousChapter {
+        fun previousChapter()
+    }
+
+    @FunctionalInterface
+    interface OnPageChange{
+        fun onPageChange(index: Int)
     }
 }

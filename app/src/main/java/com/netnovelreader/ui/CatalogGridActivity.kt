@@ -14,7 +14,6 @@ import com.netnovelreader.bean.NovelCatalog
 import com.netnovelreader.common.*
 import com.netnovelreader.data.network.ApiManager
 import com.netnovelreader.databinding.ActivityCatalogGridBinding
-import com.netnovelreader.interfaces.IClickEvent
 import kotlinx.android.synthetic.main.activity_catalog_grid.*
 
 /**
@@ -66,7 +65,7 @@ class CatalogGridActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    inner class CatalogItemClick : IClickEvent {
+    inner class CatalogItemClick {
         fun onItemClick(name: String) {
             val intent = Intent(this@CatalogGridActivity, NovelCatalogDetailActivity::class.java)
             intent.putExtra("major", name)

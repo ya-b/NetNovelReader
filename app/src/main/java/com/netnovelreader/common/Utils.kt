@@ -6,6 +6,8 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.widget.Toast
+import com.netnovelreader.data.db.ShelfBean
+import com.netnovelreader.data.db.ShelfDao
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import retrofit2.Call
@@ -65,7 +67,7 @@ fun fixUrl(referenceUrl: String, fixUrl: String): String {
 
 //简化书写
 fun Context.toast(message: String) = launch(UI) {
-    Toast.makeText(this@toast, message, Toast.LENGTH_LONG).show()
+    Toast.makeText(this@toast, message, Toast.LENGTH_SHORT).show()
 }
 
 /**
@@ -83,8 +85,8 @@ inline fun <T> Call<T>.enqueueCall(crossinline block: (t: T?) -> Unit) {
     })
 }
 
-fun <T> RecyclerView.init(
-    adapter: RecyclerAdapter<T>,
+fun <T, E> RecyclerView.init(
+    adapter: RecyclerAdapter<in T, in E>,
     decor: RecyclerView.ItemDecoration? = NovelItemDecoration(this.context),
     layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this.context),
     animator: RecyclerView.ItemAnimator = DefaultItemAnimator()
@@ -93,4 +95,22 @@ fun <T> RecyclerView.init(
     this.adapter = adapter
     this.itemAnimator = animator
     if (decor != null) this.addItemDecoration(decor)
+}
+
+
+fun ShelfDao.replace(bean: ShelfBean) {
+    val old = getBookInfo(bean.bookName!!)
+    if (old == null) {
+        insert(bean)
+    } else {
+        ShelfBean(
+            bean._id ?: old._id,
+            bean.bookName,
+            bean.downloadUrl ?: old.downloadUrl,
+            bean.readRecord ?: old.readRecord,
+            bean.isUpdate ?: old.isUpdate,
+            bean.latestChapter ?: old.latestChapter,
+            bean.latestRead ?: old.latestRead
+        ).apply { insert(this) }
+    }
 }

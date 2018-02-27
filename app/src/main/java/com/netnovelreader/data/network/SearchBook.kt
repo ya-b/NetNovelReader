@@ -15,8 +15,8 @@ class SearchBook {
     /**
      * @url
      * @redirectFileld
-     * @redirectSelector    目录地址selector
-     * @noRedirectSelector
+     * @redirectUrl    目录地址selector
+     * @noRedirectUrl
      * @redirectName        书名selector
      * @noRedirectName
      * @redirectImage imageurl selector

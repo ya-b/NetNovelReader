@@ -18,7 +18,6 @@ import com.netnovelreader.common.PreferenceManager
 import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.init
 import com.netnovelreader.databinding.ActivityCatalogDetailBinding
-import com.netnovelreader.interfaces.IClickEvent
 import kotlinx.android.synthetic.main.activity_catalog_detail.*
 
 
@@ -90,7 +89,7 @@ class NovelCatalogDetailActivity : AppCompatActivity() {
         dialog?.show()
     }
 
-    inner class FilterNovelItemClickListener : IClickEvent {
+    inner class FilterNovelItemClickListener {
         fun onItemClick(bean: FilterBean) {
             filterList.firstOrNull { it.selected.get() == true }?.selected?.set(false)
             bean.selected.set(true)
