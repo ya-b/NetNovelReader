@@ -11,6 +11,7 @@ import android.support.v7.widget.SearchView
 import android.view.KeyEvent
 import android.view.View
 import com.netnovelreader.R
+import com.netnovelreader.ui.activity.SearchActivity
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.not

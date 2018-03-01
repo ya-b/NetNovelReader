@@ -1,9 +1,7 @@
-package com.netnovelreader.ui
+package com.netnovelreader.ui.activity
 
 import android.app.AlertDialog
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -18,10 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.netnovelreader.R
-import com.netnovelreader.common.PreferenceManager
-import com.netnovelreader.common.RecyclerAdapter
-import com.netnovelreader.common.init
-import com.netnovelreader.common.toast
+import com.netnovelreader.common.*
 import com.netnovelreader.data.network.CatalogCache
 import com.netnovelreader.databinding.ActivitySearchBinding
 import com.netnovelreader.service.DownloadService
@@ -34,7 +29,7 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 
 class SearchActivity : AppCompatActivity() {
-    var searchViewModel: SearchViewModel? = null
+    val searchViewModel by lazy { obtainViewModel(SearchViewModel::class.java) }
     private var job: Job? = null
     private var suggestCursor: Cursor? = null
     private var chapterName: String? = null
@@ -42,22 +37,16 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
-        initViewModel()
         initView()
         initData()
         initLiveData()
     }
 
-    fun initViewModel() {
-        val factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        searchViewModel = ViewModelProviders.of(this, factory).get(SearchViewModel::class.java)
+    fun initView() {
         DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
                 .apply { viewModel = searchViewModel }
-    }
-
-    fun initView() {
         searchRecycler.init(
-                RecyclerAdapter(searchViewModel?.resultList, R.layout.item_search, searchViewModel)
+                RecyclerAdapter(searchViewModel.resultList, R.layout.item_search, searchViewModel)
         )
         searchViewBar.setOnQueryTextListener(QueryListener())
         searchViewBar.onActionViewExpanded()
@@ -67,41 +56,42 @@ class SearchActivity : AppCompatActivity() {
 
     fun initData(){
         chapterName = intent.getStringExtra("chapterName")
-        searchViewModel?.isChangeSource?.set(!chapterName.isNullOrEmpty())
+        searchViewModel.isChangeSource.set(!chapterName.isNullOrEmpty())
         if (!chapterName.isNullOrEmpty()) {
-            searchViewModel?.isChangeSource?.set(true)
+            searchViewModel.isChangeSource.set(true)
             val bookname = intent.getStringExtra("bookname")
             searchViewText.text = bookname
             launch {
-                searchViewModel?.searchBook(bookname, intent.getStringExtra("chapterName"))
+                searchViewModel.searchBook(bookname, intent.getStringExtra("chapterName"))
             }
         } else {
-            launch { searchViewModel?.refreshHotWords() }
+            launch { searchViewModel.refreshHotWords() }
         }
     }
 
     fun initLiveData() {
-        searchViewModel?.toastMessage?.observe(this, Observer { it?.let { toast(it) } })
-        searchViewModel?.exitCommand?.observe(this, Observer { finish() })
-        searchViewModel?.selectHotWordEvent?.observe(
+        searchViewModel.toastMessage.observe(this, Observer { it?.let { toast(it) } })
+        searchViewModel.exitCommand.observe(this, Observer { finish() })
+        searchViewModel.selectHotWordEvent.observe(
                 this, Observer { searchViewBar.setQuery(it, false) })
-        searchViewModel?.showBookDetailCommand?.observe(this, Observer {
+        searchViewModel.showBookDetailCommand.observe(this, Observer {
             it ?: return@Observer
             val intent = Intent(this@SearchActivity, NovelDetailActivity::class.java)
             intent.putExtra("data", it)
             this@SearchActivity.startActivity(intent)
         })
-        searchViewModel?.downLoadChapterCommand?.observe(this, Observer {
+        searchViewModel.downLoadChapterCommand.observe(this, Observer {
             it ?: return@Observer
             val intent = Intent(this@SearchActivity, DownloadService::class.java)
             intent.putExtra("tableName", it[0])
             intent.putExtra("catalogurl", it[1])
             startService(intent)
         })
-        searchViewModel?.showDialogCommand?.observe(this, Observer {
+        searchViewModel.showDialogCommand.observe(this, Observer {
             it ?: return@Observer
             val listener = DialogInterface.OnClickListener { _, which ->
-                searchViewModel!!.downloadBook(it.bookname.get()!!, it.url.get()!!, chapterName, which)
+                searchViewModel.downloadBook(it.bookname.get()!!, it.url.get()!!, chapterName, which)
+                setResult(100)
                 finish()
             }
             AlertDialog.Builder(this@SearchActivity).setTitle(getString(R.string.downloadAllBook))
@@ -112,12 +102,14 @@ class SearchActivity : AppCompatActivity() {
         })
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun onDestroy() {
         super.onDestroy()
-        (searchRecycler.adapter as RecyclerAdapter<Any, Any>).removeDataChangeListener()
         CatalogCache.clearCache()
         job?.cancel()
+    }
+
+    override fun onBackPressed() {
+        searchViewModel.exitCommand.call()
     }
 
     inner class QueryListener : android.support.v7.widget.SearchView.OnQueryTextListener {
@@ -126,7 +118,7 @@ class SearchActivity : AppCompatActivity() {
         override fun onQueryTextSubmit(query: String): Boolean {
             launch {
                 job?.cancel()
-                job = launch { searchViewModel?.searchBook(query, null) }
+                job = launch { searchViewModel.searchBook(query, null) }
             }
             searchViewBar.clearFocus()                    //提交搜索commit后收起键盘
             return true
@@ -135,7 +127,7 @@ class SearchActivity : AppCompatActivity() {
         override fun onQueryTextChange(newText: String?): Boolean {
             launch(UI) {
                 deffered?.cancel()
-                deffered = async { searchViewModel?.onQueryTextChange(newText) }
+                deffered = async { searchViewModel.onQueryTextChange(newText) }
                 suggestCursor = deffered?.await()
                 searchViewBar.suggestionsAdapter.changeCursor(suggestCursor)
             }
@@ -161,7 +153,7 @@ class SearchActivity : AppCompatActivity() {
             if (suggestCursor?.moveToPosition(position) == true) {
                 searchViewBar.setQuery(suggestCursor?.getString(0), true)
                 job?.cancel()
-                job = launch { searchViewModel?.searchBook(suggestCursor?.getString(0), null) }
+                job = launch { searchViewModel.searchBook(suggestCursor?.getString(0), null) }
             }
             return true
         }

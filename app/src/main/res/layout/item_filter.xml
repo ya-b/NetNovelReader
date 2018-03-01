@@ -13,14 +13,14 @@
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.ui.NovelCatalogDetailActivity.FilterNovelItemClickListener" />
+            type="com.netnovelreader.ui.activity.NovelCatalogDetailActivity.FilterNovelItemClickListener" />
     </data>
 
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{(bean) -> clickEvent.onItemClick(itemDetail)}">
+        android:onClick="@{() -> clickEvent.onItemClick(itemDetail)}">
 
         <TextView
             android:id="@+id/filterName"

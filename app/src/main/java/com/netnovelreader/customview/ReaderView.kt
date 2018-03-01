@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -42,7 +43,6 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     lateinit var timeFormatter: SimpleDateFormat
     private val MIN_MOVE = 80F                              //翻页最小滑动距离
     lateinit var detector: GestureDetector
-    private var isFirstDraw = true
 
     var doDrawPrepare: DoDrawPrepare? = null            //第一次绘制时调用
     var nextChapter: NextChapter? = null              // 下一章
@@ -73,12 +73,12 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         mBottomPaint.textSize = indicatorFontSize                                  //底部部分画笔大小
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        pageNum = doDrawPrepare?.doDrawPrepare() //绘制前一些操作
+    }
+
     override fun onDraw(canvas: Canvas) {
-        if (isFirstDraw) {
-            isFirstDraw = false
-            pageNum = doDrawPrepare?.doDrawPrepare() //绘制前一些操作
-            flushTextArray()
-        }
         super.onDraw(canvas)
         canvas.drawColor(bgColor!!)             //背景颜色
 
@@ -257,11 +257,13 @@ class ReaderView : View, GestureDetector.OnGestureListener {
             this.value = value
             when (property.name) {
                 "txtFontSize" -> {
+                    if(width < 1) return
                     val scale = maxPageNum.toFloat() / pageNum!!
                     flushTextArray()
                     pageNum = (maxPageNum / scale).toInt().takeIf { it != 0 } ?: 1
                 }
                 "text" -> {
+                    if(width < 1) return
                     flushTextArray()
                     pageNum = when (pageFlag) {
                         0 -> if (maxPageNum == 0) 0 else if (pageNum == 0) 1 else pageNum

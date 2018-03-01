@@ -6,6 +6,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
         applicationId "com.netnovelreader"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -23,11 +24,13 @@ android {
     dataBinding {
         enabled = true
     }
-    buildToolsVersion rootProject.ext.buildToolsVersion
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    androidExtensions {
+    	experimental = true
+	}
 }
 
 dependencies {
@@ -49,6 +52,7 @@ dependencies {
 
     //日志调试框架
     implementation 'com.orhanobut:logger:2.1.1'
+
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'org.jsoup:jsoup:1.10.3'
 

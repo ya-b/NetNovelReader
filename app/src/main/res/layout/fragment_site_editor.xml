@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable
+            name="siteBean"
+            type="com.netnovelreader.bean.ObservableSiteBean" />
+        <variable
+            name="viewModel"
+            type="com.netnovelreader.viewmodel.SettingViewModel" />
+    </data>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".ui.fragment.SiteEditorFragment">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/hostname + `:` + siteBean.hostname??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/catalogSelector + `:` + siteBean.catalogSelector??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/chapterSelector + `:` + siteBean.chapterSelector??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/catalogFilter + `:` + siteBean.catalogFilter??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/chapterFilter + `:` + siteBean.chapterFilter??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/searchUrl + `:` + siteBean.searchUrl??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/redirectFileld + `:` + siteBean.redirectFileld??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/redirectUrl + `:` + siteBean.redirectUrl??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/noRedirectUrl + `:` + siteBean.noRedirectUrl??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/redirectName + `:` + siteBean.redirectName??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/noRedirectName + `:` + siteBean.noRedirectName??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/redirectImage + `:` + siteBean.redirectImage??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/noRedirectImage + `:` + siteBean.noRedirectImage??``}" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{@string/charset + `:` + siteBean.charset??``}" />
+    </LinearLayout>
+</layout>

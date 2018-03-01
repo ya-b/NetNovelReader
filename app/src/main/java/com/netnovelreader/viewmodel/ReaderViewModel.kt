@@ -7,6 +7,7 @@ import android.databinding.*
 import android.graphics.Color
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import com.netnovelreader.R
 import com.netnovelreader.bean.ChapterChangeType
 import com.netnovelreader.bean.ReaderBean
@@ -55,6 +56,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
 
     //获取章节内容
     fun getChapter(type: ChapterChangeType, chapterName: String?) {
+        if(showDialogCommand.value == true) showDialogCommand.value = false
         when (type) {
             ChapterChangeType.NEXT -> if (chapterNum.get() >= maxChapterNum) return else chapterNum.incrementAndGet()
             ChapterChangeType.PREVIOUS -> if (chapterNum.get() < 2) return else chapterNum.decrementAndGet()
@@ -115,7 +117,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     /**
      * 重新读取目录
      */
-    fun getCatalog() {
+    private fun getCatalog() {
         catalog.clear()
         catalog.addAll(ReaderDbManager.getAllChapter(bookName).map { ReaderBean(it) })
     }
@@ -124,16 +126,12 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
      * 自动删除已读章节，但保留最近[NotDeleteNum]章
      */
     fun autoRemove() {
-        val num = getRecord()[0]
-        if (num < NotDeleteNum) return
-        val id = num - NotDeleteNum
-        ReaderDbManager.setReaded(bookName, id)
-            .forEach { File("${getSavePath()}/$bookName/$it").delete() }
-    }
-
-    fun pageByCatalog(chapterName: String) {
-        showDialogCommand.value = false
-        getChapter(ChapterChangeType.BY_CATALOG, chapterName)
+        PreferenceManager.isAutoRemove(context).takeIf { it }?.apply {
+            getRecord()[0].takeIf { it > NotDeleteNum }?.also {
+                ReaderDbManager.setReaded(bookName, it - NotDeleteNum)
+                        .forEach { File("${getSavePath()}/$bookName/$it").delete() }
+            }
+        }
     }
 
     fun drawPrepareTask(): Int = runBlocking {
@@ -189,6 +187,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
                 isFontSettingShow.set(false)
                 isBackgroundSetingShow.set(false)
                 isFootViewShow.set(false)
+                launch { getCatalog() }
                 showDialogCommand.value = true
             }
             "fontSizeButton" -> {
@@ -286,6 +285,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
                 backgroundColor.set(ContextCompat.getColor(context, R.color.read_bg_4))
             }
             else -> {
+                //0
                 fontColor.set(ContextCompat.getColor(context, R.color.read_font_default))
                 backgroundColor.set(ContextCompat.getColor(context, R.color.read_bg_default))
             }
@@ -297,14 +297,14 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     /**
      * 获取阅读记录
      */
-    private fun getRecord(): Array<Int> {
+    fun getRecord(): Array<Int> {
 
         val queryResult = ReaderDbManager.getRoomDB().shelfDao().getBookInfo(bookName)?.readRecord
             ?.split("#")?.map { it.toInt() }          //阅读记录 3#2 表示第3章第2页
         return arrayOf(queryResult?.get(0) ?: 1, queryResult?.get(1) ?: 1)
     }
 
-    private fun updateCatalog() {
+    fun updateCatalog() {
         try {
             DownloadCatalog(
                 bookName, ReaderDbManager.getRoomDB().shelfDao().getBookInfo(bookName)?.downloadUrl

@@ -13,4 +13,4 @@ data class BookBean(
     var downloadURL: ObservableField<String>,
     var bitmap: ObservableField<Bitmap>,
     var isUpdate: ObservableField<String>
-) : BaseObservable()
+)

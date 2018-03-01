@@ -6,7 +6,7 @@
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.NovelCatalogDetailActivity">
+        tools:context=".ui.activity.NovelCatalogDetailActivity">
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"

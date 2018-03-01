@@ -44,4 +44,19 @@
     <string name="followSystem">跟随系统</string>
     <string name="follow">人在追</string>
     <string name="retent">%读者留存</string>
+
+    <string name="hostname">域名</string>
+    <string name="catalogSelector">目录选择器</string>
+    <string name="chapterSelector">章节内容选择器</string>
+    <string name="catalogFilter">目录过滤</string>
+    <string name="chapterFilter">章节过滤</string>
+    <string name="searchUrl">搜索地址</string>
+    <string name="redirectFileld">重定向</string>
+    <string name="redirectUrl">重定向url选择器</string>
+    <string name="noRedirectUrl">url选择器</string>
+    <string name="redirectName">重定向书名选择器</string>
+    <string name="noRedirectName">书名选择器</string>
+    <string name="redirectImage">重定向封面选择器</string>
+    <string name="noRedirectImage">封面选择器</string>
+    <string name="charset">字符编码</string>
 </resources>

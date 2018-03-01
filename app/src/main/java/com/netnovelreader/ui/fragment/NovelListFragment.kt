@@ -1,4 +1,4 @@
-package com.netnovelreader.ui
+package com.netnovelreader.ui.fragment
 
 import android.content.Intent
 import android.databinding.ObservableArrayList
@@ -13,6 +13,7 @@ import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.common.init
 import com.netnovelreader.data.network.ApiManager
+import com.netnovelreader.ui.activity.NovelDetailActivity
 import kotlinx.android.synthetic.main.fragment_novel_list.*
 
 /**

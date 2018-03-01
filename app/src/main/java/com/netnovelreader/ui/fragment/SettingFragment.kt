@@ -1,4 +1,4 @@
-package com.netnovelreader.ui
+package com.netnovelreader.ui.fragment
 
 import android.content.Intent
 import android.os.Bundle
@@ -15,6 +15,7 @@ class SettingFragment : PreferenceFragment() {
         findPreference(getString(R.string.themeKey)).setOnPreferenceChangeListener { _, _ ->
             val intent = activity.intent
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            activity.setResult(10)
             activity.finish()
             activity.overridePendingTransition(0, 0)
             activity.startActivity(intent)

@@ -1,9 +1,7 @@
-package com.netnovelreader.ui
+package com.netnovelreader.ui.activity
 
 import android.app.AlertDialog
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -17,10 +15,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.SeekBar
 import com.netnovelreader.R
-import com.netnovelreader.common.PREFERENCE_NAME
-import com.netnovelreader.common.PreferenceManager
-import com.netnovelreader.common.RecyclerAdapter
-import com.netnovelreader.common.init
+import com.netnovelreader.common.*
 import com.netnovelreader.databinding.ActivityReaderBinding
 import com.netnovelreader.viewmodel.ReaderViewModel
 import kotlinx.android.synthetic.main.activity_reader.*
@@ -29,7 +24,7 @@ import kotlinx.coroutines.experimental.runBlocking
 
 
 class ReaderActivity : AppCompatActivity() {
-    var readerViewModel: ReaderViewModel? = null
+    val readerViewModel by lazy { obtainViewModel(ReaderViewModel::class.java) }
     var dialog: AlertDialog? = null
     var netStateReceiver: NetChangeReceiver? = null
 
@@ -42,36 +37,28 @@ class ReaderActivity : AppCompatActivity() {
         }
         PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
-        initViewModel()
         initView()
         initLiveData()
     }
 
-    fun initViewModel() {
-        val factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        ViewModelProviders.of(this, factory).get(ReaderViewModel::class.java).apply {
-            readerViewModel = this
-            bookName = intent.getStringExtra("bookname")
-            CACHE_NUM = PreferenceManager.getAutoDownNum(this@ReaderActivity)
-        }
-        DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
-            .apply { viewModel = readerViewModel }
-    }
-
     fun initView() {
+        readerViewModel.bookName = intent.getStringExtra("bookname")
+        readerViewModel.CACHE_NUM = PreferenceManager.getAutoDownNum(this@ReaderActivity)
+        DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
+                .apply { viewModel = readerViewModel }
         netStateReceiver = NetChangeReceiver()
         val filter = IntentFilter().apply { addAction(ConnectivityManager.CONNECTIVITY_ACTION) }
         registerReceiver(netStateReceiver, filter)  //网络变化广播接收器
 
         getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).apply {
-            readerViewModel?.fontSizeChangeEvent(getFloat(getString(R.string.fontSizeKey), 50f))
-            readerViewModel?.fontTypeChangeEvent(
+            readerViewModel.fontSizeChangeEvent(getFloat(getString(R.string.fontSizeKey), 50f))
+            readerViewModel.fontTypeChangeEvent(
                 getString(
                     getString(R.string.fontTypeKey),
                     "default"
                 )
             )
-            readerViewModel?.backgroundChangeEvent(
+            readerViewModel.backgroundChangeEvent(
                 getInt(
                     getString(R.string.backgroundColorKey),
                     0
@@ -96,29 +83,29 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     fun initLiveData() {
-        readerViewModel?.showDialogCommand?.observe(this, Observer {
+        readerViewModel.showDialogCommand.observe(this, Observer {
             if (it == true) showDialog() else dialog?.dismiss()
         })
-        readerViewModel?.changeSourceCommand?.observe(this, Observer {
+        readerViewModel.changeSourceCommand.observe(this, Observer {
             val intent = Intent(this@ReaderActivity, SearchActivity::class.java).apply {
                 putExtra("bookname", intent.getStringExtra("bookname"))
                 putExtra("chapterName", it)
             }
-            startActivity(intent)
+            startActivityForResult(intent, 1)
         })
     }
 
-    override fun onResume() {
-        super.onResume()
-        launch { readerViewModel?.reloadCurrentChapter() }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == 1 && requestCode == 100){
+            launch { readerViewModel.reloadCurrentChapter() }
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(netStateReceiver)
-        if (PreferenceManager.isAutoRemove(this)) {
-            launch { readerViewModel?.autoRemove() }
-        }
+        launch { readerViewModel.autoRemove() }
     }
 
     override fun onBackPressed() {
@@ -139,12 +126,11 @@ class ReaderActivity : AppCompatActivity() {
             val builder = AlertDialog.Builder(this@ReaderActivity)
             catalogView = RecyclerView(this@ReaderActivity)
             catalogView.init(
-                RecyclerAdapter(readerViewModel?.catalog, R.layout.item_catalog, readerViewModel)
+                RecyclerAdapter(readerViewModel.catalog, R.layout.item_catalog, readerViewModel)
             )
             dialog = builder.setView(catalogView).create()
         }
-        launch { readerViewModel?.getCatalog() }.join()
-        catalogView?.scrollToPosition(readerViewModel!!.chapterNum.get() - 1)
+        catalogView?.scrollToPosition(readerViewModel.chapterNum.get() - 1)
         dialog?.show()
         dialog?.window?.setLayout(readerView.width * 5 / 6, readerView.height * 9 / 10)
         Unit
@@ -155,8 +141,8 @@ class ReaderActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val isAvailable = cm.activeNetworkInfo?.isAvailable ?: false
-            if (isAvailable && readerViewModel?.isLoading?.get() != false) {   //当网络变为连接状态，并且加载条显示时，下载章节内容
-                launch { readerViewModel!!.downloadAndShow() }
+            if (isAvailable && readerViewModel.isLoading.get() != false) {   //当网络变为连接状态，并且加载条显示时，下载章节内容
+                launch { readerViewModel.downloadAndShow() }
             }
         }
     }

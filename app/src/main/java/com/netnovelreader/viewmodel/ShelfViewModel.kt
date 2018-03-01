@@ -3,6 +3,7 @@ package com.netnovelreader.viewmodel
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.databinding.ObservableArrayList
+import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -31,6 +32,9 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     val bookList = ObservableArrayList<BookBean>()
     val readBookCommand = ReaderLiveData<String>()
     val showDialogCommand = ReaderLiveData<String>()
+    val notRefershCommand = ReaderLiveData<Void>()
+    @Volatile
+    var timeTemp = 0L
 
     fun readBookTask(bookname: String) {
         launch(threadPool) {
@@ -50,8 +54,9 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     //检查书籍是否有更新
-    @Synchronized
-    fun updateBooks() {
+    fun updateBooks() = launch {
+        notRefershCommand.call()
+        System.currentTimeMillis().takeIf { it - timeTemp > 2000 }?.also { timeTemp = it } ?: return@launch
         bookList.forEach {
             updateCatalog(it)
             val list = ReaderDbManager.getRoomDB().shelfDao().getAll()

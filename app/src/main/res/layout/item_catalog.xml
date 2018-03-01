@@ -2,32 +2,24 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
-
+        <import type="com.netnovelreader.bean.ChapterChangeType"/>
         <variable
             name="itemDetail"
             type="com.netnovelreader.bean.ReaderBean" />
 
         <variable
-            name="viewModel"
+            name="clickEvent"
             type="com.netnovelreader.viewmodel.ReaderViewModel" />
     </data>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/itemChapter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:onClick="@{(chapterName) -> viewModel.pageByCatalog(itemDetail.catalogItem)}"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/itemChapter"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp"
-            android:text="@{itemDetail.catalogItem??``}"
-            android:textSize="13sp" />
-
-    </LinearLayout>
+        android:layout_marginStart="19dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:onClick="@{() -> clickEvent.getChapter(ChapterChangeType.BY_CATALOG,itemDetail.catalogItem)}"
+        android:text="@{itemDetail.catalogItem??``}"
+        android:textSize="13sp" />
 </layout>

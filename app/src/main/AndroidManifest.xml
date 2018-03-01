@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.AppBarOverlay">
         <activity
-            android:name=".ui.ShelfActivity"
+            android:name=".ui.activity.ShelfActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.AppBarOverlay">
             <intent-filter>
@@ -26,15 +26,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.ReaderActivity" />
-        <activity android:name=".ui.SearchActivity" />
+        <activity android:name=".ui.activity.ReaderActivity" />
+        <activity android:name=".ui.activity.SearchActivity" />
 
         <service android:name=".service.DownloadService" />
 
-        <activity android:name=".ui.SettingActivity" />
-        <activity android:name=".ui.NovelDetailActivity" />
-        <activity android:name=".ui.CatalogGridActivity" />
-        <activity android:name=".ui.NovelCatalogDetailActivity" />
+        <activity android:name=".ui.activity.SettingActivity" />
+        <activity android:name=".ui.activity.NovelDetailActivity" />
+        <activity android:name=".ui.activity.CatalogGridActivity" />
+        <activity android:name=".ui.activity.NovelCatalogDetailActivity" />
     </application>
 
 </manifest>

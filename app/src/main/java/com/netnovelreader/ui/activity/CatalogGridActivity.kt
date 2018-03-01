@@ -1,4 +1,4 @@
-package com.netnovelreader.ui
+package com.netnovelreader.ui.activity
 
 import android.content.Intent
 import android.databinding.DataBindingUtil

@@ -1,9 +1,7 @@
-package com.netnovelreader.ui
+package com.netnovelreader.ui.activity
 
 import android.app.AlertDialog
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
@@ -13,10 +11,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import com.netnovelreader.R
-import com.netnovelreader.common.PreferenceManager
-import com.netnovelreader.common.RecyclerAdapter
-import com.netnovelreader.common.init
-import com.netnovelreader.common.toast
+import com.netnovelreader.common.*
 import com.netnovelreader.databinding.ActivityShelfBinding
 import com.netnovelreader.viewmodel.ShelfViewModel
 import kotlinx.android.synthetic.main.activity_shelf.*
@@ -25,7 +20,7 @@ import kotlinx.coroutines.experimental.launch
 
 class ShelfActivity : AppCompatActivity() {
 
-    var shelfViewModel: ShelfViewModel? = null
+    val shelfViewModel by lazy { obtainViewModel(ShelfViewModel::class.java) }
     private var hasPermission = false
     private var themeId = 0
     var job: Job? = null
@@ -37,73 +32,46 @@ class ShelfActivity : AppCompatActivity() {
         if (!hasPermission) {
             requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)
         }
-        initViewModel()
         initView()
         initLiveData()
     }
 
-    /**
-     * DataBinding绑定
-     */
-    fun initViewModel() {
-        val factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        shelfViewModel = ViewModelProviders.of(this, factory).get(ShelfViewModel::class.java)
-        DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
-    }
-
     fun initView() {
+        DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
+                .apply { viewModel = shelfViewModel }
         setSupportActionBar(shelfToolbar)
         shelfRecycler.init(
-                RecyclerAdapter(shelfViewModel?.bookList, R.layout.item_shelf, shelfViewModel),
+                RecyclerAdapter(shelfViewModel.bookList, R.layout.item_shelf, shelfViewModel),
                 null
         )
         shelf_layout.setColorSchemeResources(R.color.gray)
-        var time = System.currentTimeMillis()
-        shelf_layout.setOnRefreshListener {
-            if (System.currentTimeMillis() - time > 2000) {
-                job = launch { shelfViewModel!!.updateBooks() }
-            }
-            time = System.currentTimeMillis()
-            shelf_layout.isRefreshing = false
-        }
     }
 
     fun initLiveData() {
-        shelfViewModel?.readBookCommand?.observe(this, Observer {
+        shelfViewModel.notRefershCommand.observe(this, Observer { shelf_layout.isRefreshing = false })
+        shelfViewModel.readBookCommand.observe(this, Observer {
             startActivity(Intent(this, ReaderActivity::class.java)
                     .apply { this.putExtra("bookname", it) })
         })
-        shelfViewModel?.showDialogCommand?.observe(this, Observer {
+        shelfViewModel.showDialogCommand.observe(this, Observer {
             AlertDialog.Builder(this@ShelfActivity)
                     .setTitle(getString(R.string.deleteBook).replace("book", it!!))
-                    .setPositiveButton(R.string.yes, { _, _ -> launch { shelfViewModel?.deleteBook(it) } })
+                    .setPositiveButton(R.string.yes, { _, _ -> launch { shelfViewModel.deleteBook(it) } })
                     .setNegativeButton(R.string.no, null)
                     .create()
                     .show()
         })
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (themeId != PreferenceManager.getThemeId(this)) {
-            val intent = intent
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            finish()
-            overridePendingTransition(0, 0)
-            startActivity(intent)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
-        launch { if (hasPermission) shelfViewModel?.refreshBookList() }
+        shelfRecycler.scrollToPosition(0)
+        launch { if (hasPermission) shelfViewModel.refreshBookList() }
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun onDestroy() {
         super.onDestroy()
         job?.cancel()
-        (shelfRecycler.adapter as RecyclerAdapter<Any, Any>).removeDataChangeListener()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -114,13 +82,13 @@ class ShelfActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.search_button -> {
-                startActivity(Intent(this, SearchActivity::class.java).apply {
-                    this.putExtra("type", 0)
-                })
+                startActivity(Intent(this, SearchActivity::class.java))
                 true
             }
             R.id.action_settings -> {
-                startActivity(Intent(this, SettingActivity::class.java))
+                startActivityForResult(Intent(this, SettingActivity::class.java).apply {
+                    this.putExtra("type", 0)
+                }, 1)
                 true
             }
             R.id.edit_site_preference -> {
@@ -137,6 +105,17 @@ class ShelfActivity : AppCompatActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == 1 && resultCode == 10){
+            val intent = intent
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            finish()
+            overridePendingTransition(0, 0)
+            startActivity(intent)
+        }
+    }
+
     /**
      * 请求权限的结果
      */
@@ -148,7 +127,7 @@ class ShelfActivity : AppCompatActivity() {
         if (requestCode == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 hasPermission = true
-                launch { shelfViewModel?.refreshBookList() }
+                launch { shelfViewModel.refreshBookList() }
             } else {
                 toast(getString(R.string.permission_warnning))
             }

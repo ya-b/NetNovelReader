@@ -1,4 +1,4 @@
-package com.netnovelreader.ui
+package com.netnovelreader.ui.fragment
 
 import android.content.Intent
 import android.os.Bundle

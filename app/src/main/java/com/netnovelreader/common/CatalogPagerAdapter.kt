@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
-import com.netnovelreader.ui.NovelListFragment
+import com.netnovelreader.ui.fragment.NovelListFragment
 
 /**
  * 文件： CatalogPagerAdapter

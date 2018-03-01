@@ -190,7 +190,7 @@
                 android:gravity="center"
                 android:minWidth="58dp"
                 android:text="@{detail.rating.score}"
-                android:textColor="@color/lightgray"
+                android:textColor="@color/orange"
                 android:textSize="12sp"
                 app:layout_constraintStart_toStartOf="@+id/scoreLabel"
                 app:layout_constraintTop_toTopOf="@+id/serialState"

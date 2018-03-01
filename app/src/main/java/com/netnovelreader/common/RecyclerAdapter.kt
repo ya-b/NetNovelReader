@@ -6,7 +6,6 @@ import android.databinding.ViewDataBinding
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-
 import com.netnovelreader.BR
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
@@ -16,21 +15,27 @@ import kotlinx.coroutines.experimental.launch
  */
 
 class RecyclerAdapter<T, E>(
-    private var itemDetails: ObservableArrayList<T>?,
-    private val resId: Int,
-    val clickEvent: E
+        private val itemDetails: ObservableArrayList<T>?,
+        private val resId: Int,
+        val clickEvent: E
 ) : RecyclerView.Adapter<RecyclerAdapter.BindingViewHolder<T, E>>() {
-    val listener: ArrayListChangeListener<T> =
-        ArrayListChangeListener { launch(UI) { this@RecyclerAdapter.notifyDataSetChanged() } }
+    lateinit var listener: ArrayListChangeListener<T>
 
-    init {
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        listener = ArrayListChangeListener { launch(UI) { this@RecyclerAdapter.notifyDataSetChanged() } }
         itemDetails?.addOnListChangedCallback(listener)
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        itemDetails?.removeOnListChangedCallback(listener)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<T, E> {
         val binding = DataBindingUtil.inflate<ViewDataBinding>(
-            LayoutInflater.from(parent.context),
-            resId, parent, false
+                LayoutInflater.from(parent.context),
+                resId, parent, false
         )
         return BindingViewHolder(binding)
     }
@@ -41,7 +46,7 @@ class RecyclerAdapter<T, E>(
 
     override fun getItemCount(): Int {
         itemDetails ?: return 0
-        return itemDetails!!.size
+        return itemDetails.size
     }
 
     fun removeDataChangeListener() {
@@ -49,7 +54,7 @@ class RecyclerAdapter<T, E>(
     }
 
     class BindingViewHolder<in T, in E>(private val binding: ViewDataBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+            RecyclerView.ViewHolder(binding.root) {
         fun bind(itemData: T?, clickEvent: E?) {
             binding.setVariable(BR.itemDetail, itemData)
             binding.setVariable(BR.clickEvent, clickEvent)

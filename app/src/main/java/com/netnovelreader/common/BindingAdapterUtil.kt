@@ -4,6 +4,9 @@ import android.databinding.BindingAdapter
 import android.graphics.Bitmap
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
+import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.widget.Toolbar
+import android.view.View
 import android.widget.ImageView
 import com.netnovelreader.GlideApp
 import com.netnovelreader.R
@@ -67,4 +70,14 @@ fun setPreviousChapter(readerView: ReaderView, previousChapter: ReaderView.Previ
 @BindingAdapter("android:nextPage")
 fun setOnPageChange(readerView: ReaderView, onPageChange: ReaderView.OnPageChange){
     readerView.onPageChange = onPageChange
+}
+
+@BindingAdapter("android:onRefresh")
+fun setRefershListener(refreshLayout: SwipeRefreshLayout, listener: SwipeRefreshLayout.OnRefreshListener){
+    refreshLayout.setOnRefreshListener(listener)
+}
+
+@BindingAdapter("app:navigationOnClick")
+fun setNavigationOnClickListener(toobar: Toolbar, listener: View.OnClickListener){
+    toobar.setNavigationOnClickListener(listener)
 }

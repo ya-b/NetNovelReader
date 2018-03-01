@@ -12,13 +12,13 @@
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.ui.CatalogGridActivity.CatalogItemClick" />
+            type="com.netnovelreader.ui.activity.CatalogGridActivity.CatalogItemClick" />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{(name) -> clickEvent.onItemClick(itemDetail.name)}">
+        android:onClick="@{() -> clickEvent.onItemClick(itemDetail.name)}">
 
         <TextView
             android:id="@+id/tvCatalog"

@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.netnovelreader.ui.ShelfActivity">
+    tools:context="com.netnovelreader.ui.activity.ShelfActivity">
     <item
         android:id="@+id/search_button"
         android:icon="@drawable/ic_search_white_24dp"

@@ -26,8 +26,8 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:onClick="@{(bookname) -> clickEvent.readBookTask(itemDetail.bookname??``)}"
-            android:onLongClick="@{(bookname) -> clickEvent.deleteBookTask(itemDetail.bookname??``)}">
+            android:onClick="@{() -> clickEvent.readBookTask(itemDetail.bookname??``)}"
+            android:onLongClick="@{() -> clickEvent.deleteBookTask(itemDetail.bookname??``)}">
 
             <ImageView
                 android:id="@+id/bookCover"

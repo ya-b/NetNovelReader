@@ -1,7 +1,11 @@
 package com.netnovelreader.common
 
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Environment
+import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -28,11 +32,11 @@ val NotDeleteNum = 3 //自动删除已读章节，但保留最近3章
 val THREAD_NUM = Runtime.getRuntime().availableProcessors() * 2 / 3 //线程数
 
 fun getSavePath(): String =
-    if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-        Environment.getExternalStorageDirectory().path + "/netnovelreader"
-    } else {
-        "/data/data/com.netnovelreader"
-    }
+        if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
+            Environment.getExternalStorageDirectory().path + "/netnovelreader"
+        } else {
+            "/data/data/com.netnovelreader"
+        }
 
 //例如: http://www.hello.com/world/fjwoj/foew.html  中截取 hello.com
 fun url2Hostname(url: String): String {
@@ -86,10 +90,10 @@ inline fun <T> Call<T>.enqueueCall(crossinline block: (t: T?) -> Unit) {
 }
 
 fun <T, E> RecyclerView.init(
-    adapter: RecyclerAdapter<in T, in E>,
-    decor: RecyclerView.ItemDecoration? = NovelItemDecoration(this.context),
-    layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this.context),
-    animator: RecyclerView.ItemAnimator = DefaultItemAnimator()
+        adapter: RecyclerAdapter<in T, in E>,
+        decor: RecyclerView.ItemDecoration? = NovelItemDecoration(this.context),
+        layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this.context),
+        animator: RecyclerView.ItemAnimator = DefaultItemAnimator()
 ) {
     this.layoutManager = layoutManager
     this.adapter = adapter
@@ -104,13 +108,18 @@ fun ShelfDao.replace(bean: ShelfBean) {
         insert(bean)
     } else {
         ShelfBean(
-            bean._id ?: old._id,
-            bean.bookName,
-            bean.downloadUrl ?: old.downloadUrl,
-            bean.readRecord ?: old.readRecord,
-            bean.isUpdate ?: old.isUpdate,
-            bean.latestChapter ?: old.latestChapter,
-            bean.latestRead ?: old.latestRead
+                bean._id ?: old._id,
+                bean.bookName,
+                bean.downloadUrl ?: old.downloadUrl,
+                bean.readRecord ?: old.readRecord,
+                bean.isUpdate ?: old.isUpdate,
+                bean.latestChapter ?: old.latestChapter,
+                bean.latestRead ?: old.latestRead
         ).apply { insert(this) }
     }
 }
+
+
+fun <T : ViewModel> FragmentActivity.obtainViewModel(clazz: Class<T>): T =
+        ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
+                .let { ViewModelProviders.of(this, it).get(clazz) }
