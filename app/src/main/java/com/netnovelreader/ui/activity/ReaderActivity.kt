@@ -45,7 +45,7 @@ class ReaderActivity : AppCompatActivity() {
         readerViewModel.bookName = intent.getStringExtra("bookname")
         readerViewModel.CACHE_NUM = PreferenceManager.getAutoDownNum(this@ReaderActivity)
         DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
-                .apply { viewModel = readerViewModel }
+            .apply { viewModel = readerViewModel }
         netStateReceiver = NetChangeReceiver()
         val filter = IntentFilter().apply { addAction(ConnectivityManager.CONNECTIVITY_ACTION) }
         registerReceiver(netStateReceiver, filter)  //网络变化广播接收器
@@ -97,7 +97,7 @@ class ReaderActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == 1 && requestCode == 100){
+        if (requestCode == 1 && requestCode == 100) {
             launch { readerViewModel.reloadCurrentChapter() }
         }
     }

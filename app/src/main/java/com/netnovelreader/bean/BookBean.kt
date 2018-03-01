@@ -1,6 +1,5 @@
 package com.netnovelreader.bean
 
-import android.databinding.BaseObservable
 import android.databinding.ObservableField
 import android.graphics.Bitmap
 
@@ -11,6 +10,6 @@ data class BookBean(
     var bookname: ObservableField<String>,
     var latestChapter: ObservableField<String>,
     var downloadURL: ObservableField<String>,
-    var bitmap: ObservableField<Bitmap>,
+    var bitmap: ObservableField<Bitmap?>,
     var isUpdate: ObservableField<String>
 )

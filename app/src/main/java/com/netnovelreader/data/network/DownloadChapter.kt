@@ -28,7 +28,8 @@ class DownloadChapter(
         if (!chapterUrl.startsWith("http")) return ""
         File(dir, chapterName).takeIf { it.exists() }?.run { return this.readText() }
         var str = ParseHtml().getChapter(chapterUrl)
-        ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(chapterUrl)).catalogFilter
+        ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(chapterUrl))
+            .catalogFilter
             .takeIf { it.isNotEmpty() }
             ?.split("|")
             ?.forEach { str = str.replace(it, "") }

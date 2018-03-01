@@ -32,11 +32,11 @@ val NotDeleteNum = 3 //自动删除已读章节，但保留最近3章
 val THREAD_NUM = Runtime.getRuntime().availableProcessors() * 2 / 3 //线程数
 
 fun getSavePath(): String =
-        if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-            Environment.getExternalStorageDirectory().path + "/netnovelreader"
-        } else {
-            "/data/data/com.netnovelreader"
-        }
+    if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
+        Environment.getExternalStorageDirectory().path + "/netnovelreader"
+    } else {
+        "/data/data/com.netnovelreader"
+    }
 
 //例如: http://www.hello.com/world/fjwoj/foew.html  中截取 hello.com
 fun url2Hostname(url: String): String {
@@ -90,10 +90,14 @@ inline fun <T> Call<T>.enqueueCall(crossinline block: (t: T?) -> Unit) {
 }
 
 fun <T, E> RecyclerView.init(
-        adapter: RecyclerAdapter<in T, in E>,
-        decor: RecyclerView.ItemDecoration? = NovelItemDecoration(this.context),
-        layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this.context),
-        animator: RecyclerView.ItemAnimator = DefaultItemAnimator()
+    adapter: RecyclerAdapter<in T, in E>,
+    decor: RecyclerView.ItemDecoration? = NovelItemDecoration(context),
+    layoutManager: RecyclerView.LayoutManager = object : LinearLayoutManager(context) {
+        override fun supportsPredictiveItemAnimations(): Boolean {
+            return false
+        }
+    },
+    animator: RecyclerView.ItemAnimator = DefaultItemAnimator()
 ) {
     this.layoutManager = layoutManager
     this.adapter = adapter
@@ -101,25 +105,34 @@ fun <T, E> RecyclerView.init(
     if (decor != null) this.addItemDecoration(decor)
 }
 
-
-fun ShelfDao.replace(bean: ShelfBean) {
-    val old = getBookInfo(bean.bookName!!)
+fun ShelfDao.replace(
+    _id: Int? = null,
+    bookName: String?,
+    downloadUrl: String? = null,
+    readRecord: String? = null,
+    isUpdate: String? = null,
+    latestChapter: String? = null,
+    latestRead: Int? = null
+) {
+    val now = ShelfBean(_id, bookName, downloadUrl, readRecord, isUpdate, latestChapter, latestRead)
+    val old = getBookInfo(now.bookName!!)
     if (old == null) {
-        insert(bean)
+        insert(now)
     } else {
         ShelfBean(
-                bean._id ?: old._id,
-                bean.bookName,
-                bean.downloadUrl ?: old.downloadUrl,
-                bean.readRecord ?: old.readRecord,
-                bean.isUpdate ?: old.isUpdate,
-                bean.latestChapter ?: old.latestChapter,
-                bean.latestRead ?: old.latestRead
+            now._id ?: old._id,
+            now.bookName,
+            now.downloadUrl ?: old.downloadUrl,
+            now.readRecord ?: old.readRecord,
+            now.isUpdate ?: old.isUpdate,
+            now.latestChapter ?: old.latestChapter,
+            now.latestRead ?: old.latestRead
         ).apply { insert(this) }
     }
+
 }
 
 
 fun <T : ViewModel> FragmentActivity.obtainViewModel(clazz: Class<T>): T =
-        ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
-                .let { ViewModelProviders.of(this, it).get(clazz) }
+    ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
+        .let { ViewModelProviders.of(this, it).get(clazz) }

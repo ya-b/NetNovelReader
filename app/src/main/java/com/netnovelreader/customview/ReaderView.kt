@@ -8,7 +8,6 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -257,13 +256,13 @@ class ReaderView : View, GestureDetector.OnGestureListener {
             this.value = value
             when (property.name) {
                 "txtFontSize" -> {
-                    if(width < 1) return
+                    if (width < 1) return
                     val scale = maxPageNum.toFloat() / pageNum!!
                     flushTextArray()
                     pageNum = (maxPageNum / scale).toInt().takeIf { it != 0 } ?: 1
                 }
                 "text" -> {
-                    if(width < 1) return
+                    if (width < 1) return
                     flushTextArray()
                     pageNum = when (pageFlag) {
                         0 -> if (maxPageNum == 0) 0 else if (pageNum == 0) 1 else pageNum
@@ -302,7 +301,7 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     }
 
     @FunctionalInterface
-    interface OnPageChange{
+    interface OnPageChange {
         fun onPageChange(index: Int)
     }
 }

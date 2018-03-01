@@ -21,24 +21,24 @@ data class QueryNovel(
 
 
     data class BooksBean(
-            var _id: String? = null,
-            var isHasCp: Boolean = false,
-            var title: String? = null,
-            var aliases: String? = null,
-            var cat: String? = null,
-            var author: String? = null,
-            var site: String? = null,
-            var cover: String? = null,
-            var shortIntro: String? = null,
-            var lastChapter: String? = null,
-            var retentionRatio: Double = 0.toDouble(),
-            var banned: Int = 0,
-            var latelyFollower: Int = 0,
-            var wordCount: Int = 0,
-            var contentType: String? = null,
-            var superscript: String? = null,
-            var sizetype: Int = 0,
-            var highlight: HighlightBean? = null
+        var _id: String? = null,
+        var isHasCp: Boolean = false,
+        var title: String? = null,
+        var aliases: String? = null,
+        var cat: String? = null,
+        var author: String? = null,
+        var site: String? = null,
+        var cover: String? = null,
+        var shortIntro: String? = null,
+        var lastChapter: String? = null,
+        var retentionRatio: Double = 0.toDouble(),
+        var banned: Int = 0,
+        var latelyFollower: Int = 0,
+        var wordCount: Int = 0,
+        var contentType: String? = null,
+        var superscript: String? = null,
+        var sizetype: Int = 0,
+        var highlight: HighlightBean? = null
     )
 
     data class HighlightBean(var title: List<String>? = null)

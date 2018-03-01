@@ -38,28 +38,32 @@ class ShelfActivity : AppCompatActivity() {
 
     fun initView() {
         DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
-                .apply { viewModel = shelfViewModel }
+            .apply { viewModel = shelfViewModel }
         setSupportActionBar(shelfToolbar)
         shelfRecycler.init(
-                RecyclerAdapter(shelfViewModel.bookList, R.layout.item_shelf, shelfViewModel),
-                null
+            RecyclerAdapter(shelfViewModel.bookList, R.layout.item_shelf, shelfViewModel),
+            null
         )
         shelf_layout.setColorSchemeResources(R.color.gray)
     }
 
     fun initLiveData() {
-        shelfViewModel.notRefershCommand.observe(this, Observer { shelf_layout.isRefreshing = false })
+        shelfViewModel.notRefershCommand.observe(
+            this,
+            Observer { shelf_layout.isRefreshing = false })
         shelfViewModel.readBookCommand.observe(this, Observer {
             startActivity(Intent(this, ReaderActivity::class.java)
-                    .apply { this.putExtra("bookname", it) })
+                .apply { this.putExtra("bookname", it) })
         })
         shelfViewModel.showDialogCommand.observe(this, Observer {
             AlertDialog.Builder(this@ShelfActivity)
-                    .setTitle(getString(R.string.deleteBook).replace("book", it!!))
-                    .setPositiveButton(R.string.yes, { _, _ -> launch { shelfViewModel.deleteBook(it) } })
-                    .setNegativeButton(R.string.no, null)
-                    .create()
-                    .show()
+                .setTitle(getString(R.string.deleteBook).replace("book", it!!))
+                .setPositiveButton(
+                    R.string.yes,
+                    { _, _ -> launch { shelfViewModel.deleteBook(it) } })
+                .setNegativeButton(R.string.no, null)
+                .create()
+                .show()
         })
     }
 
@@ -107,7 +111,7 @@ class ShelfActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == 1 && resultCode == 10){
+        if (requestCode == 1 && resultCode == 10) {
             val intent = intent
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             finish()
@@ -120,9 +124,9 @@ class ShelfActivity : AppCompatActivity() {
      * 请求权限的结果
      */
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
         if (requestCode == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -137,8 +141,8 @@ class ShelfActivity : AppCompatActivity() {
 
     fun checkPermission(permission: String): Boolean {
         return ActivityCompat.checkSelfPermission(
-                this,
-                permission
+            this,
+            permission
         ) == PackageManager.PERMISSION_GRANTED
     }
 

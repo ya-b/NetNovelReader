@@ -4,7 +4,9 @@
     xmlns:tool="http://schemas.android.com/tools">
 
     <data>
+
         <import type="android.view.View" />
+
         <variable
             name="viewModel"
             type="com.netnovelreader.viewmodel.SearchViewModel" />
@@ -69,8 +71,8 @@
             android:id="@+id/tvSearchLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
             android:layout_marginStart="10dp"
+            android:layout_marginTop="12dp"
             android:gravity="center"
             android:text="大家都在搜"
             android:textColor="@color/black"

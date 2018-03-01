@@ -10,6 +10,6 @@ import android.databinding.ObservableField
  */
 
 data class FilterBean(
-        var minorType: ObservableField<String>,
-        var selected: ObservableBoolean
+    var minorType: ObservableField<String>,
+    var selected: ObservableBoolean
 )

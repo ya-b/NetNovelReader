@@ -3,8 +3,6 @@ package com.netnovelreader.viewmodel
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.databinding.ObservableArrayList
-import android.databinding.ObservableField
-import android.util.Log
 import com.netnovelreader.bean.ObservableSiteBean
 import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.data.db.ReaderDbManager
@@ -18,7 +16,7 @@ class SettingViewModel(val context: Application) : AndroidViewModel(context) {
     val editSiteCommand = ReaderLiveData<String>()                   //编辑站点
     val deleteAlertCommand = ReaderLiveData<String>()                //删除对话框
 
-    fun showSiteListTask(){
+    fun showSiteListTask() {
         siteList.clear()
         siteList.addAll(ReaderDbManager.getRoomDB().sitePreferenceDao().getAll())
     }
@@ -38,7 +36,7 @@ class SettingViewModel(val context: Application) : AndroidViewModel(context) {
         siteList.first { it.hostname == hostName }.also { siteList.remove(it) }
     }
 
-    fun exitTask(){
+    fun exitTask() {
         exitCommand.call()
     }
 }

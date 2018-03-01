@@ -83,18 +83,18 @@ class DownloadService : IntentService {
 
     private fun openNotification() {
         builder = NotificationCompat.Builder(this, "reader")
-                .setTicker(getString(R.string.app_name))
-                .setContentTitle(getString(R.string.prepare_download))
-                .setSmallIcon(R.drawable.notification_icon)
+            .setTicker(getString(R.string.app_name))
+            .setContentTitle(getString(R.string.prepare_download))
+            .setSmallIcon(R.drawable.notification_icon)
         mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
 
     fun updateNotification(progress: Int, max: Int) {
         val str = if (remainder != 0) ",${getString(R.string.wait4download)}"
-                .replace("nn", "$remainder") else ""
+            .replace("nn", "$remainder") else ""
         builder?.setProgress(max, progress, false)
-                ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
+            ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
         launch(UI) { mNotificationManager?.notify(NOTIFYID, builder?.build()) }
     }
 

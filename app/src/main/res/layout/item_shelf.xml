@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:onClick="@{() -> clickEvent.readBookTask(itemDetail.bookname??``)}"
-            android:onLongClick="@{() -> clickEvent.deleteBookTask(itemDetail.bookname??``)}">
+            android:onLongClick="@{() -> clickEvent.askDeleteTask(itemDetail.bookname??``)}">
 
             <ImageView
                 android:id="@+id/bookCover"

@@ -1,4 +1,4 @@
-package com.netnovelreader;
+package com.netnovelreader.common;
 
 /**
  * 文件： A

@@ -2,7 +2,9 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
-        <import type="com.netnovelreader.bean.ChapterChangeType"/>
+
+        <import type="com.netnovelreader.bean.ChapterChangeType" />
+
         <variable
             name="itemDetail"
             type="com.netnovelreader.bean.ReaderBean" />

@@ -17,10 +17,14 @@ import com.netnovelreader.viewmodel.SettingViewModel
 class SiteEditorFragment : Fragment() {
     val settingViewModel by lazy { activity?.obtainViewModel(SettingViewModel::class.java) }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val binding = DataBindingUtil.inflate<FragmentSiteEditorBinding>(inflater,
-                R.layout.fragment_site_editor, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val binding = DataBindingUtil.inflate<FragmentSiteEditorBinding>(
+            inflater,
+            R.layout.fragment_site_editor, container, false
+        )
         binding.siteBean = settingViewModel?.editedSite
         return binding.root.apply { this.setBackgroundColor(Color.WHITE) }
     }

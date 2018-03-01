@@ -5,7 +5,6 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import com.netnovelreader.R
 import com.netnovelreader.common.PreferenceManager
 import com.netnovelreader.common.obtainViewModel
@@ -20,7 +19,8 @@ class SettingActivity : AppCompatActivity() {
     val settingViewModel by lazy { obtainViewModel(SettingViewModel::class.java) }
     val SP = "SitePreferenceFragment"
     val SE = "SiteEditorFragment"
-    var mFragment: Fragment? = null
+    var mTemp: Fragment? = null
+    var siteListFg: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,28 +31,31 @@ class SettingActivity : AppCompatActivity() {
 
     fun initView() {
         DataBindingUtil.setContentView<ActivitySettingBinding>(this, R.layout.activity_setting)
-                .apply { viewModel = settingViewModel }
+            .apply { viewModel = settingViewModel }
         if (intent.getIntExtra("type", 0) == 0) {
             setSupportActionBar(settingToolbar.apply { title = getString(R.string.settings) })
-            fragmentManager.beginTransaction().add(R.id.settingFrameLayout, SettingFragment()).commit()
+            fragmentManager.beginTransaction().add(R.id.settingFrameLayout, SettingFragment())
+                .commit()
         } else {
             setSupportActionBar(settingToolbar.apply { title = getString(R.string.edit_site) })
-            mFragment = SitePreferenceFragment()
-            supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, mFragment, SP).commit()
+            siteListFg = SitePreferenceFragment().also { mTemp = it }
+            supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, siteListFg, SP)
+                .commit()
         }
     }
 
     fun initLiveData() {
         settingViewModel.exitCommand.observe(this, Observer {
-            if (mFragment?.tag == SE) {
-                supportFragmentManager.beginTransaction().remove(mFragment).commit()
+            if (mTemp?.tag == SE) {
+                supportFragmentManager.beginTransaction().remove(mTemp).show(siteListFg).commit()
             } else {
                 finish()
             }
         })
         settingViewModel.editSiteCommand.observe(this, Observer {
-            mFragment = SiteEditorFragment()
-            supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, mFragment, SE).commit()
+            mTemp = SiteEditorFragment()
+            supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, mTemp, SE)
+                .hide(siteListFg).commit()
         })
     }
 

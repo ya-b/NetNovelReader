@@ -4,9 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="viewModel"
-            type="com.netnovelreader.viewmodel.SettingViewModel"/>
+            type="com.netnovelreader.viewmodel.SettingViewModel" />
     </data>
 
     <LinearLayout
@@ -28,9 +29,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                app:navigationOnClick="@{() -> viewModel.exitTask()}"
-                app:navigationIcon="@drawable/icon_back"
+                android:navigationOnClick="@{() -> viewModel.exitTask()}"
                 app:layout_scrollFlags="scroll"
+                app:navigationIcon="@drawable/icon_back"
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         </android.support.design.widget.AppBarLayout>

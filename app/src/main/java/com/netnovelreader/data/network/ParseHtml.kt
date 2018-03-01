@@ -18,7 +18,8 @@ class ParseHtml {
      */
     @Throws(IOException::class)
     fun getChapter(url: String): String {
-        val selector = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(url)).chapterSelector
+        val selector = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(url))
+            .chapterSelector
         val txt = if (selector.isEmpty() || selector.length < 2) {
             getChapterWithOutSelector(url)
         } else {
@@ -33,10 +34,11 @@ class ParseHtml {
      */
     @Throws(IOException::class)
     fun getCatalog(url: String): LinkedHashMap<String, String> {
-        val selector = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(url)).catalogSelector
+        val selector = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(url))
+            .catalogSelector
         val catalog = LinkedHashMap<String, String>()
         val list = Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
-                .select(selector).select("a")
+            .select(selector).select("a")
 
         //Logger.i("解析的目录网页来源为：【$url】,元素选择器为：【$selector】")
         list.forEach {

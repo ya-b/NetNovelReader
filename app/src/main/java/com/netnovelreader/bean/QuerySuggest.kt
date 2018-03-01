@@ -18,9 +18,9 @@ data class QuerySuggest(
 
 {
     data class KeywordsBean(
-            var text: String? = null,
-            var tag: String? = null,
-            var contentType: String? = null
+        var text: String? = null,
+        var tag: String? = null,
+        var contentType: String? = null
     )
     /**
      * text : 腹黑

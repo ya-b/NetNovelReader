@@ -3,13 +3,9 @@ package com.netnovelreader.viewmodel
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.databinding.ObservableArrayList
-import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.support.v4.content.ContextCompat
-import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication.Companion.threadPool
 import com.netnovelreader.bean.BookBean
 import com.netnovelreader.common.IMAGENAME
@@ -17,7 +13,6 @@ import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.replace
 import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.ShelfBean
 import com.netnovelreader.data.network.DownloadCatalog
 import kotlinx.coroutines.experimental.launch
 import java.io.File
@@ -40,15 +35,15 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
         launch(threadPool) {
             //取消书籍更新标志,设为最近阅读
             val latestRead = ReaderDbManager.getRoomDB().shelfDao().getLatestReaded() ?: 0
-            ReaderDbManager.getRoomDB().shelfDao().replace(ShelfBean(bookName = bookname,
-                    isUpdate = "",
-                    latestRead = latestRead + 1)
+            ReaderDbManager.getRoomDB().shelfDao().replace(
+                bookName = bookname, isUpdate = "", latestRead = latestRead + 1
             )
+
         }
         readBookCommand.value = bookname
     }
 
-    fun deleteBookTask(bookname: String): Boolean {
+    fun askDeleteTask(bookname: String): Boolean {
         showDialogCommand.value = bookname
         return true
     }
@@ -56,7 +51,8 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     //检查书籍是否有更新
     fun updateBooks() = launch {
         notRefershCommand.call()
-        System.currentTimeMillis().takeIf { it - timeTemp > 2000 }?.also { timeTemp = it } ?: return@launch
+        System.currentTimeMillis().takeIf { it - timeTemp > 2000 }?.also { timeTemp = it }
+                ?: return@launch
         bookList.forEach {
             updateCatalog(it)
             val list = ReaderDbManager.getRoomDB().shelfDao().getAll()
@@ -81,11 +77,11 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
         val temp = ArrayList<BookBean>()
         list.forEach {
             val bookBean = BookBean(
-                    ObservableField(it.bookName ?: ""),
-                    ObservableField(it.latestChapter ?: ""),
-                    ObservableField(it.downloadUrl ?: ""),
-                    ObservableField(getBitmap(it.bookName ?: "")),
-                    ObservableField(it.isUpdate ?: "")
+                ObservableField(it.bookName ?: ""),
+                ObservableField(it.latestChapter ?: ""),
+                ObservableField(it.downloadUrl ?: ""),
+                ObservableField(getBitmap(it.bookName ?: "")),
+                ObservableField(it.isUpdate ?: "")
             )
             if (bookDirList?.contains(bookBean.bookname.get()) == true) {
                 temp.add(bookBean)
@@ -103,16 +99,11 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     //删除书籍
     fun deleteBook(bookname: String) {
         ReaderDbManager.getRoomDB().shelfDao().apply {
-            this.getBookInfo(bookname)?.also {
-                ReaderDbManager.dropTable(it.bookName ?: "")
+            getBookInfo(bookname)?.also {
+                it.bookName?.let { ReaderDbManager.dropTable(it) }
                 File(getSavePath(), it.bookName).deleteRecursively()
-                for (i in 0 until bookList.size) {
-                    if (bookList[i].bookname.get() == bookname) {
-                        bookList.removeAt(i)
-                        break
-                    }
-                }
-                this.delete(it)
+                bookList.filter { it.bookname.get() == bookname }.let { bookList.removeAll(it) }
+                delete(it)
             }
         }
     }
@@ -126,15 +117,8 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     //书架将要显示的书籍封面图片
-    private fun getBitmap(bookname: String): Bitmap {
-        val file = File("${getSavePath()}/$bookname", IMAGENAME)
-        return if (file.exists()) {
-            BitmapFactory.decodeFile(file.path)
-        } else {
-            ((ContextCompat.getDrawable(
-                    context,
-                    R.drawable.cover_default
-            ) as BitmapDrawable)).bitmap
-        }
-    }
+    private fun getBitmap(bookname: String): Bitmap? =
+        File("${getSavePath()}/$bookname", IMAGENAME)
+            .takeIf { it.exists() }
+            ?.let { BitmapFactory.decodeFile(it.path) }
 }

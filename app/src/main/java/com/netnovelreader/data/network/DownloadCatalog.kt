@@ -4,7 +4,6 @@ import com.netnovelreader.common.UPDATEFLAG
 import com.netnovelreader.common.replace
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.ShelfBean
 import java.io.IOException
 
 /**
@@ -19,7 +18,8 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     fun download() {
         ReaderDbManager.createTable(tableName)
         val cacheMap = CatalogCache.cache.get(catalogUrl)?.catalogMap
-        val map = (if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
+        val map =
+            (if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
                 .let { filtExistsInSql(it) }
         var latestChapter: String? = null
         ReaderDbManager.getRoomDB().runInTransaction {
@@ -28,11 +28,12 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
                 latestChapter = it.key
             }
         }
-        val dbLatestChapter = ReaderDbManager.getRoomDB().shelfDao().getBookInfo(tableName)?.latestChapter
-        if(latestChapter != null && dbLatestChapter != latestChapter){
+        val dbLatestChapter =
+            ReaderDbManager.getRoomDB().shelfDao().getBookInfo(tableName)?.latestChapter
+        if (latestChapter != null && dbLatestChapter != latestChapter) {
             latestChapter?.let {
                 ReaderDbManager.getRoomDB().shelfDao().replace(
-                        ShelfBean(bookName = tableName, isUpdate = UPDATEFLAG, latestChapter = it)
+                    bookName = tableName, isUpdate = UPDATEFLAG, latestChapter = it
                 )
             }
         }
@@ -44,7 +45,9 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     @Throws(IOException::class)
     fun getMapFromNet(catalogUrl: String): LinkedHashMap<String, String> {
         val map = ParseHtml().getCatalog(catalogUrl)
-        val filter = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(catalogUrl)).catalogFilter
+        val filter =
+            ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(catalogUrl))
+                .catalogFilter
         if (filter.isNotEmpty()) {
             filtCatalog(map, filter.split("|"))
         }
@@ -54,8 +57,12 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     /**
      * 过滤目录的某些章节，从map中过滤掉filter
      */
-    fun filtCatalog(map: LinkedHashMap<String, String>, filters: List<String>): LinkedHashMap<String, String> {
-        map.filter { entry -> filters.filter { entry.key.contains(it) }.size > 0 }.forEach{ map.remove(it.key) }
+    fun filtCatalog(
+        map: LinkedHashMap<String, String>,
+        filters: List<String>
+    ): LinkedHashMap<String, String> {
+        map.filter { entry -> filters.filter { entry.key.contains(it) }.size > 0 }
+            .forEach { map.remove(it.key) }
         return map
     }
 

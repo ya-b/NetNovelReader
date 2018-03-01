@@ -7,13 +7,11 @@ import android.databinding.*
 import android.graphics.Color
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
-import android.util.Log
 import com.netnovelreader.R
 import com.netnovelreader.bean.ChapterChangeType
 import com.netnovelreader.bean.ReaderBean
 import com.netnovelreader.common.*
 import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.ShelfBean
 import com.netnovelreader.data.network.ChapterCache
 import com.netnovelreader.data.network.DownloadCatalog
 import kotlinx.coroutines.experimental.async
@@ -29,6 +27,13 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 
 class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
+    companion object {
+        @JvmStatic
+        val HEAD_VIEW = "headView"
+        const val Font_SETTING = "fontSetting"
+        const val BG_SETTING = "backgroundSetting"
+        const val FOOT_VIEW = "footView"
+    }
 
     val catalog by lazy { ObservableArrayList<ReaderBean>() }               //目录
     val text by lazy { ObservableField<String>("") }                   //一页显示的内容
@@ -36,10 +41,15 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     val fontType by lazy { ObservableField<Typeface>(Typeface.DEFAULT) }    //字体
     val fontColor by lazy { ObservableInt(Color.BLACK) }                    //字体颜色
     val backgroundColor by lazy { ObservableInt(R.color.read_font_default) }//背景颜色
-    val isHeadViewShow by lazy { ObservableBoolean(false) }            //是否显示HeadView
-    val isFontSettingShow by lazy { ObservableBoolean(false) }         //是否显示FontSetting
-    val isBackgroundSetingShow by lazy { ObservableBoolean(false) }    //是否显示BackgroundSeting
-    val isFootViewShow by lazy { ObservableBoolean(false) }            //是否显示FootView
+    val isViewShow by lazy {
+        mapOf(
+            Pair(HEAD_VIEW, ObservableBoolean(false)),                //是否显示HeadView
+            Pair(Font_SETTING, ObservableBoolean(false)),             //是否显示FontSetting
+            Pair(BG_SETTING, ObservableBoolean(false)),               //是否显示BackgroundSeting
+            Pair(FOOT_VIEW, ObservableBoolean(false))
+        )                //是否显示FootView
+    }
+
     val fontSizeSelected = List(5) { ObservableBoolean(false) }   //字体大小设置Button是否选中
     val fontTypeSelected = List(5) { ObservableBoolean(false) }   //字体大小设置Button是否选中
     val isLoading by lazy { ObservableBoolean(true) }                  //是否显示加载进度条
@@ -56,7 +66,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
 
     //获取章节内容
     fun getChapter(type: ChapterChangeType, chapterName: String?) {
-        if(showDialogCommand.value == true) showDialogCommand.value = false
+        if (showDialogCommand.value == true) showDialogCommand.value = false
         when (type) {
             ChapterChangeType.NEXT -> if (chapterNum.get() >= maxChapterNum) return else chapterNum.incrementAndGet()
             ChapterChangeType.PREVIOUS -> if (chapterNum.get() < 2) return else chapterNum.decrementAndGet()
@@ -106,10 +116,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         if (chapterNum.get() < 1) return
         launch {
             ReaderDbManager.getRoomDB().shelfDao().replace(
-                ShelfBean(
-                    bookName = bookName,
-                    readRecord = "$chapterNum#${if (pageNum < 1) 1 else pageNum}"
-                )
+                bookName = bookName, readRecord = "$chapterNum#${if (pageNum < 1) 1 else pageNum}"
             )
         }
     }
@@ -129,7 +136,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         PreferenceManager.isAutoRemove(context).takeIf { it }?.apply {
             getRecord()[0].takeIf { it > NotDeleteNum }?.also {
                 ReaderDbManager.setReaded(bookName, it - NotDeleteNum)
-                        .forEach { File("${getSavePath()}/$bookName/$it").delete() }
+                    .forEach { File("${getSavePath()}/$bookName/$it").delete() }
             }
         }
     }
@@ -145,58 +152,43 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     fun nextChapterTask() {
-        isHeadViewShow.set(false)
-        isFontSettingShow.set(false)
-        isBackgroundSetingShow.set(false)
-        isFootViewShow.set(false)
+        isViewShow.forEach { it.value.set(false) }
         launch { getChapter(ChapterChangeType.NEXT, null) }
     }
 
     fun previousChapterTask() {
-        isHeadViewShow.set(false)
-        isFontSettingShow.set(false)
-        isBackgroundSetingShow.set(false)
-        isFootViewShow.set(false)
+        isViewShow.forEach { it.value.set(false) }
         launch { getChapter(ChapterChangeType.PREVIOUS, null) }
     }
 
     fun centerClickTask() {
-        if (isFootViewShow.get()) {
-            isHeadViewShow.set(false)
-            isFontSettingShow.set(false)
-            isBackgroundSetingShow.set(false)
-            isFootViewShow.set(false)
+        if (isViewShow[FOOT_VIEW]!!.get() == true) {
+            isViewShow.forEach { it.value.set(false) }
         } else {
-            isFootViewShow.set(true)
-            isHeadViewShow.set(true)
+            isViewShow[FOOT_VIEW]!!.set(true)
+            isViewShow[HEAD_VIEW]!!.set(true)
         }
     }
 
     fun changeSourceTask() {
-        isHeadViewShow.set(false)
-        isFontSettingShow.set(false)
-        isBackgroundSetingShow.set(false)
-        isFootViewShow.set(false)
+        isViewShow.forEach { it.value.set(false) }
         changeSourceCommand.value = chapterName
     }
 
     fun footViewClickEvent(which: String) {
         when (which) {
             "catalogButton" -> {
-                isHeadViewShow.set(false)
-                isFontSettingShow.set(false)
-                isBackgroundSetingShow.set(false)
-                isFootViewShow.set(false)
+                isViewShow.forEach { it.value.set(false) }
                 launch { getCatalog() }
                 showDialogCommand.value = true
             }
             "fontSizeButton" -> {
-                isBackgroundSetingShow.set(false)
-                isFontSettingShow.set(!isFontSettingShow.get())
+                isViewShow[BG_SETTING]!!.set(false)
+                isViewShow[Font_SETTING]!!.set(!isViewShow[Font_SETTING]!!.get())
             }
             "backgroundButton" -> {
-                isFontSettingShow.set(false)
-                isBackgroundSetingShow.set(!isBackgroundSetingShow.get())
+                isViewShow[Font_SETTING]!!.set(false)
+                isViewShow[BG_SETTING]!!.set(!isViewShow[BG_SETTING]!!.get())
             }
         }
     }

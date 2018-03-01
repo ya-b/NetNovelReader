@@ -1,6 +1,5 @@
 package com.netnovelreader.bean
 
-import android.databinding.BaseObservable
 import android.databinding.ObservableField
 
 /**
@@ -11,4 +10,4 @@ data class SearchBean(
     val url: ObservableField<String>,
     val latestChapter: ObservableField<String?>,
     val catalogMap: LinkedHashMap<String, String>
-) : BaseObservable()
+)

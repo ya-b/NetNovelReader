@@ -28,9 +28,14 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kapt {
+        arguments {
+            arg("room.schemaLocation", "$projectDir/schemas".toString())
+        }
+    }
     androidExtensions {
-    	experimental = true
-	}
+        experimental = true
+    }
 }
 
 dependencies {

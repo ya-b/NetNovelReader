@@ -60,12 +60,12 @@ object ApiManager {
 
         @GET("http://api.zhuishushenqi.com/book/by-categories?")
         fun seachBookListByTypeAndMajor(
-                @Query("gender") gender: String? = "male",
-                @Query("type") type: String?,
-                @Query("major") major: String?,
-                @Query("minor") minor: String? = "",
-                @Query("start") start: String? = "0",
-                @Query("limit") limit: String? = "50"
+            @Query("gender") gender: String? = "male",
+            @Query("type") type: String?,
+            @Query("major") major: String?,
+            @Query("minor") minor: String? = "",
+            @Query("start") start: String? = "0",
+            @Query("limit") limit: String? = "50"
         ): Call<NovelList>
 
 

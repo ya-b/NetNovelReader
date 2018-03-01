@@ -7,9 +7,11 @@
 
         <import type="android.view.View" />
 
+        <import type="com.netnovelreader.viewmodel.ReaderViewModel" />
+
         <variable
             name="viewModel"
-            type="com.netnovelreader.viewmodel.ReaderViewModel" />
+            type="ReaderViewModel" />
     </data>
 
     <android.support.constraint.ConstraintLayout
@@ -22,19 +24,19 @@
             android:id="@+id/readerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@{viewModel.text}"
             android:background="@{viewModel.backgroundColor}"
+            android:doDrawPrepare="@{() -> viewModel.drawPrepareTask()}"
+            android:nextChapter="@{() -> viewModel.nextChapterTask()}"
+            android:onCenterClick="@{() -> viewModel.centerClickTask()}"
+            android:onPageChange="@{(index) -> viewModel.setRecord(index)}"
+            android:previousChapter="@{() -> viewModel.previousChapterTask()}"
+            android:text="@{viewModel.text}"
             android:textColor="@{viewModel.fontColor}"
+            android:textFontType="@{viewModel.fontType}"
             android:textSize="@{viewModel.fontSize}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:doDrawPrepare="@{() -> viewModel.drawPrepareTask()}"
-            app:nextChapter="@{() -> viewModel.nextChapterTask()}"
-            app:onCenterClick="@{() -> viewModel.centerClickTask()}"
-            app:onPageChange="@{(index) -> viewModel.setRecord(index)}"
-            app:previousChapter="@{() -> viewModel.previousChapterTask()}"
-            app:textFontType="@{viewModel.fontType}" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!--顶部-->
         <android.support.constraint.ConstraintLayout
@@ -43,7 +45,7 @@
             android:layout_height="wrap_content"
             android:background="@color/my_dark"
             android:padding="5dp"
-            android:visibility="@{viewModel.isHeadViewShow ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewModel.isViewShow[ReaderViewModel.HEAD_VIEW] ? View.VISIBLE : View.GONE}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -67,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/my_dark"
-            android:visibility="@{viewModel.isFontSettingShow ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewModel.isViewShow[ReaderViewModel.Font_SETTING] ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toTopOf="@+id/footView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -158,8 +160,8 @@
                 android:layout_weight="1"
                 android:background="@{viewModel.fontTypeSelected[0] ? @drawable/button_select_bg : @drawable/button_bg}"
                 android:onClick="@{() -> viewModel.fontTypeChangeEvent(`default`)}"
-                android:textColor="@{viewModel.fontTypeSelected[0] ? @color/white : @color/gray}"
                 android:text="系统款"
+                android:textColor="@{viewModel.fontTypeSelected[0] ? @color/white : @color/gray}"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/tv_beiweikai"
@@ -173,8 +175,8 @@
                 android:layout_weight="1"
                 android:background="@{viewModel.fontTypeSelected[1] ? @drawable/button_select_bg : @drawable/button_bg}"
                 android:onClick="@{() -> viewModel.fontTypeChangeEvent(`beiweikai`)}"
-                android:textColor="@{viewModel.fontTypeSelected[1] ? @color/white : @color/gray}"
                 android:text="北魏凯"
+                android:textColor="@{viewModel.fontTypeSelected[1] ? @color/white : @color/gray}"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toStartOf="@id/tv_bysong"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -187,8 +189,8 @@
                 android:layout_weight="1"
                 android:background="@{viewModel.fontTypeSelected[2] ? @drawable/button_select_bg : @drawable/button_bg}"
                 android:onClick="@{() -> viewModel.fontTypeChangeEvent(`bysong`)}"
-                android:textColor="@{viewModel.fontTypeSelected[2] ? @color/white : @color/gray}"
                 android:text="繁宋体"
+                android:textColor="@{viewModel.fontTypeSelected[2] ? @color/white : @color/gray}"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toStartOf="@id/tv_fzkatong"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -201,8 +203,8 @@
                 android:layout_weight="1"
                 android:background="@{viewModel.fontTypeSelected[3] ? @drawable/button_select_bg : @drawable/button_bg}"
                 android:onClick="@{() -> viewModel.fontTypeChangeEvent(`fzkatong`)}"
-                android:textColor="@{viewModel.fontTypeSelected[3] ? @color/white : @color/gray}"
                 android:text="卡通型"
+                android:textColor="@{viewModel.fontTypeSelected[3] ? @color/white : @color/gray}"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toStartOf="@id/tv_zhulang"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -215,8 +217,8 @@
                 android:layout_weight="1"
                 android:background="@{viewModel.fontTypeSelected[4] ? @drawable/button_select_bg : @drawable/button_bg}"
                 android:onClick="@{() -> viewModel.fontTypeChangeEvent(`chenguang`)}"
-                android:textColor="@{viewModel.fontTypeSelected[4] ? @color/white : @color/gray}"
                 android:text="晨光体"
+                android:textColor="@{viewModel.fontTypeSelected[4] ? @color/white : @color/gray}"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -229,7 +231,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/my_dark"
-            android:visibility="@{viewModel.isBackgroundSetingShow ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewModel.isViewShow[ReaderViewModel.BG_SETTING] ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toTopOf="@+id/footView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -341,7 +343,7 @@
             android:background="@color/my_dark"
             android:orientation="horizontal"
             android:paddingTop="8dp"
-            android:visibility="@{viewModel.isFootViewShow ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewModel.isViewShow[ReaderViewModel.FOOT_VIEW] ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent">

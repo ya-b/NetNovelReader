@@ -20,7 +20,6 @@ import com.netnovelreader.bean.SearchHotWord
 import com.netnovelreader.common.*
 import com.netnovelreader.data.db.ReaderDatabase
 import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.ShelfBean
 import com.netnovelreader.data.db.SitePreferenceBean
 import com.netnovelreader.data.network.ApiManager
 import com.netnovelreader.data.network.CatalogCache
@@ -48,30 +47,31 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     val selectHotWordEvent = ReaderLiveData<String>()               //选中的hotword的text
     val showBookDetailCommand = ReaderLiveData<NovelIntroduce>()      //点击的item的所需数据NovelIntroduce
     val showDialogCommand = ReaderLiveData<SearchBean>()              //点击的item的下载事件所需数据
-    val downLoadChapterCommand = ReaderLiveData<Array<String>>()      //启动[DownloadService]的ExtraString
+    val downLoadChapterCommand =
+        ReaderLiveData<Array<String>>()      //启动[DownloadService]的ExtraString
     private var queryTextTemp = ""
     private var queryTimeTemp = System.currentTimeMillis()
 
     private val colorArray by lazy {
         //搜索热词标签的背景颜色(从中选取)
         listOf(
-                R.color.hot_label_bg1,
-                R.color.hot_label_bg2,
-                R.color.hot_label_bg3,
-                R.color.hot_label_bg4,
-                R.color.hot_label_bg5,
-                R.color.hot_label_bg6,
-                R.color.hot_label_bg7,
-                R.color.hot_label_bg8,
-                R.color.hot_label_bg9,
-                R.color.hot_label_bg10,
-                R.color.hot_label_bg11,
-                R.color.hot_label_bg12,
-                R.color.hot_label_bg13,
-                R.color.hot_label_bg14,
-                R.color.hot_label_bg15,
-                R.color.hot_label_bg16,
-                R.color.hot_label_bg17
+            R.color.hot_label_bg1,
+            R.color.hot_label_bg2,
+            R.color.hot_label_bg3,
+            R.color.hot_label_bg4,
+            R.color.hot_label_bg5,
+            R.color.hot_label_bg6,
+            R.color.hot_label_bg7,
+            R.color.hot_label_bg8,
+            R.color.hot_label_bg9,
+            R.color.hot_label_bg10,
+            R.color.hot_label_bg11,
+            R.color.hot_label_bg12,
+            R.color.hot_label_bg13,
+            R.color.hot_label_bg14,
+            R.color.hot_label_bg15,
+            R.color.hot_label_bg16,
+            R.color.hot_label_bg17
         ).map { ContextCompat.getColor(context, it) }
     }
 
@@ -84,7 +84,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
                 null
             }
             hotWordsTemp?.filter { it.word != null && it.word!!.length > 1 }
-                    ?.takeIf { it.size > 50 }?.run { hotWordsTemp = this }
+                ?.takeIf { it.size > 50 }?.run { hotWordsTemp = this }
         }
         hotWordsTemp = hotWordsTemp?.shuffled() ?: return@launch
         val colorSource = colorArray.shuffled()
@@ -117,18 +117,18 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         resultList.clear()
         CatalogCache.clearCache()
         ReaderDbManager.getRoomDB().sitePreferenceDao().getAll().apply { isLoading.set(!isEmpty()) }
-                .forEach {
-                    launch(threadPool) {
-                        // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
-                        try {
-                            //查询所有搜索站点设置，然后逐个搜索
-                            searchBookFromSite(bookname!!, it, searchCode, chapterName)
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
-                        isLoading.set(false)
+            .forEach {
+                launch(threadPool) {
+                    // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
+                    try {
+                        //查询所有搜索站点设置，然后逐个搜索
+                        searchBookFromSite(bookname!!, it, searchCode, chapterName)
+                    } catch (e: IOException) {
+                        e.printStackTrace()
                     }
+                    isLoading.set(false)
                 }
+            }
         queryTextTemp = bookname!!
         queryTimeTemp = System.currentTimeMillis()
     }
@@ -143,21 +143,22 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
      */
     fun downloadBook(bookname: String, catalogUrl: String, chapterName: String?, which: Int) =
         launch {
-        ReaderDbManager.getRoomDB().shelfDao().replace(ShelfBean(bookName = bookname, downloadUrl = catalogUrl))
-        saveBookImage(bookname)
-        if (isChangeSource.get()) {
-            delChapterAfterSrc(bookname, chapterName!!)
+            ReaderDbManager.getRoomDB().shelfDao()
+                .replace(bookName = bookname, downloadUrl = catalogUrl)
+            saveBookImage(bookname)
+            if (isChangeSource.get()) {
+                delChapterAfterSrc(bookname, chapterName!!)
+            }
+            try {
+                DownloadCatalog(bookname, catalogUrl).download()
+                toastMessage.value = this@SearchViewModel.context.getString(R.string.catalog_finish)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            if (which == Dialog.BUTTON_POSITIVE) {
+                downLoadChapterCommand.value = arrayOf(bookname, catalogUrl)
+            }
         }
-        try {
-            DownloadCatalog(bookname, catalogUrl).download()
-            toastMessage.value = this@SearchViewModel.context.getString(R.string.catalog_finish)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        if (which == Dialog.BUTTON_POSITIVE) {
-            downLoadChapterCommand.value = arrayOf(bookname, catalogUrl)
-        }
-    }
 
     fun showDialogTask(itemDetail: SearchBean) {
         showDialogCommand.value = itemDetail
@@ -192,9 +193,9 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     private fun searchBookSuggest(queryText: String): Cursor? = try {
         val suggestCursor = MatrixCursor(arrayOf("text", "_id"))
         ApiManager.mAPI.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
-                .execute().body()?.keywords?.filter { it.tag == "bookname" }
-                ?.map { it.text }?.toHashSet()
-                ?.forEachIndexed { index, s -> suggestCursor.addRow(arrayOf(s, index)) }
+            .execute().body()?.keywords?.filter { it.tag == "bookname" }
+            ?.map { it.text }?.toHashSet()
+            ?.forEachIndexed { index, s -> suggestCursor.addRow(arrayOf(s, index)) }
         suggestCursor
     } catch (e: IOException) {
         null
@@ -203,23 +204,23 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     //从具体网站搜索，并添加到resultList
     @Throws(IOException::class)
     private fun searchBookFromSite(
-            bookname: String,
-            siteinfo: SitePreferenceBean,
-            reqCode: Int,
-            chapterName: String?
+        bookname: String,
+        siteinfo: SitePreferenceBean,
+        reqCode: Int,
+        chapterName: String?
     ) {
         val result = SearchBook().search(
-                siteinfo.searchUrl.replace(
-                        ReaderDatabase.SEARCH_NAME,
-                        URLEncoder.encode(bookname, siteinfo.charset)
-                ),
-                siteinfo.redirectFileld,
-                siteinfo.redirectUrl,
-                siteinfo.noRedirectUrl,
-                siteinfo.redirectName,
-                siteinfo.noRedirectName,
-                siteinfo.redirectImage,
-                siteinfo.noRedirectImage
+            siteinfo.searchUrl.replace(
+                ReaderDatabase.SEARCH_NAME,
+                URLEncoder.encode(bookname, siteinfo.charset)
+            ),
+            siteinfo.redirectFileld,
+            siteinfo.redirectUrl,
+            siteinfo.noRedirectUrl,
+            siteinfo.redirectName,
+            siteinfo.noRedirectName,
+            siteinfo.redirectImage,
+            siteinfo.noRedirectImage
         )
         if (searchCode == reqCode && result[1].isNotEmpty()) { //result[1]==bookname,result[0]==catalogurl
             CatalogCache.addCatalog(result[1], result[0])
@@ -237,8 +238,8 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     private fun delChapterAfterSrc(tableName: String, chapterName: String) {
         val list = ReaderDbManager.delChapterAfterSrc(tableName, chapterName)
         File(getSavePath() + "/$tableName") //目录
-                .takeIf { it.exists() }             //是否存在
-                ?.let { list.map { item -> File(it, item) }.forEach { it.delete() } }
+            .takeIf { it.exists() }             //是否存在
+            ?.let { list.map { item -> File(it, item) }.forEach { it.delete() } }
     }
 
     //下载书籍图片，搜索时调用(搜索时顺便获取图片链接)
@@ -253,7 +254,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
                     inputStream = it?.byteStream()
                     outputStream = FileOutputStream(path)
                     BitmapFactory.decodeStream(inputStream)
-                            .compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                        .compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                     outputStream.flush()
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -267,12 +268,12 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
 
     private fun saveBookImage(bookname: String) {
         File(getSavePath() + "/tmp")
-                .takeIf { it.exists() }
-                ?.listFiles { _, name -> name.startsWith(bookname) }
-                ?.firstOrNull()
-                ?.copyTo(
-                        File("${getSavePath()}/$bookname".apply { File(this).mkdirs() }, IMAGENAME),
-                        true
-                )
+            .takeIf { it.exists() }
+            ?.listFiles { _, name -> name.startsWith(bookname) }
+            ?.firstOrNull()
+            ?.copyTo(
+                File("${getSavePath()}/$bookname".apply { File(this).mkdirs() }, IMAGENAME),
+                true
+            )
     }
 }
