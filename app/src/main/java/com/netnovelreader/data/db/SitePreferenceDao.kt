@@ -11,7 +11,7 @@ interface SitePreferenceDao {
     fun getRule(hostname: String): SitePreferenceBean
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(vararg beans: SitePreferenceBean)
+    fun insert(vararg beans: SitePreferenceBean)
 
     @Delete
     fun delete(bean: SitePreferenceBean)

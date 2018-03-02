@@ -36,4 +36,39 @@ data class ObservableSiteBean(
         noRedirectImage.set(bean.noRedirectImage)
         charset.set(bean.charset)
     }
+
+    fun toSitePreferenceBean(): SitePreferenceBean = SitePreferenceBean(
+        0,
+        hostname.get() ?: "",
+        catalogSelector.get() ?: "",
+        chapterSelector.get() ?: "",
+        catalogFilter.get() ?: "",
+        chapterFilter.get() ?: "",
+        searchUrl.get() ?: "",
+        redirectFileld.get() ?: "",
+        redirectUrl.get() ?: "",
+        noRedirectUrl.get() ?: "",
+        redirectName.get() ?: "",
+        noRedirectName.get() ?: "",
+        redirectImage.get() ?: "",
+        noRedirectImage.get() ?: "",
+        charset.get() ?: ""
+    )
+
+    fun get(type: RuleType) = when (type) {
+        RuleType.hostname -> hostname
+        RuleType.catalogSelector -> catalogSelector
+        RuleType.chapterSelector -> chapterSelector
+        RuleType.catalogFilter -> catalogFilter
+        RuleType.chapterFilter -> chapterFilter
+        RuleType.searchUrl -> searchUrl
+        RuleType.redirectFileld -> redirectFileld
+        RuleType.redirectUrl -> redirectUrl
+        RuleType.noRedirectUrl -> noRedirectUrl
+        RuleType.redirectName -> redirectName
+        RuleType.noRedirectName -> noRedirectName
+        RuleType.redirectImage -> redirectImage
+        RuleType.noRedirectImage -> noRedirectImage
+        RuleType.charset -> charset
+    }
 }

@@ -50,7 +50,8 @@ class NovelListFragment : Fragment() {
     }
 
     private fun initData() {
-        ApiManager.mAPI.seachBookListByTypeAndMajor(type = type, major = major).enqueueCall {
+        ApiManager.zhuiShuShenQi.seachBookListByTypeAndMajor(type = type, major = major)
+            .enqueueCall {
             it?.let {
                 bookList.clear()
                 bookList.addAll(it.books!!)
@@ -61,7 +62,7 @@ class NovelListFragment : Fragment() {
     inner class NovelListItemClickEvent {
 
         fun onClickDetail(id: String) {
-            ApiManager.mAPI.getNovelIntroduce(id).enqueueCall {
+            ApiManager.zhuiShuShenQi.getNovelIntroduce(id).enqueueCall {
                 val intent = Intent(context, NovelDetailActivity::class.java)
                 intent.putExtra("data", it)
                 context!!.startActivity(intent)

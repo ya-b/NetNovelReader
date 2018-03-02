@@ -25,12 +25,12 @@ class SitePreferenceFragment : Fragment() {
         settingViewModel?.deleteAlertCommand?.observe(this, Observer {
             it ?: return@Observer
             val listener = DialogInterface.OnClickListener { _, _ ->
-                launch { settingViewModel?.deleteSiteTask(it) }
+                launch { settingViewModel?.deleteSite(it) }
             }
             AlertDialog.Builder(this@SitePreferenceFragment.context)
                 .setTitle(getString(R.string.deleteBook).replace("book", it))
                 .setPositiveButton(R.string.yes, listener)
-                .setNegativeButton(R.string.no, listener)
+                .setNegativeButton(R.string.no, null)
                 .create()
                 .show()
         })
@@ -39,21 +39,16 @@ class SitePreferenceFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val binding = DataBindingUtil.inflate<FragmentSitePreferenceBinding>(
+    ): View? =
+        DataBindingUtil.inflate<FragmentSitePreferenceBinding>(
             inflater,
             R.layout.fragment_site_preference, container, false
-        )
-
-        binding.recycleSiteList.init(
-            RecyclerAdapter(
-                settingViewModel?.siteList,
-                R.layout.item_site_preference_list,
-                settingViewModel
+        ).apply {
+            launch { settingViewModel?.showSiteList() }
+            recycleSiteList.init(
+                RecyclerAdapter(
+                    settingViewModel?.siteList, R.layout.item_site_preference_list, settingViewModel
+                )
             )
-        )
-        binding.viewModel = settingViewModel
-        launch { settingViewModel?.showSiteListTask() }
-        return binding.root
-    }
+        }.root
 }

@@ -5,10 +5,14 @@
     <string name="deleteBook">删除book?</string>
     <string name="yes">是</string>
     <string name="no">否</string>
+    <string name="save">保存</string>
     <string name="cancel">取消</string>
     <string name="settings">设置</string>
     <string name="edit_site">编辑网站规则</string>
-
+    <string name="update">更新</string>
+    <string name="whenconflict">当与本地配置冲突时</string>
+    <string name="yes_local">是,优先本地配置</string>
+    <string name="filter">筛选</string>
 
     <string name="full_screen">阅读界面全屏</string>
     <string name="full_screen_key">fullscreen</string>

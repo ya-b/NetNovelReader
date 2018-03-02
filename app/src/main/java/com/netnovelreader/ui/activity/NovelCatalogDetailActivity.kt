@@ -14,7 +14,6 @@ import android.view.MenuItem
 import com.netnovelreader.R
 import com.netnovelreader.bean.FilterBean
 import com.netnovelreader.common.CatalogPagerAdapter
-import com.netnovelreader.common.PreferenceManager
 import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.init
 import com.netnovelreader.databinding.ActivityCatalogDetailBinding
@@ -31,7 +30,7 @@ class NovelCatalogDetailActivity : AppCompatActivity() {
     private var filterList = ObservableArrayList<FilterBean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferenceManager.getThemeId(this).also { setTheme(it) }
+        setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         super.onCreate(savedInstanceState)
 
         DataBindingUtil.setContentView<ActivityCatalogDetailBinding>(
@@ -80,7 +79,7 @@ class NovelCatalogDetailActivity : AppCompatActivity() {
             val builder = AlertDialog.Builder(this)
             val filterView = RecyclerView(this)
             filterView.init(
-                RecyclerAdapter(filterList, R.layout.item_filter, FilterNovelItemClickListener())
+                RecyclerAdapter(filterList, R.layout.item_filter, FilterNovelItemClickListener(), true)
             )
             dialog = builder.setView(filterView).create()
             val dialogWindow = dialog!!.window

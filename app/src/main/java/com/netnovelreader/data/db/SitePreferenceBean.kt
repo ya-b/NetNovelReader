@@ -10,7 +10,7 @@ import android.arch.persistence.room.PrimaryKey
     indices = arrayOf(Index(value = arrayOf(ReaderDatabase.HOSTNAME), unique = true))
 )
 data class SitePreferenceBean(
-    @PrimaryKey var _id: Int = 0,
+    @PrimaryKey var _id: Int? = null,
     @ColumnInfo(name = ReaderDatabase.HOSTNAME) var hostname: String,                 //域名
     @ColumnInfo(name = ReaderDatabase.CATALOG_SELECTOR) var catalogSelector: String,  //目录选择器
     @ColumnInfo(name = ReaderDatabase.CHAPTER_SELECTOR) var chapterSelector: String,  //章节内容选择器

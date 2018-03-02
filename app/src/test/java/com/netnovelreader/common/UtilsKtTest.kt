@@ -23,18 +23,6 @@ class UtilsKtTest {
     }
 
     @Test
-    fun id2TableName() {
-        val a = 3
-        val b = "3"
-        val resultA = com.netnovelreader.common.id2TableName(a)
-        val resultB = com.netnovelreader.common.id2TableName(b)
-        println("a --- $resultA")
-        println("b --- $resultB")
-        Assert.assertEquals(resultA, "BOOK3")
-        Assert.assertEquals(resultB, "BOOK3")
-    }
-
-    @Test
     fun fixUrl() {
         val reference = "http://www.23zw.me/search/result.html"
         val src = arrayOf(

@@ -6,7 +6,7 @@ package com.netnovelreader.bean
  * 作者： YangJunQuan   2018-2-11.
  */
 
-class NovelList {
+data class NovelList (
 
     /**
      * total : 68
@@ -14,11 +14,11 @@ class NovelList {
      * ok : true
      */
 
-    var total: String? = null
-    var isOk: Boolean = false
-    var books: List<BooksBean>? = null
+    var total: String? = null,
+    var isOk: Boolean = false,
+    var books: List<BooksBean>? = null){
 
-    class BooksBean {
+    data class BooksBean (
         /**
          * _id : 59fc782d6676152d15ae0472
          * title : 综漫一切从火影开始
@@ -39,30 +39,22 @@ class NovelList {
          * tags : ["二次元"]
          */
 
-        var _id: String? = null
-        var title: String? = null
-        var author: String? = null
-        var shortIntro: String? = null
-        var cover: String? = null
-        var site: String? = null
-        var majorCate: String? = null
-        var minorCate: String? = null
-        var sizetype: String? = null
-        var superscript: String? = null
-        var contentType: String? = null
-        var isAllowMonthly: Boolean = false
-        var banned: String? = null
-        var latelyFollower: String? = null
-        var retentionRatio: String? = null
-        var lastChapter: String? = null
+        var _id: String? = null,
+        var title: String? = null,
+        var author: String? = null,
+        var shortIntro: String? = null,
+        var cover: String? = null,
+        var site: String? = null,
+        var majorCate: String? = null,
+        var minorCate: String? = null,
+        var sizetype: String? = null,
+        var superscript: String? = null,
+        var contentType: String? = null,
+        var isAllowMonthly: Boolean = false,
+        var banned: String? = null,
+        var latelyFollower: String? = null,
+        var retentionRatio: String? = null,
+        var lastChapter: String? = null,
         var tags: List<String>? = null
-        override fun toString(): String {
-            return "BooksBean(_id=$_id, title=$title, author=$author, shortIntro=$shortIntro, cover=$cover, site=$site, majorCate=$majorCate, minorCate=$minorCate, sizetype=$sizetype, superscript=$superscript, contentType=$contentType, isAllowMonthly=$isAllowMonthly, banned=$banned, latelyFollower=$latelyFollower, retentionRatio=$retentionRatio, lastChapter=$lastChapter, tags=$tags)"
-        }
-
-    }
-
-    override fun toString(): String {
-        return "NovelList(total=$total, isOk=$isOk, books=$books)"
-    }
+    )
 }

@@ -30,6 +30,7 @@ val PREFERENCE_NAME = "com.netnovelreader_preferences"
 val UPDATEFLAG = "●"  //书籍有更新，显示该标志
 val NotDeleteNum = 3 //自动删除已读章节，但保留最近3章
 val THREAD_NUM = Runtime.getRuntime().availableProcessors() * 2 / 3 //线程数
+val SP_URL = "http://139.159.226.67/rule.json"
 
 fun getSavePath(): String =
     if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
@@ -129,7 +130,6 @@ fun ShelfDao.replace(
             now.latestRead ?: old.latestRead
         ).apply { insert(this) }
     }
-
 }
 
 

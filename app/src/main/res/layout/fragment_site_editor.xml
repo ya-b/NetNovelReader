@@ -4,6 +4,7 @@
 
     <data>
 
+        <import type="com.netnovelreader.bean.RuleType" />
         <variable
             name="siteBean"
             type="com.netnovelreader.bean.ObservableSiteBean" />
@@ -19,74 +20,380 @@
         android:orientation="vertical"
         tools:context=".ui.fragment.SiteEditorFragment">
 
-        <TextView
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/hostname + `:` + siteBean.hostname??``}" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/catalogSelector + `:` + siteBean.catalogSelector??``}" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/hostname + `:`}"
+                android:textSize="16sp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/chapterSelector + `:` + siteBean.chapterSelector??``}" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.hostname??``}"
+                android:textSize="16sp" />
+        </TableRow>
 
-        <TextView
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/catalogFilter + `:` + siteBean.catalogFilter??``}" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/chapterFilter + `:` + siteBean.chapterFilter??``}" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/catalogSelector + `:`}"
+                android:textSize="16sp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/searchUrl + `:` + siteBean.searchUrl??``}" />
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.catalogSelector)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.catalogSelector??``}"
+                android:textSize="16sp" />
+        </TableRow>
 
-        <TextView
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/redirectFileld + `:` + siteBean.redirectFileld??``}" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/redirectUrl + `:` + siteBean.redirectUrl??``}" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/chapterSelector + `:`}"
+                android:textSize="16sp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/noRedirectUrl + `:` + siteBean.noRedirectUrl??``}" />
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.chapterSelector)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.chapterSelector??``}"
+                android:textSize="16sp" />
+        </TableRow>
 
-        <TextView
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/redirectName + `:` + siteBean.redirectName??``}" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/noRedirectName + `:` + siteBean.noRedirectName??``}" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/catalogFilter + `:`}"
+                android:textSize="16sp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/redirectImage + `:` + siteBean.redirectImage??``}" />
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.catalogFilter)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.catalogFilter??``}"
+                android:textSize="16sp" />
+        </TableRow>
 
-        <TextView
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/noRedirectImage + `:` + siteBean.noRedirectImage??``}" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-        <TextView
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/chapterFilter + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.chapterFilter)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.chapterFilter??``}"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{@string/charset + `:` + siteBean.charset??``}" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/searchUrl + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.searchUrl)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.searchUrl??``}"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/redirectFileld + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.redirectFileld)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.redirectFileld??``}"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/redirectUrl + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.redirectUrl)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.redirectUrl??``}"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/noRedirectUrl + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.noRedirectUrl)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.noRedirectUrl??``}"
+                android:textSize="16sp" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/redirectName + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.redirectName)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.redirectName??``}"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/noRedirectName + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.noRedirectName)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.noRedirectName??``}"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+
+                android:singleLine="true"
+                android:text="@{@string/redirectImage + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.redirectImage)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.redirectImage??``}"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/noRedirectImage + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.noRedirectImage)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.noRedirectImage??``}"
+                android:textSize="16sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{@string/charset + `:`}"
+                android:textSize="16sp" />
+
+            <EditText
+                style="?android:attr/textViewStyle"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:background="@android:color/transparent"
+                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.charset)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_rowWeight="1"
+                android:singleLine="true"
+                android:text="@{siteBean.charset??``}"
+                android:textSize="16sp" />
+        </TableRow>
+
     </LinearLayout>
 </layout>

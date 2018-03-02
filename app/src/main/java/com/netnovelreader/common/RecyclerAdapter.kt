@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.netnovelreader.BR
+import com.netnovelreader.R
 
 /**
  * Created by yangbo on 18-1-12.
@@ -31,20 +32,28 @@ class RecyclerAdapter<T, E>(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<T, E> {
-        val binding = DataBindingUtil.inflate<ViewDataBinding>(
+        val binding = if (viewType != -1) DataBindingUtil.inflate<ViewDataBinding>(
             LayoutInflater.from(parent.context),
             resId, parent, false
+        ) else DataBindingUtil.inflate<ViewDataBinding>(
+            LayoutInflater.from(parent.context),
+            R.layout.item_empty, parent, false
         )
         return BindingViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: BindingViewHolder<T, E>, position: Int) {
-        holder.bind(itemDetails?.get(position), clickEvent)
+        if (position == 0) holder.bind(null, null)
+        else holder.bind(itemDetails?.get(position - 1), clickEvent)
     }
 
     override fun getItemCount(): Int {
         itemDetails ?: return 0
-        return itemDetails.size
+        return itemDetails.size + 1
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (position == 0) -1 else super.getItemViewType(position)
     }
 
     class BindingViewHolder<in T, in E>(private val binding: ViewDataBinding) :

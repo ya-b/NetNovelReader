@@ -28,8 +28,20 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     var txtFontColor: Int = Color.BLACK                                 //字体颜色
     var bgColor: Int? by InvalidateAfterSet()                           //背景颜色
     var txtFontType: Typeface? by InvalidateAfterSet(null)        //正文字体类型//背景颜色
-    private val mBottomPaint = Paint()                                  //绘制底部文字部分所用的画笔
-    private val mMainPaint = Paint()                                    //绘制正文部分所用的画笔
+    private val mBottomPaint by lazy {
+        //绘制底部文字部分所用的画笔
+        Paint().apply {
+            isAntiAlias = true
+            textSize = indicatorFontSize
+        }
+    }
+    private val mMainPaint by lazy {
+        //绘制正文部分所用的画笔
+        Paint().apply {
+            isAntiAlias = true
+            textSize = indicatorFontSize
+        }
+    }
     var txtFontSize: Float? by InvalidateAfterSet(50f)            //正文部分默认画笔的大小
     var indicatorFontSize: Float = 35f                                  //底部部分默认画笔的大小
     var text: ObservableField<String>? by InvalidateAfterSet(null)//一个未分割章节,格式：章节名|正文
@@ -39,7 +51,7 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     var maxPageNum = 0
     var pageFlag = 0                                        //0刚进入view，1表示目录跳转，2表示下一页，3表示上一页
 
-    lateinit var timeFormatter: SimpleDateFormat
+    val timeFormatter: SimpleDateFormat by lazy { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     private val MIN_MOVE = 80F                              //翻页最小滑动距离
     lateinit var detector: GestureDetector
 
@@ -63,13 +75,9 @@ class ReaderView : View, GestureDetector.OnGestureListener {
     }
 
     fun init() {
-        mBottomPaint.isAntiAlias = true   //抗锯齿开启
-        mMainPaint.isAntiAlias = true
         bgColor = ContextCompat.getColor(context, R.color.read_bg_default)
         rowSpace = PreferenceManager.getRowSpace(context)
-        timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
         detector = GestureDetector(context, this)
-        mBottomPaint.textSize = indicatorFontSize                                  //底部部分画笔大小
     }
 
     override fun onAttachedToWindow() {

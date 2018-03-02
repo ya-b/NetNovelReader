@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
 import com.netnovelreader.R
 import com.netnovelreader.bean.NovelIntroduce
-import com.netnovelreader.common.PreferenceManager
 import com.netnovelreader.databinding.ActivityDetailBinding
 import kotlinx.android.synthetic.main.activity_detail.*
 
@@ -17,7 +16,7 @@ import kotlinx.android.synthetic.main.activity_detail.*
  */
 class NovelDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferenceManager.getThemeId(this).also { setTheme(it) }
+        setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         super.onCreate(savedInstanceState)
         val binding =
             DataBindingUtil.setContentView<ActivityDetailBinding>(this, R.layout.activity_detail)

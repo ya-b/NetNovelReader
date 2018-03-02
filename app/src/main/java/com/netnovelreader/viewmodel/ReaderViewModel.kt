@@ -14,10 +14,7 @@ import com.netnovelreader.common.*
 import com.netnovelreader.data.db.ReaderDbManager
 import com.netnovelreader.data.network.ChapterCache
 import com.netnovelreader.data.network.DownloadCatalog
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.*
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
@@ -63,6 +60,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     var chapterCache: ChapterCache? = null
     lateinit var bookName: String
     var CACHE_NUM: Int = 0
+    var downloadJob: Job? = null
 
     //获取章节内容
     fun getChapter(type: ChapterChangeType, chapterName: String?) {
@@ -80,7 +78,8 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         text.set(str)
         this.chapterName = str.substring(0, str.indexOf("|"))
         if (str.substring(str.indexOf("|") + 1) == ChapterCache.FILENOTFOUND) {
-            launch { downloadAndShow() }
+            downloadJob?.cancel()
+            downloadJob = launch { downloadAndShow() }
         } else {
             isLoading.set(false)
         }
@@ -95,7 +94,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
             str = chapterCache!!.getChapter(chapterNum.get())
             delay(500)
         }
-        if (str != ChapterCache.FILENOTFOUND && str.isNotEmpty()) {
+        str.split("|")[1].takeIf { it != ChapterCache.FILENOTFOUND }?.run {
             isLoading.set(false)
             getChapter(ChapterChangeType.BY_CATALOG, null)
         }
@@ -142,13 +141,15 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     fun drawPrepareTask(): Int = runBlocking {
-        maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?:
-                return@runBlocking 0
-        val record = async { getRecord() }.await()
-        chapterNum.set(record[0])
-        chapterCache = ChapterCache(CACHE_NUM, bookName).apply { init(maxChapterNum, bookName) }
-        launch { getChapter(ChapterChangeType.BY_CATALOG, null) }
-        record[1]
+        async {
+            maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?:
+                    return@async 0
+            val record = async { getRecord() }.await()
+            chapterNum.set(record[0])
+            chapterCache = ChapterCache(CACHE_NUM, bookName).apply { init(maxChapterNum, bookName) }
+            launch { getChapter(ChapterChangeType.BY_CATALOG, null) }
+            record[1]
+        }.await()
     }
 
     fun nextChapterTask() {
@@ -175,11 +176,11 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         changeSourceCommand.value = chapterName
     }
 
-    fun footViewClickEvent(which: String) {
+    fun footViewClickEvent(which: String) = runBlocking {
         when (which) {
             "catalogButton" -> {
                 isViewShow.forEach { it.value.set(false) }
-                launch { getCatalog() }
+                launch { getCatalog() }.join()
                 showDialogCommand.value = true
             }
             "fontSizeButton" -> {
@@ -191,6 +192,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
                 isViewShow[BG_SETTING]!!.set(!isViewShow[BG_SETTING]!!.get())
             }
         }
+        Unit
     }
 
     fun fontSizeChangeEvent(float: Float) {

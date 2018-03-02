@@ -16,7 +16,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.netnovelreader.R
-import com.netnovelreader.common.*
+import com.netnovelreader.common.RecyclerAdapter
+import com.netnovelreader.common.init
+import com.netnovelreader.common.obtainViewModel
+import com.netnovelreader.common.toast
 import com.netnovelreader.data.network.CatalogCache
 import com.netnovelreader.databinding.ActivitySearchBinding
 import com.netnovelreader.service.DownloadService
@@ -35,7 +38,7 @@ class SearchActivity : AppCompatActivity() {
     private var chapterName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferenceManager.getThemeId(this).also { setTheme(it) }
+        setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         super.onCreate(savedInstanceState)
         initView()
         initData()
@@ -46,7 +49,7 @@ class SearchActivity : AppCompatActivity() {
         DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
             .apply { viewModel = searchViewModel }
         searchRecycler.init(
-            RecyclerAdapter(searchViewModel.resultList, R.layout.item_search, searchViewModel)
+            RecyclerAdapter(searchViewModel.resultList, R.layout.item_search, searchViewModel, true)
         )
         searchViewBar.setOnQueryTextListener(QueryListener())
         searchViewBar.onActionViewExpanded()
@@ -78,6 +81,7 @@ class SearchActivity : AppCompatActivity() {
             it ?: return@Observer
             val intent = Intent(this@SearchActivity, NovelDetailActivity::class.java)
             intent.putExtra("data", it)
+            intent.putExtra("themeid", intent.getIntExtra("themeid", R.style.AppThemeBlack))
             this@SearchActivity.startActivity(intent)
         })
         searchViewModel.downLoadChapterCommand.observe(this, Observer {
@@ -132,7 +136,7 @@ class SearchActivity : AppCompatActivity() {
         override fun onQueryTextChange(newText: String?): Boolean {
             launch(UI) {
                 deffered?.cancel()
-                deffered = async { searchViewModel.onQueryTextChange(newText) }
+                deffered = async { searchViewModel.onQueryTextChange(newText ?: "") }
                 suggestCursor = deffered?.await()
                 searchViewBar.suggestionsAdapter.changeCursor(suggestCursor)
             }
@@ -158,7 +162,9 @@ class SearchActivity : AppCompatActivity() {
             if (suggestCursor?.moveToPosition(position) == true) {
                 searchViewBar.setQuery(suggestCursor?.getString(0), true)
                 job?.cancel()
-                job = launch { searchViewModel.searchBook(suggestCursor?.getString(0), null) }
+                job = launch {
+                    searchViewModel.searchBook(suggestCursor?.getString(0), null)
+                }
             }
             return true
         }

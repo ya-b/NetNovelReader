@@ -5,20 +5,19 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="itemDetail"
             type="com.netnovelreader.bean.NovelCatalog.Bean" />
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.ui.activity.CatalogGridActivity.CatalogItemClick" />
+            type="com.netnovelreader.viewmodel.ShelfViewModel" />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> clickEvent.onItemClick(itemDetail.name)}">
+        android:onClick="@{() -> clickEvent.openCatalogDetail(itemDetail.name)}">
 
         <TextView
             android:id="@+id/tvCatalog"
@@ -37,7 +36,7 @@
             android:layout_height="13dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-            android:text="@{itemDetail.bookCount}"
+            android:text="@{itemDetail.bookCount + `本`}"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"

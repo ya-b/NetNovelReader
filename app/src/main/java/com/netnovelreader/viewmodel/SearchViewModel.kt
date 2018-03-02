@@ -42,13 +42,12 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     val colors = Array(10) { ObservableInt(R.color.hot_label_bg1) }  //显示的搜索热词颜色
     var hotWordsTemp: List<SearchHotWord.SearchHotWordsBean>? = null      //搜索热词(从中选取)
     val isLoading = ObservableBoolean(false)                        //loadingbar是否显示
-    val toastMessage = ReaderLiveData<String>()                       //toast要显示的信息
-    val exitCommand = ReaderLiveData<Void>()                          //点击返回图标
-    val selectHotWordEvent = ReaderLiveData<String>()               //选中的hotword的text
-    val showBookDetailCommand = ReaderLiveData<NovelIntroduce>()      //点击的item的所需数据NovelIntroduce
-    val showDialogCommand = ReaderLiveData<SearchBean>()              //点击的item的下载事件所需数据
-    val downLoadChapterCommand =
-        ReaderLiveData<Array<String>>()      //启动[DownloadService]的ExtraString
+    val toastMessage = ReaderLiveData<String>()                   //toast要显示的信息
+    val exitCommand = ReaderLiveData<Void>()                      //点击返回图标
+    val selectHotWordEvent = ReaderLiveData<String>()             //选中的hotword的text
+    val showBookDetailCommand = ReaderLiveData<NovelIntroduce>()  //点击的item的所需数据NovelIntroduce
+    val showDialogCommand = ReaderLiveData<SearchBean>()          //点击的item的下载事件所需数据
+    val downLoadChapterCommand = ReaderLiveData<Array<String>>()  //启动[DownloadService]的ExtraString
     private var queryTextTemp = ""
     private var queryTimeTemp = System.currentTimeMillis()
 
@@ -79,7 +78,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         showHotWord.set(false)
         if (hotWordsTemp == null) {
             hotWordsTemp = try {
-                ApiManager.mAPI.hotWords().execute().body()?.searchHotWords
+                ApiManager.zhuiShuShenQi.hotWords().execute().body()?.searchHotWords
             } catch (e: IOException) {
                 null
             }
@@ -96,12 +95,10 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         showHotWord.set(true)
     }
 
-    fun onQueryTextChange(newText: String?): Cursor? {
+    fun onQueryTextChange(newText: String): Cursor? {
         resultList.clear()
-        return if (newText!!.isEmpty()) {
-            if (hotWordsTemp != null) {
-                showHotWord.set(true)
-            }
+        return if (newText.isEmpty()) {
+            showHotWord.set(hotWordsTemp != null)
             null
         } else {
             showHotWord.set(false)
@@ -165,9 +162,9 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     fun detailClickTask(itemText: String) {
-        ApiManager.mAPI.searchBook(itemText).enqueueCall {
+        ApiManager.zhuiShuShenQi.searchBook(itemText).enqueueCall {
             it?.books?.firstOrNull { it.title == itemText }?._id?.let {
-                ApiManager.mAPI.getNovelIntroduce(it).enqueueCall {
+                ApiManager.zhuiShuShenQi.getNovelIntroduce(it).enqueueCall {
                     if (it == null) {
                         toastMessage.value = "没有搜索到相关小说的介绍"
                     } else {
@@ -192,7 +189,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
      */
     private fun searchBookSuggest(queryText: String): Cursor? = try {
         val suggestCursor = MatrixCursor(arrayOf("text", "_id"))
-        ApiManager.mAPI.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
+        ApiManager.zhuiShuShenQi.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
             .execute().body()?.keywords?.filter { it.tag == "bookname" }
             ?.map { it.text }?.toHashSet()
             ?.forEachIndexed { index, s -> suggestCursor.addRow(arrayOf(s, index)) }
@@ -247,7 +244,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         val path = "${getSavePath()}/tmp".apply { File(this).mkdirs() } + "/$bookname.png"
         if (imageUrl != "" && !File(path).exists()) {
             //  Logger.i("步骤2.从网站下载图书【$bookname】的图片,URL为【$imageUrl】")
-            ApiManager.mAPI.getPicture(imageUrl).enqueueCall {
+            ApiManager.novelReader.getPicture(imageUrl).enqueueCall {
                 var inputStream: InputStream? = null
                 var outputStream: OutputStream? = null
                 try {

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "df5f7565c589ed6fef005ae8f91acd87",
+    "identityHash": "27e873ea8bd3ef1316aeafe53361798d",
     "entities": [
       {
         "tableName": "shelf",
@@ -71,13 +71,13 @@
       },
       {
         "tableName": "sitepreference",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `hostname` TEXT NOT NULL, `catalog_selector` TEXT NOT NULL, `chapter_selector` TEXT NOT NULL, `catalog_filter` TEXT NOT NULL, `chapter_filter` TEXT NOT NULL, `search_url` TEXT NOT NULL, `redirect_fileld` TEXT NOT NULL, `redirect_selector` TEXT NOT NULL, `no_redirect_selector` TEXT NOT NULL, `redirect_name` TEXT NOT NULL, `no_redirect_name` TEXT NOT NULL, `redirect_image` TEXT NOT NULL, `no_redirect_image` TEXT NOT NULL, `charset` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER, `hostname` TEXT NOT NULL, `catalog_selector` TEXT NOT NULL, `chapter_selector` TEXT NOT NULL, `catalog_filter` TEXT NOT NULL, `chapter_filter` TEXT NOT NULL, `search_url` TEXT NOT NULL, `redirect_fileld` TEXT NOT NULL, `redirect_selector` TEXT NOT NULL, `no_redirect_selector` TEXT NOT NULL, `redirect_name` TEXT NOT NULL, `no_redirect_name` TEXT NOT NULL, `redirect_image` TEXT NOT NULL, `no_redirect_image` TEXT NOT NULL, `charset` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "_id",
             "columnName": "_id",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "hostname",
@@ -185,7 +185,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"df5f7565c589ed6fef005ae8f91acd87\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"27e873ea8bd3ef1316aeafe53361798d\")"
     ]
   }
 }

@@ -1,7 +1,5 @@
 package com.netnovelreader.ui.activity
 
-import android.app.AlertDialog
-import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
@@ -13,9 +11,10 @@ import android.view.MenuItem
 import com.netnovelreader.R
 import com.netnovelreader.common.*
 import com.netnovelreader.databinding.ActivityShelfBinding
+import com.netnovelreader.ui.fragment.NovelClassfyFragment
+import com.netnovelreader.ui.fragment.ShelfFragment
 import com.netnovelreader.viewmodel.ShelfViewModel
 import kotlinx.android.synthetic.main.activity_shelf.*
-import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 
 class ShelfActivity : AppCompatActivity() {
@@ -23,7 +22,6 @@ class ShelfActivity : AppCompatActivity() {
     val shelfViewModel by lazy { obtainViewModel(ShelfViewModel::class.java) }
     private var hasPermission = false
     private var themeId = 0
-    var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         themeId = PreferenceManager.getThemeId(this).also { setTheme(it) }
@@ -33,49 +31,20 @@ class ShelfActivity : AppCompatActivity() {
             requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)
         }
         initView()
-        initLiveData()
     }
 
     fun initView() {
         DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
             .apply { viewModel = shelfViewModel }
         setSupportActionBar(shelfToolbar)
-        shelfRecycler.init(
-            RecyclerAdapter(shelfViewModel.bookList, R.layout.item_shelf, shelfViewModel),
-            null
-        )
-        shelf_layout.setColorSchemeResources(R.color.gray)
-    }
-
-    fun initLiveData() {
-        shelfViewModel.notRefershCommand.observe(
-            this,
-            Observer { shelf_layout.isRefreshing = false })
-        shelfViewModel.readBookCommand.observe(this, Observer {
-            startActivity(Intent(this, ReaderActivity::class.java)
-                .apply { this.putExtra("bookname", it) })
-        })
-        shelfViewModel.showDialogCommand.observe(this, Observer {
-            AlertDialog.Builder(this@ShelfActivity)
-                .setTitle(getString(R.string.deleteBook).replace("book", it!!))
-                .setPositiveButton(
-                    R.string.yes,
-                    { _, _ -> launch { shelfViewModel.deleteBook(it) } })
-                .setNegativeButton(R.string.no, null)
-                .create()
-                .show()
-        })
-    }
-
-    override fun onResume() {
-        super.onResume()
-        shelfRecycler.scrollToPosition(0)
-        launch { if (hasPermission) shelfViewModel.refreshBookList() }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job?.cancel()
+        shelfViewPager.apply {
+            offscreenPageLimit = 4
+            adapter = PagerAdapter(
+                supportFragmentManager,
+                arrayOf(getString(R.string.shelf), getString(R.string.classification)),
+                arrayOf(ShelfFragment::class.java, NovelClassfyFragment::class.java)
+            )
+        }.let { shelfTab.setupWithViewPager(it) }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -86,23 +55,25 @@ class ShelfActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.search_button -> {
-                startActivity(Intent(this, SearchActivity::class.java))
+                startActivity(
+                    Intent(this, SearchActivity::class.java)
+                        .apply { putExtra("themeid", themeId) }
+                )
+                shelfViewModel.refreshType = 2
                 true
             }
             R.id.action_settings -> {
                 startActivityForResult(Intent(this, SettingActivity::class.java).apply {
-                    this.putExtra("type", 0)
+                    putExtra("type", 0)
+                    putExtra("themeid", themeId)
                 }, 1)
                 true
             }
             R.id.edit_site_preference -> {
                 startActivity(Intent(this, SettingActivity::class.java).apply {
-                    this.putExtra("type", 1)
+                    putExtra("type", 1)
+                    putExtra("themeid", themeId)
                 })
-                true
-            }
-            R.id.classfied -> {
-                startActivity(Intent(this, CatalogGridActivity::class.java))
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -137,13 +108,6 @@ class ShelfActivity : AppCompatActivity() {
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-    fun checkPermission(permission: String): Boolean {
-        return ActivityCompat.checkSelfPermission(
-            this,
-            permission
-        ) == PackageManager.PERMISSION_GRANTED
     }
 
     //请求权限

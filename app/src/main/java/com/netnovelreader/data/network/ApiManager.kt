@@ -1,6 +1,7 @@
 package com.netnovelreader.data.network
 
 import com.netnovelreader.bean.*
+import com.netnovelreader.common.SP_URL
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -16,12 +17,28 @@ import retrofit2.http.Url
  * 作者： YangJunQuan   2018/2/5.
  */
 object ApiManager {
-    val mAPI: ZhuiShuShenQiAPI by lazy {
+    val zhuiShuShenQi: ZhuiShuShenQiAPI by lazy {
         Retrofit.Builder()
             .baseUrl("http://api.zhuishushenqi.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ZhuiShuShenQiAPI::class.java)
+    }
+    val novelReader: NovalReaderAPI by lazy {
+        Retrofit.Builder()
+            .baseUrl("http://139.159.226.67")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(NovalReaderAPI::class.java)
+    }
+
+    interface NovalReaderAPI {
+
+        @GET
+        fun getPicture(@Url url: String): Call<ResponseBody>
+
+        @GET
+        fun getSitePreference(@Url url: String = SP_URL): Call<SPResponse>
     }
 
     interface ZhuiShuShenQiAPI {
@@ -68,13 +85,7 @@ object ApiManager {
             @Query("limit") limit: String? = "50"
         ): Call<NovelList>
 
-
         @GET("http://api.zhuishushenqi.com/cats/lv2/statistics")
         fun getNovelCatalogData(): Call<NovelCatalog>
-
-
-        @GET
-        fun getPicture(@Url url: String): Call<ResponseBody>
-
     }
 }

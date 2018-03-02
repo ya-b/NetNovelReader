@@ -1,10 +1,10 @@
 package com.netnovelreader.data.network
 
 import android.databinding.ObservableField
-import android.util.LruCache
 import com.netnovelreader.bean.SearchBean
 import java.io.IOException
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Created by yangbo on 18-1-30.
@@ -13,7 +13,7 @@ object CatalogCache {
     /**
      * HashMap<目录页url, LinkedHashMap<章节名, 章节url>>
      */
-    val cache: LruCache<String, SearchBean> = LruCache(10)
+    val cache: HashMap<String, SearchBean> = HashMap()
 
     fun addCatalog(bookname: String, catalogUrl: String) {
 
@@ -39,6 +39,6 @@ object CatalogCache {
     }
 
     fun clearCache() {
-        cache.evictAll()
+        cache.clear()
     }
 }
