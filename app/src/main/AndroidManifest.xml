@@ -28,12 +28,11 @@
         </activity>
         <activity android:name=".ui.activity.ReaderActivity" />
         <activity android:name=".ui.activity.SearchActivity" />
-
-        <service android:name=".service.DownloadService" />
-
         <activity android:name=".ui.activity.SettingActivity" />
         <activity android:name=".ui.activity.NovelDetailActivity" />
-        <activity android:name=".ui.activity.NovelCatalogDetailActivity" />
+        <activity android:name=".ui.activity.CategoryDetailActivity" />
+
+        <service android:name=".service.DownloadService" />
     </application>
 
 </manifest>

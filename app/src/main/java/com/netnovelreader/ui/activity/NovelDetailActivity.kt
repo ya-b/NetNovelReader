@@ -24,7 +24,6 @@ class NovelDetailActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val mydetail = intent.getSerializableExtra("data") as NovelIntroduce
 
-
         with(mydetail) {
             //对数据进行进一步的处理再显示
             serialState.text = if (mydetail.isSerial!!) "连载中" else "已完结"
@@ -40,7 +39,6 @@ class NovelDetailActivity : AppCompatActivity() {
         }
         binding.detail = mydetail
 
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -52,6 +50,4 @@ class NovelDetailActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-
-
 }

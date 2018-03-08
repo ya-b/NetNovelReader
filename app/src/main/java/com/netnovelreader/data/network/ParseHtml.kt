@@ -6,8 +6,13 @@ import com.netnovelreader.common.getHeaders
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.db.ReaderDbManager
 import org.jsoup.Jsoup
+import org.jsoup.UncheckedIOException
 import org.jsoup.nodes.Element
+import org.jsoup.select.Elements
 import java.io.IOException
+import java.util.LinkedHashMap
+import kotlin.collections.ArrayList
+import kotlin.collections.set
 
 /**
  * Created by yangbo on 18-1-14.
@@ -23,8 +28,13 @@ class ParseHtml {
         val txt = if (selector.isEmpty() || selector.length < 2) {
             getChapterWithOutSelector(url)
         } else {
-            Jsoup.connect(url).headers(getHeaders(url))
-                .timeout(TIMEOUT).get().select(selector).text()
+            try {
+                Jsoup.connect(url).headers(getHeaders(url))
+                    .timeout(TIMEOUT).get().select(selector).text()
+            } catch (e: UncheckedIOException) {
+                e.printStackTrace()
+                ""
+            }
         }
         return "    " + txt!!.replace(" ", "\n\n  ")
     }
@@ -37,9 +47,12 @@ class ParseHtml {
         val selector = ReaderDbManager.sitePreferenceDao().getRule(url2Hostname(url))
             .catalogSelector
         val catalog = LinkedHashMap<String, String>()
-        val list = Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
-            .select(selector).select("a")
-
+        val list: Elements = try {
+            Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
+                .select(selector).select("a")
+        } catch (e: UncheckedIOException) {
+            return catalog
+        }
         //Logger.i("解析的目录网页来源为：【$url】,元素选择器为：【$selector】")
         list.forEach {
             val link = fixUrl(url, it.attr("href"))
@@ -57,7 +70,11 @@ class ParseHtml {
      */
     @Throws(IOException::class)
     private fun getChapterWithOutSelector(url: String): String {
-        val elements = Jsoup.connect(url).get().allElements
+        val elements = try {
+            Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get().allElements
+        } catch (e: UncheckedIOException) {
+            return ""
+        }
         val indexList = ArrayList<Element>()
         if (elements.size > 1) {
             (1 until elements.size)

@@ -9,11 +9,7 @@ import kotlinx.coroutines.experimental.launch
 class ReaderLiveData<T> : MutableLiveData<T>() {
 
     override fun observe(owner: LifecycleOwner, observer: Observer<T>) {
-        launch(UI) {
-            super.observe(owner, Observer<T> { t ->
-                observer.onChanged(t)
-            })
-        }
+        launch(UI) { super.observe(owner, observer) }
     }
 
     override fun setValue(value: T?) {

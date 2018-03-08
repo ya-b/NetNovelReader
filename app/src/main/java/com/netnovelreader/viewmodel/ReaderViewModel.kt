@@ -7,11 +7,16 @@ import android.databinding.*
 import android.graphics.Color
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.res.ResourcesCompat
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication
 import com.netnovelreader.bean.ChapterChangeType
 import com.netnovelreader.bean.ReaderBean
-import com.netnovelreader.common.*
+import com.netnovelreader.common.NotDeleteNum
+import com.netnovelreader.common.PREFERENCE_NAME
+import com.netnovelreader.common.ReaderLiveData
+import com.netnovelreader.common.replace
+import com.netnovelreader.data.PreferenceManager
 import com.netnovelreader.data.db.ReaderDbManager
 import com.netnovelreader.data.network.ChapterCache
 import com.netnovelreader.data.network.DownloadCatalog
@@ -25,14 +30,6 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 
 class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
-    companion object {
-        @JvmStatic
-        val HEAD_VIEW = "headView"
-        const val Font_SETTING = "fontSetting"
-        const val BG_SETTING = "backgroundSetting"
-        const val FOOT_VIEW = "footView"
-    }
-
     val catalog by lazy { ObservableArrayList<ReaderBean>() }               //目录
     val text by lazy { ObservableField<String>("") }                   //一页显示的内容
     val fontSize by lazy { ObservableFloat(55f) }                      //字体大小
@@ -53,15 +50,25 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     val isLoading by lazy { ObservableBoolean(true) }                  //是否显示加载进度条
     val showDialogCommand by lazy { ReaderLiveData<Boolean>() }             //显示目录
     val changeSourceCommand by lazy { ReaderLiveData<String>() }            //换源下载
+    val brightnessCommand by lazy { ReaderLiveData<Float>() }                 //亮度
     @Volatile
-    var chapterName: String? = null
+    var chapterName: String? = null                         //章节名
     var chapterNum = AtomicInteger(0)              //章节数
     @Volatile
     var maxChapterNum = 0                                    //最大章节数
     var chapterCache: ChapterCache? = null
-    lateinit var bookName: String
-    var CACHE_NUM: Int = 0
+    lateinit var bookName: String                            //书名
+    var CACHE_NUM: Int = 0                                   //缓存后面章节数量
     var downloadJob: Job? = null
+    var changeFontSizeFlag = false
+
+    fun start() {
+        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).apply {
+            fontSizeChangeEvent(getFloat(context.getString(R.string.fontSizeKey), 50f))
+            fontTypeChangeEvent(getString(context.getString(R.string.fontTypeKey), "default"))
+            backgroundChangeEvent(getInt(context.getString(R.string.backgroundColorKey), 0))
+        }
+    }
 
     //获取章节内容
     fun getChapter(type: ChapterChangeType, chapterName: String?) {
@@ -119,6 +126,11 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
                 bookName = bookName, readRecord = "$chapterNum#${if (pageNum < 1) 1 else pageNum}"
             )
         }
+        if (changeFontSizeFlag == false) {
+            isViewShow.forEach { it.value.set(false) }
+        } else {
+            changeFontSizeFlag = false
+        }
     }
 
     /**
@@ -133,17 +145,18 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
      * 自动删除已读章节，但保留最近[NotDeleteNum]章
      */
     fun autoRemove() {
-        PreferenceManager.isAutoRemove(context).takeIf { it }?.apply {
-            getRecord()[0].takeIf { it > NotDeleteNum }?.also {
-                ReaderDbManager.setReaded(bookName, it - NotDeleteNum)
-                    .forEach { File("${ReaderApplication.dirPath}/$bookName/$it").delete() }
-            }
+        PreferenceManager.isAutoRemove(context).takeIf { it }
+        getRecord()[0].takeIf { it > NotDeleteNum }?.let {
+            ReaderDbManager.setReaded(bookName, it - NotDeleteNum)
+                .map { File("${ReaderApplication.dirPath}/$bookName/$it") }
+                .forEach { it.delete() }
         }
     }
 
     fun drawPrepareTask(): Int = runBlocking {
         async {
-            maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?: return@async 0
+            maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?:
+                    return@async 0
             val record = async { getRecord() }.await()
             chapterNum.set(record[0])
             chapterCache = ChapterCache(CACHE_NUM, bookName).apply { init(maxChapterNum, bookName) }
@@ -196,6 +209,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     fun fontSizeChangeEvent(float: Float) {
+        changeFontSizeFlag = true
         fontSize.set(float)
         when (float) {
             45f -> {
@@ -231,22 +245,22 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     fun fontTypeChangeEvent(which: String) {
         when (which) {
             "beiweikai" -> {
-                fontType.set(Typeface.createFromAsset(context.assets, "font/beiweikaishu.ttf"))
+                fontType.set(ResourcesCompat.getFont(context, R.font.beiweikaishu))
                 fontTypeSelected[1].set(true)
                 fontTypeSelected.filterIndexed { i, _ -> i != 1 }.forEach { it.set(false) }
             }
-            "bysong" -> {
-                fontType.set(Typeface.createFromAsset(context.assets, "font/bysong.ttf"))
+            "zedong" -> {
+                fontType.set(ResourcesCompat.getFont(context, R.font.zedong))
                 fontTypeSelected[2].set(true)
                 fontTypeSelected.filterIndexed { i, _ -> i != 2 }.forEach { it.set(false) }
             }
             "fzkatong" -> {
-                fontType.set(Typeface.createFromAsset(context.assets, "font/fzkatong.ttf"))
+                fontType.set(ResourcesCompat.getFont(context, R.font.fzkatong))
                 fontTypeSelected[3].set(true)
                 fontTypeSelected.filterIndexed { i, _ -> i != 3 }.forEach { it.set(false) }
             }
-            "chenguang" -> {
-                fontType.set(Typeface.createFromAsset(context.assets, "font/chenguang.ttf"))
+            "jianzhi" -> {
+                fontType.set(ResourcesCompat.getFont(context, R.font.jianzhi))
                 fontTypeSelected[4].set(true)
                 fontTypeSelected.filterIndexed { i, _ -> i != 4 }.forEach { it.set(false) }
             }
@@ -288,25 +302,39 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
             .putInt(context.getString(R.string.backgroundColorKey), which).apply()
     }
 
+    fun changeBrightness(progress: Int) {
+        brightnessCommand.value =
+                (if (progress < 1) 1 else if (progress > 255) 255 else progress) / 255f
+    }
+
     /**
      * 获取阅读记录
      */
-    fun getRecord(): Array<Int> {
-
+    private fun getRecord(): Array<Int> {
         val queryResult = ReaderDbManager.shelfDao().getBookInfo(bookName)?.readRecord
             ?.split("#")?.map { it.toInt() }          //阅读记录 3#2 表示第3章第2页
         return arrayOf(queryResult?.get(0) ?: 1, queryResult?.get(1) ?: 1)
     }
 
-    fun updateCatalog() {
+    private fun updateCatalog() {
         try {
             DownloadCatalog(
                 bookName, ReaderDbManager.shelfDao().getBookInfo(bookName)?.downloadUrl
-                ?: ""
+                        ?: ""
             ).download("")
         } catch (e: IOException) {
             e.printStackTrace()
         }
         maxChapterNum = ReaderDbManager.getChapterCount(bookName)
     }
+
+
+    companion object {
+        @JvmStatic
+        val HEAD_VIEW = "headView"
+        const val Font_SETTING = "fontSetting"
+        const val BG_SETTING = "backgroundSetting"
+        const val FOOT_VIEW = "footView"
+    }
+
 }

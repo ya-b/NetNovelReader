@@ -1,19 +1,15 @@
 package com.netnovelreader.ui.fragment
 
-import android.content.Intent
-import android.databinding.ObservableArrayList
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.netnovelreader.R
-import com.netnovelreader.bean.NovelList
 import com.netnovelreader.common.RecyclerAdapter
-import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.common.init
-import com.netnovelreader.data.network.ApiManager
-import com.netnovelreader.ui.activity.NovelDetailActivity
+import com.netnovelreader.common.obtainViewModel
+import com.netnovelreader.viewmodel.CategoryDetailViewModel
 import kotlinx.android.synthetic.main.fragment_novel_list.*
 
 /**
@@ -22,8 +18,7 @@ import kotlinx.android.synthetic.main.fragment_novel_list.*
  * 作者： YangJunQuan   2018-2-11.
  */
 class NovelListFragment : Fragment() {
-
-    private var bookList: ObservableArrayList<NovelList.BooksBean> = ObservableArrayList()
+    private var viewModel: CategoryDetailViewModel? = null
     private var type: String? = null
     private var major: String? = null
 
@@ -32,6 +27,7 @@ class NovelListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewModel = activity?.obtainViewModel(CategoryDetailViewModel::class.java)
         type = arguments!!.getString("type")
         major = arguments!!.getString("major")
         return inflater.inflate(R.layout.fragment_novel_list, container, false)
@@ -39,35 +35,14 @@ class NovelListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
-        initData()
-    }
-
-    private fun initView() {
-        novelList.init(
-            RecyclerAdapter(bookList, R.layout.item_catalog_detial, NovelListItemClickEvent(), true), null
+        RecyclerAdapter(
+            viewModel?.getBookList(type!!, major!!),
+            R.layout.item_catalog_detial,
+            viewModel,
+            true
         )
-    }
-
-    private fun initData() {
-        ApiManager.zhuiShuShenQi.seachBookListByTypeAndMajor(type = type, major = major)
-            .enqueueCall {
-                it?.let {
-                    bookList.clear()
-                    bookList.addAll(it.books!!)
-                }
-            }
-    }
-
-    inner class NovelListItemClickEvent {
-
-        fun onClickDetail(id: String) {
-            ApiManager.zhuiShuShenQi.getNovelIntroduce(id).enqueueCall {
-                val intent = Intent(context, NovelDetailActivity::class.java)
-                intent.putExtra("data", it)
-                context!!.startActivity(intent)
-            }
-        }
+            .let { novelList.init(it, null) }
+        viewModel?.initBooklist(type!!, major!!)
     }
 
 }

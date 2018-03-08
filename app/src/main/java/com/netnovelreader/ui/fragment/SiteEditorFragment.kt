@@ -17,10 +17,12 @@ import com.netnovelreader.viewmodel.SettingViewModel
 import kotlinx.coroutines.experimental.launch
 
 class SiteEditorFragment : Fragment() {
-    val settingViewModel by lazy { activity?.obtainViewModel(SettingViewModel::class.java) }
+    var settingViewModel: SettingViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        settingViewModel = activity?.obtainViewModel(SettingViewModel::class.java)
+        settingViewModel?.editTextCommand?.value = null
         settingViewModel?.editTextCommand?.observe(this, Observer {
             it ?: return@Observer
             this@SiteEditorFragment.context?.apply {

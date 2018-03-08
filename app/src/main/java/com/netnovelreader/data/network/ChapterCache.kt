@@ -66,7 +66,8 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         val sb = StringBuilder()
         val chapterName = ReaderDbManager.getChapterName(dirName!!, chapterNum)
         sb.append(chapterName + "|")
-        val chapterFile = File("${ReaderApplication.dirPath}/$dirName/${chapterName.replace("/",SLASH)}")
+        val chapterFile =
+            File("${ReaderApplication.dirPath}/$dirName/${chapterName.replace("/", SLASH)}")
         sb.append(
             if (chapterFile.exists() && chapterFile.isFile) chapterFile.readText()
             else if (!enableDownload) FILENOTFOUND

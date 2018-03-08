@@ -4,14 +4,14 @@ import android.databinding.DataBindingUtil
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableList
 import android.databinding.ViewDataBinding
-import android.os.Handler
-import android.os.Looper
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import com.netnovelreader.BR
 import com.netnovelreader.R
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
+import java.lang.ref.WeakReference
 
 /**
  * Created by yangbo on 18-1-12.
@@ -19,7 +19,7 @@ import com.netnovelreader.R
 
 
 /**
- * @isoccupiedFirst 表示第一个用一空view占用（添加到第一个的动画）
+ * @isoccupiedFirst 表示第一个item用空view占用（添加到第一个的动画）
  */
 class RecyclerAdapter<T, E>(
     private val itemDetails: ObservableArrayList<T>?,
@@ -27,17 +27,17 @@ class RecyclerAdapter<T, E>(
     val clickEvent: E,
     val isoccupiedFirst: Boolean
 ) : RecyclerView.Adapter<RecyclerAdapter.BindingViewHolder<T, E>>() {
-    lateinit var listener: ArrayListChangeListener<T, E>
+    lateinit var listener: WeakReference<ArrayListChangeListener<T, E>>
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        listener = ArrayListChangeListener(this)
-        itemDetails?.addOnListChangedCallback(listener)
+        listener = WeakReference(ArrayListChangeListener())
+        itemDetails?.addOnListChangedCallback(listener.get())
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        itemDetails?.removeOnListChangedCallback(listener)
+        itemDetails?.removeOnListChangedCallback(listener.get())
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<T, E> {
@@ -80,44 +80,47 @@ class RecyclerAdapter<T, E>(
         }
     }
 
-    inner class ArrayListChangeListener<T, E>(private val adapter: RecyclerAdapter<T, E>) :
+    inner class ArrayListChangeListener<T, E> :
         ObservableList.OnListChangedCallback<ObservableArrayList<T>>() {
 
         override fun onChanged(p0: ObservableArrayList<T>?) {
-            Looper.getMainLooper()
-            Handler(Looper.getMainLooper()).post { adapter.notifyDataSetChanged() }
+            launch(UI) { notifyDataSetChanged() }
         }
 
         override fun onItemRangeChanged(p0: ObservableArrayList<T>?, p1: Int, p2: Int) {
-            Handler(Looper.getMainLooper()).post {
+            launch(UI) {
                 (if (isoccupiedFirst) p1 + 1 else p1).also {
-                    adapter.notifyItemRangeRemoved(it, p2)
-                    adapter.notifyItemRangeInserted(it, p2)
+                    notifyItemRangeRemoved(it, p2)
+                    notifyItemRangeInserted(it, p2)
                 }
             }
         }
 
         override fun onItemRangeInserted(p0: ObservableArrayList<T>?, p1: Int, p2: Int) {
-            Handler(Looper.getMainLooper()).post {
+            launch(UI) {
                 (if (isoccupiedFirst) p1 + 1 else p1).also {
-                    adapter.notifyItemRangeInserted(it, p2)
+                    if (p0?.size == p2) {
+                        notifyDataSetChanged()           //添加所有，不显示动画效果，避免屏幕闪烁
+                    } else {
+                        notifyItemRangeInserted(it, p2)
+                    }
                 }
             }
         }
 
         override fun onItemRangeMoved(p0: ObservableArrayList<T>?, p1: Int, p2: Int, p3: Int) {
-            Handler(Looper.getMainLooper()).post {
+            launch(UI) {
                 (if (isoccupiedFirst) p1 + 1 else p1).also {
-                    adapter.notifyItemRangeRemoved(it, p3)
-                    adapter.notifyItemRangeInserted(it, p3)
+                    notifyItemRangeRemoved(it, p3)
+                    notifyItemRangeInserted(it, p3)
                 }
             }
         }
 
         override fun onItemRangeRemoved(p0: ObservableArrayList<T>?, p1: Int, p2: Int) {
-            Handler(Looper.getMainLooper()).post {
+            launch(UI) {
                 (if (isoccupiedFirst) p1 + 1 else p1).also {
-                    adapter.notifyItemRangeRemoved(it, p2)
+                    notifyItemRangeRemoved(it, p2)
                 }
             }
         }

@@ -11,14 +11,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.netnovelreader.R
-import com.netnovelreader.common.*
+import com.netnovelreader.common.RecyclerAdapter
+import com.netnovelreader.common.checkPermission
+import com.netnovelreader.common.init
+import com.netnovelreader.common.obtainViewModel
+import com.netnovelreader.data.PreferenceManager
 import com.netnovelreader.databinding.FragmentShelfBinding
 import com.netnovelreader.ui.activity.ReaderActivity
+import com.netnovelreader.ui.activity.ShelfActivity
 import com.netnovelreader.viewmodel.ShelfViewModel
+import kotlinx.android.synthetic.main.activity_shelf.*
 import kotlinx.coroutines.experimental.launch
 
 class ShelfFragment : Fragment() {
-    val shelfViewModel by lazy { activity?.obtainViewModel(ShelfViewModel::class.java) }
+    var shelfViewModel: ShelfViewModel? = null
     var isFirstResume = true
     lateinit var binding: FragmentShelfBinding
 
@@ -26,27 +32,26 @@ class ShelfFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        shelfViewModel = activity?.obtainViewModel(ShelfViewModel::class.java)
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_shelf, container, false)
         binding.viewModel = shelfViewModel
-        binding.shelfRecycler.init(
-            RecyclerAdapter(shelfViewModel?.bookList, R.layout.item_shelf, shelfViewModel, true),
-            null
-        )
+        RecyclerAdapter(shelfViewModel?.bookList, R.layout.item_shelf, shelfViewModel, true)
+            .let { binding.shelfRecycler.init(it, null) }
         binding.shelfRefresh.setColorSchemeResources(R.color.gray)
         initLiveData()
+        (activity as ShelfActivity).shelfTab.run {
+            post {
+                binding.shelfRecycler.setPadding(0, height, 0, 0)
+                binding.shelfRecycler.scrollToPosition(0)
+            }
+        }
         return binding.root
     }
 
     fun initLiveData() {
-        shelfViewModel?.paddingCommand?.observe(this, Observer {
-            if (it != null && it != 0 && binding.shelfRecycler.paddingTop != it) {
-                binding.shelfRecycler.setPadding(0, it, 0, 0)
-                binding.shelfRecycler.scrollToPosition(0)
-            }
+        shelfViewModel?.stopRefershCommand?.observe(this, Observer {
+            binding.shelfRefresh.isRefreshing = false
         })
-        shelfViewModel?.notRefershCommand?.observe(
-            this,
-            Observer { binding.shelfRefresh.isRefreshing = false })
         shelfViewModel?.readBookCommand?.observe(this, Observer {
             if (it.isNullOrEmpty()) return@Observer
             shelfViewModel?.refreshType = 1
@@ -68,15 +73,17 @@ class ShelfFragment : Fragment() {
         })
     }
 
-
     override fun onResume() {
         super.onResume()
-        if(!isFirstResume && shelfViewModel?.refreshType == 0) return
-        launch {
-            if (activity!!.checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                shelfViewModel?.refreshBookList()
-            }
+        if (!isFirstResume && shelfViewModel?.refreshType == 0) return
+        if (activity!!.checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            launch { shelfViewModel?.refreshBookList() }
         }
         isFirstResume = false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.shelfRecycler.adapter = null
     }
 }

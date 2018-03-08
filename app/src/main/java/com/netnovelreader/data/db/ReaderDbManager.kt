@@ -16,11 +16,11 @@ object ReaderDbManager {
         roomDb ?: synchronized(ReaderDbManager::class) {
             roomDb ?: kotlin.run {
                 roomDb = Room.databaseBuilder(
-                        ReaderApplication.appContext,
-                        ReaderDatabase::class.java,
-                        dbName
+                    ReaderApplication.appContext,
+                    ReaderDatabase::class.java,
+                    dbName
                 )
-                        .addCallback(dbCallBack).build()
+                    .addCallback(dbCallBack).build()
             }
         }
         return roomDb!!
@@ -36,9 +36,9 @@ object ReaderDbManager {
     fun createTable(tableName: String) {
         synchronized(ReaderDbManager::class) {
             getRoomDB().openHelper.writableDatabase.execSQL(
-                    "create table if not exists $tableName (${ReaderDatabase.ID} " +
-                            "integer primary key unique,${ReaderDatabase.CHAPTERNAME} text unique, " +
-                            "${ReaderDatabase.CHAPTERURL} text, ${ReaderDatabase.ISDOWNLOADED} var char(128));"
+                "create table if not exists $tableName (${ReaderDatabase.ID} " +
+                        "integer primary key unique,${ReaderDatabase.CHAPTERNAME} text unique, " +
+                        "${ReaderDatabase.CHAPTERURL} text, ${ReaderDatabase.ISDOWNLOADED} var char(128));"
             )
         }
     }
@@ -53,17 +53,17 @@ object ReaderDbManager {
 
     //设置章节是否下载完成
     fun setChapterFinish(
-            tableName: String,
-            chaptername: String,
-            url: String,
-            isDownloadSuccess: Int
+        tableName: String,
+        chaptername: String,
+        url: String,
+        isDownloadSuccess: Int
     ) {
 
         val getId =
-                "(select ${ReaderDatabase.ID} from $tableName where ${ReaderDatabase.CHAPTERNAME}='$chaptername')"
+            "(select ${ReaderDatabase.ID} from $tableName where ${ReaderDatabase.CHAPTERNAME}='$chaptername')"
         getRoomDB().openHelper.writableDatabase.execSQL(
-                "replace into $tableName (${ReaderDatabase.ID}, ${ReaderDatabase.CHAPTERNAME}, ${ReaderDatabase.CHAPTERURL}, ${ReaderDatabase.ISDOWNLOADED}) " +
-                        "values ($getId, '$chaptername', '$url', '$isDownloadSuccess')"
+            "replace into $tableName (${ReaderDatabase.ID}, ${ReaderDatabase.CHAPTERNAME}, ${ReaderDatabase.CHAPTERURL}, ${ReaderDatabase.ISDOWNLOADED}) " +
+                    "values ($getId, '$chaptername', '$url', '$isDownloadSuccess')"
         )
     }
 
@@ -74,9 +74,9 @@ object ReaderDbManager {
     fun getChapterNameAndUrl(tableName: String, isDownloaded: Int): LinkedHashMap<String, String> {
         val map = LinkedHashMap<String, String>()
         val cursor = getRoomDB().openHelper.writableDatabase.query(
-                "select ${ReaderDatabase.CHAPTERNAME}," +
-                        "${ReaderDatabase.CHAPTERURL} from $tableName where ${ReaderDatabase.ISDOWNLOADED}=" +
-                        "'$isDownloaded';", null
+            "select ${ReaderDatabase.CHAPTERNAME}," +
+                    "${ReaderDatabase.CHAPTERURL} from $tableName where ${ReaderDatabase.ISDOWNLOADED}=" +
+                    "'$isDownloaded';", null
         )
         while (cursor.moveToNext()) {
             map[cursor.getString(0)] = cursor.getString(1)
@@ -89,8 +89,8 @@ object ReaderDbManager {
     fun getAllChapter(tableName: String): ArrayList<String> {
         val arrayList = ArrayList<String>()
         val cursor = getRoomDB().openHelper.writableDatabase.query(
-                "select ${ReaderDatabase.CHAPTERNAME} from $tableName order by ${ReaderDatabase.ID} asc;",
-                null
+            "select ${ReaderDatabase.CHAPTERNAME} from $tableName order by ${ReaderDatabase.ID} asc;",
+            null
         )
         while (cursor.moveToNext()) {
             arrayList.add(cursor.getString(0))
@@ -103,8 +103,8 @@ object ReaderDbManager {
     fun getChapterName(tableName: String, id: Int): String {
         var chapterName: String? = null
         val cursor = getRoomDB().openHelper.writableDatabase.query(
-                "select ${ReaderDatabase.CHAPTERNAME} from $tableName where " +
-                        "${ReaderDatabase.ID}=$id;", null
+            "select ${ReaderDatabase.CHAPTERNAME} from $tableName where " +
+                    "${ReaderDatabase.ID}=$id;", null
         )
         if (cursor.moveToFirst()) {
             chapterName = cursor.getString(0)
@@ -117,8 +117,8 @@ object ReaderDbManager {
     fun getChapterUrl(tableName: String, chapterName: String): String {
         var chapterUrl: String? = null
         val cursor = getRoomDB().openHelper.writableDatabase.query(
-                "select ${ReaderDatabase.CHAPTERURL} from $tableName where " +
-                        "${ReaderDatabase.CHAPTERNAME}='${chapterName}';", null
+            "select ${ReaderDatabase.CHAPTERURL} from $tableName where " +
+                    "${ReaderDatabase.CHAPTERNAME}='${chapterName}';", null
         )
         if (cursor.moveToFirst()) {
             chapterUrl = cursor.getString(0)
@@ -130,8 +130,8 @@ object ReaderDbManager {
     fun getChapterId(tableName: String, chapterName: String): Int {
         var id = 1
         val cursor = getRoomDB().openHelper.writableDatabase.query(
-                "select ${ReaderDatabase.ID} from $tableName where " +
-                        "${ReaderDatabase.CHAPTERNAME}='${chapterName}';", null
+            "select ${ReaderDatabase.ID} from $tableName where " +
+                    "${ReaderDatabase.CHAPTERNAME}='${chapterName}';", null
         )
         if (cursor.moveToFirst()) {
             id = cursor.getInt(0)
@@ -144,8 +144,8 @@ object ReaderDbManager {
     fun setReaded(tableName: String, id: Int): ArrayList<String> {
         val arrayList = ArrayList<String>()
         val cursor = getRoomDB().openHelper.writableDatabase.query(
-                "select ${ReaderDatabase.CHAPTERNAME} from $tableName where ${ReaderDatabase.ID}<=$id " +
-                        "and ${ReaderDatabase.ISDOWNLOADED}='1';", null
+            "select ${ReaderDatabase.CHAPTERNAME} from $tableName where ${ReaderDatabase.ID}<=$id " +
+                    "and ${ReaderDatabase.ISDOWNLOADED}='1';", null
         )
         while (cursor.moveToNext()) {
             arrayList.add(cursor.getString(0))
@@ -160,10 +160,10 @@ object ReaderDbManager {
         val arrayList = ArrayList<String>()
         val id = getChapterId(tableName, chapterName)
         val cursor =
-                getRoomDB().openHelper.writableDatabase.query(
-                        "select ${ReaderDatabase.CHAPTERNAME} from $tableName where ${ReaderDatabase.ID}>=$id;",
-                        null
-                )
+            getRoomDB().openHelper.writableDatabase.query(
+                "select ${ReaderDatabase.CHAPTERNAME} from $tableName where ${ReaderDatabase.ID}>=$id;",
+                null
+            )
         while (cursor.moveToNext()) {
             arrayList.add(cursor.getString(0))
         }
@@ -179,7 +179,7 @@ object ReaderDbManager {
         var c = 0
         createTable(tableName)
         val cursor =
-                getRoomDB().openHelper.writableDatabase.query("select count(*) from $tableName;", null)
+            getRoomDB().openHelper.writableDatabase.query("select count(*) from $tableName;", null)
         if (cursor.moveToFirst()) {
             c = cursor.getInt(0)
         }
@@ -191,53 +191,53 @@ object ReaderDbManager {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             val array = arrayOf(
-                    "(1,'qidian.com','.volume-wrap','.read-content','分卷阅读|订阅本卷',''," +
-                            "'https://www.qidian.com/search/?kw=${ReaderDatabase.SEARCH_NAME}','',''," +
-                            "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)',''," +
-                            "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)'," +
-                            "'','.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)','utf-8')",
-                    "(2,'yunlaige.com','#contenttable','#content','',''," +
-                            "'http://www.yunlaige.com/modules/article/search.php?searchkey=${ReaderDatabase.SEARCH_NAME}&action=login&submit='," +
-                            "'location','.readnow'," +
-                            "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)'," +
-                            "'#content > div.book-info > div.info > h2 > a'," +
-                            "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)'," +
-                            "'','','gbk')",
-                    "(3,'yssm.org','.chapterlist','#content','',''," +
-                            "'http://zhannei.baidu.com/cse/search?s=7295900583126281660&q=${ReaderDatabase.SEARCH_NAME}'," +
-                            "'',''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "'','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)','utf-8')",
-                    "(4,'b5200.net','#list > dl:nth-child(1)','#content','',''," +
-                            "'http://www.b5200.net/modules/article/search.php?searchkey=${ReaderDatabase.SEARCH_NAME}'," +
-                            "'',''," +
-                            "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
-                            "'','','utf-8')",
-                    "(5,'shudaizi.org','#list > dl:nth-child(1)','#content','',''," +
-                            "'http://zhannei.baidu.com/cse/search?q=${ReaderDatabase.SEARCH_NAME}&click=1&entry=1&s=16961354726626188066&nsid='," +
-                            "'',''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "'','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)','utf-8')",
-                    "(6,'81xsw.com','#list > dl:nth-child(1)','#content','',''," +
-                            "'http://zhannei.baidu.com/cse/search?s=16095493717575840686&q=${ReaderDatabase.SEARCH_NAME}'," +
-                            "'',''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
-                            "'','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)','utf-8')",
-                    "(7,'sqsxs.com','#list > dl:nth-child(1)','#content','',''," +
-                            "'https://www.sqsxs.com/modules/article/search.php?searchkey=${ReaderDatabase.SEARCH_NAME}'," +
-                            "'',''," +
-                            "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
-                            "''," +
-                            "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
-                            "'','','gbk')"
+                "(1,'qidian.com','.volume-wrap','.read-content','分卷阅读|订阅本卷',''," +
+                        "'https://www.qidian.com/search/?kw=${ReaderDatabase.SEARCH_NAME}','',''," +
+                        "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)',''," +
+                        "'.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)'," +
+                        "'','.book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)','utf-8')",
+                "(2,'yunlaige.com','#contenttable','#content','',''," +
+                        "'http://www.yunlaige.com/modules/article/search.php?searchkey=${ReaderDatabase.SEARCH_NAME}&action=login&submit='," +
+                        "'location','.readnow'," +
+                        "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(2) > a:nth-child(1)'," +
+                        "'#content > div.book-info > div.info > h2 > a'," +
+                        "'li.clearfix:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)'," +
+                        "'','','gbk')",
+                "(3,'yssm.org','.chapterlist','#content','',''," +
+                        "'http://zhannei.baidu.com/cse/search?s=7295900583126281660&q=${ReaderDatabase.SEARCH_NAME}'," +
+                        "'',''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "'','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)','utf-8')",
+                "(4,'b5200.net','#list > dl:nth-child(1)','#content','',''," +
+                        "'http://www.b5200.net/modules/article/search.php?searchkey=${ReaderDatabase.SEARCH_NAME}'," +
+                        "'',''," +
+                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
+                        "'','','utf-8')",
+                "(5,'shudaizi.org','#list > dl:nth-child(1)','#content','',''," +
+                        "'http://zhannei.baidu.com/cse/search?q=${ReaderDatabase.SEARCH_NAME}&click=1&entry=1&s=16961354726626188066&nsid='," +
+                        "'',''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "'','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)','utf-8')",
+                "(6,'81xsw.com','#list > dl:nth-child(1)','#content','',''," +
+                        "'http://zhannei.baidu.com/cse/search?s=16095493717575840686&q=${ReaderDatabase.SEARCH_NAME}'," +
+                        "'',''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'div.result-item:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'," +
+                        "'','div.result-item:nth-child(1) > div:nth-child(1) > a:nth-child(1) > img:nth-child(1)','utf-8')",
+                "(7,'sqsxs.com','#list > dl:nth-child(1)','#content','',''," +
+                        "'https://www.sqsxs.com/modules/article/search.php?searchkey=${ReaderDatabase.SEARCH_NAME}'," +
+                        "'',''," +
+                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
+                        "''," +
+                        "'.grid > tbody:nth-child(2) > tr:nth-child(2) > td:nth-child(1) > a:nth-child(1)'," +
+                        "'','','gbk')"
             )
             db.beginTransaction()
             array.forEach {

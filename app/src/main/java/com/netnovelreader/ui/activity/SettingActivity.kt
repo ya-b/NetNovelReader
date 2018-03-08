@@ -22,9 +22,9 @@ class SettingActivity : AppCompatActivity() {
     val settingViewModel by lazy { obtainViewModel(SettingViewModel::class.java) }
     val SP = "SitePreferenceFragment"
     val SE = "SiteEditorFragment"
-    var mTemp: Fragment? = null
     var siteListFg: Fragment? = null
-    var updateMenu: MenuItem? = null
+    var siteEditorFg: Fragment? = null
+    var menuItemList = ArrayList<MenuItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +42,7 @@ class SettingActivity : AppCompatActivity() {
                 .commit()
         } else {
             setSupportActionBar(settingToolbar.apply { title = getString(R.string.edit_site) })
-            siteListFg = SitePreferenceFragment().also { mTemp = it }
+            siteListFg = SitePreferenceFragment()
             supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, siteListFg, SP)
                 .commit()
         }
@@ -51,20 +51,21 @@ class SettingActivity : AppCompatActivity() {
     fun initLiveData() {
         settingViewModel.exitCommand.observe(this, Observer {
             if (siteListFg?.isHidden == true) {
-                supportFragmentManager.beginTransaction().hide(mTemp).show(siteListFg).commit()
-                updateMenu?.isVisible = true
+                supportFragmentManager.beginTransaction().hide(siteEditorFg).show(siteListFg)
+                    .commit()
+                menuItemList.forEach { it.isVisible = true }
             } else {
                 finish()
             }
         })
         settingViewModel.editSiteCommand.observe(this, Observer {
-            mTemp = SiteEditorFragment.instance
-            updateMenu?.isVisible = false
+            siteEditorFg ?: kotlin.run { siteEditorFg = SiteEditorFragment.instance }
+            menuItemList.forEach { it.isVisible = false }
             supportFragmentManager.beginTransaction().apply {
                 if (supportFragmentManager.fragments.size > 1) {
-                    show(mTemp)
+                    show(siteEditorFg)
                 } else {
-                    add(R.id.settingFrameLayout, mTemp, SE)
+                    add(R.id.settingFrameLayout, siteEditorFg, SE)
                 }
             }.hide(siteListFg).commit()
         })
@@ -76,24 +77,33 @@ class SettingActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_setting, menu)
-        updateMenu = menu.findItem(R.id.updateSitePreference)
-        return intent.getIntExtra("type", 0) != 0
+        menuItemList.add(menu.findItem(R.id.addSitePreference))
+        menuItemList.add(menu.findItem(R.id.updateSitePreference))
+        return intent.getIntExtra("type", 0) != 0   //false 不显示
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.updateSitePreference) {
-            AlertDialog.Builder(this)
-                .setTitle(getString(R.string.whenconflict))
-                .setPositiveButton(R.string.no, { _, _ ->
-                    launch { settingViewModel.updatePreference(false) }
-                })
-                .setNegativeButton(R.string.yes_local, { _, _ ->
-                    launch { settingViewModel.updatePreference(true) }
-                })
-                .setNeutralButton(R.string.cancel, null)
-                .create()
-                .show()
+        when (item.itemId) {
+            R.id.updateSitePreference -> showDialog()
+            R.id.addSitePreference -> {
+                settingViewModel.edittingSite!!.add(null)
+                settingViewModel.editSiteCommand.value = null
+            }
         }
         return true
+    }
+
+    fun showDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.whenconflict))
+            .setPositiveButton(R.string.no, { _, _ ->
+                launch { settingViewModel.updatePreference(false) }
+            })
+            .setNegativeButton(R.string.yes_local, { _, _ ->
+                launch { settingViewModel.updatePreference(true) }
+            })
+            .setNeutralButton(R.string.cancel, null)
+            .create()
+            .show()
     }
 }

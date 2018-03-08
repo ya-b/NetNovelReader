@@ -20,7 +20,7 @@
         tools:context="com.netnovelreader.ui.activity.ReaderActivity">
 
         <!--正文-->
-        <com.netnovelreader.customview.ReaderView
+        <com.netnovelreader.ui.customview.ReaderView
             android:id="@+id/readerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -188,8 +188,8 @@
                 style="@style/setting_dialog_button"
                 android:layout_weight="1"
                 android:background="@{viewModel.fontTypeSelected[2] ? @drawable/button_select_bg : @drawable/button_bg}"
-                android:onClick="@{() -> viewModel.fontTypeChangeEvent(`bysong`)}"
-                android:text="繁宋体"
+                android:onClick="@{() -> viewModel.fontTypeChangeEvent(`zedong`)}"
+                android:text="泽东体"
                 android:textColor="@{viewModel.fontTypeSelected[2] ? @color/white : @color/gray}"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toStartOf="@id/tv_fzkatong"
@@ -216,8 +216,8 @@
                 style="@style/setting_dialog_button"
                 android:layout_weight="1"
                 android:background="@{viewModel.fontTypeSelected[4] ? @drawable/button_select_bg : @drawable/button_bg}"
-                android:onClick="@{() -> viewModel.fontTypeChangeEvent(`chenguang`)}"
-                android:text="晨光体"
+                android:onClick="@{() -> viewModel.fontTypeChangeEvent(`jianzhi`)}"
+                android:text="剪纸体"
                 android:textColor="@{viewModel.fontTypeSelected[4] ? @color/white : @color/gray}"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -257,6 +257,7 @@
                 android:layout_marginBottom="16dp"
                 android:gravity="center"
                 android:max="255"
+                android:OnSeekBarChangeListener="@{(p) -> viewModel.changeBrightness(p)}"
                 app:layout_constraintBottom_toTopOf="@id/read_bg_default"
                 app:layout_constraintEnd_toStartOf="@id/imageView2"
                 app:layout_constraintStart_toEndOf="@id/imageView"

@@ -18,10 +18,12 @@ import com.netnovelreader.viewmodel.SettingViewModel
 import kotlinx.coroutines.experimental.launch
 
 class SitePreferenceFragment : Fragment() {
-    val settingViewModel by lazy { activity?.obtainViewModel(SettingViewModel::class.java) }
+    private var settingViewModel: SettingViewModel? = null
+    private lateinit var binding: FragmentSitePreferenceBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        settingViewModel = activity?.obtainViewModel(SettingViewModel::class.java)
         settingViewModel?.deleteAlertCommand?.observe(this, Observer {
             it ?: return@Observer
             val listener = DialogInterface.OnClickListener { _, _ ->
@@ -39,19 +41,25 @@ class SitePreferenceFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? =
-        DataBindingUtil.inflate<FragmentSitePreferenceBinding>(
+    ): View? {
+        binding = DataBindingUtil.inflate<FragmentSitePreferenceBinding>(
             inflater,
             R.layout.fragment_site_preference, container, false
-        ).apply {
-            launch { settingViewModel?.showSiteList() }
-            recycleSiteList.init(
-                RecyclerAdapter(
-                    settingViewModel?.siteList,
-                    R.layout.item_site_preference_list,
-                    settingViewModel,
-                    true
-                )
+        )
+        launch { settingViewModel?.showSiteList() }
+        binding.recycleSiteList.init(
+            RecyclerAdapter(
+                settingViewModel?.siteList,
+                R.layout.item_site_preference_list,
+                settingViewModel,
+                true
             )
-        }.root
+        )
+        return binding.root
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.recycleSiteList.adapter = null
+    }
 }

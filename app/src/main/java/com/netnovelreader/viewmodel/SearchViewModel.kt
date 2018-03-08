@@ -128,7 +128,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
                     } catch (e: IOException) {
                         e.printStackTrace()
                     }
-                    isLoading.set(false)
+                    if (isLoading.get()) isLoading.set(false)
                 }
             }
         queryTextTemp = bookname!!
@@ -167,19 +167,21 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     fun detailClickTask(itemText: String) {
-        val novelIntroduce = try {
-            ApiManager.zhuiShuShenQi.searchBook(itemText).execute().body()
-                ?.books
-                ?.firstOrNull { it.title == itemText }
-                ?._id
-                ?.let { ApiManager.zhuiShuShenQi.getNovelIntroduce(it).execute().body() }
-        } catch (e: IOException) {
-            null
-        }
-        if (novelIntroduce == null) {
-            toastMessage.value = "没有搜索到相关小说的介绍"
-        } else {
-            showBookDetailCommand.value = novelIntroduce
+        launch {
+            val novelIntroduce = try {
+                ApiManager.zhuiShuShenQi.searchBook(itemText).execute().body()
+                    ?.books
+                    ?.firstOrNull { it.title == itemText }
+                    ?._id
+                    ?.let { ApiManager.zhuiShuShenQi.getNovelIntroduce(it).execute().body() }
+            } catch (e: IOException) {
+                null
+            }
+            if (novelIntroduce == null) {
+                toastMessage.value = "没有搜索到相关小说的介绍"
+            } else {
+                showBookDetailCommand.value = novelIntroduce
+            }
         }
     }
 
@@ -208,7 +210,10 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         return suggestCursor
     }
 
-    //从具体网站搜索，并添加到resultList
+    /**
+     * 从具体网站搜索，并添加到resultList
+     * @chapterName 正在阅读的章节（换源下载）
+     */
     @Throws(IOException::class)
     private fun searchBookFromSite(
         bookname: String,
@@ -218,9 +223,9 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         //result[1]==bookname,result[0]==catalogurl
         val result = SearchBook().search(bookname, siteinfo).takeIf { it[1].isNotEmpty() } ?: return
         CatalogCache.addCatalog(result[1], result[0])
-        val bean = CatalogCache.cache[result[0]]
+        val bean = CatalogCache.getCatalog(result[0])
             ?.takeIf { !it.url.get().isNullOrEmpty() }
-            ?.takeIf { it.latestChapter.get().isNullOrEmpty() }
+            ?.takeIf { !it.latestChapter.get().isNullOrEmpty() }
                 ?: return
         if (chapterName.isNullOrEmpty() || bean.catalogMap.containsKey(chapterName)) {
             resultList.add(bean)

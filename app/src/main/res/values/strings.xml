@@ -11,6 +11,7 @@
     <string name="settings">设置</string>
     <string name="edit_site">编辑网站规则</string>
     <string name="update">更新</string>
+    <string name="add">添加</string>
     <string name="whenconflict">当与本地配置冲突时</string>
     <string name="yes_local">是,优先本地配置</string>
     <string name="filter">筛选</string>
@@ -64,8 +65,5 @@
     <string name="redirectImage">重定向封面选择器</string>
     <string name="noRedirectImage">封面选择器</string>
     <string name="charset">字符编码</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

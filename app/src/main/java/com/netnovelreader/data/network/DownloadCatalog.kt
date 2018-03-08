@@ -17,7 +17,7 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
     @Throws(IOException::class)
     fun download(isUpdate: String = UPDATEFLAG) {
         ReaderDbManager.createTable(tableName)
-        val cacheMap = CatalogCache.cache[catalogUrl]?.catalogMap
+        val cacheMap = CatalogCache.getCatalog(catalogUrl)?.catalogMap
         val map =
             (if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
                 .let { filtExistsInSql(it) }
@@ -28,14 +28,11 @@ class DownloadCatalog(val tableName: String, val catalogUrl: String) {
                 latestChapter = it.key
             }
         }
-        val dbLatestChapter =
-            ReaderDbManager.shelfDao().getBookInfo(tableName)?.latestChapter
+        val dbLatestChapter = ReaderDbManager.shelfDao().getBookInfo(tableName)?.latestChapter
         if (latestChapter != null && dbLatestChapter != latestChapter) {
-            latestChapter?.let {
-                ReaderDbManager.shelfDao().replace(
-                    bookName = tableName, isUpdate = isUpdate, latestChapter = it
-                )
-            }
+            ReaderDbManager.shelfDao().replace(
+                bookName = tableName, isUpdate = isUpdate, latestChapter = latestChapter
+            )
         }
     }
 

@@ -1,6 +1,6 @@
 package com.netnovelreader.common
 
-import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -92,7 +92,7 @@ fun <T, E> RecyclerView.init(
             return false
         }
     },
-    animator: RecyclerView.ItemAnimator = DefaultItemAnimator()
+    animator: RecyclerView.ItemAnimator? = DefaultItemAnimator()
 ) {
     this.layoutManager = layoutManager
     this.adapter = adapter
@@ -128,7 +128,7 @@ fun ShelfDao.replace(
 }
 
 
-fun <T : ViewModel> FragmentActivity.obtainViewModel(clazz: Class<T>): T =
+fun <T : AndroidViewModel> FragmentActivity.obtainViewModel(clazz: Class<T>): T =
     ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
         .let { ViewModelProviders.of(this, it).get(clazz) }
 

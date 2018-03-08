@@ -16,22 +16,28 @@ import com.netnovelreader.common.GridDivider
 import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.init
 import com.netnovelreader.common.obtainViewModel
+import com.netnovelreader.data.PreferenceManager
 import com.netnovelreader.databinding.FragmentNovelClassfyBinding
-import com.netnovelreader.ui.activity.NovelCatalogDetailActivity
+import com.netnovelreader.ui.activity.CategoryDetailActivity
+import com.netnovelreader.ui.activity.ShelfActivity
 import com.netnovelreader.viewmodel.ShelfViewModel
+import kotlinx.android.synthetic.main.activity_shelf.*
 
 class NovelClassfyFragment : Fragment() {
-    val viewModel by lazy { activity?.obtainViewModel(ShelfViewModel::class.java) }
-    lateinit var binding: FragmentNovelClassfyBinding
+    private var viewModel: ShelfViewModel? = null
+    private lateinit var binding: FragmentNovelClassfyBinding
+    private var tabHeight = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_novel_classfy, container, false)
+        viewModel = activity?.obtainViewModel(ShelfViewModel::class.java)
+        binding =
+                DataBindingUtil.inflate(inflater, R.layout.fragment_novel_classfy, container, false)
         binding.maleRecyclerView.init(
             RecyclerAdapter(viewModel?.resultList, R.layout.item_novel_classfy, viewModel, false),
-            GridDivider(activity!!.baseContext, 1, Color.BLACK),
+            GridDivider(activity!!.baseContext, 1, Color.GRAY),
             object : GridLayoutManager(activity, 3, RecyclerView.VERTICAL, false) {
                 override fun supportsPredictiveItemAnimations(): Boolean {
                     return false
@@ -40,20 +46,31 @@ class NovelClassfyFragment : Fragment() {
         )
         viewModel?.getNovelCatalogData()
         initLiveData()
+        (activity as ShelfActivity).shelfTab.run {
+            post {
+                tabHeight = height
+                binding.malelabel.setPadding(0, tabHeight, 0, 0)
+            }
+        }
         return binding.root
     }
 
     fun initLiveData() {
-        viewModel?.paddingCommand?.observe(this, Observer {
-            if (it != null && it != 0 && binding.malelabel.paddingTop != it) {
-                binding.malelabel.setPadding(0, it, 0, 0)
-            }
-        })
         viewModel?.openCatalogDetailCommand?.observe(this, Observer {
-            val intent = Intent(activity, NovelCatalogDetailActivity::class.java)
+            val intent = Intent(activity, CategoryDetailActivity::class.java)
             intent.putExtra("major", it)
-            intent.putExtra("themeid", intent.getIntExtra("themeid", R.style.AppThemeBlack))
+            intent.putExtra("themeid", PreferenceManager.getThemeId(activity!!.baseContext))
             startActivity(intent)
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.maleRecyclerView.adapter = null
     }
 }

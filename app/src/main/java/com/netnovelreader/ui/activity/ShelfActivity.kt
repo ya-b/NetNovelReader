@@ -7,10 +7,16 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
+import android.view.animation.DecelerateInterpolator
 import com.netnovelreader.R
-import com.netnovelreader.common.*
+import com.netnovelreader.common.PagerAdapter
+import com.netnovelreader.common.checkPermission
+import com.netnovelreader.common.obtainViewModel
+import com.netnovelreader.common.toast
+import com.netnovelreader.data.PreferenceManager
 import com.netnovelreader.databinding.ActivityShelfBinding
 import com.netnovelreader.ui.fragment.NovelClassfyFragment
 import com.netnovelreader.ui.fragment.ShelfFragment
@@ -20,9 +26,10 @@ import kotlinx.coroutines.experimental.launch
 
 class ShelfActivity : AppCompatActivity() {
 
-    val shelfViewModel by lazy { obtainViewModel(ShelfViewModel::class.java) }
+    val viewModel by lazy { obtainViewModel(ShelfViewModel::class.java) }
     private var hasPermission = false
     private var themeId = 0
+    private var translationTemp = 0F
 
     override fun onCreate(savedInstanceState: Bundle?) {
         themeId = PreferenceManager.getThemeId(this).also { setTheme(it) }
@@ -32,27 +39,34 @@ class ShelfActivity : AppCompatActivity() {
             requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)
         }
         initView()
-        mtoolbar.post {
-            shelfViewModel.paddingCommand.value = shelfTab.height
-        }
-        shelfViewModel.translateCommand.observe(this, Observer {
-            it ?: return@Observer
-            mtoolbar.translationY = -it.toFloat()
-        })
+        initLiveData()
+        shelfTab.post { viewModel.tabHeight = shelfTab.height }
     }
 
     fun initView() {
         DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
-            .apply { viewModel = shelfViewModel }
+            .apply { viewModel = this@ShelfActivity.viewModel }
         setSupportActionBar(shelfToolbar)
-        shelfViewPager.apply {
-            offscreenPageLimit = 2
-            adapter = PagerAdapter(
-                supportFragmentManager,
-                arrayOf(getString(R.string.shelf), getString(R.string.classification)),
-                arrayOf(ShelfFragment::class.java, NovelClassfyFragment::class.java)
-            )
-        }.let { shelfTab.setupWithViewPager(it) }
+        shelfViewPager.offscreenPageLimit = 2
+        shelfViewPager.adapter = PagerAdapter(
+            supportFragmentManager,
+            arrayOf(getString(R.string.shelf), getString(R.string.classification)),
+            arrayOf(ShelfFragment::class.java, NovelClassfyFragment::class.java)
+        )
+        shelfTab.setupWithViewPager(shelfViewPager)
+    }
+
+    fun initLiveData() {
+        viewModel.translateCommand.observe(this, Observer {
+            if (it == null || shelfTab.height == 0) return@Observer
+            if (it[1] == RecyclerView.SCROLL_STATE_IDLE) {
+                mtoolbar.animate().translationY(-it[0].toFloat()).setDuration(300L)
+                    .setInterpolator(DecelerateInterpolator(2F)).start()
+            } else {
+                mtoolbar.translationY = -it[0].toFloat()
+            }
+            translationTemp = -it[0].toFloat()
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -63,25 +77,26 @@ class ShelfActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.search_button -> {
-                startActivity(
-                    Intent(this, SearchActivity::class.java)
-                        .apply { putExtra("themeid", themeId) }
-                )
-                shelfViewModel.refreshType = 2
+                val intent = Intent(this, SearchActivity::class.java)
+                    .apply { putExtra("themeid", themeId) }
+                startActivity(intent)
+                viewModel.refreshType = 2
                 true
             }
             R.id.action_settings -> {
-                startActivityForResult(Intent(this, SettingActivity::class.java).apply {
+                val intent = Intent(this, SettingActivity::class.java).apply {
                     putExtra("type", 0)
                     putExtra("themeid", themeId)
-                }, 1)
+                }
+                startActivityForResult(intent, 1)
                 true
             }
             R.id.edit_site_preference -> {
-                startActivity(Intent(this, SettingActivity::class.java).apply {
+                val intent = Intent(this, SettingActivity::class.java).apply {
                     putExtra("type", 1)
                     putExtra("themeid", themeId)
-                })
+                }
+                startActivity(intent)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -110,7 +125,7 @@ class ShelfActivity : AppCompatActivity() {
         if (requestCode == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 hasPermission = true
-                launch { shelfViewModel.refreshBookList() }
+                launch { viewModel.refreshBookList() }
             } else {
                 toast(getString(R.string.permission_warnning))
             }

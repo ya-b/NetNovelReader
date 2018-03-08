@@ -20,21 +20,21 @@ data class ObservableSiteBean(
     var charset: ObservableField<String> = ObservableField()
 
 ) {
-    fun addAll(bean: SitePreferenceBean) {
-        hostname.set(bean.hostname)
-        catalogSelector.set(bean.catalogSelector)
-        chapterSelector.set(bean.chapterSelector)
-        catalogFilter.set(bean.catalogFilter)
-        chapterFilter.set(bean.chapterFilter)
-        searchUrl.set(bean.searchUrl)
-        redirectFileld.set(bean.redirectFileld)
-        redirectUrl.set(bean.redirectUrl)
-        noRedirectUrl.set(bean.noRedirectUrl)
-        redirectName.set(bean.redirectName)
-        noRedirectName.set(bean.noRedirectName)
-        redirectImage.set(bean.redirectImage)
-        noRedirectImage.set(bean.noRedirectImage)
-        charset.set(bean.charset)
+    fun add(bean: SitePreferenceBean?) {
+        hostname.set(bean?.hostname)
+        catalogSelector.set(bean?.catalogSelector)
+        chapterSelector.set(bean?.chapterSelector)
+        catalogFilter.set(bean?.catalogFilter)
+        chapterFilter.set(bean?.chapterFilter)
+        searchUrl.set(bean?.searchUrl)
+        redirectFileld.set(bean?.redirectFileld)
+        redirectUrl.set(bean?.redirectUrl)
+        noRedirectUrl.set(bean?.noRedirectUrl)
+        redirectName.set(bean?.redirectName)
+        noRedirectName.set(bean?.noRedirectName)
+        redirectImage.set(bean?.redirectImage)
+        noRedirectImage.set(bean?.noRedirectImage)
+        charset.set(bean?.charset)
     }
 
     fun toSitePreferenceBean(): SitePreferenceBean = SitePreferenceBean(

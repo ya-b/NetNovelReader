@@ -21,7 +21,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -36,9 +36,6 @@ android {
         arguments {
             arg("room.schemaLocation", "$projectDir/schemas".toString())
         }
-    }
-    androidExtensions {
-        experimental = true
     }
 }
 
@@ -58,9 +55,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-
     implementation 'de.hdodenhof:circleimageview:2.2.0'
-    implementation 'org.jsoup:jsoup:1.10.3'
+    implementation 'org.jsoup:jsoup:1.11.2'
 
 <<<<<<< HEAD
     implementation 'com.squareup.okhttp3:okhttp:3.9.1'
@@ -72,7 +68,6 @@ dependencies {
     //内存泄漏检查框架
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
-
     implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
     kapt "android.arch.lifecycle:compiler:$rootProject.archLifecycleVersion"
     testImplementation "android.arch.core:core-testing:$rootProject.archLifecycleVersion"
@@ -86,8 +81,8 @@ dependencies {
     testImplementation "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
 
     // Android Testing Support Library's runner and rules
-    androidTestImplementation("com.android.support.test:runner:$rootProject.ext.runnerVersion")
-    androidTestImplementation("com.android.support.test:rules:$rootProject.ext.rulesVersion")
+    androidTestImplementation "com.android.support.test:runner:$rootProject.ext.runnerVersion"
+    androidTestImplementation "com.android.support.test:rules:$rootProject.ext.rulesVersion"
 
     // Dependencies for Android unit tests
     androidTestImplementation "junit:junit:$rootProject.ext.junitVersion"

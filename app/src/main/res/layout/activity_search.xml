@@ -99,7 +99,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
-        <com.netnovelreader.customview.FlowLayout
+        <com.netnovelreader.ui.customview.FlowLayout
             android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -179,7 +179,7 @@
                 tool:text="搜索热词9" />
 
 
-        </com.netnovelreader.customview.FlowLayout>
+        </com.netnovelreader.ui.customview.FlowLayout>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/searchRecycler"
@@ -190,7 +190,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+            app:layout_constraintTop_toBottomOf="@id/linearLayout" />
 
 
         <!--加载进度条-->

@@ -16,7 +16,8 @@ data class NovelList(
 
     var total: String? = null,
     var isOk: Boolean = false,
-    var books: List<BooksBean>? = null) {
+    var books: List<BooksBean>? = null
+) {
 
     data class BooksBean(
         /**

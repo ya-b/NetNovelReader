@@ -4,6 +4,7 @@ import com.netnovelreader.common.*
 import com.netnovelreader.data.db.ReaderDatabase
 import com.netnovelreader.data.db.SitePreferenceBean
 import org.jsoup.Jsoup
+import org.jsoup.UncheckedIOException
 import org.jsoup.nodes.Element
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -38,7 +39,7 @@ class SearchBook {
 
             if (redirectFileld == "") {
                 search(url, noRedirectUrl, noRedirectName, noRedirectImage)
-            }else{
+            } else {
                 val redirect_url = redirectToCatalog(url, redirectFileld)
                 search(redirect_url, redirectUrl, redirectName, redirectImage)
             }
@@ -48,7 +49,11 @@ class SearchBook {
     @Throws(IOException::class)
     fun search(url: String, catalogSelector: String, nameSelector: String, imageSelector: String)
             : Array<String> {
-        val doc = Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
+        val doc = try {
+            Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
+        } catch (e: UncheckedIOException) {
+            return Array(3) { "" }
+        }
         return arrayOf(
             parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),
             parseImageUrl(doc, imageSelector)
