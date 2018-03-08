@@ -65,7 +65,7 @@
             android:layout_height="30dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="16dp"
-            android:background="@color/hot_label_bg3"
+            android:background="@color/orange"
             android:gravity="center"
             android:onClick="@{() -> clickEvent.showDialogTask(itemDetail)}"
             android:paddingBottom="6dp"

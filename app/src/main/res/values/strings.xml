@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">小说阅读器</string>
-    <string name="shelf_activity_title">书架</string>
+    <string name="shelf">本地书架</string>
+    <string name="classification">分类排行</string>
     <string name="permission_warnning">此程序没有执行所需要的权限</string>
     <string name="deleteBook">删除book?</string>
     <string name="yes">是</string>
@@ -63,4 +64,8 @@
     <string name="redirectImage">重定向封面选择器</string>
     <string name="noRedirectImage">封面选择器</string>
     <string name="charset">字符编码</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

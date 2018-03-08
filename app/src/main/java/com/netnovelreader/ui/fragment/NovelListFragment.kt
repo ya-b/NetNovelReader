@@ -45,18 +45,18 @@ class NovelListFragment : Fragment() {
 
     private fun initView() {
         novelList.init(
-            RecyclerAdapter(bookList, R.layout.item_catalog_detial, NovelListItemClickEvent()), null
+            RecyclerAdapter(bookList, R.layout.item_catalog_detial, NovelListItemClickEvent(), true), null
         )
     }
 
     private fun initData() {
         ApiManager.zhuiShuShenQi.seachBookListByTypeAndMajor(type = type, major = major)
             .enqueueCall {
-            it?.let {
-                bookList.clear()
-                bookList.addAll(it.books!!)
+                it?.let {
+                    bookList.clear()
+                    bookList.addAll(it.books!!)
+                }
             }
-        }
     }
 
     inner class NovelListItemClickEvent {

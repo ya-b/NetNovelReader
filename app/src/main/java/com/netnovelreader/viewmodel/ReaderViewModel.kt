@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
 import com.netnovelreader.R
+import com.netnovelreader.ReaderApplication
 import com.netnovelreader.bean.ChapterChangeType
 import com.netnovelreader.bean.ReaderBean
 import com.netnovelreader.common.*
@@ -43,7 +44,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
             Pair(HEAD_VIEW, ObservableBoolean(false)),                //是否显示HeadView
             Pair(Font_SETTING, ObservableBoolean(false)),             //是否显示FontSetting
             Pair(BG_SETTING, ObservableBoolean(false)),               //是否显示BackgroundSeting
-            Pair(FOOT_VIEW, ObservableBoolean(false))
+            Pair(FOOT_VIEW, ObservableBoolean(false))                 //是否显示footview
         )                //是否显示FootView
     }
 
@@ -114,7 +115,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     fun setRecord(pageNum: Int) {
         if (chapterNum.get() < 1) return
         launch {
-            ReaderDbManager.getRoomDB().shelfDao().replace(
+            ReaderDbManager.shelfDao().replace(
                 bookName = bookName, readRecord = "$chapterNum#${if (pageNum < 1) 1 else pageNum}"
             )
         }
@@ -135,15 +136,14 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         PreferenceManager.isAutoRemove(context).takeIf { it }?.apply {
             getRecord()[0].takeIf { it > NotDeleteNum }?.also {
                 ReaderDbManager.setReaded(bookName, it - NotDeleteNum)
-                    .forEach { File("${getSavePath()}/$bookName/$it").delete() }
+                    .forEach { File("${ReaderApplication.dirPath}/$bookName/$it").delete() }
             }
         }
     }
 
     fun drawPrepareTask(): Int = runBlocking {
         async {
-            maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?:
-                    return@async 0
+            maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?: return@async 0
             val record = async { getRecord() }.await()
             chapterNum.set(record[0])
             chapterCache = ChapterCache(CACHE_NUM, bookName).apply { init(maxChapterNum, bookName) }
@@ -163,7 +163,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     fun centerClickTask() {
-        if (isViewShow[FOOT_VIEW]!!.get() == true) {
+        if (isViewShow[FOOT_VIEW]!!.get()) {
             isViewShow.forEach { it.value.set(false) }
         } else {
             isViewShow[FOOT_VIEW]!!.set(true)
@@ -293,7 +293,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
      */
     fun getRecord(): Array<Int> {
 
-        val queryResult = ReaderDbManager.getRoomDB().shelfDao().getBookInfo(bookName)?.readRecord
+        val queryResult = ReaderDbManager.shelfDao().getBookInfo(bookName)?.readRecord
             ?.split("#")?.map { it.toInt() }          //阅读记录 3#2 表示第3章第2页
         return arrayOf(queryResult?.get(0) ?: 1, queryResult?.get(1) ?: 1)
     }
@@ -301,9 +301,9 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     fun updateCatalog() {
         try {
             DownloadCatalog(
-                bookName, ReaderDbManager.getRoomDB().shelfDao().getBookInfo(bookName)?.downloadUrl
-                        ?: ""
-            ).download()
+                bookName, ReaderDbManager.shelfDao().getBookInfo(bookName)?.downloadUrl
+                ?: ""
+            ).download("")
         } catch (e: IOException) {
             e.printStackTrace()
         }

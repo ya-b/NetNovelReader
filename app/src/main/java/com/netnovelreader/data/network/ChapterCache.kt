@@ -1,6 +1,7 @@
 package com.netnovelreader.data.network
 
-import com.netnovelreader.common.getSavePath
+import com.netnovelreader.ReaderApplication
+import com.netnovelreader.common.SLASH
 import com.netnovelreader.data.db.ReaderDbManager
 import kotlinx.coroutines.experimental.launch
 import java.io.File
@@ -12,7 +13,7 @@ import java.util.*
  */
 class ChapterCache(private val cacheNum: Int, private val tableName: String) {
     companion object {
-        val FILENOTFOUND = "            "
+        const val FILENOTFOUND = "            "
     }
 
     /**
@@ -42,7 +43,7 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
                 getText(chapterNum, enableDownload).apply {
                     val str = this.substring(this.indexOf("|") + 1)
                     if (!str.isEmpty() && str != FILENOTFOUND) {
-                        chapterTxtTable.put(chapterNum, this)
+                        chapterTxtTable[chapterNum] = this
                     }
                 }
             } catch (e: IOException) {
@@ -65,11 +66,11 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         val sb = StringBuilder()
         val chapterName = ReaderDbManager.getChapterName(dirName!!, chapterNum)
         sb.append(chapterName + "|")
-        val chapterFile = File("${getSavePath()}/$dirName/$chapterName")
+        val chapterFile = File("${ReaderApplication.dirPath}/$dirName/${chapterName.replace("/",SLASH)}")
         sb.append(
             if (chapterFile.exists() && chapterFile.isFile) chapterFile.readText()
             else if (!enableDownload) FILENOTFOUND
-            else getFromNet("${getSavePath()}/$dirName", chapterName)
+            else getFromNet("${ReaderApplication.dirPath}/$dirName", chapterName)
         )
         return sb.toString()
     }
@@ -98,10 +99,10 @@ class ChapterCache(private val cacheNum: Int, private val tableName: String) {
         chapterTxtTable.filter { it.key + 1 < chapterNum || it.key - cacheNum > chapterNum || it.value.isEmpty() }
             .forEach { chapterTxtTable.remove(it.key) }
         if (chapterNum > 1 && !chapterTxtTable.contains(chapterNum - 1)) {
-            chapterTxtTable.put(chapterNum - 1, getText(chapterNum - 1, true))
+            chapterTxtTable[chapterNum - 1] = getText(chapterNum - 1, true)
         }
         (1..cacheNum)
             .filter { chapterNum + it <= maxChapterNum && !chapterTxtTable.contains(chapterNum + it) }
-            .forEach { chapterTxtTable.put(chapterNum + it, getText(chapterNum + it, true)) }
+            .forEach { chapterTxtTable[chapterNum + it] = getText(chapterNum + it, true) }
     }
 }

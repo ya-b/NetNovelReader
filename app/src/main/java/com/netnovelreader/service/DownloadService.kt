@@ -5,8 +5,8 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
+import com.netnovelreader.ReaderApplication
 import com.netnovelreader.ReaderApplication.Companion.threadPool
-import com.netnovelreader.common.getSavePath
 import com.netnovelreader.common.toast
 import com.netnovelreader.data.db.ReaderDbManager
 import com.netnovelreader.data.network.DownloadCatalog
@@ -106,7 +106,7 @@ class DownloadService : IntentService {
             e.printStackTrace()
             return runnables
         }
-        val path = "${getSavePath()}/$tableName".apply { File(this).mkdirs() }
+        val path = "${ReaderApplication.dirPath}/$tableName".apply { File(this).mkdirs() }
         ReaderDbManager.getChapterNameAndUrl(tableName, 0).forEach {
             runnables.add(DownloadChapter(tableName, path, it.key, it.value))
         }

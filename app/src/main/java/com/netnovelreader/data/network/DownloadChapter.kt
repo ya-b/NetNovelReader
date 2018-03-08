@@ -1,5 +1,6 @@
 package com.netnovelreader.data.network
 
+import com.netnovelreader.common.SLASH
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.db.ReaderDbManager
 import java.io.File
@@ -16,7 +17,7 @@ class DownloadChapter(
     @Throws(IOException::class)
     fun download(chapterText: String): Int {
         if (chapterText.isEmpty()) return 1
-        File(dir, chapterName).takeIf { !it.exists() }?.run {
+        File(dir, chapterName.replace("/", SLASH)).takeIf { !it.exists() }?.run {
             writeText(chapterText)
             ReaderDbManager.setChapterFinish(tablename, chapterName, chapterUrl, 1)
         }
@@ -28,7 +29,7 @@ class DownloadChapter(
         if (!chapterUrl.startsWith("http")) return ""
         File(dir, chapterName).takeIf { it.exists() }?.run { return this.readText() }
         var str = ParseHtml().getChapter(chapterUrl)
-        ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(chapterUrl))
+        ReaderDbManager.sitePreferenceDao().getRule(url2Hostname(chapterUrl))
             .catalogFilter
             .takeIf { it.isNotEmpty() }
             ?.split("|")

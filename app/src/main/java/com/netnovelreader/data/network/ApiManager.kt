@@ -1,7 +1,6 @@
 package com.netnovelreader.data.network
 
 import com.netnovelreader.bean.*
-import com.netnovelreader.common.SP_URL
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -38,7 +37,7 @@ object ApiManager {
         fun getPicture(@Url url: String): Call<ResponseBody>
 
         @GET
-        fun getSitePreference(@Url url: String = SP_URL): Call<SPResponse>
+        fun getSitePreference(@Url url: String = "http://139.159.226.67/rule.json"): Call<SPResponse>
     }
 
     interface ZhuiShuShenQiAPI {

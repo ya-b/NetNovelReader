@@ -64,7 +64,7 @@ class SearchActivity : AppCompatActivity() {
             searchViewModel.isChangeSource.set(true)
             val bookname = intent.getStringExtra("bookname")
             searchViewText.text = bookname
-            launch {
+            job = launch {
                 searchViewModel.searchBook(bookname, intent.getStringExtra("chapterName"))
             }
         } else {
@@ -94,13 +94,16 @@ class SearchActivity : AppCompatActivity() {
         searchViewModel.showDialogCommand.observe(this, Observer {
             it ?: return@Observer
             val listener = DialogInterface.OnClickListener { _, which ->
-                searchViewModel.downloadBook(
-                    it.bookname.get()!!,
-                    it.url.get()!!,
-                    chapterName,
-                    which
-                )
-                setResult(100)
+                launch {
+                    searchViewModel.downloadBook(
+                        it.bookname.get()!!,
+                        it.url.get()!!,
+                        chapterName,
+                        which
+                    )
+                }
+
+                this@SearchActivity.setResult(100)
                 finish()
             }
             AlertDialog.Builder(this@SearchActivity).setTitle(getString(R.string.downloadAllBook))
@@ -125,10 +128,8 @@ class SearchActivity : AppCompatActivity() {
         var deffered: Deferred<Cursor?>? = null
 
         override fun onQueryTextSubmit(query: String): Boolean {
-            launch {
-                job?.cancel()
-                job = launch { searchViewModel.searchBook(query, null) }
-            }
+            job?.cancel()
+            job = launch { searchViewModel.searchBook(query, null) }
             searchViewBar.clearFocus()                    //提交搜索commit后收起键盘
             return true
         }

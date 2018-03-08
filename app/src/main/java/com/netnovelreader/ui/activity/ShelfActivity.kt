@@ -1,5 +1,6 @@
 package com.netnovelreader.ui.activity
 
+import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
@@ -31,6 +32,13 @@ class ShelfActivity : AppCompatActivity() {
             requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)
         }
         initView()
+        mtoolbar.post {
+            shelfViewModel.paddingCommand.value = shelfTab.height
+        }
+        shelfViewModel.translateCommand.observe(this, Observer {
+            it ?: return@Observer
+            mtoolbar.translationY = -it.toFloat()
+        })
     }
 
     fun initView() {
@@ -38,7 +46,7 @@ class ShelfActivity : AppCompatActivity() {
             .apply { viewModel = shelfViewModel }
         setSupportActionBar(shelfToolbar)
         shelfViewPager.apply {
-            offscreenPageLimit = 4
+            offscreenPageLimit = 2
             adapter = PagerAdapter(
                 supportFragmentManager,
                 arrayOf(getString(R.string.shelf), getString(R.string.classification)),

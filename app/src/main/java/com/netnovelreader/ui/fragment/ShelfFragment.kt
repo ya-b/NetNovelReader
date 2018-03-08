@@ -15,11 +15,11 @@ import com.netnovelreader.common.*
 import com.netnovelreader.databinding.FragmentShelfBinding
 import com.netnovelreader.ui.activity.ReaderActivity
 import com.netnovelreader.viewmodel.ShelfViewModel
-import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 
 class ShelfFragment : Fragment() {
     val shelfViewModel by lazy { activity?.obtainViewModel(ShelfViewModel::class.java) }
+    var isFirstResume = true
     lateinit var binding: FragmentShelfBinding
 
     override fun onCreateView(
@@ -38,10 +38,17 @@ class ShelfFragment : Fragment() {
     }
 
     fun initLiveData() {
+        shelfViewModel?.paddingCommand?.observe(this, Observer {
+            if (it != null && it != 0 && binding.shelfRecycler.paddingTop != it) {
+                binding.shelfRecycler.setPadding(0, it, 0, 0)
+                binding.shelfRecycler.scrollToPosition(0)
+            }
+        })
         shelfViewModel?.notRefershCommand?.observe(
             this,
             Observer { binding.shelfRefresh.isRefreshing = false })
         shelfViewModel?.readBookCommand?.observe(this, Observer {
+            if (it.isNullOrEmpty()) return@Observer
             shelfViewModel?.refreshType = 1
             val intent = Intent(activity, ReaderActivity::class.java).apply {
                 putExtra("bookname", it)
@@ -64,10 +71,12 @@ class ShelfFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        if(!isFirstResume && shelfViewModel?.refreshType == 0) return
         launch {
             if (activity!!.checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 shelfViewModel?.refreshBookList()
             }
         }
+        isFirstResume = false
     }
 }

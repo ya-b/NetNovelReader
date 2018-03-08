@@ -6,7 +6,7 @@ package com.netnovelreader.bean
  * 作者： YangJunQuan   2018-2-11.
  */
 
-data class NovelList (
+data class NovelList(
 
     /**
      * total : 68
@@ -16,9 +16,9 @@ data class NovelList (
 
     var total: String? = null,
     var isOk: Boolean = false,
-    var books: List<BooksBean>? = null){
+    var books: List<BooksBean>? = null) {
 
-    data class BooksBean (
+    data class BooksBean(
         /**
          * _id : 59fc782d6676152d15ae0472
          * title : 综漫一切从火影开始

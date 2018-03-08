@@ -15,6 +15,18 @@
         android:fitsSystemWindows="true"
         tools:background="#e6e6e6">
 
+        <TextView
+            android:id="@+id/malelabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="男生"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/maleRecyclerView"
             android:layout_width="match_parent"
@@ -27,19 +39,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/label" />
-
-        <TextView
-            android:id="@+id/label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:text="男生"
-            android:textColor="@color/black"
-            android:textSize="15sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/appBarLayout2" />
+            app:layout_constraintTop_toBottomOf="@id/malelabel" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>

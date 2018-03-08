@@ -22,22 +22,14 @@ import com.netnovelreader.viewmodel.ShelfViewModel
 
 class NovelClassfyFragment : Fragment() {
     val viewModel by lazy { activity?.obtainViewModel(ShelfViewModel::class.java) }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        initLiveData()
-    }
+    lateinit var binding: FragmentNovelClassfyBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = DataBindingUtil.inflate<FragmentNovelClassfyBinding>(
-        inflater,
-        R.layout.fragment_novel_classfy,
-        container,
-        false
-    ).apply {
-        maleRecyclerView.init(
+    ): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_novel_classfy, container, false)
+        binding.maleRecyclerView.init(
             RecyclerAdapter(viewModel?.resultList, R.layout.item_novel_classfy, viewModel, false),
             GridDivider(activity!!.baseContext, 1, Color.BLACK),
             object : GridLayoutManager(activity, 3, RecyclerView.VERTICAL, false) {
@@ -47,9 +39,16 @@ class NovelClassfyFragment : Fragment() {
             }
         )
         viewModel?.getNovelCatalogData()
-    }.root
+        initLiveData()
+        return binding.root
+    }
 
     fun initLiveData() {
+        viewModel?.paddingCommand?.observe(this, Observer {
+            if (it != null && it != 0 && binding.malelabel.paddingTop != it) {
+                binding.malelabel.setPadding(0, it, 0, 0)
+            }
+        })
         viewModel?.openCatalogDetailCommand?.observe(this, Observer {
             val intent = Intent(activity, NovelCatalogDetailActivity::class.java)
             intent.putExtra("major", it)

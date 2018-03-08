@@ -14,13 +14,15 @@
         android:id="@+id/shelfRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:onRefresh="@{() -> viewModel.updateBooks()}"
+        android:onRefresh="@{() -> viewModel.updateBooks(true)}"
         tools:context="com.netnovelreader.ui.activity.ShelfActivity">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/shelfRecycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical" />
+            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            android:onScroll="@{(y) -> viewModel.onShelfScroll(y)}" />
     </android.support.v4.widget.SwipeRefreshLayout>
 </layout>

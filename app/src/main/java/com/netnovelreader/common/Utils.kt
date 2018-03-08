@@ -4,7 +4,8 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
-import android.os.Environment
+import android.content.pm.PackageManager
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
@@ -23,21 +24,14 @@ import java.util.regex.Pattern
  * Created by yangbo on 17-12-11.
  */
 
-val IMAGENAME = "image" //书籍封面图片名
-val TIMEOUT = 3000
-val UA = "Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0"
-val PREFERENCE_NAME = "com.netnovelreader_preferences"
-val UPDATEFLAG = "●"  //书籍有更新，显示该标志
-val NotDeleteNum = 3 //自动删除已读章节，但保留最近3章
+const val IMAGENAME = "image" //书籍封面图片名
+const val TIMEOUT = 3000
+const val UA = "Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0"
+const val PREFERENCE_NAME = "com.netnovelreader_preferences"
+const val UPDATEFLAG = "●"  //书籍有更新，显示该标志
+const val NotDeleteNum = 3 //自动删除已读章节，但保留最近3章
+const val SLASH = "SLASH" //用“SLASH”替换"/"
 val THREAD_NUM = Runtime.getRuntime().availableProcessors() * 2 / 3 //线程数
-val SP_URL = "http://139.159.226.67/rule.json"
-
-fun getSavePath(): String =
-    if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-        Environment.getExternalStorageDirectory().path + "/netnovelreader"
-    } else {
-        "/data/data/com.netnovelreader"
-    }
 
 //例如: http://www.hello.com/world/fjwoj/foew.html  中截取 hello.com
 fun url2Hostname(url: String): String {
@@ -115,6 +109,7 @@ fun ShelfDao.replace(
     latestChapter: String? = null,
     latestRead: Int? = null
 ) {
+    if (bookName.isNullOrEmpty()) return
     val now = ShelfBean(_id, bookName, downloadUrl, readRecord, isUpdate, latestChapter, latestRead)
     val old = getBookInfo(now.bookName!!)
     if (old == null) {
@@ -136,3 +131,11 @@ fun ShelfDao.replace(
 fun <T : ViewModel> FragmentActivity.obtainViewModel(clazz: Class<T>): T =
     ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
         .let { ViewModelProviders.of(this, it).get(clazz) }
+
+
+fun Context.checkPermission(permission: String): Boolean {
+    return ActivityCompat.checkSelfPermission(
+        this,
+        permission
+    ) == PackageManager.PERMISSION_GRANTED
+}

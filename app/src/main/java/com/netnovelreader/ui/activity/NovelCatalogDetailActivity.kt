@@ -34,8 +34,8 @@ class NovelCatalogDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         DataBindingUtil.setContentView<ActivityCatalogDetailBinding>(
-            this,
-            R.layout.activity_catalog_detail
+                this,
+                R.layout.activity_catalog_detail
         )
         setSupportActionBar({ toolbar.title = intent.getStringExtra("major");toolbar }())
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -43,14 +43,12 @@ class NovelCatalogDetailActivity : AppCompatActivity() {
     }
 
     private fun initView() {
-        viewPager.offscreenPageLimit =
-                4                  //一次性初始化typeList-1+1页，所以初始化时间比较久，但是随后的切换不会卡顿因为都已经初始化完毕了
+        viewPager.offscreenPageLimit = 2
         viewPager.adapter = CatalogPagerAdapter(
-            supportFragmentManager,
-            intent.getStringExtra("major")
+                supportFragmentManager,
+                intent.getStringExtra("major")
         )
         tabLayout.setupWithViewPager(viewPager)
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -79,7 +77,7 @@ class NovelCatalogDetailActivity : AppCompatActivity() {
             val builder = AlertDialog.Builder(this)
             val filterView = RecyclerView(this)
             filterView.init(
-                RecyclerAdapter(filterList, R.layout.item_filter, FilterNovelItemClickListener(), true)
+                    RecyclerAdapter(filterList, R.layout.item_filter, FilterNovelItemClickListener(), true)
             )
             dialog = builder.setView(filterView).create()
             val dialogWindow = dialog!!.window
@@ -90,7 +88,7 @@ class NovelCatalogDetailActivity : AppCompatActivity() {
 
     inner class FilterNovelItemClickListener {
         fun onItemClick(bean: FilterBean) {
-            filterList.firstOrNull { it.selected.get() == true }?.selected?.set(false)
+            filterList.firstOrNull { it.selected.get() }?.selected?.set(false)
             bean.selected.set(true)
             dialog?.dismiss()
         }

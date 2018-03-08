@@ -7,7 +7,7 @@ import android.arch.persistence.room.PrimaryKey
 
 @Entity(
     tableName = ReaderDatabase.TABLE_SHELF,
-    indices = arrayOf(Index(value = arrayOf(ReaderDatabase.BOOKNAME), unique = true))
+    indices = [(Index(value = arrayOf(ReaderDatabase.BOOKNAME), unique = true))]
 )
 data class ShelfBean(
     @PrimaryKey var _id: Int? = null,

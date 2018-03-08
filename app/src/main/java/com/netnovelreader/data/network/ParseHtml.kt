@@ -18,7 +18,7 @@ class ParseHtml {
      */
     @Throws(IOException::class)
     fun getChapter(url: String): String {
-        val selector = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(url))
+        val selector = ReaderDbManager.sitePreferenceDao().getRule(url2Hostname(url))
             .chapterSelector
         val txt = if (selector.isEmpty() || selector.length < 2) {
             getChapterWithOutSelector(url)
@@ -34,7 +34,7 @@ class ParseHtml {
      */
     @Throws(IOException::class)
     fun getCatalog(url: String): LinkedHashMap<String, String> {
-        val selector = ReaderDbManager.getRoomDB().sitePreferenceDao().getRule(url2Hostname(url))
+        val selector = ReaderDbManager.sitePreferenceDao().getRule(url2Hostname(url))
             .catalogSelector
         val catalog = LinkedHashMap<String, String>()
         val list = Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
@@ -47,7 +47,7 @@ class ParseHtml {
             if (catalog.containsKey(name)) {
                 catalog.remove(name)
             }
-            catalog.put(name, link)
+            catalog[name] = link
         }
         return catalog
     }

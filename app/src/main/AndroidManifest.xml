@@ -33,7 +33,6 @@
 
         <activity android:name=".ui.activity.SettingActivity" />
         <activity android:name=".ui.activity.NovelDetailActivity" />
-        <activity android:name=".ui.activity.CatalogGridActivity" />
         <activity android:name=".ui.activity.NovelCatalogDetailActivity" />
     </application>
 

@@ -7,7 +7,7 @@ import android.arch.persistence.room.PrimaryKey
 
 @Entity(
     tableName = ReaderDatabase.TABLE_SP,
-    indices = arrayOf(Index(value = arrayOf(ReaderDatabase.HOSTNAME), unique = true))
+    indices = [(Index(value = arrayOf(ReaderDatabase.HOSTNAME), unique = true))]
 )
 data class SitePreferenceBean(
     @PrimaryKey var _id: Int? = null,

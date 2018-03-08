@@ -1,5 +1,6 @@
 package com.netnovelreader.customview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.databinding.ObservableField
 import android.graphics.Canvas
@@ -126,10 +127,8 @@ class ReaderView : View, GestureDetector.OnGestureListener {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_DOWN) {
-            performClick()
-        }
         return detector.onTouchEvent(event)
     }
 

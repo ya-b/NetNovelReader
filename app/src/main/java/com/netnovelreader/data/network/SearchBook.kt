@@ -1,11 +1,14 @@
 package com.netnovelreader.data.network
 
 import com.netnovelreader.common.*
+import com.netnovelreader.data.db.ReaderDatabase
+import com.netnovelreader.data.db.SitePreferenceBean
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 
 /**
  * Created by yangbo on 18-1-14.
@@ -13,33 +16,32 @@ import java.net.URL
 class SearchBook {
 
     /**
-     * @url
-     * @redirectFileld
-     * @redirectUrl    目录地址selector
-     * @noRedirectUrl
-     * @redirectName        书名selector
-     * @noRedirectName
-     * @redirectImage imageurl selector
-     * @noRedirectImage
+     * url
+     * redirectFileld
+     * redirectUrl    目录地址selector
+     * noRedirectUrl
+     * redirectName        书名selector
+     * noRedirectName
+     * redirectImage      图片网址 selector
+     * noRedirectImage
      * 有些网站搜索到书名后，响应头例如Location：http://www.yunlaige.com/book/19984.html，然后跳转到书籍页,redirectFileld表示响应头跳转链接
      * 有些网站搜索到书名后，显示搜索列表,
      * Selector  jsoup选择结果页目录url
      * Name  jsoup选择结果页书名
      */
+
     @Throws(IOException::class)
-    fun search(
-        url: String, redirectFileld: String, redirectSelector: String, noRedirectSelector: String,
-        redirectName: String, noRedirectName: String, redirectImage: String, noRedirectImage: String
-    )
-            : Array<String> {
-        if (redirectFileld == "") {
-            return search(url, noRedirectSelector, noRedirectName, noRedirectImage)
-        }
-        val redirect_url = redirectToCatalog(url, redirectFileld)
-        return if (redirect_url.isEmpty()) {
-            search(url, noRedirectSelector, noRedirectName, noRedirectImage)
-        } else {
-            search(redirect_url, redirectSelector, redirectName, redirectImage)
+    fun search(bookname: String, sitePreference: SitePreferenceBean): Array<String> {
+        return sitePreference.run {
+            val url =
+                searchUrl.replace(ReaderDatabase.SEARCH_NAME, URLEncoder.encode(bookname, charset))
+
+            if (redirectFileld == "") {
+                search(url, noRedirectUrl, noRedirectName, noRedirectImage)
+            }else{
+                val redirect_url = redirectToCatalog(url, redirectFileld)
+                search(redirect_url, redirectUrl, redirectName, redirectImage)
+            }
         }
     }
 

@@ -47,7 +47,10 @@ class SitePreferenceFragment : Fragment() {
             launch { settingViewModel?.showSiteList() }
             recycleSiteList.init(
                 RecyclerAdapter(
-                    settingViewModel?.siteList, R.layout.item_site_preference_list, settingViewModel
+                    settingViewModel?.siteList,
+                    R.layout.item_site_preference_list,
+                    settingViewModel,
+                    true
                 )
             )
         }.root

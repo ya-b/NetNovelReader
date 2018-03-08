@@ -18,10 +18,4 @@
         android:title="@string/edit_site"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/classfied"
-        android:orderInCategory="100"
-        android:title="分类"
-        app:showAsAction="always" />
-
 </menu>

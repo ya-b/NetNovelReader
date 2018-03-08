@@ -50,7 +50,7 @@ class ReaderActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 val attrs = window.attributes
                 attrs.screenBrightness = (if (progress < 1) 1 else if (progress > 255) 255 else progress) /
-                        255f
+                    255f
                 window.attributes = attrs
             }
 
@@ -100,7 +100,7 @@ class ReaderActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1 && requestCode == 100) {
+        if (requestCode == 1 && resultCode == 100) {
             launch { readerViewModel.reloadCurrentChapter() }
         }
     }
@@ -143,7 +143,7 @@ class ReaderActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val isAvailable = cm.activeNetworkInfo?.isAvailable ?: false
-            if (isAvailable && !stateTemp && readerViewModel.isLoading.get() != false) {
+            if (isAvailable && !stateTemp && readerViewModel.isLoading.get()) {
                 readerViewModel.downloadJob?.cancel()
                 readerViewModel.downloadJob = launch { readerViewModel.downloadAndShow() }
                 stateTemp = isAvailable
