@@ -35,6 +35,7 @@ class NovelClassfyFragment : Fragment() {
         viewModel = activity?.obtainViewModel(ShelfViewModel::class.java)
         binding =
                 DataBindingUtil.inflate(inflater, R.layout.fragment_novel_classfy, container, false)
+        binding.viewModel = viewModel
         binding.maleRecyclerView.init(
             RecyclerAdapter(viewModel?.resultList, R.layout.item_novel_classfy, viewModel, false),
             GridDivider(activity!!.baseContext, 1, Color.GRAY),
@@ -60,13 +61,15 @@ class NovelClassfyFragment : Fragment() {
             val intent = Intent(activity, CategoryDetailActivity::class.java)
             intent.putExtra("major", it)
             intent.putExtra("themeid", PreferenceManager.getThemeId(activity!!.baseContext))
-            startActivity(intent)
+            startActivityForResult(intent, 123)
         })
     }
 
-    override fun onResume() {
-        super.onResume()
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == 10000) {
+            (activity as ShelfActivity).shelfViewPager.setCurrentItem(0, false)
+        }
     }
 
     override fun onDestroy() {

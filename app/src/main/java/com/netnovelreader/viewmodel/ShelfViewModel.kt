@@ -3,6 +3,7 @@ package com.netnovelreader.viewmodel
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.databinding.ObservableArrayList
+import android.databinding.ObservableBoolean
 import android.support.v7.widget.RecyclerView
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication
@@ -28,6 +29,7 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
 
     val bookList = ObservableArrayList<BookBean>()             //书架fragment小说列表
     var resultList = ObservableArrayList<NovelCatalog.Bean>()  //分类fragment列表
+    var isLoading = ObservableBoolean(true)
     val readBookCommand = ReaderLiveData<String>()             //阅读小说，打开readerActivity
     val showDialogCommand = ReaderLiveData<String>()           //长按删除，询问对话框
     val stopRefershCommand = ReaderLiveData<Void>()             //下拉刷新后，取消刷新进度条
@@ -154,8 +156,11 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
 
     //分类数据加载
     fun getNovelCatalogData() {
-        ApiManager.zhuiShuShenQi.getNovelCatalogData()
-            .enqueueCall { it?.male?.let { resultList.addAll(it) } }
+        isLoading.set(true)
+        ApiManager.zhuiShuShenQi.getNovelCatalogData().enqueueCall {
+            it?.male?.let { resultList.addAll(it) }
+            if (resultList.isNotEmpty()) isLoading.set(false)
+        }
     }
 
     //更新小说目录

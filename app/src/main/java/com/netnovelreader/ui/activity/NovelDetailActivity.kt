@@ -1,5 +1,6 @@
 package com.netnovelreader.ui.activity
 
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -20,6 +21,7 @@ class NovelDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding =
             DataBindingUtil.setContentView<ActivityDetailBinding>(this, R.layout.activity_detail)
+        binding.searchEvent = this
         setSupportActionBar({ toolbar.title = "书籍详情";toolbar }())
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val mydetail = intent.getSerializableExtra("data") as NovelIntroduce
@@ -49,5 +51,16 @@ class NovelDetailActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    fun search(bookname: String) {
+        val intent = Intent(this, SearchActivity::class.java).apply {
+            putExtra("bookname", bookname)
+            putExtra("chapterName", "")
+            putExtra("themeid", intent.getIntExtra("themeid", R.style.AppThemeBlack))
+        }
+        startActivity(intent)
+        setResult(2333)
+        this.finish()
     }
 }

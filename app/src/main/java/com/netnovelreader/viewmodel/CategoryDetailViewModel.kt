@@ -3,6 +3,7 @@ package com.netnovelreader.viewmodel
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.databinding.ObservableArrayList
+import android.databinding.ObservableBoolean
 import android.util.LruCache
 import com.netnovelreader.bean.NovelIntroduce
 import com.netnovelreader.bean.NovelList
@@ -13,6 +14,7 @@ import kotlinx.coroutines.experimental.launch
 import java.io.IOException
 
 class CategoryDetailViewModel(context: Application) : AndroidViewModel(context) {
+    var isLoading = ObservableBoolean(true)
     val boolistMap = HashMap<String, LruCache<String, ObservableArrayList<NovelList.BooksBean>>>()
     val toastMessage by lazy { ReaderLiveData<String>() }
     val showBookDetailCommand by lazy { ReaderLiveData<NovelIntroduce>() }
@@ -35,10 +37,12 @@ class CategoryDetailViewModel(context: Application) : AndroidViewModel(context) 
 
     fun initBooklist(type: String, major: String) {
         val booklist = getBookList(type, major)
+        if (booklist.isNotEmpty()) return
+        isLoading.set(true)
         ApiManager.zhuiShuShenQi.seachBookListByTypeAndMajor(type = type, major = major)
             .enqueueCall {
                 it ?: return@enqueueCall
-                booklist.clear()
+                isLoading.set(false)
                 booklist.addAll(it.books!!)
             }
     }

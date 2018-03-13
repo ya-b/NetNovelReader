@@ -371,7 +371,6 @@
                 android:text="@string/backgroundButton" />
         </LinearLayout>
 
-        <!--加载进度条-->
         <android.support.v4.widget.ContentLoadingProgressBar
             android:id="@+id/loadingbar"
             style="?android:attr/progressBarStyle"

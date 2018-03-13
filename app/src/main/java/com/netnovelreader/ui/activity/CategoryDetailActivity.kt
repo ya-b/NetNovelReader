@@ -57,7 +57,15 @@ class CategoryDetailActivity : AppCompatActivity() {
                 putExtra("data", it)
                 putExtra("themeid", intent.getIntExtra("themeid", R.style.AppThemeBlack))
             }
-            startActivity(intent)
+            startActivityForResult(intent, 233)
         })
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == 2333) {
+            setResult(10000)
+            this.finish()
+        }
     }
 }

@@ -59,13 +59,13 @@ class SearchActivity : AppCompatActivity() {
 
     fun initData() {
         chapterName = intent.getStringExtra("chapterName")
-        searchViewModel.isChangeSource.set(!chapterName.isNullOrEmpty())
-        if (!chapterName.isNullOrEmpty()) {
+        searchViewModel.isChangeSource.set(chapterName != null)
+        if (chapterName != null) {
             searchViewModel.isChangeSource.set(true)
             val bookname = intent.getStringExtra("bookname")
             searchViewText.text = bookname
             job = launch {
-                searchViewModel.searchBook(bookname, intent.getStringExtra("chapterName"))
+                searchViewModel.searchBook(bookname, chapterName)
             }
         } else {
             launch { searchViewModel.refreshHotWords() }

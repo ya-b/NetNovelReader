@@ -117,9 +117,8 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         if (bookname.isNullOrEmpty()) return
         resultList.clear()
         CatalogCache.clearCache()
-        ReaderDbManager.sitePreferenceDao().getAll()
-            .apply { isLoading.set(!isEmpty()) }
-            .forEach {
+        val list = ReaderDbManager.sitePreferenceDao().getAll().apply { isLoading.set(!isEmpty()) }
+        list.forEach {
                 launch(threadPool) {
                     // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
                     try {
@@ -128,7 +127,9 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
                     } catch (e: IOException) {
                         e.printStackTrace()
                     }
-                    if (isLoading.get()) isLoading.set(false)
+                    if (isLoading.get() && (resultList.isNotEmpty() || list.last() == it)) isLoading.set(
+                        false
+                    )
                 }
             }
         queryTextTemp = bookname!!

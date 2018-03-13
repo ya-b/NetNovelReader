@@ -14,27 +14,33 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import com.netnovelreader.R
+import com.netnovelreader.ReaderApplication
 import com.netnovelreader.data.network.ApiManager
 import com.netnovelreader.data.network.BookCoverCache
 import com.netnovelreader.interfaces.OnProgressChangedListener
 import com.netnovelreader.interfaces.OnScrolledListener
 import com.netnovelreader.interfaces.OnTabUnselectedListener
 import com.netnovelreader.ui.customview.ReaderView
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.runBlocking
+import java.io.IOException
 
 @BindingAdapter("android:src")
-fun loadUrl(imageView: ImageView, url: String?) {
-    url ?: return
+fun loadUrl(imageView: ImageView, url: String?) = runBlocking {
+    url ?: return@runBlocking
     val realUrl =
         if (!url.contains("http://")) "http://statics.zhuishushenqi.com$url-covers" else url
-    var bitmap = BookCoverCache.get(url)
-    if (bitmap == null) {
-        ApiManager.novelReader.getPicture(realUrl).enqueueCall {
-            if (it == null) return@enqueueCall
-            bitmap = BitmapFactory.decodeStream(it.byteStream())
-            BookCoverCache.add(url, bitmap)
-            imageView.setImageBitmap(bitmap)
-        }
-    } else {
+    val bitmap = BookCoverCache.get(url)
+            ?: async(ReaderApplication.threadPool) {
+                try {
+                    ApiManager.novelReader.getPicture(realUrl).execute().body()
+                } catch (e: IOException) {
+                    null
+                }.let {
+                    if (it != null) BitmapFactory.decodeStream(it.byteStream()) else null
+                }
+            }.await()?.also { BookCoverCache.add(url, it) }
+    if (bitmap != null) {
         imageView.setImageBitmap(bitmap)
     }
 }
