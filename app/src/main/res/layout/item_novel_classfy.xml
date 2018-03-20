@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="itemDetail"
             type="com.netnovelreader.bean.NovelCatalog.Bean" />

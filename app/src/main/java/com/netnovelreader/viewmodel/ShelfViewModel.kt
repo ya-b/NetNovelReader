@@ -13,10 +13,10 @@ import com.netnovelreader.bean.NovelCatalog
 import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.common.replace
-import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.ShelfBean
+import com.netnovelreader.data.CatalogManager
+import com.netnovelreader.data.local.ReaderDbManager
+import com.netnovelreader.data.local.db.ShelfBean
 import com.netnovelreader.data.network.ApiManager
-import com.netnovelreader.data.network.DownloadCatalog
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import java.io.File
@@ -32,7 +32,7 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     var isLoading = ObservableBoolean(true)
     val readBookCommand = ReaderLiveData<String>()             //阅读小说，打开readerActivity
     val showDialogCommand = ReaderLiveData<String>()           //长按删除，询问对话框
-    val stopRefershCommand = ReaderLiveData<Void>()             //下拉刷新后，取消刷新进度条
+    val stopRefershCommand = ReaderLiveData<Void>()            //下拉刷新后，取消刷新进度条
     val openCatalogDetailCommand = ReaderLiveData<String>()    //点击分类item
     val translateCommand = ReaderLiveData<Array<Int>>()        //移动（显示||隐藏）tablayout
     var tabHeight = 0         //activity ,tab的高度
@@ -69,7 +69,7 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
         }
     }
 
-    fun tabChangeTask(text: String) {
+    fun tabChanged(text: String) {
         if (text == context.getString(R.string.shelf)) {
             translateCommand.value = arrayOf(0, RecyclerView.SCROLL_STATE_DRAGGING)
         } else {
@@ -78,13 +78,13 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     //打开阅读页面
-    fun readBookTask(bookname: String) {
+    fun readBook(bookname: String) {
         if (bookname.isEmpty()) return
         launch(threadPool) {
             //取消书籍更新标志,设为最近阅读
             val latestRead = ReaderDbManager.shelfDao().getLatestReaded() ?: 0
             ReaderDbManager.shelfDao().replace(
-                bookName = bookname, isUpdate = "", latestRead = latestRead + 1
+                    bookName = bookname, isUpdate = "", latestRead = latestRead + 1
             )
         }
         bookList.firstOrNull { it.bookname.get() == bookname }?.isUpdate?.set("")
@@ -92,7 +92,7 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     //询问是否删除小说，[onLongClick]调用
-    fun askDeleteTask(bookname: String): Boolean {
+    fun deleteDialog(bookname: String): Boolean {
         showDialogCommand.value = bookname
         return true
     }
@@ -118,17 +118,17 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
             0 -> {
                 bookList.clear()
                 dbBookList!!.map { BookBean.fromShelfBean(it) }
-                    .let { bookList.addAll(it) }
+                        .let { bookList.addAll(it) }
             }
             1 -> {
                 if (dbBookList!![0].bookName == bookList[0].bookname.get()) return
                 bookList.firstOrNull { it.bookname.get() == dbBookList!![0].bookName }
-                    ?.let { bookList.remove(it) }
+                        ?.let { bookList.remove(it) }
                 bookList.add(0, BookBean.fromShelfBean(dbBookList!![0]))
             }
             2 -> if (dbBookList!!.size > bookList.size) {
                 BookBean.fromShelfBean(dbBookList!!.last())
-                    .let { bookList.add(it) }
+                        .let { bookList.add(it) }
             }
         }
         refreshType = 0
@@ -141,9 +141,9 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
             shelfDao().delete(deleteBean)
             dropTable(deleteBean.bookName)
             bookList.firstOrNull { it.bookname.get() == bookname }
-                ?.let { bookList.remove(it) }
+                    ?.let { bookList.remove(it) }
             File(ReaderApplication.dirPath, deleteBean.bookName)
-                .deleteRecursively()
+                    .deleteRecursively()
             dbBookList = dbBookList?.filter { it.bookName != bookname }
         }
     }
@@ -167,10 +167,10 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     private fun updateItem(bookBean: BookBean, isFromNet: Boolean) {
         if (isFromNet) {
             try {
-                DownloadCatalog(
-                    bookBean.bookname.get()!!,
-                    bookBean.downloadURL.get() ?: ""
-                ).download()
+                CatalogManager.download(
+                        bookBean.bookname.get()!!,
+                        bookBean.downloadURL.get() ?: ""
+                )
             } catch (e: IOException) {
                 e.printStackTrace()
             }

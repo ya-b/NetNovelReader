@@ -27,10 +27,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.hostname)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.hostname)}"
                 android:singleLine="true"
                 android:text="@{@string/hostname + `:`}"
                 android:textSize="16sp" />
@@ -55,10 +55,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.catalogSelector)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.catalogSelector)}"
                 android:singleLine="true"
                 android:text="@{@string/catalogSelector + `:`}"
                 android:textSize="16sp" />
@@ -83,10 +83,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.chapterSelector)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.chapterSelector)}"
                 android:singleLine="true"
                 android:text="@{@string/chapterSelector + `:`}"
                 android:textSize="16sp" />
@@ -111,10 +111,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.catalogFilter)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.catalogFilter)}"
                 android:singleLine="true"
                 android:text="@{@string/catalogFilter + `:`}"
                 android:textSize="16sp" />
@@ -139,10 +139,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.chapterFilter)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.chapterFilter)}"
                 android:singleLine="true"
                 android:text="@{@string/chapterFilter + `:`}"
                 android:textSize="16sp" />
@@ -167,10 +167,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.searchUrl)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.searchUrl)}"
                 android:singleLine="true"
                 android:text="@{@string/searchUrl + `:`}"
                 android:textSize="16sp" />
@@ -195,10 +195,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectFileld)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectFileld)}"
                 android:singleLine="true"
                 android:text="@{@string/redirectFileld + `:`}"
                 android:textSize="16sp" />
@@ -223,10 +223,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectUrl)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectUrl)}"
                 android:singleLine="true"
                 android:text="@{@string/redirectUrl + `:`}"
                 android:textSize="16sp" />
@@ -251,10 +251,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.noRedirectUrl)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.noRedirectUrl)}"
                 android:singleLine="true"
                 android:text="@{@string/noRedirectUrl + `:`}"
                 android:textSize="16sp" />
@@ -280,10 +280,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectName)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectName)}"
                 android:singleLine="true"
                 android:text="@{@string/redirectName + `:`}"
                 android:textSize="16sp" />
@@ -308,10 +308,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.noRedirectName)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.noRedirectName)}"
                 android:singleLine="true"
                 android:text="@{@string/noRedirectName + `:`}"
                 android:textSize="16sp" />
@@ -336,10 +336,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectImage)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectImage)}"
                 android:singleLine="true"
                 android:text="@{@string/redirectImage + `:`}"
                 android:textSize="16sp" />
@@ -364,10 +364,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.noRedirectImage)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.noRedirectImage)}"
                 android:singleLine="true"
                 android:text="@{@string/noRedirectImage + `:`}"
                 android:textSize="16sp" />
@@ -392,10 +392,10 @@
             android:layout_weight="1">
 
             <TextView
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.charset)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
+                android:onClick="@{() -> viewModel.editTextTask(RuleType.charset)}"
                 android:singleLine="true"
                 android:text="@{@string/charset + `:`}"
                 android:textSize="16sp" />

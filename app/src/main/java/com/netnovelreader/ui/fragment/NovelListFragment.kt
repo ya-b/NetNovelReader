@@ -25,31 +25,31 @@ class NovelListFragment : Fragment() {
     private var major: String? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         viewModel = activity?.obtainViewModel(CategoryDetailViewModel::class.java)
         type = arguments!!.getString("type")
         major = arguments!!.getString("major")
         return DataBindingUtil.inflate<FragmentNovelListBinding>(
-            inflater,
-            R.layout.fragment_novel_list,
-            container,
-            false
+                inflater,
+                R.layout.fragment_novel_list,
+                container,
+                false
         )
-            .also { it.viewModel = viewModel }.root
+                .also { it.viewModel = viewModel }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         RecyclerAdapter(
-            viewModel?.getBookList(type!!, major!!),
-            R.layout.item_catalog_detial,
-            viewModel,
-            true
+                viewModel?.getBookList(type!!, major!!),
+                R.layout.item_catalog_detial,
+                viewModel,
+                true
         )
-            .let { novelList.init(it, null) }
+                .let { novelList.init(it, null) }
         viewModel?.initBooklist(type!!, major!!)
     }
 

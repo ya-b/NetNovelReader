@@ -29,7 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                android:navigationOnClick="@{() -> viewModel.exitTask()}"
+                android:navigationOnClick="@{() -> viewModel.exit()}"
                 app:layout_scrollFlags="scroll"
                 app:navigationIcon="@drawable/icon_back"
                 app:popupTheme="@style/AppTheme.PopupOverlay" />

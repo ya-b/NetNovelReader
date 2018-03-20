@@ -28,25 +28,25 @@ class SiteEditorFragment : Fragment() {
             this@SiteEditorFragment.context?.apply {
                 val editText = EditText(this).apply { setText(it) }
                 AlertDialog.Builder(this)
-                    .setTitle(getString(R.string.edit_site))
-                    .setView(editText)
-                    .setPositiveButton(R.string.save, { _, _ ->
-                        launch { settingViewModel?.saveText(editText.text.toString()) }
-                    })
-                    .setNegativeButton(R.string.no, null)
-                    .create()
-                    .show()
+                        .setTitle(getString(R.string.edit_site))
+                        .setView(editText)
+                        .setPositiveButton(R.string.save, { _, _ ->
+                            launch { settingViewModel?.saveText(editText.text.toString()) }
+                        })
+                        .setNegativeButton(R.string.no, null)
+                        .create()
+                        .show()
             }
         })
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val binding = DataBindingUtil.inflate<FragmentSiteEditorBinding>(
-            inflater,
-            R.layout.fragment_site_editor, container, false
+                inflater,
+                R.layout.fragment_site_editor, container, false
         )
         binding.siteBean = settingViewModel?.edittingSite
         binding.viewModel = settingViewModel

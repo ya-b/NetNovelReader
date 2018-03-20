@@ -5,11 +5,11 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 
 class PagerAdapter(
-    fm: FragmentManager,
-    val titles: Array<String>,
-    val types: Array<Class<out Fragment>>
+        fm: FragmentManager,
+        val titles: Array<String>,
+        val types: Array<Class<out Fragment>>
 ) :
-    FragmentPagerAdapter(fm) {
+        FragmentPagerAdapter(fm) {
 
     override fun getCount(): Int {
         return titles.size

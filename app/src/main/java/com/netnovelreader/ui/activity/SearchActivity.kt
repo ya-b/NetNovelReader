@@ -20,7 +20,7 @@ import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.init
 import com.netnovelreader.common.obtainViewModel
 import com.netnovelreader.common.toast
-import com.netnovelreader.data.network.CatalogCache
+import com.netnovelreader.data.CatalogManager
 import com.netnovelreader.databinding.ActivitySearchBinding
 import com.netnovelreader.service.DownloadService
 import com.netnovelreader.viewmodel.SearchViewModel
@@ -47,9 +47,9 @@ class SearchActivity : AppCompatActivity() {
 
     fun initView() {
         DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
-            .apply { viewModel = searchViewModel }
+                .apply { viewModel = searchViewModel }
         searchRecycler.init(
-            RecyclerAdapter(searchViewModel.resultList, R.layout.item_search, searchViewModel, true)
+                RecyclerAdapter(searchViewModel.resultList, R.layout.item_search, searchViewModel, true)
         )
         searchViewBar.setOnQueryTextListener(QueryListener())
         searchViewBar.onActionViewExpanded()
@@ -76,7 +76,7 @@ class SearchActivity : AppCompatActivity() {
         searchViewModel.toastMessage.observe(this, Observer { it?.let { toast(it) } })
         searchViewModel.exitCommand.observe(this, Observer { finish() })
         searchViewModel.selectHotWordEvent.observe(
-            this, Observer { searchViewBar.setQuery(it, false) })
+                this, Observer { searchViewBar.setQuery(it, false) })
         searchViewModel.showBookDetailCommand.observe(this, Observer {
             it ?: return@Observer
             val intent = Intent(this@SearchActivity, NovelDetailActivity::class.java)
@@ -96,10 +96,10 @@ class SearchActivity : AppCompatActivity() {
             val listener = DialogInterface.OnClickListener { _, which ->
                 launch {
                     searchViewModel.downloadBook(
-                        it.bookname.get()!!,
-                        it.url.get()!!,
-                        chapterName,
-                        which
+                            it.bookname.get()!!,
+                            it.url.get()!!,
+                            chapterName,
+                            which
                     )
                 }
 
@@ -107,16 +107,16 @@ class SearchActivity : AppCompatActivity() {
                 finish()
             }
             AlertDialog.Builder(this@SearchActivity).setTitle(getString(R.string.downloadAllBook))
-                .setPositiveButton(R.string.yes, listener)
-                .setNegativeButton(getString(R.string.no), listener)
-                .setNeutralButton(getString(R.string.cancel), null)
-                .create().show()
+                    .setPositiveButton(R.string.yes, listener)
+                    .setNegativeButton(getString(R.string.no), listener)
+                    .setNeutralButton(getString(R.string.cancel), null)
+                    .create().show()
         })
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        CatalogCache.clearCache()
+        CatalogManager.clearCache()
         job?.cancel()
     }
 
@@ -146,8 +146,8 @@ class SearchActivity : AppCompatActivity() {
     }
 
     class SearchViewAdapter(context: Context, cursor: Cursor?) : CursorAdapter(
-        context, cursor,
-        true
+            context, cursor,
+            true
     ) {
         override fun newView(context: Context, cursor: Cursor?, parent: ViewGroup?): View {
             return LayoutInflater.from(context).inflate(R.layout.item_search_suggest, parent, false)

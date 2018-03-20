@@ -17,5 +17,4 @@
         android:orderInCategory="100"
         android:title="@string/edit_site"
         app:showAsAction="never" />
-
 </menu>

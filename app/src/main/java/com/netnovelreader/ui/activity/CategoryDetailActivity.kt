@@ -5,7 +5,6 @@ import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.MenuItem
 import com.netnovelreader.R
 import com.netnovelreader.common.CatalogPagerAdapter
 import com.netnovelreader.common.obtainViewModel
@@ -33,9 +32,9 @@ class CategoryDetailActivity : AppCompatActivity() {
     private fun initView() {
         val major = intent.getStringExtra("major")
         DataBindingUtil.setContentView<ActivityCatalogDetailBinding>(
-            this,
-            R.layout.activity_catalog_detail
-        )
+                this,
+                R.layout.activity_catalog_detail
+        ).also { it.viewModel = viewModel }
         setSupportActionBar(toolbar.apply { title = major })
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         viewPager.offscreenPageLimit = 2
@@ -43,14 +42,8 @@ class CategoryDetailActivity : AppCompatActivity() {
         tabLayout.setupWithViewPager(viewPager)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> finish()     //点击回退按钮结束当前Activity
-        }
-        return true
-    }
-
     private fun initLiveData() {
+        viewModel.exitCommand.observe(this, Observer { finish() })
         viewModel.toastMessage.observe(this, Observer { it?.let { toast(it) } })
         viewModel.showBookDetailCommand.observe(this, Observer {
             val intent = Intent(this, NovelDetailActivity::class.java).apply {

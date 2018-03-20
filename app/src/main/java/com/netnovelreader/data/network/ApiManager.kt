@@ -18,17 +18,17 @@ import retrofit2.http.Url
 object ApiManager {
     val zhuiShuShenQi: ZhuiShuShenQiAPI by lazy {
         Retrofit.Builder()
-            .baseUrl("http://api.zhuishushenqi.com")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ZhuiShuShenQiAPI::class.java)
+                .baseUrl("http://api.zhuishushenqi.com")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(ZhuiShuShenQiAPI::class.java)
     }
     val novelReader: NovalReaderAPI by lazy {
         Retrofit.Builder()
-            .baseUrl("http://139.159.226.67")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(NovalReaderAPI::class.java)
+                .baseUrl("http://139.159.226.67")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(NovalReaderAPI::class.java)
     }
 
     interface NovalReaderAPI {
@@ -76,12 +76,12 @@ object ApiManager {
 
         @GET("http://api.zhuishushenqi.com/book/by-categories?")
         fun seachBookListByTypeAndMajor(
-            @Query("gender") gender: String? = "male",
-            @Query("type") type: String?,
-            @Query("major") major: String?,
-            @Query("minor") minor: String? = "",
-            @Query("start") start: String? = "0",
-            @Query("limit") limit: String? = "50"
+                @Query("gender") gender: String? = "male",
+                @Query("type") type: String?,
+                @Query("major") major: String?,
+                @Query("minor") minor: String? = "",
+                @Query("start") start: String? = "0",
+                @Query("limit") limit: String? = "50"
         ): Call<NovelList>
 
         @GET("http://api.zhuishushenqi.com/cats/lv2/statistics")

@@ -1,4 +1,4 @@
-package com.netnovelreader.data
+package com.netnovelreader.data.local
 
 import android.content.Context
 import com.netnovelreader.R
@@ -9,23 +9,23 @@ import com.netnovelreader.common.PREFERENCE_NAME
  */
 object PreferenceManager {
     fun isFullScreen(context: Context): Boolean =
-        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getBoolean(context.getString(R.string.full_screen_key), false)
+            context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+                    .getBoolean(context.getString(R.string.full_screen_key), false)
 
     fun getAutoDownNum(context: Context): Int {
         val boolean = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getBoolean(context.getString(R.string.auto_download_key), true)
+                .getBoolean(context.getString(R.string.auto_download_key), true)
         return compareValues(boolean, false) * 3
     }
 
     fun isAutoRemove(context: Context): Boolean =
-        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getBoolean(context.getString(R.string.auto_remove_key), true)
+            context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+                    .getBoolean(context.getString(R.string.auto_remove_key), true)
 
 
     fun getThemeId(context: Context): Int {
         val color = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getString(context.getString(R.string.themeKey), "black")
+                .getString(context.getString(R.string.themeKey), "black")
 
         return when (color) {
             "blue" -> R.style.AppThemeBlue
@@ -35,7 +35,7 @@ object PreferenceManager {
     }
 
     fun getRowSpace(context: Context): Float =
-        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            .getString(context.getString(R.string.rowspaceKey), "1.50").toFloat()
+            context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+                    .getString(context.getString(R.string.rowspaceKey), "1.50").toFloat()
 
 }

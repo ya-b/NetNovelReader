@@ -12,8 +12,8 @@ package com.netnovelreader.bean
  * ok : true
  */
 data class QueryNovelByAuthor(
-    var isOk: Boolean = false,
-    var books: List<Books1Bean>? = null
+        var isOk: Boolean = false,
+        var books: List<Books1Bean>? = null
 )
 
 /**
@@ -36,22 +36,22 @@ data class QueryNovelByAuthor(
  */
 {
     data class Books1Bean(
-        var _id: String? = null,
-        var author: String? = null,
-        var cover: String? = null,
-        var shortIntro: String? = null,
-        var title: String? = null,
-        var site: String? = null,
-        var majorCate: String? = null,
-        var minorCate: String? = null,
-        var contentType: String? = null,
-        var isAllowMonthly: Boolean = false,
-        var banned: String? = null,
-        var latelyFollower: String? = null,
-        var followerCount: String? = null,
-        var retentionRatio: String? = null,
-        var lastChapter: String? = null,
-        var cat: String? = null
+            var _id: String? = null,
+            var author: String? = null,
+            var cover: String? = null,
+            var shortIntro: String? = null,
+            var title: String? = null,
+            var site: String? = null,
+            var majorCate: String? = null,
+            var minorCate: String? = null,
+            var contentType: String? = null,
+            var isAllowMonthly: Boolean = false,
+            var banned: String? = null,
+            var latelyFollower: String? = null,
+            var followerCount: String? = null,
+            var retentionRatio: String? = null,
+            var lastChapter: String? = null,
+            var cat: String? = null
     )
 }
 

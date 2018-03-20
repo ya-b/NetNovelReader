@@ -30,30 +30,30 @@ class SitePreferenceFragment : Fragment() {
                 launch { settingViewModel?.deleteSite(it) }
             }
             AlertDialog.Builder(this@SitePreferenceFragment.context)
-                .setTitle(getString(R.string.deleteBook).replace("book", it))
-                .setPositiveButton(R.string.yes, listener)
-                .setNegativeButton(R.string.no, null)
-                .create()
-                .show()
+                    .setTitle(getString(R.string.deleteBook).replace("book", it))
+                    .setPositiveButton(R.string.yes, listener)
+                    .setNegativeButton(R.string.no, null)
+                    .create()
+                    .show()
         })
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         binding = DataBindingUtil.inflate<FragmentSitePreferenceBinding>(
-            inflater,
-            R.layout.fragment_site_preference, container, false
+                inflater,
+                R.layout.fragment_site_preference, container, false
         )
         launch { settingViewModel?.showSiteList() }
         binding.recycleSiteList.init(
-            RecyclerAdapter(
-                settingViewModel?.siteList,
-                R.layout.item_site_preference_list,
-                settingViewModel,
-                true
-            )
+                RecyclerAdapter(
+                        settingViewModel?.siteList,
+                        R.layout.item_site_preference_list,
+                        settingViewModel,
+                        true
+                )
         )
         return binding.root
     }

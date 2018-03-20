@@ -11,10 +11,8 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.widget.Toast
-import com.netnovelreader.data.db.ShelfBean
-import com.netnovelreader.data.db.ShelfDao
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import com.netnovelreader.data.local.db.ShelfBean
+import com.netnovelreader.data.local.db.ShelfDao
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -65,7 +63,7 @@ fun fixUrl(referenceUrl: String, fixUrl: String): String {
 }
 
 //简化书写
-fun Context.toast(message: String) = launch(UI) {
+fun Context.toast(message: String) {
     Toast.makeText(this@toast, message, Toast.LENGTH_SHORT).show()
 }
 
@@ -85,14 +83,14 @@ inline fun <T> Call<T>.enqueueCall(crossinline block: (t: T?) -> Unit) {
 }
 
 fun <T, E> RecyclerView.init(
-    adapter: RecyclerAdapter<in T, in E>,
-    decor: RecyclerView.ItemDecoration? = NovelItemDecoration(context),
-    layoutManager: RecyclerView.LayoutManager = object : LinearLayoutManager(context) {
-        override fun supportsPredictiveItemAnimations(): Boolean {
-            return false
-        }
-    },
-    animator: RecyclerView.ItemAnimator? = DefaultItemAnimator()
+        adapter: RecyclerAdapter<in T, in E>,
+        decor: RecyclerView.ItemDecoration? = NovelItemDecoration(context),
+        layoutManager: RecyclerView.LayoutManager = object : LinearLayoutManager(context) {
+            override fun supportsPredictiveItemAnimations(): Boolean {
+                return false
+            }
+        },
+        animator: RecyclerView.ItemAnimator? = DefaultItemAnimator()
 ) {
     this.layoutManager = layoutManager
     this.adapter = adapter
@@ -101,13 +99,13 @@ fun <T, E> RecyclerView.init(
 }
 
 fun ShelfDao.replace(
-    _id: Int? = null,
-    bookName: String?,
-    downloadUrl: String? = null,
-    readRecord: String? = null,
-    isUpdate: String? = null,
-    latestChapter: String? = null,
-    latestRead: Int? = null
+        _id: Int? = null,
+        bookName: String?,
+        downloadUrl: String? = null,
+        readRecord: String? = null,
+        isUpdate: String? = null,
+        latestChapter: String? = null,
+        latestRead: Int? = null
 ) {
     if (bookName.isNullOrEmpty()) return
     val now = ShelfBean(_id, bookName, downloadUrl, readRecord, isUpdate, latestChapter, latestRead)
@@ -116,26 +114,26 @@ fun ShelfDao.replace(
         insert(now)
     } else {
         ShelfBean(
-            now._id ?: old._id,
-            now.bookName,
-            now.downloadUrl ?: old.downloadUrl,
-            now.readRecord ?: old.readRecord,
-            now.isUpdate ?: old.isUpdate,
-            now.latestChapter ?: old.latestChapter,
-            now.latestRead ?: old.latestRead
+                now._id ?: old._id,
+                now.bookName,
+                now.downloadUrl ?: old.downloadUrl,
+                now.readRecord ?: old.readRecord,
+                now.isUpdate ?: old.isUpdate,
+                now.latestChapter ?: old.latestChapter,
+                now.latestRead ?: old.latestRead
         ).apply { insert(this) }
     }
 }
 
 
 fun <T : AndroidViewModel> FragmentActivity.obtainViewModel(clazz: Class<T>): T =
-    ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
-        .let { ViewModelProviders.of(this, it).get(clazz) }
+        ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
+                .let { ViewModelProviders.of(this, it).get(clazz) }
 
 
 fun Context.checkPermission(permission: String): Boolean {
     return ActivityCompat.checkSelfPermission(
-        this,
-        permission
+            this,
+            permission
     ) == PackageManager.PERMISSION_GRANTED
 }

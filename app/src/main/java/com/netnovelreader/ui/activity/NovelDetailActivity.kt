@@ -20,7 +20,7 @@ class NovelDetailActivity : AppCompatActivity() {
         setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         super.onCreate(savedInstanceState)
         val binding =
-            DataBindingUtil.setContentView<ActivityDetailBinding>(this, R.layout.activity_detail)
+                DataBindingUtil.setContentView<ActivityDetailBinding>(this, R.layout.activity_detail)
         binding.searchEvent = this
         setSupportActionBar({ toolbar.title = "书籍详情";toolbar }())
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

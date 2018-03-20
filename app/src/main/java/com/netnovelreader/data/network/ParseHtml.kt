@@ -3,8 +3,6 @@ package com.netnovelreader.data.network
 import com.netnovelreader.common.TIMEOUT
 import com.netnovelreader.common.fixUrl
 import com.netnovelreader.common.getHeaders
-import com.netnovelreader.common.url2Hostname
-import com.netnovelreader.data.db.ReaderDbManager
 import org.jsoup.Jsoup
 import org.jsoup.UncheckedIOException
 import org.jsoup.nodes.Element
@@ -22,15 +20,13 @@ class ParseHtml {
      * 解析章节
      */
     @Throws(IOException::class)
-    fun getChapter(url: String): String {
-        val selector = ReaderDbManager.sitePreferenceDao().getRule(url2Hostname(url))
-            .chapterSelector
+    fun getChapter(url: String, selector: String): String {
         val txt = if (selector.isEmpty() || selector.length < 2) {
             getChapterWithOutSelector(url)
         } else {
             try {
                 Jsoup.connect(url).headers(getHeaders(url))
-                    .timeout(TIMEOUT).get().select(selector).text()
+                        .timeout(TIMEOUT).get().select(selector).text()
             } catch (e: UncheckedIOException) {
                 e.printStackTrace()
                 ""
@@ -43,13 +39,11 @@ class ParseHtml {
      * 解析目录
      */
     @Throws(IOException::class)
-    fun getCatalog(url: String): LinkedHashMap<String, String> {
-        val selector = ReaderDbManager.sitePreferenceDao().getRule(url2Hostname(url))
-            .catalogSelector
+    fun getCatalog(url: String, selector: String): LinkedHashMap<String, String> {
         val catalog = LinkedHashMap<String, String>()
         val list: Elements = try {
             Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
-                .select(selector).select("a")
+                    .select(selector).select("a")
         } catch (e: UncheckedIOException) {
             return catalog
         }
@@ -78,8 +72,8 @@ class ParseHtml {
         val indexList = ArrayList<Element>()
         if (elements.size > 1) {
             (1 until elements.size)
-                .filter { elements[0].text().length > elements[it].text().length * 2 }
-                .forEach { indexList.add(elements[it]) }
+                    .filter { elements[0].text().length > elements[it].text().length * 2 }
+                    .forEach { indexList.add(elements[it]) }
         }
         elements.removeAll(indexList)
         return elements.last().text()

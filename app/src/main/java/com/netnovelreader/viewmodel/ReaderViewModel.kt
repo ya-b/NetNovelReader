@@ -16,10 +16,10 @@ import com.netnovelreader.common.NotDeleteNum
 import com.netnovelreader.common.PREFERENCE_NAME
 import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.common.replace
-import com.netnovelreader.data.PreferenceManager
-import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.network.ChapterCache
-import com.netnovelreader.data.network.DownloadCatalog
+import com.netnovelreader.data.CatalogManager
+import com.netnovelreader.data.ChapterManager
+import com.netnovelreader.data.local.PreferenceManager
+import com.netnovelreader.data.local.ReaderDbManager
 import kotlinx.coroutines.experimental.*
 import java.io.File
 import java.io.IOException
@@ -38,25 +38,24 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     val backgroundColor by lazy { ObservableInt(R.color.read_font_default) }//背景颜色
     val isViewShow by lazy {
         mapOf(
-            Pair(HEAD_VIEW, ObservableBoolean(false)),                //是否显示HeadView
-            Pair(Font_SETTING, ObservableBoolean(false)),             //是否显示FontSetting
-            Pair(BG_SETTING, ObservableBoolean(false)),               //是否显示BackgroundSeting
-            Pair(FOOT_VIEW, ObservableBoolean(false))                 //是否显示footview
+                Pair(HEAD_VIEW, ObservableBoolean(false)),                //是否显示HeadView
+                Pair(Font_SETTING, ObservableBoolean(false)),             //是否显示FontSetting
+                Pair(BG_SETTING, ObservableBoolean(false)),               //是否显示BackgroundSeting
+                Pair(FOOT_VIEW, ObservableBoolean(false))                 //是否显示footview
         )                //是否显示FootView
     }
-
     val fontSizeSelected = List(5) { ObservableBoolean(false) }   //字体大小设置Button是否选中
     val fontTypeSelected = List(5) { ObservableBoolean(false) }   //字体大小设置Button是否选中
     val isLoading by lazy { ObservableBoolean(true) }                  //是否显示加载进度条
-    val showDialogCommand by lazy { ReaderLiveData<Boolean>() }             //显示目录
-    val changeSourceCommand by lazy { ReaderLiveData<String>() }            //换源下载
-    val brightnessCommand by lazy { ReaderLiveData<Float>() }                 //亮度
+    val showDialogCommand by lazy { ReaderLiveData<Boolean>() }              //显示目录
+    val changeSourceCommand by lazy { ReaderLiveData<String>() }             //换源下载
+    val brightnessCommand by lazy { ReaderLiveData<Float>() }                //亮度
     @Volatile
     var chapterName: String? = null                         //章节名
     var chapterNum = AtomicInteger(0)              //章节数
     @Volatile
     var maxChapterNum = 0                                    //最大章节数
-    var chapterCache: ChapterCache? = null
+    var chapterCache: ChapterManager? = null
     lateinit var bookName: String                            //书名
     var CACHE_NUM: Int = 0                                   //缓存后面章节数量
     var downloadJob: Job? = null
@@ -85,7 +84,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         val str = chapterCache!!.getChapter(chapterNum.get(), false)
         text.set(str)
         this.chapterName = str.substring(0, str.indexOf("|"))
-        if (str.substring(str.indexOf("|") + 1) == ChapterCache.FILENOTFOUND) {
+        if (str.substring(str.indexOf("|") + 1) == ChapterManager.FILENOTFOUND) {
             downloadJob?.cancel()
             downloadJob = launch { downloadAndShow() }
         } else {
@@ -96,13 +95,13 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     //下载并显示，阅读到未下载章节时调用
     suspend fun downloadAndShow() {
         chapterCache ?: return
-        var str = ChapterCache.FILENOTFOUND
+        var str = ChapterManager.FILENOTFOUND
         var times = 0
-        while (str == ChapterCache.FILENOTFOUND && times++ < 10) {
+        while (str == ChapterManager.FILENOTFOUND && times++ < 10) {
             str = chapterCache!!.getChapter(chapterNum.get())
             delay(500)
         }
-        str.split("|")[1].takeIf { it != ChapterCache.FILENOTFOUND }?.run {
+        str.split("|")[1].takeIf { it != ChapterManager.FILENOTFOUND }?.run {
             isLoading.set(false)
             getChapter(ChapterChangeType.BY_CATALOG, null)
         }
@@ -123,7 +122,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         if (chapterNum.get() < 1) return
         launch {
             ReaderDbManager.shelfDao().replace(
-                bookName = bookName, readRecord = "$chapterNum#${if (pageNum < 1) 1 else pageNum}"
+                    bookName = bookName, readRecord = "$chapterNum#${if (pageNum < 1) 1 else pageNum}"
             )
         }
         if (changeFontSizeFlag == false) {
@@ -148,34 +147,33 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         PreferenceManager.isAutoRemove(context).takeIf { it }
         getRecord()[0].takeIf { it > NotDeleteNum }?.let {
             ReaderDbManager.setReaded(bookName, it - NotDeleteNum)
-                .map { File("${ReaderApplication.dirPath}/$bookName/$it") }
-                .forEach { it.delete() }
+                    .map { File("${ReaderApplication.dirPath}/$bookName/$it") }
+                    .forEach { it.delete() }
         }
     }
 
-    fun drawPrepareTask(): Int = runBlocking {
-        async {
-            maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?:
-                    return@async 0
+    fun drawPrepare(): Int = runBlocking {
+        return@runBlocking async {
+            maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?: return@async 0
             val record = async { getRecord() }.await()
             chapterNum.set(record[0])
-            chapterCache = ChapterCache(CACHE_NUM, bookName).apply { init(maxChapterNum, bookName) }
+            chapterCache = ChapterManager.getInstance(CACHE_NUM, bookName, maxChapterNum)
             launch { getChapter(ChapterChangeType.BY_CATALOG, null) }
             record[1]
         }.await()
     }
 
-    fun nextChapterTask() {
+    fun nextChapter() {
         isViewShow.forEach { it.value.set(false) }
         launch { getChapter(ChapterChangeType.NEXT, null) }
     }
 
-    fun previousChapterTask() {
+    fun previousChapter() {
         isViewShow.forEach { it.value.set(false) }
         launch { getChapter(ChapterChangeType.PREVIOUS, null) }
     }
 
-    fun centerClickTask() {
+    fun centerClick() {
         if (isViewShow[FOOT_VIEW]!!.get()) {
             isViewShow.forEach { it.value.set(false) }
         } else {
@@ -184,7 +182,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         }
     }
 
-    fun changeSourceTask() {
+    fun changeSource() {
         isViewShow.forEach { it.value.set(false) }
         changeSourceCommand.value = chapterName
     }
@@ -239,7 +237,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
             }
         }
         context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-            .putFloat(context.getString(R.string.fontSizeKey), float).apply()
+                .putFloat(context.getString(R.string.fontSizeKey), float).apply()
     }
 
     fun fontTypeChangeEvent(which: String) {
@@ -271,7 +269,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
             }
         }
         context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-            .putString(context.getString(R.string.fontTypeKey), which).apply()
+                .putString(context.getString(R.string.fontTypeKey), which).apply()
     }
 
     fun backgroundChangeEvent(which: Int) {
@@ -299,7 +297,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
             }
         }
         context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-            .putInt(context.getString(R.string.backgroundColorKey), which).apply()
+                .putInt(context.getString(R.string.backgroundColorKey), which).apply()
     }
 
     fun changeBrightness(progress: Int) {
@@ -312,16 +310,16 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
      */
     private fun getRecord(): Array<Int> {
         val queryResult = ReaderDbManager.shelfDao().getBookInfo(bookName)?.readRecord
-            ?.split("#")?.map { it.toInt() }          //阅读记录 3#2 表示第3章第2页
+                ?.split("#")?.map { it.toInt() }          //阅读记录 3#2 表示第3章第2页
         return arrayOf(queryResult?.get(0) ?: 1, queryResult?.get(1) ?: 1)
     }
 
     private fun updateCatalog() {
         try {
-            DownloadCatalog(
-                bookName, ReaderDbManager.shelfDao().getBookInfo(bookName)?.downloadUrl
-                        ?: ""
-            ).download("")
+            CatalogManager.download(
+                    bookName, ReaderDbManager.shelfDao().getBookInfo(bookName)?.downloadUrl
+                    ?: ""
+            )
         } catch (e: IOException) {
             e.printStackTrace()
         }

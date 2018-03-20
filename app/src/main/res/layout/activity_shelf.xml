@@ -47,7 +47,7 @@
                     android:id="@+id/shelfTab"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:onTabUnselectedListener="@{(t) -> viewModel.tabChangeTask(t)}"
+                    android:onTabUnselectedListener="@{(t) -> viewModel.tabChanged(t)}"
                     app:tabIndicatorColor="@android:color/background_light" />
 
             </android.support.design.widget.AppBarLayout>

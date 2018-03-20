@@ -46,16 +46,16 @@ class ShelfActivityTest {
     @Test
     fun tabRight() {
         val tabView = onView(
-            allOf(
-                childAtPosition(
-                    childAtPosition(
-                        withId(R.id.shelfTab),
-                        0
-                    ),
-                    1
-                ),
-                isDisplayed()
-            )
+                allOf(
+                        childAtPosition(
+                                childAtPosition(
+                                        withId(R.id.shelfTab),
+                                        0
+                                ),
+                                1
+                        ),
+                        isDisplayed()
+                )
         )
         tabView.perform(click())
         Thread.sleep(100)
@@ -66,16 +66,16 @@ class ShelfActivityTest {
     @Test
     fun tabLeft() {
         val tabView = onView(
-            allOf(
-                childAtPosition(
-                    childAtPosition(
-                        withId(R.id.shelfTab),
-                        0
-                    ),
-                    0
-                ),
-                isDisplayed()
-            )
+                allOf(
+                        childAtPosition(
+                                childAtPosition(
+                                        withId(R.id.shelfTab),
+                                        0
+                                ),
+                                0
+                        ),
+                        isDisplayed()
+                )
         )
         tabView.perform(click())
         Thread.sleep(100)
@@ -87,17 +87,17 @@ class ShelfActivityTest {
     fun startSettingActivity() {
         openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext())
         val appCompatTextView = onView(
-            allOf(
-                withId(R.id.title), withText("设置"),
-                childAtPosition(
-                    childAtPosition(
-                        withClassName(`is`("android.support.v7.view.menu.ListMenuItemView")),
-                        0
-                    ),
-                    0
-                ),
-                isDisplayed()
-            )
+                allOf(
+                        withId(R.id.title), withText("设置"),
+                        childAtPosition(
+                                childAtPosition(
+                                        withClassName(`is`("android.support.v7.view.menu.ListMenuItemView")),
+                                        0
+                                ),
+                                0
+                        ),
+                        isDisplayed()
+                )
         )
         appCompatTextView.perform(click())
         Thread.sleep(500)
@@ -105,20 +105,20 @@ class ShelfActivityTest {
 
 
         val appCompatImageButton = onView(
-            allOf(
-                withContentDescription("转到上一层级"),
-                childAtPosition(
-                    allOf(
-                        withId(R.id.settingToolbar),
+                allOf(
+                        withContentDescription("转到上一层级"),
                         childAtPosition(
-                            withClassName(`is`("android.support.design.widget.AppBarLayout")),
-                            0
-                        )
-                    ),
-                    0
-                ),
-                isDisplayed()
-            )
+                                allOf(
+                                        withId(R.id.settingToolbar),
+                                        childAtPosition(
+                                                withClassName(`is`("android.support.design.widget.AppBarLayout")),
+                                                0
+                                        )
+                                ),
+                                0
+                        ),
+                        isDisplayed()
+                )
         )
         appCompatImageButton.perform(click())
     }
@@ -129,12 +129,12 @@ class ShelfActivityTest {
         Thread.sleep(500)
         intended(hasComponent(SearchActivity::class.java.getName()))
         onView(withId(R.id.backButton)).check(ViewAssertions.matches(isDisplayed()))
-            .perform(click())
+                .perform(click())
     }
 
 
     private fun childAtPosition(
-        parentMatcher: Matcher<View>, position: Int
+            parentMatcher: Matcher<View>, position: Int
     ): Matcher<View> {
 
         return object : TypeSafeMatcher<View>() {

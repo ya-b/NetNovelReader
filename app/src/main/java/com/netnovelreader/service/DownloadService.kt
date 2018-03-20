@@ -7,10 +7,11 @@ import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication
 import com.netnovelreader.ReaderApplication.Companion.threadPool
+import com.netnovelreader.bean.ChapterBean
 import com.netnovelreader.common.toast
-import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.network.DownloadCatalog
-import com.netnovelreader.data.network.DownloadChapter
+import com.netnovelreader.data.CatalogManager
+import com.netnovelreader.data.ChapterManager
+import com.netnovelreader.data.local.ReaderDbManager
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import java.io.File
@@ -54,11 +55,12 @@ class DownloadService : IntentService {
         val tableName = intent?.getStringExtra("tableName")
         val catalogUrl = intent?.getStringExtra("catalogurl")
         if (intent == null || tableName.isNullOrEmpty() || catalogUrl.isNullOrEmpty()) return
-        getList(tableName!!, catalogUrl!!).apply { max = this.size }.forEach {
+        getList(tableName!!, catalogUrl!!).apply { max = this.size }.forEach { bean ->
+            val downloader = ChapterManager.getInstance(0, tableName, 0)
             //获取要下载的章节列表
             launch(threadPool) {
                 try {
-                    it.download(it.getChapterTxt())     //下载每一章
+                    downloader.writToDisk(bean, downloader.getChapterTxt(bean))     //下载每一章
                     progress.incrementAndGet()
                 } catch (e: IOException) {
                     failed.incrementAndGet()
@@ -83,33 +85,33 @@ class DownloadService : IntentService {
 
     private fun openNotification() {
         builder = NotificationCompat.Builder(this, "reader")
-            .setTicker(getString(R.string.app_name))
-            .setContentTitle(getString(R.string.prepare_download))
-            .setSmallIcon(R.drawable.notification_icon)
+                .setTicker(getString(R.string.app_name))
+                .setContentTitle(getString(R.string.prepare_download))
+                .setSmallIcon(R.drawable.notification_icon)
         mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager?.notify(NOTIFYID, builder?.build())
     }
 
     fun updateNotification(progress: Int, max: Int) {
         val str = if (remainder != 0) ",${getString(R.string.wait4download)}"
-            .replace("nn", "$remainder") else ""
+                .replace("nn", "$remainder") else ""
         builder?.setProgress(max, progress, false)
-            ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
+                ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
         launch(UI) { mNotificationManager?.notify(NOTIFYID, builder?.build()) }
     }
 
-    fun getList(tableName: String, url: String): ArrayList<DownloadChapter> {
-        val runnables = ArrayList<DownloadChapter>()
+    fun getList(tableName: String, url: String): ArrayList<ChapterBean> {
+        val list = ArrayList<ChapterBean>()
         try {
-            DownloadCatalog(tableName, url).download()
+            CatalogManager.download(tableName, url)
         } catch (e: IOException) {
             e.printStackTrace()
-            return runnables
+            return list
         }
         val path = "${ReaderApplication.dirPath}/$tableName".apply { File(this).mkdirs() }
         ReaderDbManager.getChapterNameAndUrl(tableName, 0).forEach {
-            runnables.add(DownloadChapter(tableName, path, it.key, it.value))
+            list.add(ChapterBean(tableName, path, it.key, it.value))
         }
-        return runnables
+        return list
     }
 }

@@ -1,4 +1,4 @@
-package com.netnovelreader.data.network
+package com.netnovelreader.data
 
 import android.graphics.Bitmap
 import android.util.LruCache

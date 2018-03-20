@@ -64,11 +64,11 @@ class GridDivider(context: Context) : RecyclerView.ItemDecoration() {
                 mDividerDarwable!!.draw(c)
                 if (mColorPaint != null) {
                     c.drawRect(
-                        left.toFloat(),
-                        top.toFloat(),
-                        right.toFloat(),
-                        bottom.toFloat(),
-                        mColorPaint!!
+                            left.toFloat(),
+                            top.toFloat(),
+                            right.toFloat(),
+                            bottom.toFloat(),
+                            mColorPaint!!
                     )
                 }
                 //item右边分割线
@@ -84,11 +84,11 @@ class GridDivider(context: Context) : RecyclerView.ItemDecoration() {
             mDividerDarwable!!.draw(c)
             if (mColorPaint != null) {
                 c.drawRect(
-                    left.toFloat(),
-                    top.toFloat(),
-                    right.toFloat(),
-                    bottom.toFloat(),
-                    mColorPaint!!
+                        left.toFloat(),
+                        top.toFloat(),
+                        right.toFloat(),
+                        bottom.toFloat(),
+                        mColorPaint!!
                 )
             }
 
@@ -117,11 +117,11 @@ class GridDivider(context: Context) : RecyclerView.ItemDecoration() {
                 mDividerDarwable!!.draw(c)
                 if (mColorPaint != null) {
                     c.drawRect(
-                        left.toFloat(),
-                        top.toFloat(),
-                        right.toFloat(),
-                        bottom.toFloat(),
-                        mColorPaint!!
+                            left.toFloat(),
+                            top.toFloat(),
+                            right.toFloat(),
+                            bottom.toFloat(),
+                            mColorPaint!!
                     )
                 }
                 top = child.bottom + params.bottomMargin
@@ -135,11 +135,11 @@ class GridDivider(context: Context) : RecyclerView.ItemDecoration() {
             mDividerDarwable!!.draw(c)
             if (mColorPaint != null) {
                 c.drawRect(
-                    left.toFloat(),
-                    top.toFloat(),
-                    right.toFloat(),
-                    bottom.toFloat(),
-                    mColorPaint!!
+                        left.toFloat(),
+                        top.toFloat(),
+                        right.toFloat(),
+                        bottom.toFloat(),
+                        mColorPaint!!
                 )
             }
         }

@@ -15,7 +15,7 @@ import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.checkPermission
 import com.netnovelreader.common.init
 import com.netnovelreader.common.obtainViewModel
-import com.netnovelreader.data.PreferenceManager
+import com.netnovelreader.data.local.PreferenceManager
 import com.netnovelreader.databinding.FragmentShelfBinding
 import com.netnovelreader.ui.activity.ReaderActivity
 import com.netnovelreader.ui.activity.ShelfActivity
@@ -29,14 +29,14 @@ class ShelfFragment : Fragment() {
     lateinit var binding: FragmentShelfBinding
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         shelfViewModel = activity?.obtainViewModel(ShelfViewModel::class.java)
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_shelf, container, false)
         binding.viewModel = shelfViewModel
         RecyclerAdapter(shelfViewModel?.bookList, R.layout.item_shelf, shelfViewModel, true)
-            .let { binding.shelfRecycler.init(it, null) }
+                .let { binding.shelfRecycler.init(it, null) }
         binding.shelfRefresh.setColorSchemeResources(R.color.gray)
         initLiveData()
         (activity as ShelfActivity).shelfTab.run {
@@ -63,13 +63,13 @@ class ShelfFragment : Fragment() {
         })
         shelfViewModel?.showDialogCommand?.observe(this, Observer {
             AlertDialog.Builder(activity)
-                .setTitle(getString(R.string.deleteBook).replace("book", it!!))
-                .setPositiveButton(
-                    R.string.yes,
-                    { _, _ -> launch { shelfViewModel?.deleteBook(it) } })
-                .setNegativeButton(R.string.no, null)
-                .create()
-                .show()
+                    .setTitle(getString(R.string.deleteBook).replace("book", it!!))
+                    .setPositiveButton(
+                            R.string.yes,
+                            { _, _ -> launch { shelfViewModel?.deleteBook(it) } })
+                    .setNegativeButton(R.string.no, null)
+                    .create()
+                    .show()
         })
     }
 

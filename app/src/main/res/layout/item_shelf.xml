@@ -26,17 +26,17 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:onClick="@{() -> clickEvent.readBookTask(itemDetail.bookname??``)}"
-            android:onLongClick="@{() -> clickEvent.askDeleteTask(itemDetail.bookname??``)}">
+            android:onClick="@{() -> clickEvent.readBook(itemDetail.bookname??``)}"
+            android:onLongClick="@{() -> clickEvent.deleteDialog(itemDetail.bookname??``)}">
 
             <ImageView
                 android:id="@+id/bookCover"
                 android:layout_width="45dp"
                 android:layout_height="60dp"
+                android:layout_gravity="center_vertical"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:layout_gravity="center_vertical"
                 android:src="@{itemDetail.bitmap}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

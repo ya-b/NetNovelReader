@@ -14,7 +14,7 @@ import com.netnovelreader.R
 import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.init
 import com.netnovelreader.common.obtainViewModel
-import com.netnovelreader.data.PreferenceManager
+import com.netnovelreader.data.local.PreferenceManager
 import com.netnovelreader.databinding.ActivityReaderBinding
 import com.netnovelreader.receiver.NetStateChangedReceiver
 import com.netnovelreader.viewmodel.ReaderViewModel
@@ -23,15 +23,16 @@ import kotlinx.coroutines.experimental.launch
 
 
 class ReaderActivity : AppCompatActivity() {
-    val viewModel by lazy { obtainViewModel(ReaderViewModel::class.java) }
-    var dialog: AlertDialog? = null
-    var netStateReceiver: NetStateChangedReceiver? = null
+    private val viewModel by lazy { obtainViewModel(ReaderViewModel::class.java) }
+    private var dialog: AlertDialog? = null
+    private var netStateReceiver: NetStateChangedReceiver? = null
+    private var catalogView: RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (PreferenceManager.isFullScreen(this)) {
             window.setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
         setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
@@ -43,7 +44,7 @@ class ReaderActivity : AppCompatActivity() {
 
     fun initView() {
         DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
-            .apply { viewModel = this@ReaderActivity.viewModel }
+                .apply { viewModel = this@ReaderActivity.viewModel }
     }
 
     fun initData() {
@@ -88,6 +89,7 @@ class ReaderActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(netStateReceiver)
+        catalogView?.adapter = null
         launch { viewModel.autoRemove() }
     }
 
@@ -103,17 +105,13 @@ class ReaderActivity : AppCompatActivity() {
 
     //显示目录
     fun showDialog() {
-        var catalogView: RecyclerView? = null
         if (dialog == null) {
             val builder = AlertDialog.Builder(this@ReaderActivity)
             catalogView = RecyclerView(this@ReaderActivity)
-            catalogView.init(
-                RecyclerAdapter(
-                    viewModel.catalog,
-                    R.layout.item_catalog,
-                    viewModel,
-                    true
-                )
+            catalogView?.init(
+                    RecyclerAdapter(
+                            viewModel.catalog, R.layout.item_catalog, viewModel, true
+                    )
             )
             dialog = builder.setView(catalogView).create()
         }

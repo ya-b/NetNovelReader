@@ -5,7 +5,7 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.data.db.SitePreferenceBean" />
+            type="com.netnovelreader.data.local.db.SitePreferenceBean" />
 
         <variable
             name="clickEvent"
@@ -19,8 +19,8 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="6dp"
-        android:onClick="@{() -> clickEvent.editSiteTask(itemDetail.hostname)}"
-        android:onLongClick="@{() -> clickEvent.askDeleteSiteTask(itemDetail.hostname)}"
+        android:onClick="@{() -> clickEvent.editSite(itemDetail.hostname)}"
+        android:onLongClick="@{() -> clickEvent.askDeleteSite(itemDetail.hostname)}"
         android:text="@{itemDetail.hostname}"
         android:textSize="16sp" />
 </layout>

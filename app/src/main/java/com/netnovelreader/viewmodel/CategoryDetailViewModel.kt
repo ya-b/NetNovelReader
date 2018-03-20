@@ -15,9 +15,10 @@ import java.io.IOException
 
 class CategoryDetailViewModel(context: Application) : AndroidViewModel(context) {
     var isLoading = ObservableBoolean(true)
-    val boolistMap = HashMap<String, LruCache<String, ObservableArrayList<NovelList.BooksBean>>>()
+    val bookMap = HashMap<String, LruCache<String, ObservableArrayList<NovelList.BooksBean>>>()
     val toastMessage by lazy { ReaderLiveData<String>() }
     val showBookDetailCommand by lazy { ReaderLiveData<NovelIntroduce>() }
+    val exitCommand = ReaderLiveData<Void>()      //点击返回图标
 
     @Synchronized
     fun getNovelIntroduce(id: String) {
@@ -40,22 +41,26 @@ class CategoryDetailViewModel(context: Application) : AndroidViewModel(context) 
         if (booklist.isNotEmpty()) return
         isLoading.set(true)
         ApiManager.zhuiShuShenQi.seachBookListByTypeAndMajor(type = type, major = major)
-            .enqueueCall {
-                it ?: return@enqueueCall
-                isLoading.set(false)
-                booklist.addAll(it.books!!)
-            }
+                .enqueueCall {
+                    it ?: return@enqueueCall
+                    isLoading.set(false)
+                    booklist.addAll(it.books!!)
+                }
     }
 
     fun getBookList(type: String, major: String): ObservableArrayList<NovelList.BooksBean> {
-        if (boolistMap[type] == null) {
-            boolistMap[type] = LruCache<String, ObservableArrayList<NovelList.BooksBean>>(3)
-                .apply { put(major, ObservableArrayList()) }
+        if (bookMap[type] == null) {
+            bookMap[type] = LruCache<String, ObservableArrayList<NovelList.BooksBean>>(3)
+                    .apply { put(major, ObservableArrayList()) }
         } else {
-            if (boolistMap[type]!![major] == null) {
-                boolistMap[type]!!.put(major, ObservableArrayList())
+            if (bookMap[type]!![major] == null) {
+                bookMap[type]!!.put(major, ObservableArrayList())
             }
         }
-        return boolistMap[type]!![major]
+        return bookMap[type]!![major]
+    }
+
+    fun exit() {
+        exitCommand.call()
     }
 }

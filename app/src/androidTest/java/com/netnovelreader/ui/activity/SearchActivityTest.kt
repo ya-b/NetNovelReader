@@ -36,8 +36,8 @@ class SearchActivityTest {
     @Synchronized
     fun onSearchViewEditisNull() {
         onView(withId(R.id.searchViewBar)).perform(
-            typeSearchViewText(" "),
-            pressKey(KeyEvent.KEYCODE_DEL)
+                typeSearchViewText(" "),
+                pressKey(KeyEvent.KEYCODE_DEL)
         )
         Thread.sleep(100)
         onView(withId(R.id.linearLayout)).check(matches(isDisplayed()))
@@ -46,8 +46,8 @@ class SearchActivityTest {
     @Test
     fun search() {
         onView(withId(R.id.searchViewBar)).perform(
-            typeSearchViewText("极道天魔"),
-            pressKey(KeyEvent.KEYCODE_SEARCH)
+                typeSearchViewText("极道天魔"),
+                pressKey(KeyEvent.KEYCODE_SEARCH)
         )
         Thread.sleep(100)
         onView(withId(R.id.searchRecycler)).check(matches(isDisplayed()))

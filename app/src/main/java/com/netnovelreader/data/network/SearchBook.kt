@@ -1,8 +1,8 @@
 package com.netnovelreader.data.network
 
 import com.netnovelreader.common.*
-import com.netnovelreader.data.db.ReaderDatabase
-import com.netnovelreader.data.db.SitePreferenceBean
+import com.netnovelreader.data.local.db.ReaderDatabase
+import com.netnovelreader.data.local.db.SitePreferenceBean
 import org.jsoup.Jsoup
 import org.jsoup.UncheckedIOException
 import org.jsoup.nodes.Element
@@ -35,7 +35,7 @@ class SearchBook {
     fun search(bookname: String, sitePreference: SitePreferenceBean): Array<String> {
         return sitePreference.run {
             val url =
-                searchUrl.replace(ReaderDatabase.SEARCH_NAME, URLEncoder.encode(bookname, charset))
+                    searchUrl.replace(ReaderDatabase.SEARCH_NAME, URLEncoder.encode(bookname, charset))
 
             if (redirectFileld == "") {
                 search(url, noRedirectUrl, noRedirectName, noRedirectImage)
@@ -55,8 +55,8 @@ class SearchBook {
             return Array(3) { "" }
         }
         return arrayOf(
-            parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),
-            parseImageUrl(doc, imageSelector)
+                parseCatalogUrl(doc, url, catalogSelector), parseBookname(doc, nameSelector),
+                parseImageUrl(doc, imageSelector)
         )
     }
 
@@ -65,8 +65,8 @@ class SearchBook {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.instanceFollowRedirects = false
         conn.setRequestProperty(
-            "accept",
-            "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+                "accept",
+                "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
         )
         conn.setRequestProperty("user-agent", UA)
         conn.setRequestProperty("Upgrade-Insecure-Requests", "1")

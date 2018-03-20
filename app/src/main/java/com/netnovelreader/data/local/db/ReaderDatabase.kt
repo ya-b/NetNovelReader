@@ -1,4 +1,4 @@
-package com.netnovelreader.data.db
+package com.netnovelreader.data.local.db
 
 import android.arch.persistence.room.Database
 import android.arch.persistence.room.RoomDatabase

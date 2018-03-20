@@ -8,6 +8,7 @@
         <variable
             name="searchEvent"
             type="com.netnovelreader.ui.activity.NovelDetailActivity" />
+
         <variable
             name="detail"
             type="com.netnovelreader.bean.NovelIntroduce" />

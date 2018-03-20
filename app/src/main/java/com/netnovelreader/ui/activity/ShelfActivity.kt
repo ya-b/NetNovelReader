@@ -16,7 +16,7 @@ import com.netnovelreader.common.PagerAdapter
 import com.netnovelreader.common.checkPermission
 import com.netnovelreader.common.obtainViewModel
 import com.netnovelreader.common.toast
-import com.netnovelreader.data.PreferenceManager
+import com.netnovelreader.data.local.PreferenceManager
 import com.netnovelreader.databinding.ActivityShelfBinding
 import com.netnovelreader.ui.fragment.NovelClassfyFragment
 import com.netnovelreader.ui.fragment.ShelfFragment
@@ -45,13 +45,13 @@ class ShelfActivity : AppCompatActivity() {
 
     fun initView() {
         DataBindingUtil.setContentView<ActivityShelfBinding>(this, R.layout.activity_shelf)
-            .apply { viewModel = this@ShelfActivity.viewModel }
+                .apply { viewModel = this@ShelfActivity.viewModel }
         setSupportActionBar(shelfToolbar)
         shelfViewPager.offscreenPageLimit = 2
         shelfViewPager.adapter = PagerAdapter(
-            supportFragmentManager,
-            arrayOf(getString(R.string.shelf), getString(R.string.classification)),
-            arrayOf(ShelfFragment::class.java, NovelClassfyFragment::class.java)
+                supportFragmentManager,
+                arrayOf(getString(R.string.shelf), getString(R.string.classification)),
+                arrayOf(ShelfFragment::class.java, NovelClassfyFragment::class.java)
         )
         shelfTab.setupWithViewPager(shelfViewPager)
     }
@@ -61,7 +61,7 @@ class ShelfActivity : AppCompatActivity() {
             if (it == null || shelfTab.height == 0) return@Observer
             if (it[1] == RecyclerView.SCROLL_STATE_IDLE) {
                 mtoolbar.animate().translationY(-it[0].toFloat()).setDuration(300L)
-                    .setInterpolator(DecelerateInterpolator(2F)).start()
+                        .setInterpolator(DecelerateInterpolator(2F)).start()
             } else {
                 mtoolbar.translationY = -it[0].toFloat()
             }
@@ -78,7 +78,7 @@ class ShelfActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.search_button -> {
                 val intent = Intent(this, SearchActivity::class.java)
-                    .apply { putExtra("themeid", themeId) }
+                        .apply { putExtra("themeid", themeId) }
                 startActivity(intent)
                 viewModel.refreshType = 2
                 true
@@ -118,9 +118,9 @@ class ShelfActivity : AppCompatActivity() {
      * 请求权限的结果
      */
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
     ) {
         if (requestCode == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {

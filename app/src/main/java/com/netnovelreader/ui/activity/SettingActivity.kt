@@ -35,16 +35,16 @@ class SettingActivity : AppCompatActivity() {
 
     fun initView() {
         DataBindingUtil.setContentView<ActivitySettingBinding>(this, R.layout.activity_setting)
-            .apply { viewModel = settingViewModel }
+                .apply { viewModel = settingViewModel }
         if (intent.getIntExtra("type", 0) == 0) {
             setSupportActionBar(settingToolbar.apply { title = getString(R.string.settings) })
             fragmentManager.beginTransaction().add(R.id.settingFrameLayout, SettingFragment())
-                .commit()
+                    .commit()
         } else {
             setSupportActionBar(settingToolbar.apply { title = getString(R.string.edit_site) })
             siteListFg = SitePreferenceFragment()
             supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, siteListFg, SP)
-                .commit()
+                    .commit()
         }
     }
 
@@ -52,7 +52,7 @@ class SettingActivity : AppCompatActivity() {
         settingViewModel.exitCommand.observe(this, Observer {
             if (siteListFg?.isHidden == true) {
                 supportFragmentManager.beginTransaction().hide(siteEditorFg).show(siteListFg)
-                    .commit()
+                        .commit()
                 menuItemList.forEach { it.isVisible = true }
             } else {
                 finish()
@@ -95,15 +95,15 @@ class SettingActivity : AppCompatActivity() {
 
     fun showDialog() {
         AlertDialog.Builder(this)
-            .setTitle(getString(R.string.whenconflict))
-            .setPositiveButton(R.string.no, { _, _ ->
-                launch { settingViewModel.updatePreference(false) }
-            })
-            .setNegativeButton(R.string.yes_local, { _, _ ->
-                launch { settingViewModel.updatePreference(true) }
-            })
-            .setNeutralButton(R.string.cancel, null)
-            .create()
-            .show()
+                .setTitle(getString(R.string.whenconflict))
+                .setPositiveButton(R.string.no, { _, _ ->
+                    launch { settingViewModel.updatePreference(false) }
+                })
+                .setNegativeButton(R.string.yes_local, { _, _ ->
+                    launch { settingViewModel.updatePreference(true) }
+                })
+                .setNeutralButton(R.string.cancel, null)
+                .create()
+                .show()
     }
 }

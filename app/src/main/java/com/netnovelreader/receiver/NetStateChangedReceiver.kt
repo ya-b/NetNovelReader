@@ -11,8 +11,8 @@ class NetStateChangedReceiver(val block: () -> Unit) : BroadcastReceiver() {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val isAvailable = cm.activeNetworkInfo?.isAvailable ?: false
         if (isAvailable && !stateTemp) {
-            stateTemp = isAvailable
             block()
         }
+        stateTemp = isAvailable
     }
 }

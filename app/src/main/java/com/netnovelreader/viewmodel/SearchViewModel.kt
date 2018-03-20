@@ -22,11 +22,10 @@ import com.netnovelreader.common.IMAGENAME
 import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.common.replace
-import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.SitePreferenceBean
+import com.netnovelreader.data.CatalogManager
+import com.netnovelreader.data.local.ReaderDbManager
+import com.netnovelreader.data.local.db.SitePreferenceBean
 import com.netnovelreader.data.network.ApiManager
-import com.netnovelreader.data.network.CatalogCache
-import com.netnovelreader.data.network.DownloadCatalog
 import com.netnovelreader.data.network.SearchBook
 import kotlinx.coroutines.experimental.launch
 import java.io.*
@@ -56,23 +55,23 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     private val colorArray by lazy {
         //搜索热词标签的背景颜色(从中选取)
         listOf(
-            Color.parseColor("#627176"),
-            Color.parseColor("#3fa5d9"),
-            Color.parseColor("#E25754"),
-            Color.parseColor("#ea6f5a"),
-            Color.parseColor("#42c02e"),
-            Color.parseColor("#2C2C2C"),
-            Color.parseColor("#617c99"),
-            Color.parseColor("#7E57C2"),
-            Color.parseColor("#ff874d"),
-            Color.parseColor("#f44336"),
-            Color.parseColor("#18FFFF"),
-            Color.parseColor("#0f0900"),
-            Color.parseColor("#795548"),
-            Color.parseColor("#FF6F00"),
-            Color.parseColor("#69F0AE"),
-            Color.parseColor("#651FFF"),
-            Color.parseColor("#F06292")
+                Color.parseColor("#627176"),
+                Color.parseColor("#3fa5d9"),
+                Color.parseColor("#E25754"),
+                Color.parseColor("#ea6f5a"),
+                Color.parseColor("#42c02e"),
+                Color.parseColor("#2C2C2C"),
+                Color.parseColor("#617c99"),
+                Color.parseColor("#7E57C2"),
+                Color.parseColor("#ff874d"),
+                Color.parseColor("#f44336"),
+                Color.parseColor("#18FFFF"),
+                Color.parseColor("#0f0900"),
+                Color.parseColor("#795548"),
+                Color.parseColor("#FF6F00"),
+                Color.parseColor("#69F0AE"),
+                Color.parseColor("#651FFF"),
+                Color.parseColor("#F06292")
         )
     }
 
@@ -116,22 +115,22 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         if (queryTextTemp == bookname && System.currentTimeMillis() - queryTimeTemp < 1000) return
         if (bookname.isNullOrEmpty()) return
         resultList.clear()
-        CatalogCache.clearCache()
+        CatalogManager.clearCache()
         val list = ReaderDbManager.sitePreferenceDao().getAll().apply { isLoading.set(!isEmpty()) }
         list.forEach {
-                launch(threadPool) {
-                    // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
-                    try {
-                        //查询所有搜索站点设置，然后逐个搜索
-                        searchBookFromSite(bookname!!, it, chapterName)
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    }
-                    if (isLoading.get() && (resultList.isNotEmpty() || list.last() == it)) isLoading.set(
-                        false
-                    )
+            launch(threadPool) {
+                // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
+                try {
+                    //查询所有搜索站点设置，然后逐个搜索
+                    searchBookFromSite(bookname!!, it, chapterName)
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
+                if (isLoading.get() && (resultList.isNotEmpty() || list.last() == it)) isLoading.set(
+                        false
+                )
             }
+        }
         queryTextTemp = bookname!!
         queryTimeTemp = System.currentTimeMillis()
     }
@@ -153,7 +152,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
             delChapterAfterSrc(bookname, chapterName!!)
         }
         try {
-            DownloadCatalog(bookname, catalogUrl).download()
+            CatalogManager.download(bookname, catalogUrl)
             toastMessage.value = this@SearchViewModel.context.getString(R.string.catalog_finish)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -163,18 +162,18 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         }
     }
 
-    fun showDialogTask(itemDetail: SearchBean) {
+    fun showDialog(itemDetail: SearchBean) {
         showDialogCommand.value = itemDetail
     }
 
-    fun detailClickTask(itemText: String) {
+    fun detailClick(itemText: String) {
         launch {
             val novelIntroduce = try {
                 ApiManager.zhuiShuShenQi.searchBook(itemText).execute().body()
-                    ?.books
-                    ?.firstOrNull { it.title == itemText }
-                    ?._id
-                    ?.let { ApiManager.zhuiShuShenQi.getNovelIntroduce(it).execute().body() }
+                        ?.books
+                        ?.firstOrNull { it.title == itemText }
+                        ?._id
+                        ?.let { ApiManager.zhuiShuShenQi.getNovelIntroduce(it).execute().body() }
             } catch (e: IOException) {
                 null
             }
@@ -186,12 +185,12 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         }
     }
 
-    fun activityExitTask() {
+    fun exit() {
         exitCommand.call()
     }
 
     //将搜索热词填充到searchView上但是不触发网络请求
-    fun selectHotWordTask(word: String) {
+    fun selectHotWord(word: String) {
         selectHotWordEvent.value = word
     }
 
@@ -202,12 +201,12 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         val suggestCursor = MatrixCursor(arrayOf("text", "_id"))
         try {
             ApiManager.zhuiShuShenQi.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
-                .execute().body()
+                    .execute().body()
         } catch (e: IOException) {
             null
         }?.keywords?.filter { it.tag == "bookname" }
-            ?.map { it.text }?.toHashSet()
-            ?.forEachIndexed { index, s -> suggestCursor.addRow(arrayOf(s, index)) }
+                ?.map { it.text }?.toHashSet()
+                ?.forEachIndexed { index, s -> suggestCursor.addRow(arrayOf(s, index)) }
         return suggestCursor
     }
 
@@ -217,16 +216,16 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
      */
     @Throws(IOException::class)
     private fun searchBookFromSite(
-        bookname: String,
-        siteinfo: SitePreferenceBean,
-        chapterName: String?
+            bookname: String,
+            siteinfo: SitePreferenceBean,
+            chapterName: String?
     ) {
         //result[1]==bookname,result[0]==catalogurl
         val result = SearchBook().search(bookname, siteinfo).takeIf { it[1].isNotEmpty() } ?: return
-        CatalogCache.addCatalog(result[1], result[0])
-        val bean = CatalogCache.getCatalog(result[0])
-            ?.takeIf { !it.url.get().isNullOrEmpty() }
-            ?.takeIf { !it.latestChapter.get().isNullOrEmpty() }
+        CatalogManager.addToCache(result[1], result[0])
+        val bean = CatalogManager.getFromCache(result[0])
+                ?.takeIf { !it.url.get().isNullOrEmpty() }
+                ?.takeIf { !it.latestChapter.get().isNullOrEmpty() }
                 ?: return
         if (chapterName.isNullOrEmpty() || bean.catalogMap.containsKey(chapterName)) {
             resultList.add(bean)
@@ -238,14 +237,14 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     private fun delChapterAfterSrc(tableName: String, chapterName: String) {
         val list = ReaderDbManager.delChapterAfterSrc(tableName, chapterName)
         File(ReaderApplication.dirPath + "/$tableName") //目录
-            .takeIf { it.exists() }             //是否存在
-            ?.let { list.map { item -> File(it, item) }.forEach { it.delete() } }
+                .takeIf { it.exists() }             //是否存在
+                ?.let { list.map { item -> File(it, item) }.forEach { it.delete() } }
     }
 
     //下载书籍图片，搜索时调用(搜索时顺便获取图片链接)
     private fun downloadImage(bookname: String, imageUrl: String) {
         val path =
-            "${ReaderApplication.dirPath}/tmp".apply { File(this).mkdirs() } + "/$bookname.png"
+                "${ReaderApplication.dirPath}/tmp".apply { File(this).mkdirs() } + "/$bookname.png"
         if (imageUrl != "" && !File(path).exists()) {
             //  Logger.i("步骤2.从网站下载图书【$bookname】的图片,URL为【$imageUrl】")
             ApiManager.novelReader.getPicture(imageUrl).enqueueCall {
@@ -255,7 +254,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
                     inputStream = it?.byteStream()
                     outputStream = FileOutputStream(path)
                     BitmapFactory.decodeStream(inputStream)
-                        .compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                            .compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                     outputStream.flush()
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -269,15 +268,15 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
 
     private fun saveBookImage(bookname: String) {
         File(ReaderApplication.dirPath + "/tmp")
-            .takeIf { it.exists() }
-            ?.listFiles { _, name -> name.startsWith(bookname) }
-            ?.firstOrNull()
-            ?.copyTo(
-                File(
-                    "${ReaderApplication.dirPath}/$bookname".apply { File(this).mkdirs() },
-                    IMAGENAME
-                ),
-                true
-            )
+                .takeIf { it.exists() }
+                ?.listFiles { _, name -> name.startsWith(bookname) }
+                ?.firstOrNull()
+                ?.copyTo(
+                        File(
+                                "${ReaderApplication.dirPath}/$bookname".apply { File(this).mkdirs() },
+                                IMAGENAME
+                        ),
+                        true
+                )
     }
 }

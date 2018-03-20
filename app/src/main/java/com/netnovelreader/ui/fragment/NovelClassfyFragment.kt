@@ -16,7 +16,7 @@ import com.netnovelreader.common.GridDivider
 import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.init
 import com.netnovelreader.common.obtainViewModel
-import com.netnovelreader.data.PreferenceManager
+import com.netnovelreader.data.local.PreferenceManager
 import com.netnovelreader.databinding.FragmentNovelClassfyBinding
 import com.netnovelreader.ui.activity.CategoryDetailActivity
 import com.netnovelreader.ui.activity.ShelfActivity
@@ -29,30 +29,25 @@ class NovelClassfyFragment : Fragment() {
     private var tabHeight = 0
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         viewModel = activity?.obtainViewModel(ShelfViewModel::class.java)
-        binding =
-                DataBindingUtil.inflate(inflater, R.layout.fragment_novel_classfy, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_novel_classfy, container, false)
         binding.viewModel = viewModel
-        binding.maleRecyclerView.init(
-            RecyclerAdapter(viewModel?.resultList, R.layout.item_novel_classfy, viewModel, false),
-            GridDivider(activity!!.baseContext, 1, Color.GRAY),
-            object : GridLayoutManager(activity, 3, RecyclerView.VERTICAL, false) {
-                override fun supportsPredictiveItemAnimations(): Boolean {
-                    return false
+        binding.classfyView.init(
+                RecyclerAdapter(viewModel?.resultList, R.layout.item_novel_classfy, viewModel, false),
+                GridDivider(activity!!.baseContext, 1, Color.GRAY),
+                object : GridLayoutManager(activity, 3, RecyclerView.VERTICAL, false) {
+                    override fun supportsPredictiveItemAnimations(): Boolean {
+                        return false
+                    }
                 }
-            }
         )
         viewModel?.getNovelCatalogData()
         initLiveData()
-        (activity as ShelfActivity).shelfTab.run {
-            post {
-                tabHeight = height
-                binding.malelabel.setPadding(0, tabHeight, 0, 0)
-            }
-        }
+        val tab = (activity as ShelfActivity).shelfTab
+        tab.post { binding.classfyView.setPadding(0, tab.height.also { tabHeight = it }, 0, 0) }
         return binding.root
     }
 
@@ -74,6 +69,6 @@ class NovelClassfyFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.maleRecyclerView.adapter = null
+        binding.classfyView.adapter = null
     }
 }

@@ -6,8 +6,8 @@ import android.databinding.ObservableArrayList
 import com.netnovelreader.bean.ObservableSiteBean
 import com.netnovelreader.bean.RuleType
 import com.netnovelreader.common.ReaderLiveData
-import com.netnovelreader.data.db.ReaderDbManager
-import com.netnovelreader.data.db.SitePreferenceBean
+import com.netnovelreader.data.local.ReaderDbManager
+import com.netnovelreader.data.local.db.SitePreferenceBean
 import com.netnovelreader.data.network.ApiManager
 import kotlinx.coroutines.experimental.launch
 import java.io.IOException
@@ -24,29 +24,29 @@ class SettingViewModel(context: Application) : AndroidViewModel(context) {
     fun showSiteList() {
         siteList.clear()
         ReaderDbManager.sitePreferenceDao()
-            .getAll()
-            .let { siteList.addAll(it) }
+                .getAll()
+                .let { siteList.addAll(it) }
     }
 
     //启动SiteEditorFragment
-    fun editSiteTask(hostName: String) = launch {
+    fun editSite(hostName: String) = launch {
         siteList.first { it.hostname == hostName }
-            .also { edittingSite!!.add(it) }
+                .also { edittingSite!!.add(it) }
         editSiteCommand.value = hostName
     }
 
     //diaog删除对话框
-    fun askDeleteSiteTask(hostName: String): Boolean {
+    fun askDeleteSite(hostName: String): Boolean {
         deleteAlertCommand.value = hostName
         return true
     }
 
     fun deleteSite(hostName: String) {
         siteList.first { it.hostname == hostName }
-            .also {
-                siteList.remove(it)
-                ReaderDbManager.sitePreferenceDao().delete(it)
-            }
+                .also {
+                    siteList.remove(it)
+                    ReaderDbManager.sitePreferenceDao().delete(it)
+                }
     }
 
     fun editTextTask(type: RuleType): Boolean {
@@ -78,18 +78,18 @@ class SettingViewModel(context: Application) : AndroidViewModel(context) {
             null
         } ?: return
         val updateList =
-            if (!perferLocal) {
-                response.arr
-            } else {
-                response.arr.filter { serverRule ->
-                    siteList.none { it.hostname == serverRule.hostname }
+                if (!perferLocal) {
+                    response.arr
+                } else {
+                    response.arr.filter { serverRule ->
+                        siteList.none { it.hostname == serverRule.hostname }
+                    }
                 }
-            }
         ReaderDbManager.sitePreferenceDao().insert(*updateList.toTypedArray())
         showSiteList()
     }
 
-    fun exitTask() {
+    fun exit() {
         exitCommand.call()
     }
 }

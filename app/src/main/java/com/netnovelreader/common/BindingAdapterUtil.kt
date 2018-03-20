@@ -15,8 +15,8 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication
+import com.netnovelreader.data.BookCoverCache
 import com.netnovelreader.data.network.ApiManager
-import com.netnovelreader.data.network.BookCoverCache
 import com.netnovelreader.interfaces.OnProgressChangedListener
 import com.netnovelreader.interfaces.OnScrolledListener
 import com.netnovelreader.interfaces.OnTabUnselectedListener
@@ -29,7 +29,7 @@ import java.io.IOException
 fun loadUrl(imageView: ImageView, url: String?) = runBlocking {
     url ?: return@runBlocking
     val realUrl =
-        if (!url.contains("http://")) "http://statics.zhuishushenqi.com$url-covers" else url
+            if (!url.contains("http://")) "http://statics.zhuishushenqi.com$url-covers" else url
     val bitmap = BookCoverCache.get(url)
             ?: async(ReaderApplication.threadPool) {
                 try {
@@ -49,7 +49,7 @@ fun loadUrl(imageView: ImageView, url: String?) = runBlocking {
 fun setSrc(imageView: ImageView, bitmap: Bitmap?) {
     if (bitmap == null) {
         imageView.setImageDrawable(
-            ContextCompat.getDrawable(imageView.context, R.drawable.cover_default)
+                ContextCompat.getDrawable(imageView.context, R.drawable.cover_default)
         )
     } else {
         imageView.setImageBitmap(bitmap)
@@ -103,8 +103,8 @@ fun setOnPageChange(readerView: ReaderView, onPageChange: ReaderView.OnPageChang
 
 @BindingAdapter("android:onRefresh")
 fun setRefershListener(
-    refreshLayout: SwipeRefreshLayout,
-    listener: SwipeRefreshLayout.OnRefreshListener?
+        refreshLayout: SwipeRefreshLayout,
+        listener: SwipeRefreshLayout.OnRefreshListener?
 ) {
     refreshLayout.setOnRefreshListener(listener)
 }
@@ -120,14 +120,14 @@ fun setOnScrolledListener(recyclerView: RecyclerView, listener: OnScrolledListen
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val i =
-                (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             listener.onScrolled(dy, RecyclerView.SCROLL_STATE_DRAGGING, i == 1)
         }
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             val i =
-                (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             listener.onScrolled(0, newState, i == 1)
         }
     })
