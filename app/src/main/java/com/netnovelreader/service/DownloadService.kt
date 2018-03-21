@@ -56,7 +56,7 @@ class DownloadService : IntentService {
         val catalogUrl = intent?.getStringExtra("catalogurl")
         if (intent == null || tableName.isNullOrEmpty() || catalogUrl.isNullOrEmpty()) return
         getList(tableName!!, catalogUrl!!).apply { max = this.size }.forEach { bean ->
-            val downloader = ChapterManager.getInstance(0, tableName, 0)
+            val downloader = ChapterManager(0, tableName, 0)
             //获取要下载的章节列表
             launch(threadPool) {
                 try {

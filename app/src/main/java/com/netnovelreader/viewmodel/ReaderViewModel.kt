@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
+import android.util.Log
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication
 import com.netnovelreader.bean.ChapterChangeType
@@ -157,7 +158,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
             maxChapterNum = ReaderDbManager.getChapterCount(bookName).takeIf { it != 0 } ?: return@async 0
             val record = async { getRecord() }.await()
             chapterNum.set(record[0])
-            chapterCache = ChapterManager.getInstance(CACHE_NUM, bookName, maxChapterNum)
+            chapterCache = ChapterManager(CACHE_NUM, bookName, maxChapterNum)
             launch { getChapter(ChapterChangeType.BY_CATALOG, null) }
             record[1]
         }.await()

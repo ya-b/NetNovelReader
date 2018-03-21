@@ -19,7 +19,7 @@ import kotlinx.android.synthetic.main.activity_setting.*
 import kotlinx.coroutines.experimental.launch
 
 class SettingActivity : AppCompatActivity() {
-    val settingViewModel by lazy { obtainViewModel(SettingViewModel::class.java) }
+    private lateinit var settingViewModel: SettingViewModel
     val SP = "SitePreferenceFragment"
     val SE = "SiteEditorFragment"
     var siteListFg: Fragment? = null
@@ -28,6 +28,7 @@ class SettingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        settingViewModel = obtainViewModel(SettingViewModel::class.java)
         setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         initView()
         initLiveData()

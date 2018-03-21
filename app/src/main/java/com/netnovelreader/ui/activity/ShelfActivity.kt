@@ -26,7 +26,7 @@ import kotlinx.coroutines.experimental.launch
 
 class ShelfActivity : AppCompatActivity() {
 
-    val viewModel by lazy { obtainViewModel(ShelfViewModel::class.java) }
+    private lateinit var viewModel: ShelfViewModel
     private var hasPermission = false
     private var themeId = 0
     private var translationTemp = 0F
@@ -34,6 +34,7 @@ class ShelfActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         themeId = PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
+        viewModel =  obtainViewModel(com.netnovelreader.viewmodel.ShelfViewModel::class.java)
         hasPermission = checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (!hasPermission) {
             requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)

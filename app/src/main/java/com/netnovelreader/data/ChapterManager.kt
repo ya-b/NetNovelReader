@@ -17,14 +17,6 @@ import java.util.*
 class ChapterManager(val cacheNum: Int, val tableName: String, var maxChapterNum: Int) {
     companion object {
         const val FILENOTFOUND = "            "
-        private var instance: ChapterManager? = null
-        fun getInstance(cacheNum: Int, tableName: String, maxChapterNum: Int): ChapterManager {
-            instance ?: synchronized(ChapterManager::class) {
-                instance
-                        ?: ChapterManager(cacheNum, tableName, maxChapterNum).also { instance = it }
-            }
-            return instance!!
-        }
     }
 
     /**

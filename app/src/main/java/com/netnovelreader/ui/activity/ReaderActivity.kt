@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.WindowManager
 import com.netnovelreader.R
 import com.netnovelreader.common.RecyclerAdapter
@@ -23,7 +24,7 @@ import kotlinx.coroutines.experimental.launch
 
 
 class ReaderActivity : AppCompatActivity() {
-    private val viewModel by lazy { obtainViewModel(ReaderViewModel::class.java) }
+    private lateinit var viewModel: ReaderViewModel
     private var dialog: AlertDialog? = null
     private var netStateReceiver: NetStateChangedReceiver? = null
     private var catalogView: RecyclerView? = null
@@ -31,12 +32,12 @@ class ReaderActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         if (PreferenceManager.isFullScreen(this)) {
             window.setFlags(
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
         setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         super.onCreate(savedInstanceState)
+        viewModel = obtainViewModel(ReaderViewModel::class.java)
         initView()
         launch { initData() }
         initLiveData()

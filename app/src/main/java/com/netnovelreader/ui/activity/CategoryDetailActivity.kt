@@ -20,11 +20,12 @@ import kotlinx.android.synthetic.main.activity_catalog_detail.*
  * 作者： YangJunQuan   2018-2-11.
  */
 class CategoryDetailActivity : AppCompatActivity() {
-    private val viewModel by lazy { obtainViewModel(CategoryDetailViewModel::class.java) }
+    private lateinit var viewModel: CategoryDetailViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         super.onCreate(savedInstanceState)
+        viewModel = obtainViewModel(CategoryDetailViewModel::class.java)
         initView()
         initLiveData()
     }

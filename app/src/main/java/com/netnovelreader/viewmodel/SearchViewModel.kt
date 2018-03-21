@@ -25,7 +25,7 @@ import com.netnovelreader.common.replace
 import com.netnovelreader.data.CatalogManager
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.local.db.SitePreferenceBean
-import com.netnovelreader.data.network.ApiManager
+import com.netnovelreader.data.network.WebService
 import com.netnovelreader.data.network.SearchBook
 import kotlinx.coroutines.experimental.launch
 import java.io.*
@@ -81,7 +81,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         hotWordsTemp ?: run {
             hotWordsTemp =
                     try {
-                        ApiManager.zhuiShuShenQi.hotWords().execute().body()?.searchHotWords
+                        WebService.zhuiShuShenQi.hotWords().execute().body()?.searchHotWords
                     } catch (e: IOException) {
                         null
                     }.let {
@@ -169,11 +169,11 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     fun detailClick(itemText: String) {
         launch {
             val novelIntroduce = try {
-                ApiManager.zhuiShuShenQi.searchBook(itemText).execute().body()
+                WebService.zhuiShuShenQi.searchBook(itemText).execute().body()
                         ?.books
                         ?.firstOrNull { it.title == itemText }
                         ?._id
-                        ?.let { ApiManager.zhuiShuShenQi.getNovelIntroduce(it).execute().body() }
+                        ?.let { WebService.zhuiShuShenQi.getNovelIntroduce(it).execute().body() }
             } catch (e: IOException) {
                 null
             }
@@ -200,7 +200,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     private fun searchBookSuggest(queryText: String): Cursor? {
         val suggestCursor = MatrixCursor(arrayOf("text", "_id"))
         try {
-            ApiManager.zhuiShuShenQi.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
+            WebService.zhuiShuShenQi.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
                     .execute().body()
         } catch (e: IOException) {
             null
@@ -247,7 +247,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
                 "${ReaderApplication.dirPath}/tmp".apply { File(this).mkdirs() } + "/$bookname.png"
         if (imageUrl != "" && !File(path).exists()) {
             //  Logger.i("步骤2.从网站下载图书【$bookname】的图片,URL为【$imageUrl】")
-            ApiManager.novelReader.getPicture(imageUrl).enqueueCall {
+            WebService.novelReader.getPicture(imageUrl).enqueueCall {
                 var inputStream: InputStream? = null
                 var outputStream: OutputStream? = null
                 try {

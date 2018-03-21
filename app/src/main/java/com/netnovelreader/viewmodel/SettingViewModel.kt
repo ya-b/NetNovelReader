@@ -8,7 +8,7 @@ import com.netnovelreader.bean.RuleType
 import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.local.db.SitePreferenceBean
-import com.netnovelreader.data.network.ApiManager
+import com.netnovelreader.data.network.WebService
 import kotlinx.coroutines.experimental.launch
 import java.io.IOException
 
@@ -73,7 +73,7 @@ class SettingViewModel(context: Application) : AndroidViewModel(context) {
     //与手动修改的规则冲突时
     fun updatePreference(perferLocal: Boolean) {
         val response = try {
-            ApiManager.novelReader.getSitePreference().execute().body()
+            WebService.novelReader.getSitePreference().execute().body()
         } catch (e: IOException) {
             null
         } ?: return

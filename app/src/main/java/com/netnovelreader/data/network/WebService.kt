@@ -11,11 +11,11 @@ import retrofit2.http.Query
 import retrofit2.http.Url
 
 /**
- * 文件： ApiManager
+ * 文件： WebService
  * 描述：
  * 作者： YangJunQuan   2018/2/5.
  */
-object ApiManager {
+object WebService {
     val zhuiShuShenQi: ZhuiShuShenQiAPI by lazy {
         Retrofit.Builder()
                 .baseUrl("http://api.zhuishushenqi.com")

@@ -16,7 +16,7 @@ import com.netnovelreader.common.replace
 import com.netnovelreader.data.CatalogManager
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.local.db.ShelfBean
-import com.netnovelreader.data.network.ApiManager
+import com.netnovelreader.data.network.WebService
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import java.io.File
@@ -80,6 +80,7 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     //打开阅读页面
     fun readBook(bookname: String) {
         if (bookname.isEmpty()) return
+        readBookCommand.value = bookname
         launch(threadPool) {
             //取消书籍更新标志,设为最近阅读
             val latestRead = ReaderDbManager.shelfDao().getLatestReaded() ?: 0
@@ -88,7 +89,6 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
             )
         }
         bookList.firstOrNull { it.bookname.get() == bookname }?.isUpdate?.set("")
-        readBookCommand.value = bookname
     }
 
     //询问是否删除小说，[onLongClick]调用
@@ -157,7 +157,7 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     //分类数据加载
     fun getNovelCatalogData() {
         isLoading.set(true)
-        ApiManager.zhuiShuShenQi.getNovelCatalogData().enqueueCall {
+        WebService.zhuiShuShenQi.getNovelCatalogData().enqueueCall {
             it?.male?.let { resultList.addAll(it) }
             if (resultList.isNotEmpty()) isLoading.set(false)
         }

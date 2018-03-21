@@ -32,7 +32,7 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 
 class SearchActivity : AppCompatActivity() {
-    val searchViewModel by lazy { obtainViewModel(SearchViewModel::class.java) }
+    private lateinit var searchViewModel: SearchViewModel
     private var job: Job? = null
     private var suggestCursor: Cursor? = null
     private var chapterName: String? = null
@@ -40,6 +40,7 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         super.onCreate(savedInstanceState)
+        searchViewModel = obtainViewModel(SearchViewModel::class.java)
         initView()
         initData()
         initLiveData()

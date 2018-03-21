@@ -9,7 +9,7 @@ import com.netnovelreader.bean.NovelIntroduce
 import com.netnovelreader.bean.NovelList
 import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.common.enqueueCall
-import com.netnovelreader.data.network.ApiManager
+import com.netnovelreader.data.network.WebService
 import kotlinx.coroutines.experimental.launch
 import java.io.IOException
 
@@ -24,7 +24,7 @@ class CategoryDetailViewModel(context: Application) : AndroidViewModel(context) 
     fun getNovelIntroduce(id: String) {
         launch {
             val novelIntroduce = try {
-                ApiManager.zhuiShuShenQi.getNovelIntroduce(id).execute().body()
+                WebService.zhuiShuShenQi.getNovelIntroduce(id).execute().body()
             } catch (e: IOException) {
                 null
             }
@@ -40,7 +40,7 @@ class CategoryDetailViewModel(context: Application) : AndroidViewModel(context) 
         val booklist = getBookList(type, major)
         if (booklist.isNotEmpty()) return
         isLoading.set(true)
-        ApiManager.zhuiShuShenQi.seachBookListByTypeAndMajor(type = type, major = major)
+        WebService.zhuiShuShenQi.seachBookListByTypeAndMajor(type = type, major = major)
                 .enqueueCall {
                     it ?: return@enqueueCall
                     isLoading.set(false)

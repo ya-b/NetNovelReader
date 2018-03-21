@@ -16,7 +16,7 @@ import android.widget.SeekBar
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication
 import com.netnovelreader.data.BookCoverCache
-import com.netnovelreader.data.network.ApiManager
+import com.netnovelreader.data.network.WebService
 import com.netnovelreader.interfaces.OnProgressChangedListener
 import com.netnovelreader.interfaces.OnScrolledListener
 import com.netnovelreader.interfaces.OnTabUnselectedListener
@@ -33,7 +33,7 @@ fun loadUrl(imageView: ImageView, url: String?) = runBlocking {
     val bitmap = BookCoverCache.get(url)
             ?: async(ReaderApplication.threadPool) {
                 try {
-                    ApiManager.novelReader.getPicture(realUrl).execute().body()
+                    WebService.novelReader.getPicture(realUrl).execute().body()
                 } catch (e: IOException) {
                     null
                 }.let {
