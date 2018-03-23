@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="itemDetail"
+            type="com.netnovelreader.bean.BookInfo" />
+
+        <variable
+            name="clickEvent"
+            type="com.netnovelreader.viewmodel.ShelfViewModel" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:orientation="vertical" />
+
+</layout>
