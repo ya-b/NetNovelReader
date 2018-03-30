@@ -12,13 +12,13 @@ interface PageListener {
     }
 
     @FunctionalInterface
-    interface NextChapter {
-        fun nextChapter()
+    interface OnNextChapter {
+        fun onNextChapter()
     }
 
     @FunctionalInterface
-    interface PreviousChapter {
-        fun previousChapter()
+    interface OnPreviousChapter {
+        fun onPreviousChapter()
     }
 
     @FunctionalInterface

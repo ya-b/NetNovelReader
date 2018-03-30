@@ -85,7 +85,7 @@ object CatalogManager {
         count = 0
         memoryCache.clear()
         try {
-            File("${ReaderApplication.dirPath}/tmp").listFiles().forEach { it.delete() }
+            File("${ReaderApplication.dirPath}/tmp").takeIf { it.exists() }?.listFiles()?.forEach { it.delete() }
         } catch (e: IOException) {
             e.printStackTrace()
         }

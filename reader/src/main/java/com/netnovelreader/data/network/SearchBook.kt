@@ -34,8 +34,7 @@ class SearchBook {
     @Throws(IOException::class)
     fun search(bookname: String, sitePreference: SitePreferenceBean): Array<String> {
         return sitePreference.run {
-            val url =
-                    searchUrl.replace(ReaderDatabase.SEARCH_NAME, URLEncoder.encode(bookname, charset))
+            val url = searchUrl.replace(ReaderDatabase.SEARCH_NAME, URLEncoder.encode(bookname, charset))
 
             if (redirectFileld == "") {
                 search(url, noRedirectUrl, noRedirectName, noRedirectImage)

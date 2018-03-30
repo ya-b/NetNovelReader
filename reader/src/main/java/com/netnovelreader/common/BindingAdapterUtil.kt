@@ -57,6 +57,11 @@ fun setSrc(imageView: ImageView, bitmap: Bitmap?) {
     }
 }
 
+@BindingAdapter("android:backgroundColor")
+fun setBackground(pageView: PageView, background: Int){
+    pageView.backgroundcolor = background
+}
+
 @BindingAdapter("android:textFontType")
 fun setFontType(readerView: PageView, typeface: Typeface?) {
     readerView.txtFontType = typeface
@@ -72,14 +77,14 @@ fun setOnCenterClick(readerView: PageView, onCenterClick: PageListener.OnCenterC
     readerView.onCenterClick = onCenterClick
 }
 
-@BindingAdapter("android:nextChapter")
-fun setNextChapter(readerView: PageView, nextChapter: PageListener.NextChapter?) {
-    readerView.nextChapter = nextChapter
+@BindingAdapter("android:onNextChapter")
+fun setNextChapter(readerView: PageView, onNextChapter: PageListener.OnNextChapter?) {
+    readerView.onNextChapter = onNextChapter
 }
 
-@BindingAdapter("android:previousChapter")
-fun setPreviousChapter(readerView: PageView, previousChapter: PageListener.PreviousChapter?) {
-    readerView.previousChapter = previousChapter
+@BindingAdapter("android:onPreviousChapter")
+fun setPreviousChapter(readerView: PageView, onPreviousChapter: PageListener.OnPreviousChapter?) {
+    readerView.onPreviousChapter = onPreviousChapter
 }
 
 @BindingAdapter("android:onPageChange")
@@ -105,15 +110,13 @@ fun setOnScrolledListener(recyclerView: RecyclerView, listener: OnScrolledListen
     recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            val i =
-                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            val i = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             listener.onScrolled(dy, RecyclerView.SCROLL_STATE_DRAGGING, i == 1)
         }
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            val i =
-                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            val i = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             listener.onScrolled(0, newState, i == 1)
         }
     })

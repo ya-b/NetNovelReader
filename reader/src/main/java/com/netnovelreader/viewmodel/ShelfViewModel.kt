@@ -152,6 +152,7 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
     fun openCatalogDetail(name: String?) {
         name ?: return
         openCatalogDetailCommand.value = name
+        refreshType = 2
     }
 
     //分类数据加载

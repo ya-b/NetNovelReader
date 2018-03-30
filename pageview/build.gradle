@@ -4,19 +4,21 @@ apply plugin: 'kotlin-android'
 android {
     compileSdkVersion buildconfig.compileSdk
 
-
     defaultConfig {
         minSdkVersion buildconfig.minSdk
         targetSdkVersion buildconfig.targetSdk
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
-        release {
+        debug {
             minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -26,12 +28,4 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation deps.kotlin.stdlib
-    implementation deps.kotlin.coroutines.core
-    implementation deps.kotlin.coroutines.android
-}
-
-kotlin {
-  experimental {
-    coroutines 'enable'
-  }
 }

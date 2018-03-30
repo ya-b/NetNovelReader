@@ -1,11 +1,5 @@
 package com.flowlayout;
 
-/**
- * 文件： FlowLayout
- * 描述：
- * 作者： YangJunQuan   2018/2/5.
- */
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;

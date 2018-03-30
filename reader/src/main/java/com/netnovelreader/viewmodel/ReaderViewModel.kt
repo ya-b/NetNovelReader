@@ -10,8 +10,8 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication
-import com.netnovelreader.bean.ChapterChangeType
 import com.netnovelreader.bean.CatalogItem
+import com.netnovelreader.bean.ChapterChangeType
 import com.netnovelreader.common.NotDeleteNum
 import com.netnovelreader.common.PREFERENCE_NAME
 import com.netnovelreader.common.ReaderLiveData
@@ -30,9 +30,9 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 
 class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
-    val catalog by lazy { ObservableArrayList<CatalogItem>() }               //目录
-    val text by lazy { ObservableField<String>("") }                   //一页显示的内容
-    val fontSize by lazy { ObservableFloat(55f) }                      //字体大小
+    val catalog by lazy { ObservableArrayList<CatalogItem>() }              //目录
+    val text by lazy { ObservableField<String>("") }                  //一页显示的内容
+    val fontSize by lazy { ObservableFloat(55f) }                     //字体大小
     val fontType by lazy { ObservableField<Typeface>(Typeface.DEFAULT) }    //字体
     val fontColor by lazy { ObservableInt(Color.BLACK) }                    //字体颜色
     val backgroundColor by lazy { ObservableInt(R.color.read_font_default) }//背景颜色
@@ -51,7 +51,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     val changeSourceCommand by lazy { ReaderLiveData<String>() }             //换源下载
     val brightnessCommand by lazy { ReaderLiveData<Float>() }                //亮度
     @Volatile
-    var chapterName = ObservableField<String>("")                         //章节名
+    var chapterName = ""                         //章节名
     var chapterNum = AtomicInteger(0)              //章节数
     @Volatile
     var maxChapterNum = 0                                    //最大章节数
@@ -82,8 +82,8 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         isLoading.set(true)
         launch { if (chapterNum.get() == maxChapterNum) updateCatalog() }
         val str = chapterCache!!.getChapter(chapterNum.get(), false)
-        text.set(str.substring(str.indexOf("|") + 1))
-        this.chapterName.set(str.substring(0, str.indexOf("|")))
+        this.chapterName = str.substring(0, str.indexOf("|"))
+        text.set(str)
         if (str.substring(str.indexOf("|") + 1) == ChapterManager.FILENOTFOUND) {
             downloadJob?.cancel()
             downloadJob = launch { downloadAndShow() }
@@ -163,12 +163,12 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
         }.await()
     }
 
-    fun nextChapter() {
+    fun onNextChapter() {
         isViewShow.forEach { it.value.set(false) }
         launch { getChapter(ChapterChangeType.NEXT, null) }
     }
 
-    fun previousChapter() {
+    fun onPreviousChapter() {
         isViewShow.forEach { it.value.set(false) }
         launch { getChapter(ChapterChangeType.PREVIOUS, null) }
     }
@@ -184,7 +184,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
 
     fun changeSource() {
         isViewShow.forEach { it.value.set(false) }
-        changeSourceCommand.value = chapterName.get()
+        changeSourceCommand.value = chapterName
     }
 
     fun footViewClickEvent(which: String) = runBlocking {

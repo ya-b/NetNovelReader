@@ -7,8 +7,10 @@ import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.network.ParseHtml
 import kotlinx.coroutines.experimental.launch
+import okio.Okio
 import java.io.File
 import java.io.IOException
+import java.nio.charset.Charset
 import java.util.*
 
 /**
@@ -62,11 +64,15 @@ class ChapterManager(val cacheNum: Int, val tableName: String, var maxChapterNum
         sb.append(chapterName + "|")
         val chapterFile =
                 File("${ReaderApplication.dirPath}/$tableName/${chapterName.replace("/", SLASH)}")
-        sb.append(
-                if (chapterFile.exists() && chapterFile.isFile) chapterFile.readText()
-                else if (!enableDownload) FILENOTFOUND
-                else getFromNet("${ReaderApplication.dirPath}/$tableName", chapterName)
-        )
+        if (chapterFile.exists()) {
+            val buffer = Okio.buffer(Okio.source(chapterFile))
+            sb.append(buffer.readUtf8())
+            buffer.close()
+        } else if (!enableDownload) {
+            sb.append(FILENOTFOUND)
+        } else {
+            sb.append(getFromNet("${ReaderApplication.dirPath}/$tableName", chapterName))
+        }
         return sb.toString()
     }
 
@@ -87,13 +93,14 @@ class ChapterManager(val cacheNum: Int, val tableName: String, var maxChapterNum
 
 
     @Throws(IOException::class)
-    fun writToDisk(bean: ChapterBean, chapterText: String): Int {
-        if (chapterText.isEmpty()) return 1
-        File(bean.dir, bean.chapterName.replace("/", SLASH)).takeIf { !it.exists() }?.run {
-            writeText(chapterText)
-            ReaderDbManager.setChapterFinish(bean.bookname, bean.chapterName, bean.chapterUrl, 1)
-        }
-        return 1
+    fun writToDisk(bean: ChapterBean, chapterText: String) {
+        if (chapterText.isEmpty()) return
+        val file = File(bean.dir, bean.chapterName.replace("/", SLASH))
+        if (file.exists()) return
+        val bufferSink = Okio.buffer(Okio.sink(file))
+        bufferSink.writeString(chapterText, Charset.forName("utf-8")).flush()
+        bufferSink.close()
+        ReaderDbManager.setChapterFinish(bean.bookname, bean.chapterName, bean.chapterUrl, 1)
     }
 
     @Throws(IOException::class)

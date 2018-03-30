@@ -60,9 +60,8 @@ class SearchActivity : AppCompatActivity() {
 
     fun initData() {
         chapterName = intent.getStringExtra("chapterName")
-        searchViewModel.isChangeSource.set(chapterName != null)
+        searchViewModel.isChangeSource.set(!chapterName.isNullOrEmpty())
         if (chapterName != null) {
-            searchViewModel.isChangeSource.set(true)
             val bookname = intent.getStringExtra("bookname")
             searchViewText.text = bookname
             job = launch {
@@ -102,10 +101,9 @@ class SearchActivity : AppCompatActivity() {
                             chapterName,
                             which
                     )
+                    this@SearchActivity.setResult(100)
+                    finish()
                 }
-
-                this@SearchActivity.setResult(100)
-                finish()
             }
             AlertDialog.Builder(this@SearchActivity).setTitle(getString(R.string.downloadAllBook))
                     .setPositiveButton(R.string.yes, listener)

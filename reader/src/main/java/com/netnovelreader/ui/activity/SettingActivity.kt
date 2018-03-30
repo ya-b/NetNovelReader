@@ -27,9 +27,9 @@ class SettingActivity : AppCompatActivity() {
     var menuItemList = ArrayList<MenuItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         super.onCreate(savedInstanceState)
         settingViewModel = obtainViewModel(SettingViewModel::class.java)
-        setTheme(intent.getIntExtra("themeid", R.style.AppThemeBlack))
         initView()
         initLiveData()
     }

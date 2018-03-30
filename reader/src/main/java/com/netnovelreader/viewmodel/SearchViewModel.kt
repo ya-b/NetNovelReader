@@ -25,8 +25,8 @@ import com.netnovelreader.common.replace
 import com.netnovelreader.data.CatalogManager
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.local.db.SitePreferenceBean
-import com.netnovelreader.data.network.WebService
 import com.netnovelreader.data.network.SearchBook
+import com.netnovelreader.data.network.WebService
 import kotlinx.coroutines.experimental.launch
 import java.io.*
 
@@ -144,9 +144,7 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
      * @return "1"表示只下载目录页， "tableName"表示下载全书， "0"表示下载目录失败
      */
     fun downloadBook(bookname: String, catalogUrl: String, chapterName: String?, which: Int) {
-        launch {
-            ReaderDbManager.shelfDao().replace(bookName = bookname, downloadUrl = catalogUrl)
-        }
+        launch { ReaderDbManager.shelfDao().replace(bookName = bookname, downloadUrl = catalogUrl) }
         saveBookImage(bookname)
         if (isChangeSource.get()) {
             delChapterAfterSrc(bookname, chapterName!!)

@@ -5,8 +5,8 @@ buildscript {
         'compileSdk': 27
     ]
     ext.versions = [
-        'kotlin': '1.2.21',
-        'gradle': '3.2.0-alpha07',
+        'kotlin': '1.2.31',
+        'gradle': '3.2.0-alpha08',
         'supportLibrary': '27.1.0',
         'coroutines': '0.22.5',
         'retrofit': '2.4.0',
@@ -55,7 +55,7 @@ buildscript {
             ]
         ],
         'kotlin': [
-            'stdlib': "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}",
+            'stdlib': "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
             'coroutines': [
                 'core': "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}",
                 'android': "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}"
@@ -75,6 +75,7 @@ buildscript {
         'jsoup': 'org.jsoup:jsoup:1.11.2'
     ]
     repositories {
+    	mavenCentral()
         google()
         jcenter()
     }
@@ -86,6 +87,7 @@ buildscript {
 
 allprojects {
     repositories {
+    	mavenCentral()
         google()
         jcenter()
     }

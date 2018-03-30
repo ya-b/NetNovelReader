@@ -30,6 +30,10 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
+    <style name="AppTheme.SettingsTheme" parent="AppTheme.PopupOverlay">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
+
     <style name="function_button_style_1">
         <item name="android:background">@android:color/transparent</item>
         <item name="android:textSize">13sp</item>
