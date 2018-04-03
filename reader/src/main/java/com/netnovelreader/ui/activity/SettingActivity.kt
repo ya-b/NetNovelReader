@@ -74,7 +74,7 @@ class SettingActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        settingViewModel.exitCommand.call()
+        settingViewModel.exitCommand.value = null
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

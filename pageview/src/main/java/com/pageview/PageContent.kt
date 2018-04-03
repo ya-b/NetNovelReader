@@ -10,10 +10,6 @@ import android.view.View
 import java.text.SimpleDateFormat
 import java.util.*
 
-/**
- * Created by yangbo on 2018/1/19.
- */
-
 class PageContent : View {
     private val mPaint by lazy {
         Paint().apply {

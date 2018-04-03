@@ -7,9 +7,6 @@ import android.graphics.drawable.Drawable
 import android.support.v7.widget.RecyclerView
 import android.view.View
 
-/**
- * Created by yangbo on 18-1-20.
- */
 class NovelItemDecoration(val context: Context) : RecyclerView.ItemDecoration() {
     private val attrs = IntArray(1) { android.R.attr.listDivider }
     private val diverHeight = 3

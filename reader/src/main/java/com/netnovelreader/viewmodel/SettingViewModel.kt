@@ -2,10 +2,10 @@ package com.netnovelreader.viewmodel
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.MutableLiveData
 import android.databinding.ObservableArrayList
 import com.netnovelreader.bean.ObservableSiteRule
 import com.netnovelreader.bean.RuleType
-import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.local.db.SitePreferenceBean
 import com.netnovelreader.data.network.WebService
@@ -15,10 +15,10 @@ import java.io.IOException
 class SettingViewModel(context: Application) : AndroidViewModel(context) {
     val siteList = ObservableArrayList<SitePreferenceBean>()         //显示的列表
     var edittingSite: ObservableSiteRule? = ObservableSiteRule()                            //编辑的站点
-    val exitCommand = ReaderLiveData<Void>()                         //点击返回图标
-    val editSiteCommand = ReaderLiveData<String>()                   //编辑站点
-    val editTextCommand = ReaderLiveData<String>()                   //编辑具体规则
-    val deleteAlertCommand = ReaderLiveData<String>()                //删除对话框
+    val exitCommand = MutableLiveData<Void>()                         //点击返回图标
+    val editSiteCommand = MutableLiveData<String>()                   //编辑站点
+    val editTextCommand = MutableLiveData<String>()                   //编辑具体规则
+    val deleteAlertCommand = MutableLiveData<String>()                //删除对话框
     var typeTmp: RuleType? = null
 
     fun showSiteList() {
@@ -49,7 +49,7 @@ class SettingViewModel(context: Application) : AndroidViewModel(context) {
                 }
     }
 
-    fun editTextTask(type: RuleType): Boolean {
+    fun editText(type: RuleType): Boolean {
         typeTmp = type
         editTextCommand.value = edittingSite!!.get(type).get() ?: ""
         return true
@@ -90,6 +90,6 @@ class SettingViewModel(context: Application) : AndroidViewModel(context) {
     }
 
     fun exit() {
-        exitCommand.call()
+        exitCommand.value = null
     }
 }

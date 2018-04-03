@@ -14,11 +14,6 @@ import kotlinx.coroutines.experimental.launch
 import java.lang.ref.WeakReference
 
 /**
- * Created by yangbo on 18-1-12.
- */
-
-
-/**
  * @isoccupiedFirst 表示第一个item用空view占用（添加到第一个的动画）
  */
 class RecyclerAdapter<T, E>(
@@ -62,14 +57,13 @@ class RecyclerAdapter<T, E>(
         }
     }
 
-    override fun getItemCount(): Int {
-        itemDetails ?: return 0
-        return if (isoccupiedFirst) itemDetails.size + 1 else itemDetails.size
-    }
+    override fun getItemCount(): Int =
+            if (itemDetails == null) 0
+            else if (isoccupiedFirst) itemDetails.size + 1
+            else itemDetails.size
 
-    override fun getItemViewType(position: Int): Int {
-        return if (isoccupiedFirst && position == 0) -1 else 0
-    }
+    override fun getItemViewType(position: Int): Int =
+            if (isoccupiedFirst && position == 0) -1 else 0
 
     class BindingViewHolder<in T, in E>(private val binding: ViewDataBinding?) :
             RecyclerView.ViewHolder(binding?.root) {

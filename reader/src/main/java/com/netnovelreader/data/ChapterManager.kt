@@ -2,7 +2,7 @@ package com.netnovelreader.data
 
 import com.netnovelreader.ReaderApplication
 import com.netnovelreader.bean.ChapterBean
-import com.netnovelreader.common.SLASH
+import com.netnovelreader.common.replaceSlash
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.network.ParseHtml
@@ -13,9 +13,6 @@ import java.io.IOException
 import java.nio.charset.Charset
 import java.util.*
 
-/**
- * Created by yangbo on 18-1-15.
- */
 class ChapterManager(val cacheNum: Int, val tableName: String, var maxChapterNum: Int) {
     companion object {
         const val FILENOTFOUND = "            "
@@ -63,7 +60,7 @@ class ChapterManager(val cacheNum: Int, val tableName: String, var maxChapterNum
         val chapterName = ReaderDbManager.getChapterName(tableName, chapterNum)
         sb.append(chapterName + "|")
         val chapterFile =
-                File("${ReaderApplication.dirPath}/$tableName/${chapterName.replace("/", SLASH)}")
+                File("${ReaderApplication.dirPath}/$tableName/${chapterName.replaceSlash()}")
         if (chapterFile.exists()) {
             val buffer = Okio.buffer(Okio.source(chapterFile))
             sb.append(buffer.readUtf8())
@@ -95,7 +92,7 @@ class ChapterManager(val cacheNum: Int, val tableName: String, var maxChapterNum
     @Throws(IOException::class)
     fun writToDisk(bean: ChapterBean, chapterText: String) {
         if (chapterText.isEmpty()) return
-        val file = File(bean.dir, bean.chapterName.replace("/", SLASH))
+        val file = File(bean.dir, bean.chapterName.replaceSlash())
         if (file.exists()) return
         val bufferSink = Okio.buffer(Okio.sink(file))
         bufferSink.writeString(chapterText, Charset.forName("utf-8")).flush()

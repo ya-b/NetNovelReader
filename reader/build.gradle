@@ -65,18 +65,18 @@ dependencies {
     implementation deps.retrofit.converter_gson
     debugImplementation deps.leakcanary.debug
     releaseImplementation deps.leakcanary.release
-    testImplementation deps.android.test.junit
-    testImplementation deps.android.test.mockito
-    testImplementation deps.android.test.hamcrest
-    androidTestImplementation deps.android.test.runner
-    androidTestImplementation deps.android.test.rules
-    androidTestImplementation deps.android.test.junit
-    androidTestImplementation deps.android.test.mockito_android
-    androidTestImplementation deps.android.test.espresso.core
-    androidTestImplementation deps.android.test.espresso.contrib
-    androidTestImplementation deps.android.test.espresso.intents
-    androidTestImplementation deps.android.test.espresso.idling_concurrent
-    androidTestImplementation deps.android.test.espresso.idling_resource
+    testImplementation deps.test.junit
+    testImplementation deps.test.mockito
+    testImplementation deps.test.hamcrest
+    androidTestImplementation deps.test.runner
+    androidTestImplementation deps.test.rules
+    androidTestImplementation deps.test.junit
+    androidTestImplementation deps.test.mockito_android
+    androidTestImplementation deps.test.espresso.core
+    androidTestImplementation deps.test.espresso.contrib
+    androidTestImplementation deps.test.espresso.intents
+    androidTestImplementation deps.test.espresso.idling_concurrent
+    androidTestImplementation deps.test.espresso.idling_resource
 }
 
 kotlin {

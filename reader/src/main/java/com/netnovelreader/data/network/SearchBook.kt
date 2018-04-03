@@ -1,6 +1,7 @@
 package com.netnovelreader.data.network
 
-import com.netnovelreader.common.*
+import com.netnovelreader.common.fixUrl
+import com.netnovelreader.common.getHeaders
 import com.netnovelreader.data.local.db.ReaderDatabase
 import com.netnovelreader.data.local.db.SitePreferenceBean
 import org.jsoup.Jsoup
@@ -11,9 +12,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-/**
- * Created by yangbo on 18-1-14.
- */
 class SearchBook {
 
     /**
@@ -49,7 +47,7 @@ class SearchBook {
     fun search(url: String, catalogSelector: String, nameSelector: String, imageSelector: String)
             : Array<String> {
         val doc = try {
-            Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
+            Jsoup.connect(url).headers(getHeaders(url)).timeout(3000).get()
         } catch (e: UncheckedIOException) {
             return Array(3) { "" }
         }
@@ -63,14 +61,12 @@ class SearchBook {
     fun redirectToCatalog(url: String, redirectFileld: String): String {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.instanceFollowRedirects = false
-        conn.setRequestProperty(
-                "accept",
-                "indicator/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-        )
-        conn.setRequestProperty("user-agent", UA)
-        conn.setRequestProperty("Upgrade-Insecure-Requests", "1")
+        val header = getHeaders(url)
+        conn.setRequestProperty("accept", header["accept"])
+        conn.setRequestProperty("user-agent", header["user-agent"])
+        conn.setRequestProperty("Upgrade-Insecure-Requests", header["Upgrade-Insecure-Requests"])
         conn.setRequestProperty("Connection", "keep-alive")
-        conn.setRequestProperty("Referer", "http://www.${url2Hostname(url)}/")
+        conn.setRequestProperty("Referer", header["Referer"])
         var redirect_url = conn.getHeaderField(redirectFileld)
         if (redirect_url != null) {
             redirect_url = fixUrl(url, redirect_url)

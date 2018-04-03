@@ -16,6 +16,7 @@ class CatalogPagerAdapter(fm: FragmentManager, major: String) : FragmentPagerAda
 
     private val typeList = arrayOf("hot", "new", "reputation", "over")
     private val mMajor = major
+
     override fun getItem(position: Int): Fragment {
         val fragment = NovelListFragment()
         val bundle = Bundle()
@@ -26,15 +27,9 @@ class CatalogPagerAdapter(fm: FragmentManager, major: String) : FragmentPagerAda
     }
 
 
-    override fun getCount(): Int {
-        return typeList.size
-    }
+    override fun getCount(): Int = typeList.size
 
-    override fun getPageTitle(position: Int): CharSequence? {
-        return translateTile(typeList[position])
-    }
-
-    private fun translateTile(origin: String? = null) = when (origin) {
+    override fun getPageTitle(position: Int): CharSequence? = when (typeList[position]) {
         "hot" -> "热门"
         "new" -> "新书"
         "reputation" -> "好评"

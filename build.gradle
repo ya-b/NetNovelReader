@@ -6,11 +6,14 @@ buildscript {
     ]
     ext.versions = [
         'kotlin': '1.2.31',
+        'kotlin_html': '0.6.9',
         'gradle': '3.2.0-alpha08',
         'supportLibrary': '27.1.0',
         'coroutines': '0.22.5',
         'retrofit': '2.4.0',
         'archLifecycle': "1.1.0",
+
+        'tomcatVersion': '8.5.24',
 
         'junit': '4.12',
         'mockito': '2.8.47',
@@ -37,21 +40,6 @@ buildscript {
                 'v4': "com.android.support:support-v4:${versions.supportLibrary}",
                 'constraint_layout': 'com.android.support.constraint:constraint-layout:1.0.2',
                 'preference': "com.android.support:preference-v7:${versions.supportLibrary}"
-            ],
-            'test': [
-                'junit': "junit:junit:${versions.junit}",
-                'mockito': "org.mockito:mockito-core:${versions.mockito}",
-                'mockito_android': "org.mockito:mockito-android:${versions.mockito}",
-                'hamcrest': "org.hamcrest:hamcrest-all:${versions.hamcrest}",
-                'runner': "com.android.support.test:runner:${versions.runner}",
-                'rules': "com.android.support.test:rules:${versions.rules}",
-                'espresso':[
-                    'core': "com.android.support.test.espresso:espresso-core:${versions.espresso}",
-                    'contrib': "com.android.support.test.espresso:espresso-contrib:${versions.espresso}",
-                    'intents': "com.android.support.test.espresso:espresso-intents:${versions.espresso}",
-                    'idling_concurrent': "com.android.support.test.espresso.idling:idling-concurrent:${versions.espresso}",
-                    'idling_resource': "com.android.support.test.espresso:espresso-idling-resource:${versions.espresso}",
-                ]
             ]
         ],
         'kotlin': [
@@ -59,6 +47,11 @@ buildscript {
             'coroutines': [
                 'core': "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}",
                 'android': "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}"
+            ],
+            'js': "org.jetbrains.kotlin:kotlin-stdlib-js:${versions.kotlin}",
+            'html': [
+                'jvm': "org.jetbrains.kotlinx:kotlinx-html-jvm:${versions.kotlin_html}",
+                'js': "org.jetbrains.kotlinx:kotlinx-html-js:${versions.kotlin_html}"
             ]
         ],
         'retrofit': [
@@ -72,7 +65,27 @@ buildscript {
         ],
         'databinding_compiler': "com.android.databinding:compiler:${versions.gradle}",
         'circleimageview': 'de.hdodenhof:circleimageview:2.2.0',
-        'jsoup': 'org.jsoup:jsoup:1.11.2'
+        'jsoup': 'org.jsoup:jsoup:1.11.2',
+        'javax': [
+                'javaee_api': 'javax:javaee-api:7.0'
+        ],
+        'commons_dbutils': "commons-dbutils:commons-dbutils:1.7",
+        'mariadb_client': "org.mariadb.jdbc:mariadb-java-client:2.2.3",
+        'test': [
+                'junit': "junit:junit:${versions.junit}",
+                'mockito': "org.mockito:mockito-core:${versions.mockito}",
+                'mockito_android': "org.mockito:mockito-android:${versions.mockito}",
+                'hamcrest': "org.hamcrest:hamcrest-all:${versions.hamcrest}",
+                'runner': "com.android.support.test:runner:${versions.runner}",
+                'rules': "com.android.support.test:rules:${versions.rules}",
+                'espresso':[
+                        'core': "com.android.support.test.espresso:espresso-core:${versions.espresso}",
+                        'contrib': "com.android.support.test.espresso:espresso-contrib:${versions.espresso}",
+                        'intents': "com.android.support.test.espresso:espresso-intents:${versions.espresso}",
+                        'idling_concurrent': "com.android.support.test.espresso.idling:idling-concurrent:${versions.espresso}",
+                        'idling_resource': "com.android.support.test.espresso:espresso-idling-resource:${versions.espresso}",
+                ]
+        ]
     ]
     repositories {
     	mavenCentral()
@@ -82,6 +95,7 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:${versions.gradle}"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
+        classpath 'com.bmuschko:gradle-tomcat-plugin:2.4.2'
     }
 }
 

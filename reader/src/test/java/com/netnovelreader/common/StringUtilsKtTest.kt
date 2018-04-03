@@ -3,10 +3,7 @@ package com.netnovelreader.common
 import org.junit.Assert
 import org.junit.Test
 
-/**
- * Created by yangbo on 18-1-31.
- */
-class UtilsKtTest {
+class StringUtilsKtTest {
 
     @Test
     fun url2Hostname() {

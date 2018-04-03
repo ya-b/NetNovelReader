@@ -8,16 +8,11 @@ class PagerAdapter(
         fm: FragmentManager,
         val titles: Array<String>,
         val types: Array<Class<out Fragment>>
-) :
-        FragmentPagerAdapter(fm) {
+) : FragmentPagerAdapter(fm) {
 
-    override fun getCount(): Int {
-        return titles.size
-    }
+    override fun getCount(): Int = titles.size
 
     override fun getItem(position: Int): Fragment = types[position].getConstructor().newInstance()
 
-    override fun getPageTitle(position: Int): CharSequence? {
-        return titles[position]
-    }
+    override fun getPageTitle(position: Int): CharSequence? = titles[position]
 }

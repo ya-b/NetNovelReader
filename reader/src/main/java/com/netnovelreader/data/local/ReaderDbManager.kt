@@ -6,9 +6,6 @@ import android.arch.persistence.room.RoomDatabase
 import com.netnovelreader.ReaderApplication
 import com.netnovelreader.data.local.db.ReaderDatabase
 
-/**
- * Created by yangbo on 17-12-24.
- */
 object ReaderDbManager {
     private var roomDb: ReaderDatabase? = null
     private val dbName = "netnovelreader.db"

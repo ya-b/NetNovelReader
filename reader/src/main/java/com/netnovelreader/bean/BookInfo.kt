@@ -4,13 +4,9 @@ import android.databinding.ObservableField
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.netnovelreader.ReaderApplication
-import com.netnovelreader.common.IMAGENAME
 import com.netnovelreader.data.local.db.ShelfBean
 import java.io.File
 
-/**
- * Created by yangbo on 18-1-12.
- */
 data class BookInfo(
         var bookname: ObservableField<String>,
         var latestChapter: ObservableField<String>,
@@ -29,7 +25,7 @@ data class BookInfo(
 
         //书架将要显示的书籍封面图片
         private fun getBitmap(bookname: String): Bitmap? =
-                File("${ReaderApplication.dirPath}/$bookname", IMAGENAME)
+                File("${ReaderApplication.dirPath}/$bookname", "$bookname.png")
                         .takeIf { it.exists() }
                         ?.let { BitmapFactory.decodeFile(it.path) }
     }

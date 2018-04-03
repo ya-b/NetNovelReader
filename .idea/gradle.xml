@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/flowlayout" />
             <option value="$PROJECT_DIR$/pageview" />
             <option value="$PROJECT_DIR$/reader" />
+            <option value="$PROJECT_DIR$/server" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

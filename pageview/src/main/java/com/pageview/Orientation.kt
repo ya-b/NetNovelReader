@@ -1,6 +1,6 @@
 package com.pageview
 
-enum class Orientation(i: Int) {
-    vertical(0),
-    horizontal(1)
+enum class Orientation {
+    vertical,
+    horizontal
 }

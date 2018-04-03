@@ -2,7 +2,7 @@ package com.netnovelreader.viewmodel
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
-import android.content.Context
+import android.arch.lifecycle.MutableLiveData
 import android.databinding.*
 import android.graphics.Color
 import android.graphics.Typeface
@@ -12,9 +12,6 @@ import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication
 import com.netnovelreader.bean.CatalogItem
 import com.netnovelreader.bean.ChapterChangeType
-import com.netnovelreader.common.NotDeleteNum
-import com.netnovelreader.common.PREFERENCE_NAME
-import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.common.replace
 import com.netnovelreader.data.CatalogManager
 import com.netnovelreader.data.ChapterManager
@@ -24,10 +21,6 @@ import kotlinx.coroutines.experimental.*
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
-
-/**
- * Created by yangbo on 18-1-13.Typeface
- */
 
 class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     val catalog by lazy { ObservableArrayList<CatalogItem>() }              //目录
@@ -47,9 +40,9 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     val fontSizeSelected = List(5) { ObservableBoolean(false) }   //字体大小设置Button是否选中
     val fontTypeSelected = List(5) { ObservableBoolean(false) }   //字体大小设置Button是否选中
     val isLoading by lazy { ObservableBoolean(true) }                  //是否显示加载进度条
-    val showDialogCommand by lazy { ReaderLiveData<Boolean>() }              //显示目录
-    val changeSourceCommand by lazy { ReaderLiveData<String>() }             //换源下载
-    val brightnessCommand by lazy { ReaderLiveData<Float>() }                //亮度
+    val showDialogCommand by lazy { MutableLiveData<Boolean>() }              //显示目录
+    val changeSourceCommand by lazy { MutableLiveData<String>() }             //换源下载
+    val brightnessCommand by lazy { MutableLiveData<Float>() }                //亮度
     @Volatile
     var chapterName = ""                         //章节名
     var chapterNum = AtomicInteger(0)              //章节数
@@ -58,15 +51,14 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
     var chapterCache: ChapterManager? = null
     lateinit var bookName: String                            //书名
     var CACHE_NUM: Int = 0                                   //缓存后面章节数量
+    val NotDeleteNum = 3                                     //自动删除已读章节，但保留最近3章
     var downloadJob: Job? = null
     var changeFontSizeFlag = false
 
     fun start() {
-        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).apply {
-            fontSizeChangeEvent(getFloat(context.getString(R.string.fontSizeKey), 50f))
-            fontTypeChangeEvent(getString(context.getString(R.string.fontTypeKey), "default"))
-            backgroundChangeEvent(getInt(context.getString(R.string.backgroundColorKey), 0))
-        }
+        fontSizeChangeEvent(PreferenceManager.getFontSize(context))
+        fontTypeChangeEvent(PreferenceManager.getFontType(context))
+        backgroundChangeEvent(PreferenceManager.getBackground(context))
     }
 
     //获取章节内容
@@ -236,8 +228,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
                 fontSizeSelected.filterIndexed { i, _ -> i != 2 }.forEach { it.set(false) }
             }
         }
-        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-                .putFloat(context.getString(R.string.fontSizeKey), float).apply()
+        PreferenceManager.saveFontSize(context, float)
     }
 
     fun fontTypeChangeEvent(which: String) {
@@ -268,8 +259,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
                 fontTypeSelected.filterIndexed { i, _ -> i != 0 }.forEach { it.set(false) }
             }
         }
-        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-                .putString(context.getString(R.string.fontTypeKey), which).apply()
+        PreferenceManager.saveFontType(context, which)
     }
 
     fun backgroundChangeEvent(which: Int) {
@@ -296,8 +286,7 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
                 backgroundColor.set(ContextCompat.getColor(context, R.color.read_bg_default))
             }
         }
-        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
-                .putInt(context.getString(R.string.backgroundColorKey), which).apply()
+        PreferenceManager.saveBackground(context, which)
     }
 
     fun changeBrightness(progress: Int) {

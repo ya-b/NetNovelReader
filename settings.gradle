@@ -1,1 +1,1 @@
-include ':reader', ':flowlayout', ':pageview'
+include ':reader', ':flowlayout', ':pageview', ':server'

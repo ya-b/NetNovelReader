@@ -120,7 +120,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        searchViewModel.exitCommand.call()
+        searchViewModel.exitCommand.value = null
     }
 
     inner class QueryListener : android.support.v7.widget.SearchView.OnQueryTextListener {

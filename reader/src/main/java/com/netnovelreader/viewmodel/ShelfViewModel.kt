@@ -2,6 +2,7 @@ package com.netnovelreader.viewmodel
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.MutableLiveData
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableBoolean
 import android.support.v7.widget.RecyclerView
@@ -10,7 +11,6 @@ import com.netnovelreader.ReaderApplication
 import com.netnovelreader.ReaderApplication.Companion.threadPool
 import com.netnovelreader.bean.BookInfo
 import com.netnovelreader.bean.NovelCatalog
-import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.common.replace
 import com.netnovelreader.data.CatalogManager
@@ -22,19 +22,16 @@ import kotlinx.coroutines.experimental.launch
 import java.io.File
 import java.io.IOException
 
-/**
- * Created by yangbo on 2018/1/12.
- */
 class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
 
     val bookList = ObservableArrayList<BookInfo>()             //书架fragment小说列表
     var resultList = ObservableArrayList<NovelCatalog.Bean>()  //分类fragment列表
     var isLoading = ObservableBoolean(true)
-    val readBookCommand = ReaderLiveData<String>()             //阅读小说，打开readerActivity
-    val showDialogCommand = ReaderLiveData<String>()           //长按删除，询问对话框
-    val stopRefershCommand = ReaderLiveData<Void>()            //下拉刷新后，取消刷新进度条
-    val openCatalogDetailCommand = ReaderLiveData<String>()    //点击分类item
-    val translateCommand = ReaderLiveData<Array<Int>>()        //移动（显示||隐藏）tablayout
+    val readBookCommand = MutableLiveData<String>()             //阅读小说，打开readerActivity
+    val showDialogCommand = MutableLiveData<String>()           //长按删除，询问对话框
+    val stopRefershCommand = MutableLiveData<Void>()            //下拉刷新后，取消刷新进度条
+    val openCatalogDetailCommand = MutableLiveData<String>()    //点击分类item
+    val translateCommand = MutableLiveData<Array<Int>>()        //移动（显示||隐藏）tablayout
     var tabHeight = 0         //activity ,tab的高度
     var job: Job? = null
     var dbBookList: List<ShelfBean>? = null
@@ -99,7 +96,7 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
 
     //检查书籍是否有更新
     fun updateBooks(isFromNet: Boolean) {
-        stopRefershCommand.call()
+        stopRefershCommand.value = null
         System.currentTimeMillis().takeIf { it - updateTime > 2000 }?.also { updateTime = it }
                 ?: return
         job?.cancel()

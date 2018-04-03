@@ -3,6 +3,7 @@ package com.netnovelreader.viewmodel
 import android.app.Application
 import android.app.Dialog
 import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.MutableLiveData
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.databinding.ObservableArrayList
@@ -18,8 +19,6 @@ import com.netnovelreader.ReaderApplication.Companion.threadPool
 import com.netnovelreader.bean.NovelIntroduce
 import com.netnovelreader.bean.SearchBookResult
 import com.netnovelreader.bean.SearchHotWord
-import com.netnovelreader.common.IMAGENAME
-import com.netnovelreader.common.ReaderLiveData
 import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.common.replace
 import com.netnovelreader.data.CatalogManager
@@ -28,11 +27,10 @@ import com.netnovelreader.data.local.db.SitePreferenceBean
 import com.netnovelreader.data.network.SearchBook
 import com.netnovelreader.data.network.WebService
 import kotlinx.coroutines.experimental.launch
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
-/**
- * Created by yangbo on 18-1-14.
- */
 class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     val resultList by lazy { ObservableArrayList<SearchBookResult>() }            //搜索结果
     val isChangeSource by lazy { ObservableBoolean(false) }           //是否显示搜索建议
@@ -44,12 +42,12 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     val colors by lazy { Array(10) { ObservableInt(colorArray[0]) } }  //显示的搜索热词颜色
     var hotWordsTemp: List<SearchHotWord.SearchHotWordsBean>? = null        //搜索热词(从中选取)
     val isLoading by lazy { ObservableBoolean(false) }                //loadingbar是否显示
-    val toastMessage by lazy { ReaderLiveData<String>() }                   //toast要显示的信息
-    val exitCommand by lazy { ReaderLiveData<Void>() }                      //点击返回图标
-    val selectHotWordEvent by lazy { ReaderLiveData<String>() }             //选中的hotword的text
-    val showBookDetailCommand by lazy { ReaderLiveData<NovelIntroduce>() }  //点击的item的所需数据NovelIntroduce
-    val showDialogCommand by lazy { ReaderLiveData<SearchBookResult>() }          //点击的item的下载事件所需数据
-    val downLoadChapterCommand by lazy { ReaderLiveData<Array<String>>() }  //启动[DownloadService]的ExtraString
+    val toastMessage by lazy { MutableLiveData<String>() }                   //toast要显示的信息
+    val exitCommand by lazy { MutableLiveData<Void>() }                      //点击返回图标
+    val selectHotWordEvent by lazy { MutableLiveData<String>() }             //选中的hotword的text
+    val showBookDetailCommand by lazy { MutableLiveData<NovelIntroduce>() }  //点击的item的所需数据NovelIntroduce
+    val showDialogCommand by lazy { MutableLiveData<SearchBookResult>() }          //点击的item的下载事件所需数据
+    val downLoadChapterCommand by lazy { MutableLiveData<Array<String>>() }  //启动[DownloadService]的ExtraString
     private var queryTextTemp = ""
     private var queryTimeTemp = System.currentTimeMillis()
     private val colorArray by lazy {
@@ -151,12 +149,12 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         }
         try {
             CatalogManager.download(bookname, catalogUrl)
-            toastMessage.value = this@SearchViewModel.context.getString(R.string.catalog_finish)
+            toastMessage.postValue(this@SearchViewModel.context.getString(R.string.catalog_finish))
         } catch (e: IOException) {
             e.printStackTrace()
         }
         if (which == Dialog.BUTTON_POSITIVE) {
-            downLoadChapterCommand.value = arrayOf(bookname, catalogUrl)
+            downLoadChapterCommand.postValue(arrayOf(bookname, catalogUrl))
         }
     }
 
@@ -176,15 +174,15 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
                 null
             }
             if (novelIntroduce == null) {
-                toastMessage.value = "没有搜索到相关小说的介绍"
+                toastMessage.postValue("没有搜索到相关小说的介绍")
             } else {
-                showBookDetailCommand.value = novelIntroduce
+                showBookDetailCommand.postValue(novelIntroduce)
             }
         }
     }
 
     fun exit() {
-        exitCommand.call()
+        exitCommand.value = null
     }
 
     //将搜索热词填充到searchView上但是不触发网络请求
@@ -246,35 +244,29 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
         if (imageUrl != "" && !File(path).exists()) {
             //  Logger.i("步骤2.从网站下载图书【$bookname】的图片,URL为【$imageUrl】")
             WebService.novelReader.getPicture(imageUrl).enqueueCall {
-                var inputStream: InputStream? = null
-                var outputStream: OutputStream? = null
                 try {
-                    inputStream = it?.byteStream()
-                    outputStream = FileOutputStream(path)
-                    BitmapFactory.decodeStream(inputStream)
-                            .compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                    outputStream.flush()
-                } catch (e: IOException) {
+                    it?.byteStream().use { ins ->
+                        FileOutputStream(path).use { os ->
+                            BitmapFactory.decodeStream(ins).compress(Bitmap.CompressFormat.PNG, 100, os)
+                            os.flush()
+                        }
+                    }
+                }catch (e: IOException){
                     e.printStackTrace()
-                } finally {
-                    inputStream?.close()
-                    outputStream?.close()
                 }
             }
         }
     }
 
     private fun saveBookImage(bookname: String) {
+        val destFile = File(
+                "${ReaderApplication.dirPath}/$bookname".apply { File(this).mkdirs() },
+                "$bookname.png"
+        )
         File(ReaderApplication.dirPath + "/tmp")
                 .takeIf { it.exists() }
                 ?.listFiles { _, name -> name.startsWith(bookname) }
                 ?.firstOrNull()
-                ?.copyTo(
-                        File(
-                                "${ReaderApplication.dirPath}/$bookname".apply { File(this).mkdirs() },
-                                IMAGENAME
-                        ),
-                        true
-                )
+                ?.copyTo(destFile,true)
     }
 }

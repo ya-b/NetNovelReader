@@ -30,7 +30,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.hostname)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.hostname)}"
                 android:singleLine="true"
                 android:text="@{@string/hostname + `:`}"
                 android:textSize="16sp" />
@@ -43,7 +43,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.hostname)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.hostname)}"
                 android:singleLine="true"
                 android:text="@{siteBean.hostname??``}"
                 android:textSize="16sp" />
@@ -58,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.catalogSelector)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.catalogSelector)}"
                 android:singleLine="true"
                 android:text="@{@string/catalogSelector + `:`}"
                 android:textSize="16sp" />
@@ -71,7 +71,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.catalogSelector)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.catalogSelector)}"
                 android:singleLine="true"
                 android:text="@{siteBean.catalogSelector??``}"
                 android:textSize="16sp" />
@@ -86,7 +86,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.chapterSelector)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.chapterSelector)}"
                 android:singleLine="true"
                 android:text="@{@string/chapterSelector + `:`}"
                 android:textSize="16sp" />
@@ -99,7 +99,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.chapterSelector)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.chapterSelector)}"
                 android:singleLine="true"
                 android:text="@{siteBean.chapterSelector??``}"
                 android:textSize="16sp" />
@@ -114,7 +114,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.catalogFilter)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.catalogFilter)}"
                 android:singleLine="true"
                 android:text="@{@string/catalogFilter + `:`}"
                 android:textSize="16sp" />
@@ -127,7 +127,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.catalogFilter)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.catalogFilter)}"
                 android:singleLine="true"
                 android:text="@{siteBean.catalogFilter??``}"
                 android:textSize="16sp" />
@@ -142,7 +142,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.chapterFilter)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.chapterFilter)}"
                 android:singleLine="true"
                 android:text="@{@string/chapterFilter + `:`}"
                 android:textSize="16sp" />
@@ -155,7 +155,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.chapterFilter)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.chapterFilter)}"
                 android:singleLine="true"
                 android:text="@{siteBean.chapterFilter??``}"
                 android:textSize="16sp" />
@@ -170,7 +170,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.searchUrl)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.searchUrl)}"
                 android:singleLine="true"
                 android:text="@{@string/searchUrl + `:`}"
                 android:textSize="16sp" />
@@ -183,7 +183,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.searchUrl)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.searchUrl)}"
                 android:singleLine="true"
                 android:text="@{siteBean.searchUrl??``}"
                 android:textSize="16sp" />
@@ -198,7 +198,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectFileld)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.redirectFileld)}"
                 android:singleLine="true"
                 android:text="@{@string/redirectFileld + `:`}"
                 android:textSize="16sp" />
@@ -211,7 +211,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.redirectFileld)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.redirectFileld)}"
                 android:singleLine="true"
                 android:text="@{siteBean.redirectFileld??``}"
                 android:textSize="16sp" />
@@ -226,7 +226,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectUrl)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.redirectUrl)}"
                 android:singleLine="true"
                 android:text="@{@string/redirectUrl + `:`}"
                 android:textSize="16sp" />
@@ -239,7 +239,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.redirectUrl)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.redirectUrl)}"
                 android:singleLine="true"
                 android:text="@{siteBean.redirectUrl??``}"
                 android:textSize="16sp" />
@@ -254,7 +254,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.noRedirectUrl)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.noRedirectUrl)}"
                 android:singleLine="true"
                 android:text="@{@string/noRedirectUrl + `:`}"
                 android:textSize="16sp" />
@@ -267,7 +267,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.noRedirectUrl)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.noRedirectUrl)}"
                 android:singleLine="true"
                 android:text="@{siteBean.noRedirectUrl??``}"
                 android:textSize="16sp" />
@@ -283,7 +283,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectName)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.redirectName)}"
                 android:singleLine="true"
                 android:text="@{@string/redirectName + `:`}"
                 android:textSize="16sp" />
@@ -296,7 +296,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.redirectName)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.redirectName)}"
                 android:singleLine="true"
                 android:text="@{siteBean.redirectName??``}"
                 android:textSize="16sp" />
@@ -311,7 +311,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.noRedirectName)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.noRedirectName)}"
                 android:singleLine="true"
                 android:text="@{@string/noRedirectName + `:`}"
                 android:textSize="16sp" />
@@ -324,7 +324,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.noRedirectName)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.noRedirectName)}"
                 android:singleLine="true"
                 android:text="@{siteBean.noRedirectName??``}"
                 android:textSize="16sp" />
@@ -339,7 +339,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.redirectImage)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.redirectImage)}"
                 android:singleLine="true"
                 android:text="@{@string/redirectImage + `:`}"
                 android:textSize="16sp" />
@@ -352,7 +352,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.redirectImage)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.redirectImage)}"
                 android:singleLine="true"
                 android:text="@{siteBean.redirectImage??``}"
                 android:textSize="16sp" />
@@ -367,7 +367,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.noRedirectImage)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.noRedirectImage)}"
                 android:singleLine="true"
                 android:text="@{@string/noRedirectImage + `:`}"
                 android:textSize="16sp" />
@@ -380,7 +380,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.noRedirectImage)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.noRedirectImage)}"
                 android:singleLine="true"
                 android:text="@{siteBean.noRedirectImage??``}"
                 android:textSize="16sp" />
@@ -395,7 +395,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_rowWeight="1"
-                android:onClick="@{() -> viewModel.editTextTask(RuleType.charset)}"
+                android:onClick="@{() -> viewModel.editText(RuleType.charset)}"
                 android:singleLine="true"
                 android:text="@{@string/charset + `:`}"
                 android:textSize="16sp" />
@@ -408,7 +408,7 @@
                 android:background="@android:color/transparent"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:onLongClick="@{() -> viewModel.editTextTask(RuleType.charset)}"
+                android:onLongClick="@{() -> viewModel.editText(RuleType.charset)}"
                 android:singleLine="true"
                 android:text="@{siteBean.charset??``}"
                 android:textSize="16sp" />

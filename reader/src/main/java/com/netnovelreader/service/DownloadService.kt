@@ -19,9 +19,6 @@ import java.io.IOException
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 
-/**
- * Created by yangbo on 18-1-15.
- */
 class DownloadService : IntentService {
     constructor() : super("DownloadService")
     constructor(name: String) : super(name)

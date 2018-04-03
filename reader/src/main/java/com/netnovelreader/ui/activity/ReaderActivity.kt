@@ -21,7 +21,6 @@ import com.netnovelreader.viewmodel.ReaderViewModel
 import kotlinx.android.synthetic.main.activity_reader.*
 import kotlinx.coroutines.experimental.launch
 
-
 class ReaderActivity : AppCompatActivity() {
     private lateinit var viewModel: ReaderViewModel
     private var dialog: AlertDialog? = null

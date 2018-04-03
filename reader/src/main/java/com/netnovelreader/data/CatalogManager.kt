@@ -3,7 +3,6 @@ package com.netnovelreader.data
 import android.databinding.ObservableField
 import com.netnovelreader.ReaderApplication
 import com.netnovelreader.bean.SearchBookResult
-import com.netnovelreader.common.UPDATEFLAG
 import com.netnovelreader.common.replace
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.local.ReaderDbManager
@@ -13,9 +12,6 @@ import java.util.LinkedHashMap
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
-/**
- * Created by yangbo on 18-1-30.
- */
 object CatalogManager {
     /**
      * HashMap<目录页url, LinkedHashMap<章节名, 章节url>>
@@ -24,7 +20,7 @@ object CatalogManager {
     private val diskCache: HashMap<String, String> = HashMap()
     private var count = 0
     private val MAX_COUNT = 5000
-
+    private val UPDATEFLAG = "●"  //书籍有更新，显示该标志
     /**
      * 下载目录并保存到数据库
      */

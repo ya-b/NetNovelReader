@@ -1,6 +1,5 @@
 package com.netnovelreader.data.network
 
-import com.netnovelreader.common.TIMEOUT
 import com.netnovelreader.common.fixUrl
 import com.netnovelreader.common.getHeaders
 import org.jsoup.Jsoup
@@ -12,10 +11,8 @@ import java.util.LinkedHashMap
 import kotlin.collections.ArrayList
 import kotlin.collections.set
 
-/**
- * Created by yangbo on 18-1-14.
- */
 class ParseHtml {
+    val TIMEOUT = 3000
     /**
      * 解析章节
      */
