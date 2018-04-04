@@ -1,8 +1,6 @@
 package com.netnovelreader.servlet
 
 import com.netnovelreader.service.UserAuthorityService
-import kotlinx.html.html
-import kotlinx.html.stream.appendHTML
 import javax.servlet.annotation.WebServlet
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServlet
@@ -18,9 +16,7 @@ class Login : HttpServlet() {
                 setAttribute("result", "已经登陆，请退出再试")
                 setAttribute("redirect", "login.html")
             }
-            resp.writer.appendHTML().html {
-
-            }
+            resp.sendRedirect("redirect.jsp")
             return
         }
         val username = req.getParameter("username")

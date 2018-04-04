@@ -6,8 +6,7 @@
         var time = 4;
         function returnUrlByTime() {
             window.setTimeout('returnUrlByTime()', 1000);
-            time = time - 1;
-            document.getElementById("time").innerHTML = "[ " + time + " ] 秒后跳转";
+            document.getElementById("time").innerHTML = "[ " + --time + " ] 秒后跳转";
         }
     </script>
 </head>

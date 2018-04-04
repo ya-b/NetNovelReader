@@ -7,13 +7,14 @@ buildscript {
     ext.versions = [
         'kotlin': '1.2.31',
         'kotlin_html': '0.6.9',
+        'ktor':'0.9.1',
         'gradle': '3.2.0-alpha08',
         'supportLibrary': '27.1.0',
         'coroutines': '0.22.5',
         'retrofit': '2.4.0',
         'archLifecycle': "1.1.0",
-
-        'tomcatVersion': '8.5.24',
+        'gretty': '2.0.0',
+        'tomcat': '8.5.24',
 
         'junit': '4.12',
         'mockito': '2.8.47',
@@ -48,6 +49,17 @@ buildscript {
                 'core': "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}",
                 'android': "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}"
             ],
+            'ktor':[
+                'server': [
+                    'core': "io.ktor:ktor-server-core:${versions.ktor}",
+                    'netty': "io.ktor:ktor-server-netty:${versions.ktor}",
+                    'tomcat': "io.ktor:ktor-server-tomcat:${versions.ktor}",
+                    'servlet': "io.ktor:ktor-server-servlet:${versions.ktor}"
+                ],
+                'features': [
+                    'html_builder': "io.ktor:ktor-html-builder:${versions.ktor}"
+                ]
+            ],
             'js': "org.jetbrains.kotlin:kotlin-stdlib-js:${versions.kotlin}",
             'html': [
                 'jvm': "org.jetbrains.kotlinx:kotlinx-html-jvm:${versions.kotlin_html}",
@@ -69,6 +81,7 @@ buildscript {
         'javax': [
                 'javaee_api': 'javax:javaee-api:7.0'
         ],
+        'logback': "ch.qos.logback:logback-classic:1.2.1",
         'commons_dbutils': "commons-dbutils:commons-dbutils:1.7",
         'mariadb_client': "org.mariadb.jdbc:mariadb-java-client:2.2.3",
         'test': [
@@ -88,6 +101,7 @@ buildscript {
         ]
     ]
     repositories {
+        maven { url "https://dl.bintray.com/kotlin/ktor" }
     	mavenCentral()
         google()
         jcenter()
@@ -96,11 +110,13 @@ buildscript {
         classpath "com.android.tools.build:gradle:${versions.gradle}"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         classpath 'com.bmuschko:gradle-tomcat-plugin:2.4.2'
+        classpath "org.akhikhl.gretty:gretty:${versions.gretty}"
     }
 }
 
 allprojects {
     repositories {
+        maven { url "https://dl.bintray.com/kotlin/ktor" }
     	mavenCentral()
         google()
         jcenter()
