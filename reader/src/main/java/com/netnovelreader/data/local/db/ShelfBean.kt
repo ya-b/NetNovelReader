@@ -17,4 +17,18 @@ data class ShelfBean(
         @ColumnInfo(name = ReaderDatabase.ISUPDATE) var isUpdate: String? = null,
         @ColumnInfo(name = ReaderDatabase.LATESTCHAPTER) var latestChapter: String? = null,
         @ColumnInfo(name = ReaderDatabase.LATESTREAD) var latestRead: Int? = null
-)
+) {
+    fun toJson(): String {
+        val sb = StringBuilder()
+        sb.append("{")
+        _id?.run { sb.append("\"i\":\"$_id\",") }
+        bookName?.run { sb.append("\"b\":\"$bookName\",") }
+        downloadUrl?.run { sb.append("\"d\":\"$downloadUrl\",") }
+        readRecord?.run { sb.append("\"r\":\"$readRecord\",") }
+        isUpdate?.run { sb.append("\"s\":\"$isUpdate\",") }
+        latestChapter?.run { sb.append("\"l\":\"$latestChapter\",") }
+        latestRead?.run { sb.append("\"a\":\"$latestRead\"") }
+        sb.append("}")
+        return sb.toString()
+    }
+}

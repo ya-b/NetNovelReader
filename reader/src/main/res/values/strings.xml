@@ -6,6 +6,10 @@
     <string name="deleteBook">删除book?</string>
     <string name="yes">是</string>
     <string name="no">否</string>
+    <string name="login">登录</string>
+    <string name="loginorregister">登录/注册</string>
+    <string name="syncRecord">同步阅读记录</string>
+    <string name="restore">恢复</string>
     <string name="save">保存</string>
     <string name="cancel">取消</string>
     <string name="settings">设置</string>
@@ -33,6 +37,7 @@
     <string name="fontTypeKey">FontType</string>
     <string name="fontColorKey">FontColor</string>
     <string name="backgroundColorKey">backgroundColor</string>
+    <string name="namepasswd">namepasswd</string>
 
     <string name="search_button">搜索</string>
     <string name="catalog_finish">目录下载完成</string>
@@ -66,4 +71,7 @@
     <string name="noRedirectImage">封面选择器</string>
     <string name="charset">字符编码</string>
 
+    <string name="filter_vcode">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+    <string name="username">用户名</string>
+    <string name="password">密　码</string>
 </resources>

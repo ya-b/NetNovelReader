@@ -12,7 +12,7 @@ class Logout : HttpServlet() {
     override fun doGet(req: HttpServletRequest, resp: HttpServletResponse) {
         if (UserAuthorityService().getRole(req.cookies) != null) {
             req.session.setAttribute("result", "退出成功")
-        }else{
+        } else {
             req.session.setAttribute("result", "未曾登陆")
         }
         val cookie = Cookie("name", null).apply { path = "/" }

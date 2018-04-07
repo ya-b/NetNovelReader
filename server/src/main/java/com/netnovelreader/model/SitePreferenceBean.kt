@@ -1,6 +1,6 @@
 package com.netnovelreader.model
 
-class SitePreferenceBean{
+class SitePreferenceBean {
     var _id: Int? = null
     var hostname: String? = null                 //域名
         get() = field ?: ""

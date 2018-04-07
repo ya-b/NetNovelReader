@@ -34,7 +34,7 @@ class ShelfActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         themeId = PreferenceManager.getThemeId(this).also { setTheme(it) }
         super.onCreate(savedInstanceState)
-        viewModel =  obtainViewModel(com.netnovelreader.viewmodel.ShelfViewModel::class.java)
+        viewModel =  obtainViewModel(ShelfViewModel::class.java)
         hasPermission = checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (!hasPermission) {
             requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)
@@ -72,6 +72,10 @@ class ShelfActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_shelf, menu)
+        viewModel.isLoginItemShow().also {
+            menu.findItem(R.id.login).setVisible(it)
+            menu.findItem(R.id.syncRecord).setVisible(!it)
+        }
         return true
     }
 
@@ -85,19 +89,19 @@ class ShelfActivity : AppCompatActivity() {
                 true
             }
             R.id.action_settings -> {
-                val intent = Intent(this, SettingActivity::class.java).apply {
-                    putExtra("type", 0)
-                    putExtra("themeid", themeId)
-                }
-                startActivityForResult(intent, 1)
+                startSettingActivity(0)
                 true
             }
             R.id.edit_site_preference -> {
-                val intent = Intent(this, SettingActivity::class.java).apply {
-                    putExtra("type", 1)
-                    putExtra("themeid", themeId)
-                }
-                startActivity(intent)
+                startSettingActivity(1)
+                true
+            }
+            R.id.login -> {
+                startSettingActivity(2)
+                true
+            }
+            R.id.syncRecord -> {
+                startSettingActivity(3)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -137,5 +141,13 @@ class ShelfActivity : AppCompatActivity() {
     //请求权限
     fun requirePermission(permission: String, reqCode: Int) {
         ActivityCompat.requestPermissions(this, Array(1) { permission }, reqCode)
+    }
+
+    private fun startSettingActivity(type: Int){
+        val intent = Intent(this, SettingActivity::class.java).apply {
+            putExtra("type", type)
+            putExtra("themeid", themeId)
+        }
+        startActivity(intent)
     }
 }

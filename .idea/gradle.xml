@@ -8,6 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/flowlayout" />
             <option value="$PROJECT_DIR$/pageview" />
             <option value="$PROJECT_DIR$/reader" />

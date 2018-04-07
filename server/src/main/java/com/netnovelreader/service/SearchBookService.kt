@@ -20,20 +20,20 @@ class SearchBookService {
 
     fun search(bookname: String?): ArrayList<Array<String>> = runBlocking {
         val resultList = ArrayList<Array<String>>()
-        if(bookname.isNullOrEmpty()) return@runBlocking resultList
+        if (bookname.isNullOrEmpty()) return@runBlocking resultList
         val siteList = SitePreferenceDao().getAllPreference()
-        if(siteList == null || siteList.isEmpty()) return@runBlocking resultList
+        if (siteList == null || siteList.isEmpty()) return@runBlocking resultList
         siteList.map {
             async(threadPoolDispatcher) {
                 try {
                     searchBook(bookname!!, it)
-                }catch (e: IOException){
+                } catch (e: IOException) {
                     e.printStackTrace()
                     null
                 }
             }
         }.map { it.await() }.forEach { it?.let { resultList.add(it) } }
-        return@runBlocking  resultList
+        return@runBlocking resultList
     }
 
     @Throws(IOException::class)
@@ -57,7 +57,7 @@ class SearchBookService {
             Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get()
         } catch (e: UncheckedIOException) {
             return null
-        }catch (e: SocketTimeoutException){
+        } catch (e: SocketTimeoutException) {
             return null
         }
         return arrayOf(

@@ -14,7 +14,7 @@ class Login : HttpServlet() {
         if (service.getRole(req.cookies) != null) {
             req.session.apply {
                 setAttribute("result", "已经登陆，请退出再试")
-                setAttribute("redirect", "login.html")
+                setAttribute("redirect", "index.jsp")
             }
             resp.sendRedirect("redirect.jsp")
             return
@@ -24,30 +24,21 @@ class Login : HttpServlet() {
         val result = service.loginOrRegister(username, passwd)
 
         when (result) {
-            service.TEXT_IS_NULL -> req.session.apply {
-                setAttribute("result", "用户名或密码长度需大于4")
-                setAttribute("redirect", "login.html")
-            }
-            service.LOGIN_FAIL -> req.session.apply {
-                setAttribute("result", "密码错误")
-                setAttribute("redirect", "login.html")
-            }
             service.LOGIN_SUCCESS -> {
                 resp.addCookie(Cookie("name", "$username=|=$passwd").apply { path = "/" })
-                req.session.apply {
-                    setAttribute("result", "登陆成功")
-                    setAttribute("redirect", "index.jsp")
-                }
+                resp.writer.append("0").close()
             }
             service.REGISTER_SUCCESS -> {
                 resp.addCookie(Cookie("name", "$username=|=$passwd").apply { path = "/" })
-                req.session.apply {
-                    setAttribute("result", "注册成功")
-                    setAttribute("redirect", "index.jsp")
-                }
+                resp.writer.append("1").close()
+            }
+            service.TEXT_IS_NULL -> req.session.apply {
+                resp.writer.append("2").close()
+            }
+            service.LOGIN_FAIL -> req.session.apply {
+                resp.writer.append("3").close()
             }
         }
-        resp.sendRedirect("redirect.jsp")
     }
 
     override fun doPost(req: HttpServletRequest, resp: HttpServletResponse) {

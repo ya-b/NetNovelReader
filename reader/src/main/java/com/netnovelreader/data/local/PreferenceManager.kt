@@ -62,4 +62,12 @@ object PreferenceManager {
     fun getFontType(context: Context): String =
             context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
                     .getString(context.getString(R.string.fontTypeKey), "default")
+
+    fun saveNamePasswd(context: Context, username: String, password: String){
+        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).edit()
+            .putString(context.getString(R.string.namepasswd), "$username=|=$password").apply()
+    }
+
+    fun getNamePasswd(context: Context) =
+        context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE).getString(context.getString(R.string.namepasswd),"")
 }

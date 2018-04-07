@@ -14,6 +14,7 @@ import com.netnovelreader.bean.NovelCatalog
 import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.common.replace
 import com.netnovelreader.data.CatalogManager
+import com.netnovelreader.data.local.PreferenceManager
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.local.db.ShelfBean
 import com.netnovelreader.data.network.WebService
@@ -160,6 +161,8 @@ class ShelfViewModel(val context: Application) : AndroidViewModel(context) {
             if (resultList.isNotEmpty()) isLoading.set(false)
         }
     }
+
+    fun isLoginItemShow(): Boolean = PreferenceManager.getNamePasswd(context).isNullOrEmpty()
 
     //更新小说目录
     private fun updateItem(bookInfo: BookInfo, isFromNet: Boolean) {

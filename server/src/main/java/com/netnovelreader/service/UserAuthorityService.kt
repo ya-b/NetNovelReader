@@ -33,7 +33,7 @@ class UserAuthorityService {
 
     fun getRole(cookies: Array<Cookie>?): Int? {
         val arr = cookies?.firstOrNull { it.name == "name" }?.value?.split("=|=") ?: return null
-        if(arr.size < 2) return null
+        if (arr.size < 2) return null
         val user = dao.getUser(arr[0])
         if (user?.password != arr[1]) return null
         return user.role
@@ -41,7 +41,7 @@ class UserAuthorityService {
 
     fun getUserName(cookies: Array<Cookie>?): String? {
         val arr = cookies?.firstOrNull { it.name == "name" }?.value?.split("=|=") ?: return null
-        if(arr.size < 2) return null
+        if (arr.size < 2) return null
         val user = dao.getUser(arr[0])
         if (user?.password != arr[1]) return null
         return arr[0]

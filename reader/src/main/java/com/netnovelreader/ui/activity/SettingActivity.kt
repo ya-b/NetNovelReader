@@ -10,10 +10,9 @@ import android.view.Menu
 import android.view.MenuItem
 import com.netnovelreader.R
 import com.netnovelreader.common.obtainViewModel
+import com.netnovelreader.common.toast
 import com.netnovelreader.databinding.ActivitySettingBinding
-import com.netnovelreader.ui.fragment.SettingFragment
-import com.netnovelreader.ui.fragment.SiteEditorFragment
-import com.netnovelreader.ui.fragment.SitePreferenceFragment
+import com.netnovelreader.ui.fragment.*
 import com.netnovelreader.viewmodel.SettingViewModel
 import kotlinx.android.synthetic.main.activity_setting.*
 import kotlinx.coroutines.experimental.launch
@@ -37,16 +36,24 @@ class SettingActivity : AppCompatActivity() {
     fun initView() {
         DataBindingUtil.setContentView<ActivitySettingBinding>(this, R.layout.activity_setting)
                 .apply { viewModel = settingViewModel }
-        if (intent.getIntExtra("type", 0) == 0) {
-            setSupportActionBar(settingToolbar.apply { title = getString(R.string.settings) })
-            supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, SettingFragment())
-                    .commit()
-
-        } else {
-            setSupportActionBar(settingToolbar.apply { title = getString(R.string.edit_site) })
-            siteListFg = SitePreferenceFragment()
-            supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, siteListFg, SP)
-                    .commit()
+        when(intent.getIntExtra("type", 0)){
+            0 -> {
+                setSupportActionBar(settingToolbar.apply { title = getString(R.string.settings) })
+                supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, SettingFragment()).commit()
+            }
+            1 -> {
+                setSupportActionBar(settingToolbar.apply { title = getString(R.string.edit_site) })
+                siteListFg = SitePreferenceFragment()
+                supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, siteListFg, SP).commit()
+            }
+            2 -> {
+                setSupportActionBar(settingToolbar.apply { title = getString(R.string.login) })
+                supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, LoginFragment()).commit()
+            }
+            3 -> {
+                setSupportActionBar(settingToolbar.apply { title = getString(R.string.syncRecord) })
+                supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, SyncRecordFragment()).commit()
+            }
         }
     }
 
@@ -70,6 +77,9 @@ class SettingActivity : AppCompatActivity() {
                     add(R.id.settingFrameLayout, siteEditorFg, SE)
                 }
             }.hide(siteListFg).commit()
+        })
+        settingViewModel.toastCommand.observe(this, Observer {
+            it?.let{ toast(it) }
         })
     }
 

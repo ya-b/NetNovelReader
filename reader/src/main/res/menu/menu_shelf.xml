@@ -17,4 +17,14 @@
         android:orderInCategory="100"
         android:title="@string/edit_site"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/login"
+        android:orderInCategory="100"
+        android:title="@string/login"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/syncRecord"
+        android:orderInCategory="100"
+        android:title="@string/syncRecord"
+        app:showAsAction="never"/>
 </menu>

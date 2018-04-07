@@ -15,12 +15,14 @@ class SearchBook : HttpServlet() {
             resp.writer.append("error")
         } else {
             resp.contentType = "application/json; charset=utf-8"
-            SearchBookService().search(bookname).let { searchResult2Json(it) }.let {  resp.writer.append(it).close() }
+            SearchBookService()
+                .search(bookname)
+                .let { searchResult2Json(it) }
+                .let { resp.writer.append(it).close() }
         }
     }
 
     override fun doPost(req: HttpServletRequest, resp: HttpServletResponse) {
-        super.doPost(req, resp)
         doGet(req, resp)
     }
 }

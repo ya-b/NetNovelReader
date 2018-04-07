@@ -37,11 +37,16 @@ object WebService {
         fun getPicture(@Url url: String): Call<ResponseBody>
 
         @GET
-        fun getSitePreference(@Url url: String = "http://139.159.226.67/rule.json"): Call<SPResponse>
+        fun getSitePreference(@Url url: String = "http://139.159.226.67/reader/GetSitePreference"): Call<SitePreferenceResponse>
+
+        @GET("http://139.159.226.67/reader/login?")
+        fun login(@Query("username") username: String, @Query("password") password: String): Call<String>
+
+        @GET("http://139.159.226.67/reader/download")
+        fun restoreRecord(): Call<ReadRecordResponse>
     }
 
     interface ZhuiShuShenQiAPI {
-
 
         /**
          * 完整Url：http://api.zhuishushenqi.com/book/search-hotwords

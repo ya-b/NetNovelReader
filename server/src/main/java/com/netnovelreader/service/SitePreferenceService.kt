@@ -23,7 +23,7 @@ class SitePreferenceService {
     fun deletePreference(hostname: String?) {
         if (hostname == "*") {
             SitePreferenceDao().deleteAllPreference()
-        }else if(!hostname.isNullOrEmpty()){
+        } else if (!hostname.isNullOrEmpty()) {
             SitePreferenceDao().deletePreference(hostname!!)
         }
     }

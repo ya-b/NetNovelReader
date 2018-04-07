@@ -2,7 +2,7 @@ package com.netnovelreader.dao.impl
 
 import com.netnovelreader.model.SitePreferenceBean
 
-interface ISitePreferenceDao{
+interface ISitePreferenceDao {
     fun addPreference(bean: SitePreferenceBean): Int
     fun deletePreference(hostname: String)
     fun deleteAllPreference()

@@ -9,9 +9,6 @@ import com.netnovelreader.R
  * 设置页面
  */
 class SettingFragment : PreferenceFragmentCompat() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.pref_settings)

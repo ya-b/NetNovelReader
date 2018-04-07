@@ -33,7 +33,7 @@ object DBHelper {
     const val NOREDIRECTIMAGE = "no_redirect_image"
     const val CHARSET = "charset"
 
-    const val USERNAME ="username"
+    const val USERNAME = "username"
     const val PASSWD = "password"
     const val EMAIL = "email"
     const val ROLE = "role"
@@ -47,16 +47,20 @@ object DBHelper {
         }
     }
 
-    fun initTable(){
+    fun initTable() {
         QueryRunner().apply {
-            update(getConn(), "CREATE TABLE IF NOT EXISTS $TABLE_SITE (`$ID` INTEGER NOT NULL AUTO_INCREMENT, " +
-                    "`$HOSTNAME` varchar(128) UNIQUE, `$CATALOG_SELECTOR` TEXT, `$CHAPTER_SELECTOR` TEXT, `$CATALOG_FILTER` TEXT, " +
-                    "`$CHAPTER_FILTER` TEXT, `$SEARCHURL` TEXT, `$REDIRECTFILELD` TEXT, `$REDIRECTURL` TEXT, " +
-                    "`$NOREDIRECTURL` TEXT, `$REDIRECTNAME` TEXT, `$NOREDIRECTNAME` TEXT, `$REDIRECTIMAGE` TEXT, " +
-                    "`$NOREDIRECTIMAGE` TEXT, `$CHARSET` TEXT, PRIMARY KEY ($ID));")
-            update(getConn(), "CREATE TABLE IF NOT EXISTS $TABLE_USER (`$ID` INTEGER NOT NULL AUTO_INCREMENT, " +
-                    "`$USERNAME` varchar(128) UNIQUE, `$PASSWD` varchar(128), `$EMAIL` varchar(128), `$ROLE` INTEGER, " +
-                    "PRIMARY KEY ($ID));")
+            update(
+                getConn(), "CREATE TABLE IF NOT EXISTS $TABLE_SITE (`$ID` INTEGER NOT NULL AUTO_INCREMENT, " +
+                        "`$HOSTNAME` varchar(128) UNIQUE, `$CATALOG_SELECTOR` TEXT, `$CHAPTER_SELECTOR` TEXT, `$CATALOG_FILTER` TEXT, " +
+                        "`$CHAPTER_FILTER` TEXT, `$SEARCHURL` TEXT, `$REDIRECTFILELD` TEXT, `$REDIRECTURL` TEXT, " +
+                        "`$NOREDIRECTURL` TEXT, `$REDIRECTNAME` TEXT, `$NOREDIRECTNAME` TEXT, `$REDIRECTIMAGE` TEXT, " +
+                        "`$NOREDIRECTIMAGE` TEXT, `$CHARSET` TEXT, PRIMARY KEY ($ID));"
+            )
+            update(
+                getConn(), "CREATE TABLE IF NOT EXISTS $TABLE_USER (`$ID` INTEGER NOT NULL AUTO_INCREMENT, " +
+                        "`$USERNAME` varchar(128) UNIQUE, `$PASSWD` varchar(128), `$EMAIL` varchar(128), `$ROLE` INTEGER, " +
+                        "PRIMARY KEY ($ID));"
+            )
         }
         DBHelper.closeConn()
     }

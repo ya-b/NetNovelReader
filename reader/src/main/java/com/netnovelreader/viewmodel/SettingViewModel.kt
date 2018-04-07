@@ -6,16 +6,18 @@ import android.arch.lifecycle.MutableLiveData
 import android.databinding.ObservableArrayList
 import com.netnovelreader.bean.ObservableSiteRule
 import com.netnovelreader.bean.RuleType
+import com.netnovelreader.data.local.PreferenceManager
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.local.db.SitePreferenceBean
 import com.netnovelreader.data.network.WebService
 import kotlinx.coroutines.experimental.launch
 import java.io.IOException
 
-class SettingViewModel(context: Application) : AndroidViewModel(context) {
-    val siteList = ObservableArrayList<SitePreferenceBean>()         //显示的列表
-    var edittingSite: ObservableSiteRule? = ObservableSiteRule()                            //编辑的站点
+class SettingViewModel(val context: Application) : AndroidViewModel(context) {
+    val siteList = ObservableArrayList<SitePreferenceBean>()          //显示的列表
+    var edittingSite: ObservableSiteRule? = ObservableSiteRule()      //编辑的站点
     val exitCommand = MutableLiveData<Void>()                         //点击返回图标
+    val toastCommand = MutableLiveData<String>()
     val editSiteCommand = MutableLiveData<String>()                   //编辑站点
     val editTextCommand = MutableLiveData<String>()                   //编辑具体规则
     val deleteAlertCommand = MutableLiveData<String>()                //删除对话框
@@ -82,14 +84,56 @@ class SettingViewModel(context: Application) : AndroidViewModel(context) {
                     response.arr
                 } else {
                     response.arr.filter { serverRule ->
-                        siteList.none { it.hostname == serverRule.hostname }
+                        siteList.none { it.hostname == serverRule.h }
                     }
-                }
+                }.map { it.toSitePreferenceBean() }
         ReaderDbManager.sitePreferenceDao().insert(*updateList.toTypedArray())
         showSiteList()
     }
 
+
+    fun login(username: String, passwd: String){
+        if(username.length < 5 || passwd.length < 5){
+            toastCommand.postValue("用户名或密码格式错误")
+            return
+        }
+        launch {
+            val result = try {
+                WebService.novelReader.login(username, passwd).execute().body()
+            }catch (e: IOException){
+                null
+            }
+            when(result){
+                "0","1" -> {
+                    PreferenceManager.saveNamePasswd(this@SettingViewModel.context, username, passwd)
+                    exit()
+                }
+                "2" -> {
+                    toastCommand.postValue("用户名或密码格式错误")
+                }
+                "3" -> {
+                    toastCommand.postValue("登陆失败，用户名或密码错误")
+                }
+                else -> {
+                    toastCommand.postValue("网络连接异常")
+                }
+            }
+        }
+    }
+
+    //保存至服务器
+    fun saveRecord(){
+        launch {
+
+        }
+    }
+
+    //从服务器恢复
+    fun updateRecord(){
+
+    }
+
     fun exit() {
-        exitCommand.value = null
+        exitCommand.postValue(null)
     }
 }

@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.widget.ViewFlipper
 import kotlin.reflect.KProperty
@@ -17,7 +18,7 @@ class PageView : ViewFlipper {
     var textSize: Float? by InvalidateAfterSet(50f)               //正文部分默认画笔的大小
     var bottomTextSize: Float = 35f                                     //底部部分默认画笔的大小
     var text: String? by InvalidateAfterSet(null)                 //一个未分割章节,格式：章节名|正文
-    var title: String? = ""                                             //章节名称
+    var title: String = ""                                             //章节名称
 
     val FILENOTFOUND = "            "         //表示该章节为空
     var isDrawTime = false                    //左下角是否显示时间
@@ -177,7 +178,7 @@ class PageView : ViewFlipper {
         val another = (displayedChild + 1) % 2
         (getChildAt(another) as PageContent).apply {
             mBgColor = backgroundcolor!!
-            if(textArray.size > 0){
+            if(maxPageNum > 0){
                 if(pageNum!! > textArray.size) pageNum = textArray.size
                 if(pageNum == 0) pageNum = 1
                 mTextArray = textArray[pageNum!! - 1]
@@ -185,7 +186,7 @@ class PageView : ViewFlipper {
             mRowSpace = rowSpace
             mTextSize = textSize!!
             mPageNum = pageNum!!
-            mMaxPageNum = textArray.size
+            mMaxPageNum = maxPageNum
             mTextColor = textColor!!
             mTitle = title
             mTxtFontType = txtFontType!!
@@ -232,13 +233,15 @@ class PageView : ViewFlipper {
                     if (width < 1) return
                     val scale = maxPageNum.toFloat() / pageNum!!
                     textArray = spliteText(text!!)
-                    maxPageNum = if (text.equals(FILENOTFOUND) || text.isNullOrEmpty()) 0 else textArray.size
+                    maxPageNum = if (text!!.substring(title.length + 1).equals(FILENOTFOUND)
+                        || text.isNullOrEmpty()) 0 else textArray.size
                     pageNum = (maxPageNum / scale).toInt().takeIf { it != 0 } ?: 1
                 }
                 "text" -> {
                     if (width < 1) return
                     textArray = spliteText(text!!)
-                    maxPageNum = if (text.equals(FILENOTFOUND) || text.isNullOrEmpty()) 0 else textArray.size
+                    maxPageNum = if (text!!.substring(title.length + 1).equals(FILENOTFOUND)
+                        || text.isNullOrEmpty()) 0 else textArray.size
                     pageNum = when (pageFlag) {
                         0 -> if (maxPageNum == 0) 0 else if (pageNum == 0) 1 else pageNum
                         1, 2 -> if (maxPageNum == 0) 0 else 1
