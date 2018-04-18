@@ -57,10 +57,11 @@ class RecyclerAdapter<T, E>(
         }
     }
 
-    override fun getItemCount(): Int =
-            if (itemDetails == null) 0
-            else if (isoccupiedFirst) itemDetails.size + 1
-            else itemDetails.size
+    override fun getItemCount(): Int = when{
+            itemDetails == null -> 0
+            isoccupiedFirst -> itemDetails.size + 1
+            else -> itemDetails.size
+    }
 
     override fun getItemViewType(position: Int): Int =
             if (isoccupiedFirst && position == 0) -1 else 0

@@ -18,16 +18,17 @@ class SettingFragment : PreferenceFragmentCompat() {
             activity?.setResult(10)
             activity?.finish()
             activity?.overridePendingTransition(0, 0)
-            activity?.startActivity(intent?.apply { putExtra("themeid", getTheme(value as String)) })
+            activity?.startActivity(intent?.apply {
+                putExtra("themeid", getTheme(value as String))
+            })
             true
         }
     }
 
-    fun getTheme(str: String): Int {
-        return when (str) {
+    fun getTheme(str: String): Int =
+        when (str) {
             "blue" -> R.style.AppThemeBlue
             "gray" -> R.style.AppThemeGray
             else -> R.style.AppThemeBlack
         }
-    }
 }

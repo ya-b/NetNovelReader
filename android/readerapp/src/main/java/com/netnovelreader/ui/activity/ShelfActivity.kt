@@ -12,11 +12,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.animation.DecelerateInterpolator
 import com.netnovelreader.R
-import com.netnovelreader.common.PagerAdapter
-import com.netnovelreader.common.checkPermission
-import com.netnovelreader.common.obtainViewModel
-import com.netnovelreader.common.toast
-import com.netnovelreader.data.local.PreferenceManager
+import com.netnovelreader.common.*
 import com.netnovelreader.databinding.ActivityShelfBinding
 import com.netnovelreader.ui.fragment.NovelClassfyFragment
 import com.netnovelreader.ui.fragment.ShelfFragment
@@ -33,13 +29,14 @@ class ShelfActivity : AppCompatActivity() {
     private var mMenu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        themeId = PreferenceManager.getThemeId(this).also { setTheme(it) }
+        themeId = sharedPreferences().get(getString(R.string.themeKey), "black").parseTheme().also { setTheme(it) }
         super.onCreate(savedInstanceState)
         viewModel = obtainViewModel(ShelfViewModel::class.java)
-        hasPermission = checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        if (!hasPermission) {
-            requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)
-        }
+        hasPermission = ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!hasPermission) requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 1)
         initView()
         initLiveData()
         shelfTab.post { viewModel.tabHeight = shelfTab.height }
@@ -82,33 +79,22 @@ class ShelfActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+        when (item.itemId) {
             R.id.search_button -> {
                 val intent = Intent(this, SearchActivity::class.java)
                     .apply { putExtra("themeid", themeId) }
                 startActivity(intent)
                 viewModel.refreshType = 2
-                true
             }
-            R.id.action_settings -> {
-                startSettingActivity(0)
-                true
-            }
-            R.id.edit_site_preference -> {
-                startSettingActivity(1)
-                true
-            }
-            R.id.login -> {
-                startSettingActivity(2)
-                true
-            }
+            R.id.action_settings -> startSettingActivity(0)
+            R.id.edit_site_preference -> startSettingActivity(1)
+            R.id.login -> startSettingActivity(2)
             R.id.syncRecord -> {
                 startSettingActivity(3)
                 viewModel.refreshType = 0
-                true
             }
-            else -> super.onOptionsItemSelected(item)
         }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -119,7 +105,7 @@ class ShelfActivity : AppCompatActivity() {
             finish()
             overridePendingTransition(0, 0)
             startActivity(intent)
-        } else if(requestCode == 2 && resultCode == 20) {
+        } else if (requestCode == 2 && resultCode == 20) {
             viewModel.isLoginItemShow().also {
                 mMenu?.findItem(R.id.login)?.setVisible(it)
                 mMenu?.findItem(R.id.syncRecord)?.setVisible(!it)

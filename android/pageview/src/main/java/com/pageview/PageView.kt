@@ -98,29 +98,27 @@ class PageView : ViewFlipper {
         }
         if(!isTouching && (!isMoved || (isMoved && Math.abs(moveStart[0] - moveEnd[0]) < 5f  //点击事件
                         && Math.abs(moveStart[1] - moveEnd[1]) < 5f))){
-            if (moveStart[0] > width * 3 / 5) {
-                pageToNext(Orientation.horizontal)
-            } else if (moveStart[0] < width * 2 / 5) {
-                pageToPrevious(Orientation.horizontal)
-            } else if (moveStart[1] > height * 2 / 5 && moveStart[1] < height * 3 / 5) {
-                setInAnimation(getContext(), R.anim.slide_in_right)
-                setOutAnimation(getContext(), R.anim.slide_out_left)
-                onCenterClick?.onCenterClick()
-                pageFlag = 1
+            when {
+                moveStart[0] > width * 3 / 5 -> pageToNext(Orientation.horizontal)
+                moveStart[0] < width * 2 / 5 -> pageToPrevious(Orientation.horizontal)
+                moveStart[1] > height * 2 / 5 && moveStart[1] < height * 3 / 5 -> {
+                    setInAnimation(getContext(), R.anim.slide_in_right)
+                    setOutAnimation(getContext(), R.anim.slide_out_left)
+                    onCenterClick?.onCenterClick()
+                    pageFlag = 1
+                }
             }
         } else if(!isTouching && isMoved && Math.abs(moveStart[0] - moveEnd[0]) > MIN_MOVE &&  //滑动左右翻页
                 Math.abs(moveStart[1] - moveEnd[1]) < MIN_MOVE){
-            if (moveStart[0] > moveEnd[0]) {
-                pageToNext(Orientation.horizontal)
-            } else {
-                pageToPrevious(Orientation.horizontal)
+            when {
+                moveStart[0] > moveEnd[0] -> pageToNext(Orientation.horizontal)
+                else -> pageToPrevious(Orientation.horizontal)
             }
         } else if(!isTouching && isMoved && Math.abs(moveStart[1] - moveEnd[1]) > MIN_MOVE * height / width &&  //滑动上下翻页
                 Math.abs(moveStart[0] - moveEnd[0]) < MIN_MOVE){
-            if (moveStart[1] > moveEnd[1]) {
-                pageToNext(Orientation.vertical)
-            } else {
-                pageToPrevious(Orientation.vertical)
+            when {
+                moveStart[1] > moveEnd[1] -> pageToNext(Orientation.vertical)
+                else -> pageToPrevious(Orientation.vertical)
             }
         } else if(!isTouching && isMoved && Math.abs(moveStart[1] - moveEnd[1]) > MIN_MOVE * height / width &&
                 Math.abs(moveStart[0] - moveEnd[0]) > MIN_MOVE){  //需要进一步判断翻页方向

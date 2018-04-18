@@ -12,11 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.netnovelreader.R
-import com.netnovelreader.common.GridDivider
-import com.netnovelreader.common.RecyclerAdapter
-import com.netnovelreader.common.init
-import com.netnovelreader.common.obtainViewModel
-import com.netnovelreader.data.local.PreferenceManager
+import com.netnovelreader.common.*
 import com.netnovelreader.databinding.FragmentNovelClassfyBinding
 import com.netnovelreader.ui.activity.CategoryDetailActivity
 import com.netnovelreader.ui.activity.ShelfActivity
@@ -55,7 +51,8 @@ class NovelClassfyFragment : Fragment() {
         viewModel?.openCatalogDetailCommand?.observe(this, Observer {
             val intent = Intent(activity, CategoryDetailActivity::class.java)
             intent.putExtra("major", it)
-            intent.putExtra("themeid", PreferenceManager.getThemeId(activity!!.baseContext))
+            intent.putExtra("themeid", context!!.sharedPreferences()
+                .get(context!!.getString(R.string.themeKey), "black").parseTheme())
             startActivityForResult(intent, 123)
         })
     }

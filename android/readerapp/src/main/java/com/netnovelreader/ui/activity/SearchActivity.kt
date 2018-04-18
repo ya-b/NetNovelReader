@@ -60,7 +60,7 @@ class SearchActivity : AppCompatActivity() {
 
     fun initData() {
         chapterName = intent.getStringExtra("chapterName")
-        searchViewModel.isChangeSource.set(!chapterName.isNullOrEmpty())
+        searchViewModel.isChangeSource.set(chapterName != null)
         if (chapterName != null) {
             val bookname = intent.getStringExtra("bookname")
             searchViewText.text = bookname

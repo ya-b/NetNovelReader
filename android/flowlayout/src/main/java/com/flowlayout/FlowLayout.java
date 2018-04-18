@@ -19,7 +19,7 @@ import java.util.List;
 public class FlowLayout extends ViewGroup {
 
 
-    private List<List<View>> mLineViews = new ArrayList<List<View>>();
+    private final List<List<View>> mLineViews = new ArrayList<List<View>>();
     private List<Integer> mLineHeight = new ArrayList<Integer>();
 
     public FlowLayout(Context context) {

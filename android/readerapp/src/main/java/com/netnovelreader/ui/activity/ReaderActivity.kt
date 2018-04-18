@@ -11,10 +11,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.WindowManager
 import com.netnovelreader.R
-import com.netnovelreader.common.RecyclerAdapter
-import com.netnovelreader.common.init
-import com.netnovelreader.common.obtainViewModel
-import com.netnovelreader.data.local.PreferenceManager
+import com.netnovelreader.common.*
 import com.netnovelreader.databinding.ActivityReaderBinding
 import com.netnovelreader.receiver.NetStateChangedReceiver
 import com.netnovelreader.viewmodel.ReaderViewModel
@@ -28,7 +25,7 @@ class ReaderActivity : AppCompatActivity() {
     private var catalogView: RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (PreferenceManager.isFullScreen(this)) {
+        if (sharedPreferences().get(getString(R.string.full_screen_key), false)) {
             window.setFlags(
                     WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
@@ -44,13 +41,13 @@ class ReaderActivity : AppCompatActivity() {
     fun initView() {
         DataBindingUtil.setContentView<ActivityReaderBinding>(this, R.layout.activity_reader)
                 .apply { viewModel = this@ReaderActivity.viewModel }
-        readerView.isDrawTime = PreferenceManager.isFullScreen(this)
-        readerView.rowSpace = PreferenceManager.getRowSpace(this)
+        readerView.isDrawTime = sharedPreferences().get(getString(R.string.full_screen_key), false)
+        readerView.rowSpace = sharedPreferences().get(getString(R.string.rowspaceKey), "1.50").toFloat()
     }
 
     fun initData() {
         viewModel.bookName = intent.getStringExtra("bookname")
-        viewModel.CACHE_NUM = PreferenceManager.getAutoDownNum(this@ReaderActivity)
+        viewModel.CACHE_NUM = sharedPreferences().get(getString(R.string.auto_download_key), true).let { compareValues(it, false) * 3 }
         viewModel.start()
         netStateReceiver = NetStateChangedReceiver {
             if (viewModel.isLoading.get()) {

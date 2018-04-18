@@ -29,6 +29,10 @@ object deps {
         }
         object ktor {
             val servlet = "io.ktor:ktor-server-servlet:${versions.ktor}"
+            val location = "io.ktor:ktor-locations:${versions.ktor}"
+            val gson = "io.ktor:ktor-gson:${versions.ktor}"
+            val auth_jwt = "io.ktor:ktor-auth-jwt:${versions.ktor}"
+            val html_builder = "io.ktor:ktor-html-builder:${versions.ktor}"
         }
         val js = "org.jetbrains.kotlin:kotlin-stdlib-js:${versions.kotlin}"
     }
@@ -46,8 +50,14 @@ object deps {
     val javaee_api = "javax:javaee-api:7.0"
     val gson = "com.google.code.gson:gson:2.8.2"
     val slf4j = "org.slf4j:slf4j-jdk14:1.8.0-beta2"
-    val commons_dbutils = "commons-dbutils:commons-dbutils:1.7"
-    val commons_fileupload = "commons-fileupload:commons-fileupload:1.3.3"
+    object apache {
+        val dbutils = "commons-dbutils:commons-dbutils:1.7"
+        val fileupload = "commons-fileupload:commons-fileupload:1.3.3"
+        object tomcatEmbed {
+            val core = "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcat}"
+            val jasper = "org.apache.tomcat.embed:tomcat-embed-jasper:${versions.tomcat}"
+        }
+    }
     val mariadb_client = "org.mariadb.jdbc:mariadb-java-client:2.2.3"
     object test {
         val junit = "junit:junit:${versions.junit}"
@@ -64,14 +74,9 @@ object deps {
             val idling_resource = "com.android.support.test.espresso:espresso-idling-resource:${versions.espresso}"
         }
     }
-    object tomcatEmbed {
-        val core = "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcat}"
-        val jasper = "org.apache.tomcat.embed:tomcat-embed-jasper:${versions.tomcat}"
-    }
     object buildPlugins {
         val android = "com.android.tools.build:gradle:${versions.gradle}"
         val kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         val tomcat = "com.bmuschko:gradle-tomcat-plugin:2.4.2"
-        val gretty = "org.akhikhl.gretty:gretty:2.0.0"
     }
 }

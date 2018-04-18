@@ -4,18 +4,19 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
-import android.content.pm.PackageManager
-import android.support.v4.app.ActivityCompat
+import android.content.SharedPreferences
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.widget.Toast
+import com.netnovelreader.R
 import com.netnovelreader.data.local.db.ShelfBean
 import com.netnovelreader.data.local.db.ShelfDao
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 
 
 fun Context.toast(message: String) {
@@ -85,10 +86,55 @@ fun <T : AndroidViewModel> FragmentActivity.obtainViewModel(clazz: Class<T>): T 
         ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
                 .let { ViewModelProviders.of(this, it).get(clazz) }
 
+fun Context.sharedPreferences(name: String = this.applicationContext.packageName, type: Int = Context.MODE_PRIVATE) =
+        getSharedPreferences(name, type)
 
-fun Context.checkPermission(permission: String): Boolean {
-    return ActivityCompat.checkSelfPermission(
-            this,
-            permission
-    ) == PackageManager.PERMISSION_GRANTED
+fun <T: Any> SharedPreferences.put(key: String, value: T) {
+    edit().apply {
+        when (value) {
+            is String -> putString(key, value)
+            is Int -> putInt(key, value)
+            is Float -> putFloat(key, value)
+            is Long -> putLong(key, value)
+            is Boolean -> putBoolean(key, value)
+            else -> throw IllegalArgumentException()
+        }
+    }.apply()
 }
+
+@Suppress("UNCHECKED_CAST")
+fun <T: Any> SharedPreferences.get(key: String, default: T) : T =
+    when (default) {
+        is String -> getString(key, default) as T
+        is Int -> getInt(key, default) as T
+        is Float -> getFloat(key, default) as T
+        is Long -> getLong(key, default) as T
+        is Boolean -> getBoolean(key, default) as T
+        else -> throw IllegalArgumentException()
+    }
+
+inline fun <T> tryIgnoreCatch(body: () -> T?): T? =
+    try {
+        body()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+
+fun String.parseTheme() =
+    when (this) {
+        "blue" -> R.style.AppThemeBlue
+        "gray" -> R.style.AppThemeGray
+        else -> R.style.AppThemeBlack
+    }
+
+operator fun File.unaryMinus() =
+    if(this.exists()) {
+        if(this.isDirectory) {
+            this.deleteRecursively()
+        } else {
+            this.delete()
+        }
+    } else {
+        false
+    }

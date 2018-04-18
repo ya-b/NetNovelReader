@@ -228,9 +228,7 @@ object ReaderDbManager {
                         "'','','gbk')"
             )
             db.beginTransaction()
-            array.forEach {
-                db.execSQL("insert into sitepreference values $it;")
-            }
+            array.forEach { db.execSQL("insert into sitepreference values $it;") }
             db.setTransactionSuccessful()
             db.endTransaction()
         }

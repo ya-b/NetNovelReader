@@ -93,7 +93,7 @@ class SettingActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_setting, menu)
         menuItemList.add(menu.findItem(R.id.addSitePreference))
         menuItemList.add(menu.findItem(R.id.updateSitePreference))
-        return intent.getIntExtra("type", 0) != 0   //false 不显示
+        return intent.getIntExtra("type", 0) == 1   //false 不显示
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

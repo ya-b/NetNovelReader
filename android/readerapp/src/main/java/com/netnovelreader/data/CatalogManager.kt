@@ -1,13 +1,16 @@
 package com.netnovelreader.data
 
-import android.databinding.ObservableField
 import com.netnovelreader.ReaderApplication
 import com.netnovelreader.bean.SearchBookResult
 import com.netnovelreader.common.replace
+import com.netnovelreader.common.tryIgnoreCatch
 import com.netnovelreader.common.url2Hostname
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.network.ParseHtml
-import java.io.*
+import java.io.File
+import java.io.IOException
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import java.util.LinkedHashMap
 import kotlin.collections.HashMap
 import kotlin.collections.set
@@ -27,41 +30,26 @@ object CatalogManager {
     @Throws(IOException::class)
     fun download(tableName: String, catalogUrl: String, isUpdate: String = UPDATEFLAG) {
         ReaderDbManager.createTable(tableName)
-        val cacheMap = CatalogManager.getFromCache(catalogUrl)?.catalogMap
-        val map =
-                (if (cacheMap != null && cacheMap.isNotEmpty()) cacheMap else getMapFromNet(catalogUrl))
-                        .let { filtExistsInSql(tableName, it) }
-        var latestChapter: String? = null
+        val map = CatalogManager.getFromCache(catalogUrl)?.catalogMap
+            .let { if (it.isNullOrEmpty()) getMapFromNet(catalogUrl) else it }
+            ?.let { filtExistsInSql(tableName, it) }
+            ?.takeIf { !it.isNullOrEmpty() } ?: return
         ReaderDbManager.runInTransaction {
-            map.forEach {
-                ReaderDbManager.setChapterFinish(tableName, it.key, it.value, 0)
-                latestChapter = it.key
-            }
+            map.forEach { ReaderDbManager.setChapterFinish(tableName, it.key, it.value, 0) }
         }
-        val dbLatestChapter = ReaderDbManager.shelfDao().getBookInfo(tableName)?.latestChapter
-        if (latestChapter != null && dbLatestChapter != latestChapter) {
-            ReaderDbManager.shelfDao().replace(
-                    bookName = tableName, isUpdate = isUpdate, latestChapter = latestChapter
-            )
-        }
+        map.entries.toTypedArray().last().key
+            .takeIf { it != ReaderDbManager.shelfDao().getBookInfo(tableName)?.latestChapter }
+            ?.also { ReaderDbManager.shelfDao().replace(bookName = tableName, isUpdate = isUpdate, latestChapter = it) }
     }
 
     @Suppress("UNCHECKED_CAST")
     fun addToCache(bookname: String, catalogUrl: String) {
         val selector = ReaderDbManager.sitePreferenceDao().getRule(url2Hostname(catalogUrl)).catalogSelector
-        val map: LinkedHashMap<String, String> = try {
-            ParseHtml().getCatalog(catalogUrl, selector)
-        } catch (e: IOException) {
-            null
-        }?.takeIf { it.isNotEmpty() } ?: return
+        val map = tryIgnoreCatch { ParseHtml().getCatalog(catalogUrl, selector) }
+                ?.takeIf { !it.isNullOrEmpty() } ?: return
+        val result = map.takeIf { map.isNotEmpty() }?.entries?.toTypedArray()?.last()?.key
+            .let { SearchBookResult.new(bookname, catalogUrl, it ?: "", map) }
         count += map.size
-        val latestChapter = map.entries.toTypedArray().last().key
-        val result = SearchBookResult(
-                ObservableField(bookname),
-                ObservableField(catalogUrl),
-                ObservableField(latestChapter),
-                map
-        )
         if (count < MAX_COUNT) {
             memoryCache[catalogUrl] = result
         } else {  //缓存到磁盘
@@ -70,51 +58,44 @@ object CatalogManager {
     }
 
     fun getFromCache(catalogUrl: String): SearchBookResult? {
-        var result = memoryCache[catalogUrl]
-        if (result == null && !diskCache[catalogUrl].isNullOrEmpty()) {
-            result = readFromDisk(diskCache[catalogUrl]!!)
-        }
+        val result = memoryCache[catalogUrl]
+                ?: let {
+                    if (!diskCache[catalogUrl].isNullOrEmpty())
+                        readFromDisk(diskCache[catalogUrl]!!)
+                    else
+                        null
+                }
         return result
     }
 
     fun clearCache() {
         count = 0
         memoryCache.clear()
-        try {
-            File("${ReaderApplication.dirPath}/tmp").takeIf { it.exists() }?.listFiles()?.forEach { it.delete() }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
+        File("${ReaderApplication.dirPath}/tmp").deleteRecursively()
     }
 
     private fun writeToDisk(searchBean: SearchBookResult): String {
-        val file = File("${ReaderApplication.dirPath}/tmp", searchBean.hashCode().toString())
-        var outputStream: ObjectOutputStream? = null
-        try {
-            file.parentFile.mkdirs()
-            outputStream = ObjectOutputStream(FileOutputStream(file))
-            outputStream.writeObject(searchBean)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } finally {
-            outputStream?.close()
+        val file = File("${ReaderApplication.dirPath}/tmp")
+            .apply { mkdirs() }
+            .let { File(it, searchBean.hashCode().toString()) }
+        tryIgnoreCatch {
+            ObjectOutputStream(file.outputStream())
+                .use { it.writeObject(searchBean) }
         }
         return file.path
     }
 
     private fun readFromDisk(path: String): SearchBookResult? {
-        var inputStream: ObjectInputStream? = null
-        val file = File(path)
-        if (!file.exists()) return null
-        return try {
-            inputStream = ObjectInputStream(FileInputStream(file))
-            inputStream.readObject() as SearchBookResult
-        } catch (e: IOException) {
+        val file = File(path).takeIf { !it.exists() } ?: return null
+        var result: SearchBookResult? = null
+        try {
+            ObjectInputStream(file.inputStream()).use {
+                result = it.readObject() as SearchBookResult
+            }
+        }catch (e: IOException) {
             e.printStackTrace()
-            null
-        } finally {
-            inputStream?.close()
         }
+        return result
     }
 
 
@@ -126,11 +107,11 @@ object CatalogManager {
         val selector = ReaderDbManager.sitePreferenceDao().getRule(url2Hostname(catalogUrl)).catalogSelector
         val map = ParseHtml().getCatalog(catalogUrl, selector)
         ReaderDbManager.sitePreferenceDao().getRule(url2Hostname(catalogUrl)).catalogFilter
-                .takeIf { it.isNotEmpty() }
-                ?.split("|")
-                ?.also { list ->
-                    map.filter { entry -> !list.none { entry.key.contains(it) } }.forEach { map.remove(it.key) }
-                }
+            .takeIf { it.isNotEmpty() }
+            ?.split("|")
+            ?.also { list ->
+                map.filter { entry -> !list.none { entry.key.contains(it) } }.forEach { map.remove(it.key) }
+            }
         return map
     }
 
@@ -150,4 +131,5 @@ object CatalogManager {
         return result
     }
 
+    private fun <K, V> Map<K, V>?.isNullOrEmpty() = this == null || this.isEmpty()
 }

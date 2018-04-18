@@ -1,0 +1,38 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登陆</title>
+    <script type="text/javascript" src="js/getUserName.js"></script>
+    <script type="text/javascript">
+    	function login() {
+    		$.ajax({
+    			type: "POST",
+    			dataType: "json",
+    			url: "login",
+    			data: $('#form-login').serialize(),
+    			success: function (result) {
+    				if(result.ret == 1) {
+    					console.log(result.token);
+    					localStorage.setItem("Authorization","Bearer " + result.token);
+    					alert("success");
+    				};
+    			},
+    			error: function () {
+    				alert("failed");
+    			}
+    		});
+    	}
+    </script>
+</head>
+<body onload="getUserName('username')">
+    <div id="username"></div><br />
+    <div id="from-div">
+        <form id="form-login" onsubmit="return false" accept-charset="utf-8">
+            username:<input type="text" name="username"><br>
+            password:<input type="passwd" name="password"><br>
+            <input type="button" value="登陆/注册" onclick="login()">
+        </form>
+    </div>
+<a href="logout">退出登陆</a>
+</body>
+</html>

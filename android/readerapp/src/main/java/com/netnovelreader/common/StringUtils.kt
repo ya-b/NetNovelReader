@@ -27,15 +27,16 @@ fun getHeaders(url: String): HashMap<String, String> {
 
 //对不合法url修复
 fun fixUrl(referenceUrl: String, fixUrl: String): String {
-    if (fixUrl.isEmpty()) return ""
-    if (fixUrl.startsWith("http")) return fixUrl
-    if (fixUrl.startsWith("//")) return "http:" + fixUrl
     val str = if (fixUrl.startsWith("/")) fixUrl else "/" + fixUrl
     val arr = str.split("/")
-    if (arr.size < 2) return referenceUrl.substring(0, referenceUrl.lastIndexOf("/")) + str
-    if (referenceUrl.contains(arr[1]))
-        return referenceUrl.substring(0, referenceUrl.indexOf(arr[1]) - 1) + str
-    return referenceUrl.substring(0, referenceUrl.lastIndexOf("/")) + str
+    return when {
+        fixUrl.isEmpty() -> ""
+        fixUrl.startsWith("http") -> fixUrl
+        fixUrl.startsWith("//") -> "http:" + fixUrl
+        arr.size < 2 -> referenceUrl.substring(0, referenceUrl.lastIndexOf("/")) + str
+        referenceUrl.contains(arr[1]) -> referenceUrl.substring(0, referenceUrl.indexOf(arr[1]) - 1) + str
+        else -> referenceUrl.substring(0, referenceUrl.lastIndexOf("/")) + str
+    }
 }
 
 fun String.replaceSlash(): String = this.replace("/", "SLASH")

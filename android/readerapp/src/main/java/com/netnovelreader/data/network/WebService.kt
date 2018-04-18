@@ -8,11 +8,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
-/**
- * 文件： WebService
- * 描述：
- * 作者： YangJunQuan   2018/2/5.
- */
 object WebService {
     val zhuiShuShenQi: ZhuiShuShenQiAPI by lazy {
         Retrofit.Builder()
@@ -23,7 +18,7 @@ object WebService {
     }
     val novelReader: NovalReaderAPI by lazy {
         Retrofit.Builder()
-                .baseUrl("http://139.159.226.67")
+                .baseUrl("http://139.159.226.67/reader/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(NovalReaderAPI::class.java)
@@ -34,16 +29,16 @@ object WebService {
         fun getPicture(@Url url: String): Call<ResponseBody>
 
         @GET
-        fun getSitePreference(@Url url: String = "http://139.159.226.67/reader/GetSitePreference"): Call<SitePreferenceResponse>
+        fun getSitePreference(@Url url: String = "rule/query"): Call<RespMessage>
 
-        @GET("http://139.159.226.67/reader/login?")
-        fun login(@Query("username") username: String, @Query("password") password: String): Call<ResponseBody>
+        @POST("login") @FormUrlEncoded
+        fun login(@Field("username") username: String, @Field("password") password: String): Call<RespMessage>
 
-        @GET("http://139.159.226.67/reader/download")
-        fun restoreRecord(@Header("Cookie") cookie: String): Call<ReadRecordResponse>
+        @POST("record/restore")
+        fun restoreRecord(@Header("Authorization") token: String): Call<RespMessage>
 
-        @POST("http://139.159.226.67/reader/upload") @Multipart
-        fun saveRecord(@Header("Cookie") cookie: String, @Part file: MultipartBody.Part): Call<ResponseBody>
+        @POST("record/save") @Multipart
+        fun saveRecord(@Header("Authorization") token: String, @Part file: MultipartBody.Part): Call<RespMessage>
     }
 
     interface ZhuiShuShenQiAPI {

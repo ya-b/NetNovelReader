@@ -10,8 +10,6 @@ import android.databinding.ObservableArrayList
 import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
 import android.databinding.ObservableInt
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import com.netnovelreader.R
 import com.netnovelreader.ReaderApplication
@@ -21,6 +19,7 @@ import com.netnovelreader.bean.SearchBookResult
 import com.netnovelreader.bean.SearchHotWord
 import com.netnovelreader.common.enqueueCall
 import com.netnovelreader.common.replace
+import com.netnovelreader.common.tryIgnoreCatch
 import com.netnovelreader.data.CatalogManager
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.local.db.SitePreferenceBean
@@ -53,39 +52,34 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     private val colorArray by lazy {
         //搜索热词标签的背景颜色(从中选取)
         listOf(
-                Color.parseColor("#627176"),
-                Color.parseColor("#3fa5d9"),
-                Color.parseColor("#E25754"),
-                Color.parseColor("#ea6f5a"),
-                Color.parseColor("#42c02e"),
-                Color.parseColor("#2C2C2C"),
-                Color.parseColor("#617c99"),
-                Color.parseColor("#7E57C2"),
-                Color.parseColor("#ff874d"),
-                Color.parseColor("#f44336"),
-                Color.parseColor("#18FFFF"),
-                Color.parseColor("#0f0900"),
-                Color.parseColor("#795548"),
-                Color.parseColor("#FF6F00"),
-                Color.parseColor("#69F0AE"),
-                Color.parseColor("#651FFF"),
-                Color.parseColor("#F06292")
+            Color.parseColor("#627176"),
+            Color.parseColor("#3fa5d9"),
+            Color.parseColor("#E25754"),
+            Color.parseColor("#ea6f5a"),
+            Color.parseColor("#42c02e"),
+            Color.parseColor("#2C2C2C"),
+            Color.parseColor("#617c99"),
+            Color.parseColor("#7E57C2"),
+            Color.parseColor("#ff874d"),
+            Color.parseColor("#f44336"),
+            Color.parseColor("#18FFFF"),
+            Color.parseColor("#0f0900"),
+            Color.parseColor("#795548"),
+            Color.parseColor("#FF6F00"),
+            Color.parseColor("#69F0AE"),
+            Color.parseColor("#651FFF"),
+            Color.parseColor("#F06292")
         )
     }
 
 
     fun refreshHotWords() {
         showHotWord.set(false)
-        hotWordsTemp ?: run {
-            hotWordsTemp =
-                    try {
-                        WebService.zhuiShuShenQi.hotWords().execute().body()?.searchHotWords
-                    } catch (e: IOException) {
-                        null
-                    }.let {
-                        it?.filter { it.word != null && it.word!!.length > 1 }?.takeIf { it.size > 50 }
-                                ?: it
-                    }
+        if (hotWordsTemp == null) {
+            hotWordsTemp = tryIgnoreCatch {
+                WebService.zhuiShuShenQi.hotWords().execute().body()?.searchHotWords
+            }
+                .let { it?.filter { it.word != null && it.word!!.length > 1 } }
         }
         hotWordsTemp = hotWordsTemp?.shuffled() ?: return
         val colorSource = colorArray.shuffled()
@@ -110,23 +104,18 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
 
     fun searchBook(bookname: String?, chapterName: String?) {
         showHotWord.set(false)
-        if (queryTextTemp == bookname && System.currentTimeMillis() - queryTimeTemp < 1000) return
-        if (bookname.isNullOrEmpty()) return
+        if (bookname.isNullOrEmpty() || (queryTextTemp == bookname && System.currentTimeMillis() - queryTimeTemp < 1000)) {
+            return
+        }
         resultList.clear()
         CatalogManager.clearCache()
         val list = ReaderDbManager.sitePreferenceDao().getAll().apply { isLoading.set(!isEmpty()) }
         list.forEach {
             launch(threadPool) {
-                // Logger.i("步骤1.正准备从网站【${it[1]}】搜索图书【${bookname}】")
-                try {
-                    //查询所有搜索站点设置，然后逐个搜索
-                    searchBookFromSite(bookname!!, it, chapterName)
-                } catch (e: IOException) {
-                    e.printStackTrace()
+                tryIgnoreCatch { searchBookFromSite(bookname!!, it, chapterName) }
+                if (isLoading.get() && (resultList.isNotEmpty() || list.last() == it)) {
+                    isLoading.set(false)
                 }
-                if (isLoading.get() && (resultList.isNotEmpty() || list.last() == it)) isLoading.set(
-                        false
-                )
             }
         }
         queryTextTemp = bookname!!
@@ -144,14 +133,10 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     fun downloadBook(bookname: String, catalogUrl: String, chapterName: String?, which: Int) {
         launch { ReaderDbManager.shelfDao().replace(bookName = bookname, downloadUrl = catalogUrl) }
         saveBookImage(bookname)
-        if (isChangeSource.get()) {
-            delChapterAfterSrc(bookname, chapterName!!)
-        }
-        try {
+        if (isChangeSource.get()) delChapterAfterSrc(bookname, chapterName!!)
+        tryIgnoreCatch {
             CatalogManager.download(bookname, catalogUrl)
             toastMessage.postValue(this@SearchViewModel.context.getString(R.string.catalog_finish))
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
         if (which == Dialog.BUTTON_POSITIVE) {
             downLoadChapterCommand.postValue(arrayOf(bookname, catalogUrl))
@@ -163,20 +148,14 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     }
 
     fun detailClick(itemText: String) {
-        launch {
-            val novelIntroduce = try {
-                WebService.zhuiShuShenQi.searchBook(itemText).execute().body()
-                        ?.books
-                        ?.firstOrNull { it.title == itemText }
-                        ?._id
-                        ?.let { WebService.zhuiShuShenQi.getNovelIntroduce(it).execute().body() }
-            } catch (e: IOException) {
-                null
-            }
-            if (novelIntroduce == null) {
-                toastMessage.postValue("没有搜索到相关小说的介绍")
-            } else {
-                showBookDetailCommand.postValue(novelIntroduce)
+        WebService.zhuiShuShenQi.searchBook(itemText).enqueueCall {
+            val id = it?.books?.firstOrNull { it.title == itemText }?._id
+            WebService.zhuiShuShenQi.getNovelIntroduce(id).enqueueCall {
+                if (it == null) {
+                    toastMessage.postValue("没有搜索到相关小说的介绍")
+                } else {
+                    showBookDetailCommand.postValue(it)
+                }
             }
         }
     }
@@ -195,14 +174,13 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
      */
     private fun searchBookSuggest(queryText: String): Cursor? {
         val suggestCursor = MatrixCursor(arrayOf("text", "_id"))
-        try {
+        tryIgnoreCatch {
             WebService.zhuiShuShenQi.searchSuggest(queryText, "com.ushaqi.zhuishushenqi")
-                    .execute().body()
-        } catch (e: IOException) {
-            null
-        }?.keywords?.filter { it.tag == "bookname" }
-                ?.map { it.text }?.toHashSet()
-                ?.forEachIndexed { index, s -> suggestCursor.addRow(arrayOf(s, index)) }
+                .execute().body()
+        }
+            ?.keywords?.filter { it.tag == "bookname" }
+            ?.map { it.text }?.toHashSet()
+            ?.forEachIndexed { index, s -> suggestCursor.addRow(arrayOf(s, index)) }
         return suggestCursor
     }
 
@@ -211,17 +189,13 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
      * @chapterName 正在阅读的章节（换源下载）
      */
     @Throws(IOException::class)
-    private fun searchBookFromSite(
-            bookname: String,
-            siteinfo: SitePreferenceBean,
-            chapterName: String?
-    ) {
+    private fun searchBookFromSite(bookname: String, siteinfo: SitePreferenceBean, chapterName: String?) {
         //result[1]==bookname,result[0]==catalogurl
         val result = SearchBook().search(bookname, siteinfo).takeIf { it[1].isNotEmpty() } ?: return
         CatalogManager.addToCache(result[1], result[0])
         val bean = CatalogManager.getFromCache(result[0])
-                ?.takeIf { !it.url.get().isNullOrEmpty() }
-                ?.takeIf { !it.latestChapter.get().isNullOrEmpty() }
+            ?.takeIf { !it.url.get().isNullOrEmpty() }
+            ?.takeIf { !it.latestChapter.get().isNullOrEmpty() }
                 ?: return
         if (chapterName.isNullOrEmpty() || bean.catalogMap.containsKey(chapterName)) {
             resultList.add(bean)
@@ -233,40 +207,31 @@ class SearchViewModel(val context: Application) : AndroidViewModel(context) {
     private fun delChapterAfterSrc(tableName: String, chapterName: String) {
         val list = ReaderDbManager.delChapterAfterSrc(tableName, chapterName)
         File(ReaderApplication.dirPath + "/$tableName") //目录
-                .takeIf { it.exists() }             //是否存在
-                ?.let { list.map { item -> File(it, item) }.forEach { it.delete() } }
+            .takeIf { it.exists() }             //是否存在
+            ?.let { list.map { item -> File(it, item) }.forEach { it.delete() } }
     }
 
     //下载书籍图片，搜索时调用(搜索时顺便获取图片链接)
     private fun downloadImage(bookname: String, imageUrl: String) {
-        val path =
-                "${ReaderApplication.dirPath}/tmp".apply { File(this).mkdirs() } + "/$bookname.png"
-        if (imageUrl != "" && !File(path).exists()) {
-            //  Logger.i("步骤2.从网站下载图书【$bookname】的图片,URL为【$imageUrl】")
-            WebService.novelReader.getPicture(imageUrl).enqueueCall {
-                try {
-                    it?.byteStream().use { ins ->
-                        FileOutputStream(path).use { os ->
-                            BitmapFactory.decodeStream(ins).compress(Bitmap.CompressFormat.PNG, 100, os)
-                            os.flush()
-                        }
-                    }
-                }catch (e: IOException){
-                    e.printStackTrace()
-                }
+        val path = "${ReaderApplication.dirPath}/tmp".also { File(it).mkdirs() }.let { it + "/$bookname.png" }
+        if(imageUrl.isEmpty() || File(path).exists()) return
+        try {
+            WebService.novelReader.getPicture(imageUrl).execute().body()?.byteStream()?.use { ins ->
+                FileOutputStream(path).use { os -> ins.copyTo(os) }
             }
+        }catch (e: IOException) {
+            e.printStackTrace()
         }
     }
 
     private fun saveBookImage(bookname: String) {
-        val destFile = File(
-                "${ReaderApplication.dirPath}/$bookname".apply { File(this).mkdirs() },
-                "$bookname.png"
-        )
+        val destFile = File("${ReaderApplication.dirPath}/$bookname")
+            .apply { mkdirs() }
+            .let { File(it, "$bookname.png") }
         File(ReaderApplication.dirPath + "/tmp")
-                .takeIf { it.exists() }
-                ?.listFiles { _, name -> name.startsWith(bookname) }
-                ?.firstOrNull()
-                ?.copyTo(destFile,true)
+            .takeIf { it.exists() }
+            ?.listFiles { _, name -> name.startsWith(bookname) }
+            ?.firstOrNull()
+            ?.copyTo(destFile, true)
     }
 }

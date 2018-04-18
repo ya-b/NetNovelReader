@@ -2,6 +2,7 @@ package com.netnovelreader.data.network
 
 import com.netnovelreader.common.fixUrl
 import com.netnovelreader.common.getHeaders
+import com.netnovelreader.common.tryIgnoreCatch
 import org.jsoup.Jsoup
 import org.jsoup.UncheckedIOException
 import org.jsoup.nodes.Element
@@ -21,15 +22,11 @@ class ParseHtml {
         val txt = if (selector.isEmpty() || selector.length < 2) {
             getChapterWithOutSelector(url)
         } else {
-            try {
-                Jsoup.connect(url).headers(getHeaders(url))
-                        .timeout(TIMEOUT).get().select(selector).text()
-            } catch (e: UncheckedIOException) {
-                e.printStackTrace()
-                ""
-            }
+            tryIgnoreCatch {
+                Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get().select(selector).text()
+            } ?: ""
         }
-        return "    " + txt!!.replace(" ", "\n\n  ")
+        return "    " + txt.replace(" ", "\n\n  ")
     }
 
     /**
@@ -61,11 +58,9 @@ class ParseHtml {
      */
     @Throws(IOException::class)
     private fun getChapterWithOutSelector(url: String): String {
-        val elements = try {
+        val elements = tryIgnoreCatch {
             Jsoup.connect(url).headers(getHeaders(url)).timeout(TIMEOUT).get().allElements
-        } catch (e: UncheckedIOException) {
-            return ""
-        }
+        } ?: return ""
         val indexList = ArrayList<Element>()
         if (elements.size > 1) {
             (1 until elements.size)

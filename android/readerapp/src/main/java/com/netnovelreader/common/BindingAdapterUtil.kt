@@ -24,7 +24,6 @@ import com.pageview.PageListener
 import com.pageview.PageView
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.runBlocking
-import java.io.IOException
 
 @BindingAdapter("android:src")
 fun loadUrl(imageView: ImageView, url: String?) = runBlocking {
@@ -33,10 +32,8 @@ fun loadUrl(imageView: ImageView, url: String?) = runBlocking {
             if (!url.contains("http://")) "http://statics.zhuishushenqi.com$url-covers" else url
     val bitmap = BookCoverCache.get(url)
             ?: async(ReaderApplication.threadPool) {
-                try {
+                tryIgnoreCatch {
                     WebService.novelReader.getPicture(realUrl).execute().body()
-                } catch (e: IOException) {
-                    null
                 }.let {
                     if (it != null) BitmapFactory.decodeStream(it.byteStream()) else null
                 }

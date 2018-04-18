@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload File</title>
+    <script type="text/javascript" src="js/getUserName.js"></script>
+</head>
+<body onload="getUserName('username')">
+    <a href="login.html"><div id=username></div></a><a href="logout">退出</a><br/>
+    <form action="record/save" method="post" enctype="multipart/form-data">
+        <input type="file" name="fileupload"/><br />
+        <input type="submit" value="upload file"/>
+    </form>
+</body>
+</html>

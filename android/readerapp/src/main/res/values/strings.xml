@@ -37,7 +37,8 @@
     <string name="fontTypeKey">FontType</string>
     <string name="fontColorKey">FontColor</string>
     <string name="backgroundColorKey">backgroundColor</string>
-    <string name="namepasswd">namepasswd</string>
+    <string name="usernameKey">username</string>
+    <string name="tokenKey">token</string>
 
     <string name="search_button">搜索</string>
     <string name="catalog_finish">目录下载完成</string>

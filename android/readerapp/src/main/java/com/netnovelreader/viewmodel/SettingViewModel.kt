@@ -5,9 +5,13 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableBoolean
+import com.netnovelreader.R
 import com.netnovelreader.bean.ObservableSiteRule
 import com.netnovelreader.bean.RuleType
-import com.netnovelreader.data.local.PreferenceManager
+import com.netnovelreader.common.get
+import com.netnovelreader.common.put
+import com.netnovelreader.common.sharedPreferences
+import com.netnovelreader.common.tryIgnoreCatch
 import com.netnovelreader.data.local.ReaderDbManager
 import com.netnovelreader.data.local.db.SitePreferenceBean
 import com.netnovelreader.data.network.WebService
@@ -15,7 +19,6 @@ import kotlinx.coroutines.experimental.launch
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import java.io.IOException
 
 class SettingViewModel(val context: Application) : AndroidViewModel(context) {
     val isLoading = ObservableBoolean(false)
@@ -30,16 +33,14 @@ class SettingViewModel(val context: Application) : AndroidViewModel(context) {
 
     fun showSiteList() {
         siteList.clear()
-        ReaderDbManager.sitePreferenceDao()
-                .getAll()
-                .let { siteList.addAll(it) }
+        ReaderDbManager.sitePreferenceDao().getAll().let { siteList.addAll(it) }
     }
 
     //启动SiteEditorFragment
     fun editSite(hostName: String) = launch {
         siteList.first { it.hostname == hostName }
-                .also { edittingSite!!.add(it) }
-        editSiteCommand.value = hostName
+            .also { edittingSite!!.add(it) }
+        editSiteCommand.postValue(hostName)
     }
 
     //diaog删除对话框
@@ -50,10 +51,10 @@ class SettingViewModel(val context: Application) : AndroidViewModel(context) {
 
     fun deleteSite(hostName: String) {
         siteList.first { it.hostname == hostName }
-                .also {
-                    siteList.remove(it)
-                    ReaderDbManager.sitePreferenceDao().delete(it)
-                }
+            .also {
+                siteList.remove(it)
+                ReaderDbManager.sitePreferenceDao().delete(it)
+            }
     }
 
     fun editText(type: RuleType): Boolean {
@@ -79,122 +80,81 @@ class SettingViewModel(val context: Application) : AndroidViewModel(context) {
 
     //与手动修改的规则冲突时
     fun updatePreference(perferLocal: Boolean) {
-        val response = try {
+        val response = tryIgnoreCatch {
             WebService.novelReader.getSitePreference().execute().body()
-        } catch (e: IOException) {
-            null
-        } ?: return
-        val updateList =
-                if (!perferLocal) {
-                    response.arr
-                } else {
-                    response.arr.filter { serverRule ->
-                        siteList.none { it.hostname == serverRule.h }
-                    }
-                }.map { it.toSitePreferenceBean() }
-        ReaderDbManager.sitePreferenceDao().insert(*updateList.toTypedArray())
+        }?.takeIf { it.ret == 6 } ?: run { toastCommand.value = "获取配置文件错误"; return }
+        if (!perferLocal) {
+            response.rules
+        } else {
+            response.rules?.filter { bean -> siteList.none { it.hostname == bean.h } }
+        }
+            ?.map { it.toSitePreferenceBean() }
+            ?.let { ReaderDbManager.sitePreferenceDao().insert(*it.toTypedArray()) }
+
         showSiteList()
     }
 
 
-    fun login(username: String, passwd: String) {
+    fun login(username: String, passwd: String) = launch {
         if (username.length < 4 || passwd.length < 4) {
             toastCommand.postValue("用户名或密码格式错误")
-            return
+            return@launch
         }
         isLoading.set(true)
-        launch {
-            var result: String? = null
-            try {
-                WebService.novelReader.login(username, passwd).execute().body()
-            } catch (e: IOException) {
-                null
-            }?.byteStream().use {
-                it?.bufferedReader().use {
-                    result = it?.readText()
+        val result = tryIgnoreCatch { WebService.novelReader.login(username, passwd).execute().body() }
+        when (result?.ret) {
+            1, 2 -> {
+                this@SettingViewModel.context.apply {
+                    sharedPreferences().put(getString(R.string.tokenKey), result.token!!)
                 }
+                exit()
             }
-            when (result) {
-                "0", "1" -> {
-                    PreferenceManager.saveNamePasswd(this@SettingViewModel.context, username, passwd)
-                    exit()
-                }
-                "2" -> {
-                    toastCommand.postValue("用户名或密码格式错误")
-                }
-                "3" -> {
-                    toastCommand.postValue("登陆失败，用户名或密码错误")
-                }
-                else -> {
-                    toastCommand.postValue("网络连接异常")
-                }
-            }
-            isLoading.set(false)
+            3 -> toastCommand.postValue("登陆失败，用户名或密码错误")
+            4 -> toastCommand.postValue("用户名或密码格式错误")
+            else -> toastCommand.postValue("网络连接异常")
         }
+        isLoading.set(false)
     }
 
     //保存至服务器
-    fun saveRecord() {
+    fun saveRecord() = launch {
         isLoading.set(true)
-        val cookie = "name=${PreferenceManager.getNamePasswd(context)}"
-        launch {
-            val records = ReaderDbManager.shelfDao().getAll() ?: return@launch
-            val sb = StringBuilder()
-            sb.append("\"books\":[")
-            for (i in 0 until records.size) {
-                sb.append(records[i].toJson())
-                if (i != records.size - 1) {
-                    sb.append(",")
-                }
+        val token = "Bearer ${this@SettingViewModel.context.run { sharedPreferences().get(getString(R.string.tokenKey),"") }}"
+        val records = ReaderDbManager.shelfDao().getAll() ?: return@launch
+        val sb = StringBuilder()
+        sb.append("{\"books\":[")
+        for (i in 0 until records.size) {
+            sb.append(records[i].toJson())
+            if (i != records.size - 1) {
+                sb.append(",")
             }
-            sb.append("]")
-            val body = RequestBody.create(MediaType.parse("text/plain"), sb.toString())
-            val filePart = MultipartBody.Part.createFormData("fileupload", "record", body)
-            val response = try {
-                WebService.novelReader.saveRecord(cookie, filePart).execute().body()
-            } catch (e: IOException) {
-                null
-            }
-            response?.byteStream()?.use {
-                it.bufferedReader().use {
-                    val result = it.readText()
-                    if (result == "0") {
-                        toastCommand.postValue("上传成功")
-                    } else {
-                        if(result == "1") {
-                            PreferenceManager.saveNamePasswd(this@SettingViewModel.context,"", "")
-                        }
-                        toastCommand.postValue("上传失败")
-                    }
-                }
-            } ?: kotlin.run { toastCommand.postValue("上传失败") }
-            isLoading.set(false)
         }
+        sb.append("]}")
+        val body = RequestBody.create(MediaType.parse("text/plain"), sb.toString())
+        val filePart = MultipartBody.Part.createFormData("fileupload", "record", body)
+        tryIgnoreCatch { WebService.novelReader.saveRecord(token, filePart).execute().body() }
+            .let {
+                if (it?.ret == 6) {
+                    toastCommand.postValue("上传成功")
+                } else {
+                    toastCommand.postValue("上传失败")
+                }
+            }
+        isLoading.set(false)
     }
 
     //从服务器恢复
-    fun updateRecord() {
+    fun updateRecord() = launch {
         isLoading.set(true)
-        val cookie = "name=${PreferenceManager.getNamePasswd(context)}"
-        launch {
-            val result = try {
-                WebService.novelReader.restoreRecord(cookie).execute().body()
-            } catch (e: IOException) {
-                null
-            }
-            if (result?.ret == 0) {
-                result.books.map { it.toSitePreferenceBean() }.let {
-                    if (it.size == 0) return@launch
-                    ReaderDbManager.shelfDao().getAll()?.forEach {
-                        ReaderDbManager.shelfDao().delete(it)
-                    }
-                    ReaderDbManager.shelfDao().insert(*it.toTypedArray())
-                }
-            } else if(result?.ret == 1 ) {
-                PreferenceManager.saveNamePasswd(this@SettingViewModel.context,"", "")
-            }
-            isLoading.set(false)
+        val token = "Bearer ${this@SettingViewModel.context.run { sharedPreferences().get(getString(R.string.tokenKey),"") }}"
+        val result = tryIgnoreCatch { WebService.novelReader.restoreRecord(token).execute().body() }
+        result?.books?.map { it.toSitePreferenceBean() }?.let {
+            if (it.size == 0) return@launch
+            ReaderDbManager.shelfDao().getAll()?.forEach { ReaderDbManager.shelfDao().delete(it) }
+            ReaderDbManager.shelfDao().insert(*it.toTypedArray())
+            exit()
         }
+        isLoading.set(false)
     }
 
     fun exit() {
