@@ -23,14 +23,14 @@ import io.ktor.routing.Routing
 import io.ktor.routing.route
 import javax.naming.AuthenticationException
 
-@Location("login") class Login()
-@Location("logout") class Logout()
-@Location("query") class QueryRule()       // rule/query
-@Location("add") class AddRule()           // rule/add
-@Location("delete") class DeleteRule()     //   rule/delete
-@Location("import") class ImportRule()     //   rule/import
-@Location("save") class SaveRecord()       //   record/save
-@Location("restore") class RestoreRecord() //   record/restore
+@Location("login") class Login
+@Location("logout") class Logout
+@Location("query") class QueryRule       // rule/query
+@Location("add") class AddRule           // rule/add
+@Location("delete") class DeleteRule     //   rule/delete
+@Location("import") class ImportRule     //   rule/import
+@Location("save") class SaveRecord       //   record/save
+@Location("restore") class RestoreRecord //   record/restore
 
 fun Application.main() {
     val config = environment.config

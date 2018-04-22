@@ -21,7 +21,6 @@ object deps {
     object kotlin {
         object stdlib {
             val jdk = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
-            val js = "org.jetbrains.kotlin:kotlin-stdlib-js:${versions.kotlin}"
         }
         object coroutines {
             val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}"
@@ -34,7 +33,6 @@ object deps {
             val auth_jwt = "io.ktor:ktor-auth-jwt:${versions.ktor}"
             val html_builder = "io.ktor:ktor-html-builder:${versions.ktor}"
         }
-        val js = "org.jetbrains.kotlin:kotlin-stdlib-js:${versions.kotlin}"
     }
     object retrofit {
         val client = "com.squareup.retrofit2:retrofit:${versions.retrofit}"

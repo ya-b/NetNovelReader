@@ -32,4 +32,6 @@ tomcat {
 
 kotlin.experimental.coroutines = Coroutines.ENABLE
 
-(getTasksByName("war", false).first() as AbstractArchiveTask).baseName = "reader"
+tasks.withType(War::class.java) {
+    baseName = "reader"
+}

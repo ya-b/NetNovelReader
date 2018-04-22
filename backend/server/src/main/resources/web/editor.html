@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>rule editor</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
     <script type="text/javascript" src="js/getUserName.js"></script>
+    <script type="text/javascript" src="js/formUpload.js"></script>
 </head>
 <body onload="getUserName('username')">
 <a href="login.html"><div id=username></div></a><a href="logout">退出</a><br/>
     <h3>-------------import---------------------</h3>
-    <form action="rule/import" method="post" enctype="multipart/form-data">
+    <form id="form-upload" enctype="multipart/form-data">
         <input type="file" name="fileupload"/><br />
-        <input type="submit" value="import"/>
+        <input type="button" onclick="upload('#form-upload','rule/import')" value="import"/>
     </form>
     <h3>-------------query---------------------</h3>
-    <form action="rule/query" accept-charset="utf-8" method="post">
+    <form id="form-query" enctype="multipart/form-data">
         hostname:<input type="text" name="hostname"><br>
-        <input type="submit">
+        <input type="button" onclick="upload('#form-query','rule/query')">
     </form>
     <h3>-------------add---------------------</h3>
-    <form action="rule/add" accept-charset="utf-8" method="post">
+    <form id="form-add" enctype="multipart/form-data">
         hostname:<input type="text" name="hostname"><br>
         catalogSelector:<input type="text" name="catalog_selector"><br>
         chapterSelector:<input type="text" name="chapter_selector"><br>
@@ -33,12 +35,12 @@
         redirectImage:<input type="text" name="redirect_image"><br>
         noRedirectImage:<input type="text" name="no_redirect_image"><br>
         charset:<input type="text" name="charset"><br>
-        <input type="submit">
+        <input type="button" onclick="upload('#form-add','rule/add')">
     </form>
     <h3>-------------delete---------------------</h3>
-    <form action="rule/delete" accept-charset="utf-8" method="post">
+    <form id="form-delete" enctype="multipart/form-data">
         hostname:<input type="text" name="hostname"><br>
-        <input type="submit">
+        <input type="button" onclick="upload('#form-delete','rule/delete')">
     </form>
 </body>
 </html>
