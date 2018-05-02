@@ -69,7 +69,7 @@ class DownloadService : IntentService {
                 }
             }
         }
-        lock.take()  //用阻塞队列阻塞住线程，一次只下载一本书
+        lock.take()  //阻塞住线程，一次只下载一本书
     }
 
     override fun onDestroy() {

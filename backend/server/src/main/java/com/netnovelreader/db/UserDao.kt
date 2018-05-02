@@ -30,7 +30,8 @@ class UserDao(private val connection: () -> Connection?) {
             .close()
     }
 
-    fun getUser(username: String): UserBean? {
+    fun getUser(username: String?): UserBean? {
+        username ?: return null
         var result: UserBean? = null
         (connection() ?: throw SQLException())
             .also {

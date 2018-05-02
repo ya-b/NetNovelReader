@@ -13,6 +13,7 @@ import android.widget.Toast
 import com.netnovelreader.R
 import com.netnovelreader.data.local.db.ShelfBean
 import com.netnovelreader.data.local.db.ShelfDao
+import org.jsoup.UncheckedIOException
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -118,6 +119,8 @@ inline fun <T> tryIgnoreCatch(body: () -> T?): T? =
         body()
     } catch (e: Exception) {
         e.printStackTrace()
+        null
+    } catch (e: UncheckedIOException) {
         null
     }
 

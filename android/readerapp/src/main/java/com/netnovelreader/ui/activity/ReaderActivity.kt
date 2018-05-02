@@ -50,10 +50,8 @@ class ReaderActivity : AppCompatActivity() {
         viewModel.CACHE_NUM = sharedPreferences().get(getString(R.string.auto_download_key), true).let { compareValues(it, false) * 3 }
         viewModel.start()
         netStateReceiver = NetStateChangedReceiver {
-            if (viewModel.isLoading.get()) {
-                viewModel.downloadJob?.cancel()
-                viewModel.downloadJob = launch { viewModel.downloadAndShow() }
-            }
+            viewModel.downloadJob?.cancel()
+            viewModel.downloadJob = launch { viewModel.downloadAndShow() }
         }
         val filter = IntentFilter().apply { addAction(ConnectivityManager.CONNECTIVITY_ACTION) }
         registerReceiver(netStateReceiver, filter)  //网络变化广播接收器
