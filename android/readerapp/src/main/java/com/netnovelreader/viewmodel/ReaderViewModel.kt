@@ -83,17 +83,16 @@ class ReaderViewModel(val context: Application) : AndroidViewModel(context) {
 
     //下载并显示，阅读到未下载章节时调用
     suspend fun downloadAndShow() {
-        chapterCache ?: return
-        var str = ChapterManager.FILENOTFOUND
+        if(!isLoading.get() || chapterCache == null) return
+        var str = "|${ChapterManager.FILENOTFOUND}"
         var times = 0
-        while (str == ChapterManager.FILENOTFOUND && times++ < 10) {
+        while (str.split("|")[1] == ChapterManager.FILENOTFOUND && times++ < 10) {
             str = chapterCache!!.getChapter(chapterNum.get())
             delay(500)
         }
-        str.split("|")[1].takeIf { it != ChapterManager.FILENOTFOUND }?.run {
-            isLoading.set(false)
-            getChapter(ChapterChangeType.BY_CATALOG, null)
-        }
+        str.split("|")[1].takeIf { it != ChapterManager.FILENOTFOUND }
+        text.set(str)
+        if(times < 10) isLoading.set(false)
     }
 
     fun reloadCurrentChapter() {

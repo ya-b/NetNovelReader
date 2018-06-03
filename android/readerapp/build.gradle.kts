@@ -16,6 +16,7 @@ android {
         applicationId = config.applicationId
         versionCode = config.versionCode
         versionName = config.versionName
+        multiDexEnabled = true
         testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -54,6 +55,7 @@ dependencies {
     implementation(deps.android.support.design)
     implementation(deps.android.support.constraint_layout)
     implementation(deps.android.support.preference)
+    implementation(deps.android.support.multidex)
     kapt(deps.android.databinding)
     implementation(deps.circleimageview)
     implementation(deps.android.arch.lifecycle)

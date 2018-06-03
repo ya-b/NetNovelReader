@@ -16,6 +16,7 @@ object deps {
             val v4 = "com.android.support:support-v4:${versions.supportLibrary}"
             val constraint_layout = "com.android.support.constraint:constraint-layout:1.0.2"
             val preference = "com.android.support:preference-v7:${versions.supportLibrary}"
+            val multidex = "com.android.support:multidex:1.0.1"
         }
         val databinding = "com.android.databinding:compiler:${versions.gradle}"
     }

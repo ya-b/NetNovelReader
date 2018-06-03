@@ -48,12 +48,12 @@ fun Application.main() {
     install(PartialContent)
     install(AutoHeadResponse)
     install(ContentNegotiation) { gson { setPrettyPrinting() } }
-    install(Authentication) { auth(issuer, audience, realm, secret) }
+    install(Authentication) { auth(issuer, audience, realm, secret, db) }
     install(StatusPages) { statusPage() }
     install(Routing) { routes(uploadDir, issuer, audience, secret, db) }
 }
 
-fun Authentication.Configuration.auth(issuer: String, audience: String, realm: String, secret: String){
+fun Authentication.Configuration.auth(issuer: String, audience: String, realm: String, secret: String, db: ReaderDatabase){
     val jwtVerifier = JWT.require(Algorithm.HMAC256(secret))
         .withAudience(audience)
         .withIssuer(issuer)
@@ -61,7 +61,14 @@ fun Authentication.Configuration.auth(issuer: String, audience: String, realm: S
     jwt {
         this.realm = realm
         verifier(jwtVerifier)
-        validate { if (it.payload.audience.contains(audience)) JWTPrincipal(it.payload) else null }
+        validate {
+            val user = db.userDao().getUser(it.payload.getClaim("username")?.asString())
+            if (it.payload.audience.contains(audience) && user != null) {
+                JWTPrincipal(it.payload)
+            } else {
+                null
+            }
+        }
     }
 }
 

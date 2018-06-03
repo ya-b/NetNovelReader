@@ -38,25 +38,26 @@ class SettingActivity : AppCompatActivity() {
                 .apply { viewModel = settingViewModel }
         when(intent.getIntExtra("type", 0)){
             0 -> {
-                setSupportActionBar(settingToolbar.apply { title = getString(R.string.settings) })
+                settingToolbar.title = getString(R.string.settings)
                 supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, SettingFragment()).commit()
             }
             1 -> {
-                setSupportActionBar(settingToolbar.apply { title = getString(R.string.edit_site) })
+                settingToolbar.title = getString(R.string.edit_site)
                 siteListFg = SitePreferenceFragment()
                 supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, siteListFg, SP).commit()
             }
             2 -> {
-                setSupportActionBar(settingToolbar.apply { title = getString(R.string.login) })
+                settingToolbar.title = getString(R.string.login)
                 supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, LoginFragment()).commit()
                 setResult(20)
             }
             3 -> {
-                setSupportActionBar(settingToolbar.apply { title = getString(R.string.syncRecord) })
+                title = getString(R.string.syncRecord)
                 supportFragmentManager.beginTransaction().add(R.id.settingFrameLayout, SyncRecordFragment()).commit()
                 setResult(20)
             }
         }
+        setSupportActionBar(settingToolbar)
     }
 
     fun initLiveData() {

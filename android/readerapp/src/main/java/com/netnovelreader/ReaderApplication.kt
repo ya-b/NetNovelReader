@@ -1,7 +1,9 @@
 package com.netnovelreader
 
 import android.app.Application
+import android.content.Context
 import android.os.Environment
+import android.support.multidex.MultiDex
 import com.netnovelreader.data.local.ReaderDbManager
 import com.squareup.leakcanary.LeakCanary
 import kotlinx.coroutines.experimental.ThreadPoolDispatcher
@@ -20,6 +22,11 @@ class ReaderApplication : Application() {
         } else {
             filesDir.absolutePath
         }
+    }
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+        MultiDex.install(this)
     }
 
     companion object {
