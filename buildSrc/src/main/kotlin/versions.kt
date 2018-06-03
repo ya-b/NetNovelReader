@@ -1,7 +1,7 @@
 object versions{
-    val kotlin = "1.2.40"
+    val kotlin = "1.2.41"
     val gradle = "3.1.1"
-    val ktor = "0.9.2-alpha-5"
+    val ktor = "0.9.2"
     val supportLibrary = "27.1.1"
     val coroutines = "0.22.5"
     val retrofit = "2.4.0"

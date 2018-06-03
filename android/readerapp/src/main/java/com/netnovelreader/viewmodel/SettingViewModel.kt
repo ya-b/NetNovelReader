@@ -5,6 +5,7 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableBoolean
+import com.google.gson.Gson
 import com.netnovelreader.R
 import com.netnovelreader.bean.ObservableSiteRule
 import com.netnovelreader.bean.RuleType
@@ -86,9 +87,8 @@ class SettingViewModel(val context: Application) : AndroidViewModel(context) {
         if (!perferLocal) {
             response.rules
         } else {
-            response.rules?.filter { bean -> siteList.none { it.hostname == bean.h } }
+            response.rules?.filter { bean -> siteList.none { it.hostname == bean.hostname } }
         }
-            ?.map { it.toSitePreferenceBean() }
             ?.let { ReaderDbManager.sitePreferenceDao().insert(*it.toTypedArray()) }
 
         showSiteList()
@@ -124,7 +124,7 @@ class SettingViewModel(val context: Application) : AndroidViewModel(context) {
         val sb = StringBuilder()
         sb.append("{\"books\":[")
         for (i in 0 until records.size) {
-            sb.append(records[i].toJson())
+            sb.append(Gson().toJson(records[i]))
             if (i != records.size - 1) {
                 sb.append(",")
             }
@@ -148,7 +148,7 @@ class SettingViewModel(val context: Application) : AndroidViewModel(context) {
         isLoading.set(true)
         val token = "Bearer ${this@SettingViewModel.context.run { sharedPreferences().get(getString(R.string.tokenKey),"") }}"
         val result = tryIgnoreCatch { WebService.novelReader.restoreRecord(token).execute().body() }
-        result?.books?.map { it.toSitePreferenceBean() }?.let {
+        result?.books?.let {
             if (it.size == 0) return@launch
             ReaderDbManager.shelfDao().getAll()?.forEach { ReaderDbManager.shelfDao().delete(it) }
             ReaderDbManager.shelfDao().insert(*it.toTypedArray())

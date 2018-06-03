@@ -4,9 +4,10 @@ object deps {
             val lifecycle = "android.arch.lifecycle:extensions:${versions.archLifecycle}"
             val lifecycle_compiler = "android.arch.lifecycle:compiler:${versions.archLifecycle}"
             val lifecycle_test = "android.arch.core:core-testing:${versions.archLifecycle}"
-            val room = "android.arch.persistence.room:runtime:1.0.0"
-            val room_compiler = "android.arch.persistence.room:compiler:1.0.0"
-            val room_test = "android.arch.persistence.room:testing:1.0.0"
+            val room = "android.arch.persistence.room:runtime:1.1.0"
+            val room_compiler = "android.arch.persistence.room:compiler:1.1.0"
+            val room_test = "android.arch.persistence.room:testing:1.1.0"
+            val paging = "android.arch.paging:runtime:1.0.0"
         }
         object support {
             val v7 = "com.android.support:appcompat-v7:${versions.supportLibrary}"
@@ -43,20 +44,20 @@ object deps {
         val debug = "com.squareup.leakcanary:leakcanary-android:${versions.leakcanary}"
         val release = "com.squareup.leakcanary:leakcanary-android-no-op:${versions.leakcanary}"
     }
-    val circleimageview = "de.hdodenhof:circleimageview:2.2.0"
-    val jsoup = "org.jsoup:jsoup:1.11.2"
+    val circleimageview = "de.hdodenhof:circleimageview:+"
+    val jsoup = "org.jsoup:jsoup:+"
     val javaee_api = "javax:javaee-api:7.0"
     val gson = "com.google.code.gson:gson:2.8.2"
     val slf4j = "org.slf4j:slf4j-jdk14:1.8.0-beta2"
     object apache {
-        val dbutils = "commons-dbutils:commons-dbutils:1.7"
-        val fileupload = "commons-fileupload:commons-fileupload:1.3.3"
+        val dbutils = "commons-dbutils:commons-dbutils:+"
+        val fileupload = "commons-fileupload:commons-fileupload:+"
         object tomcatEmbed {
             val core = "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcat}"
             val jasper = "org.apache.tomcat.embed:tomcat-embed-jasper:${versions.tomcat}"
         }
     }
-    val mariadb_client = "org.mariadb.jdbc:mariadb-java-client:2.2.3"
+    val mariadb_client = "org.mariadb.jdbc:mariadb-java-client:+"
     object test {
         val junit = "junit:junit:${versions.junit}"
         val mockito = "org.mockito:mockito-core:${versions.mockito}"
