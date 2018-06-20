@@ -1,4 +1,4 @@
-package com.netnovelreader.common
+package com.netnovelreader.ui.adapter
 
 import android.content.Context
 import android.graphics.Canvas

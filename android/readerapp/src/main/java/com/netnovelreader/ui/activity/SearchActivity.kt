@@ -16,13 +16,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.netnovelreader.R
-import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.init
 import com.netnovelreader.common.obtainViewModel
 import com.netnovelreader.common.toast
 import com.netnovelreader.data.CatalogManager
 import com.netnovelreader.databinding.ActivitySearchBinding
 import com.netnovelreader.service.DownloadService
+import com.netnovelreader.ui.adapter.RecyclerAdapter
 import com.netnovelreader.viewmodel.SearchViewModel
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.experimental.Deferred
@@ -50,7 +50,11 @@ class SearchActivity : AppCompatActivity() {
         DataBindingUtil.setContentView<ActivitySearchBinding>(this, R.layout.activity_search)
                 .apply { viewModel = searchViewModel }
         searchRecycler.init(
-                RecyclerAdapter(searchViewModel.resultList, R.layout.item_search, searchViewModel, true)
+            RecyclerAdapter(
+                searchViewModel.resultList,
+                R.layout.item_search,
+                searchViewModel
+            )
         )
         searchViewBar.setOnQueryTextListener(QueryListener())
         searchViewBar.onActionViewExpanded()

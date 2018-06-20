@@ -11,9 +11,13 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.WindowManager
 import com.netnovelreader.R
-import com.netnovelreader.common.*
+import com.netnovelreader.common.get
+import com.netnovelreader.common.init
+import com.netnovelreader.common.obtainViewModel
+import com.netnovelreader.common.sharedPreferences
 import com.netnovelreader.databinding.ActivityReaderBinding
 import com.netnovelreader.receiver.NetStateChangedReceiver
+import com.netnovelreader.ui.adapter.RecyclerAdapter
 import com.netnovelreader.viewmodel.ReaderViewModel
 import kotlinx.android.synthetic.main.activity_reader.*
 import kotlinx.coroutines.experimental.launch
@@ -105,9 +109,9 @@ class ReaderActivity : AppCompatActivity() {
             val builder = AlertDialog.Builder(this@ReaderActivity)
             catalogView = RecyclerView(this@ReaderActivity)
             catalogView?.init(
-                    RecyclerAdapter(
-                            viewModel.catalog, R.layout.item_catalog, viewModel, true
-                    )
+                RecyclerAdapter(
+                    viewModel.catalog, R.layout.item_catalog, viewModel
+                )
             )
             dialog = builder.setView(catalogView).create()
         }

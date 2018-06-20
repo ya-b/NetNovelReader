@@ -64,6 +64,7 @@ dependencies {
     implementation(deps.android.arch.room)
     kapt(deps.android.arch.room_compiler)
     testImplementation(deps.android.arch.room_test)
+    implementation(deps.android.arch.paging)
     implementation(deps.kotlin.stdlib.jdk)
     implementation(deps.kotlin.coroutines.core)
     implementation(deps.kotlin.coroutines.android)

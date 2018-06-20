@@ -10,10 +10,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.netnovelreader.R
-import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.init
 import com.netnovelreader.common.obtainViewModel
 import com.netnovelreader.databinding.FragmentSitePreferenceBinding
+import com.netnovelreader.ui.adapter.RecyclerAdapter
 import com.netnovelreader.viewmodel.SettingViewModel
 import kotlinx.coroutines.experimental.launch
 
@@ -48,12 +48,11 @@ class SitePreferenceFragment : Fragment() {
         )
         launch { settingViewModel?.showSiteList() }
         binding.recycleSiteList.init(
-                RecyclerAdapter(
-                        settingViewModel?.siteList,
-                        R.layout.item_site_preference_list,
-                        settingViewModel,
-                        true
-                )
+            RecyclerAdapter(
+                settingViewModel?.siteList,
+                R.layout.item_site_preference_list,
+                settingViewModel
+            )
         )
         return binding.root
     }

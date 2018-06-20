@@ -1,4 +1,4 @@
-package com.netnovelreader.common
+package com.netnovelreader.ui.adapter
 
 import android.databinding.DataBindingUtil
 import android.databinding.ObservableArrayList
@@ -19,8 +19,7 @@ import java.lang.ref.WeakReference
 class RecyclerAdapter<T, E>(
         private val itemDetails: ObservableArrayList<T>?,
         private val resId: Int,
-        val clickEvent: E,
-        val isoccupiedFirst: Boolean
+        val clickEvent: E
 ) : RecyclerView.Adapter<RecyclerAdapter.BindingViewHolder<T, E>>() {
     lateinit var listener: WeakReference<ArrayListChangeListener<T, E>>
 
@@ -48,23 +47,13 @@ class RecyclerAdapter<T, E>(
     }
 
     override fun onBindViewHolder(holder: BindingViewHolder<T, E>, position: Int) {
-        if (!isoccupiedFirst) {
-            holder.bind(itemDetails?.get(position), clickEvent)
-        } else if (position == 0) {
-            holder.bind(null, null)
-        } else {
-            holder.bind(itemDetails?.get(position - 1), clickEvent)
-        }
+        holder.bind(itemDetails?.get(position), clickEvent)
     }
 
     override fun getItemCount(): Int = when{
             itemDetails == null -> 0
-            isoccupiedFirst -> itemDetails.size + 1
             else -> itemDetails.size
     }
-
-    override fun getItemViewType(position: Int): Int =
-            if (isoccupiedFirst && position == 0) -1 else 0
 
     class BindingViewHolder<in T, in E>(private val binding: ViewDataBinding?) :
             RecyclerView.ViewHolder(binding?.root) {
@@ -84,39 +73,31 @@ class RecyclerAdapter<T, E>(
 
         override fun onItemRangeChanged(p0: ObservableArrayList<T>?, p1: Int, p2: Int) {
             launch(UI) {
-                (if (isoccupiedFirst) p1 + 1 else p1).also {
-                    notifyItemRangeRemoved(it, p2)
-                    notifyItemRangeInserted(it, p2)
-                }
+                notifyItemRangeRemoved(p1, p2)
+                notifyItemRangeInserted(p1, p2)
             }
         }
 
         override fun onItemRangeInserted(p0: ObservableArrayList<T>?, p1: Int, p2: Int) {
             launch(UI) {
-                (if (isoccupiedFirst) p1 + 1 else p1).also {
-                    if (p0?.size == p2) {
-                        notifyDataSetChanged()           //添加所有，不显示动画效果，避免屏幕闪烁
-                    } else {
-                        notifyItemRangeInserted(it, p2)
-                    }
+                if (p0?.size == p2) {
+                    notifyDataSetChanged()           //添加所有，不显示动画效果，避免屏幕闪烁
+                } else {
+                    notifyItemRangeInserted(p1, p2)
                 }
             }
         }
 
         override fun onItemRangeMoved(p0: ObservableArrayList<T>?, p1: Int, p2: Int, p3: Int) {
             launch(UI) {
-                (if (isoccupiedFirst) p1 + 1 else p1).also {
-                    notifyItemRangeRemoved(it, p3)
-                    notifyItemRangeInserted(it, p3)
-                }
+                notifyItemRangeRemoved(p1, p3)
+                notifyItemRangeInserted(p1, p3)
             }
         }
 
         override fun onItemRangeRemoved(p0: ObservableArrayList<T>?, p1: Int, p2: Int) {
             launch(UI) {
-                (if (isoccupiedFirst) p1 + 1 else p1).also {
-                    notifyItemRangeRemoved(it, p2)
-                }
+                notifyItemRangeRemoved(p1, p2)
             }
         }
     }

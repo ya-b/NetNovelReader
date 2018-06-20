@@ -5,7 +5,7 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.bean.BookInfo" />
+            type="com.netnovelreader.data.local.db.ShelfBean" />
 
         <variable
             name="clickEvent"

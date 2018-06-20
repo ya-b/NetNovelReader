@@ -13,10 +13,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.netnovelreader.R
-import com.netnovelreader.common.*
+import com.netnovelreader.common.get
+import com.netnovelreader.common.obtainViewModel
+import com.netnovelreader.common.parseTheme
+import com.netnovelreader.common.sharedPreferences
 import com.netnovelreader.databinding.FragmentShelfBinding
 import com.netnovelreader.ui.activity.ReaderActivity
 import com.netnovelreader.ui.activity.ShelfActivity
+import com.netnovelreader.ui.adapter.ShelfAdapter
 import com.netnovelreader.viewmodel.ShelfViewModel
 import kotlinx.android.synthetic.main.activity_shelf.*
 import kotlinx.coroutines.experimental.launch
@@ -33,10 +37,10 @@ class ShelfFragment : Fragment() {
         shelfViewModel = activity?.obtainViewModel(ShelfViewModel::class.java)
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_shelf, container, false)
         binding.viewModel = shelfViewModel
-        RecyclerAdapter(shelfViewModel?.bookList, R.layout.item_shelf, shelfViewModel, true)
-            .let { binding.shelfRecycler.init(it, null) }
+        val adapter = ShelfAdapter(shelfViewModel)
+        binding.shelfRecycler.adapter = adapter
         binding.shelfRefresh.setColorSchemeResources(R.color.gray)
-        initLiveData()
+        initLiveData(adapter)
         (activity as ShelfActivity).shelfTab.run {
             post {
                 binding.shelfRecycler.setPadding(0, height, 0, 0)
@@ -46,7 +50,8 @@ class ShelfFragment : Fragment() {
         return binding.root
     }
 
-    fun initLiveData() {
+    fun initLiveData(adapter: ShelfAdapter) {
+        shelfViewModel?.allBookList?.observe(this, Observer(adapter::submitList))
         shelfViewModel?.stopRefershCommand?.observe(this, Observer {
             binding.shelfRefresh.isRefreshing = false
         })
@@ -80,7 +85,6 @@ class ShelfFragment : Fragment() {
                 context!!,
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED) {
-            launch { shelfViewModel?.refreshBookList() }
         }
         isFirstResume = false
     }

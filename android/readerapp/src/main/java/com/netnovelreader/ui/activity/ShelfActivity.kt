@@ -14,11 +14,11 @@ import android.view.animation.DecelerateInterpolator
 import com.netnovelreader.R
 import com.netnovelreader.common.*
 import com.netnovelreader.databinding.ActivityShelfBinding
+import com.netnovelreader.ui.adapter.PagerAdapter
 import com.netnovelreader.ui.fragment.NovelClassfyFragment
 import com.netnovelreader.ui.fragment.ShelfFragment
 import com.netnovelreader.viewmodel.ShelfViewModel
 import kotlinx.android.synthetic.main.activity_shelf.*
-import kotlinx.coroutines.experimental.launch
 
 class ShelfActivity : AppCompatActivity() {
 
@@ -124,7 +124,6 @@ class ShelfActivity : AppCompatActivity() {
         if (requestCode == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 hasPermission = true
-                launch { viewModel.refreshBookList() }
             } else {
                 toast(getString(R.string.permission_warnning))
             }

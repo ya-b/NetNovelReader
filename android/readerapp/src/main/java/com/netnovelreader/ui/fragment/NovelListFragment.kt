@@ -7,10 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.netnovelreader.R
-import com.netnovelreader.common.RecyclerAdapter
 import com.netnovelreader.common.init
 import com.netnovelreader.common.obtainViewModel
 import com.netnovelreader.databinding.FragmentNovelListBinding
+import com.netnovelreader.ui.adapter.RecyclerAdapter
 import com.netnovelreader.viewmodel.CategoryDetailViewModel
 import kotlinx.android.synthetic.main.fragment_novel_list.*
 
@@ -39,10 +39,9 @@ class NovelListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         RecyclerAdapter(
-                viewModel?.getBookList(type!!, major!!),
-                R.layout.item_catalog_detial,
-                viewModel,
-                true
+            viewModel?.getBookList(type!!, major!!),
+            R.layout.item_catalog_detial,
+            viewModel
         )
                 .let { novelList.init(it, null) }
         viewModel?.initBooklist(type!!, major!!)

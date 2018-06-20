@@ -13,6 +13,8 @@ import android.widget.Toast
 import com.netnovelreader.R
 import com.netnovelreader.data.local.db.ShelfBean
 import com.netnovelreader.data.local.db.ShelfDao
+import com.netnovelreader.ui.adapter.NovelItemDecoration
+import com.netnovelreader.ui.adapter.RecyclerAdapter
 import org.jsoup.UncheckedIOException
 import retrofit2.Call
 import retrofit2.Callback
@@ -40,14 +42,14 @@ inline fun <T> Call<T>.enqueueCall(crossinline block: (t: T?) -> Unit) {
 }
 
 fun <T, E> RecyclerView.init(
-        adapter: RecyclerAdapter<in T, in E>,
-        decor: RecyclerView.ItemDecoration? = NovelItemDecoration(context),
-        layoutManager: RecyclerView.LayoutManager = object : LinearLayoutManager(context) {
+    adapter: RecyclerAdapter<in T, in E>,
+    decor: RecyclerView.ItemDecoration? = NovelItemDecoration(context),
+    layoutManager: RecyclerView.LayoutManager = object : LinearLayoutManager(context) {
             override fun supportsPredictiveItemAnimations(): Boolean {
                 return false
             }
         },
-        animator: RecyclerView.ItemAnimator? = DefaultItemAnimator()
+    animator: RecyclerView.ItemAnimator? = DefaultItemAnimator()
 ) {
     this.layoutManager = layoutManager
     this.adapter = adapter

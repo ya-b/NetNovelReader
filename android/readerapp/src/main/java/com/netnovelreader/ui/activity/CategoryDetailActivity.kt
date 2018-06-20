@@ -6,10 +6,10 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.netnovelreader.R
-import com.netnovelreader.common.CatalogPagerAdapter
 import com.netnovelreader.common.obtainViewModel
 import com.netnovelreader.common.toast
 import com.netnovelreader.databinding.ActivityCatalogDetailBinding
+import com.netnovelreader.ui.adapter.CatalogPagerAdapter
 import com.netnovelreader.viewmodel.CategoryDetailViewModel
 import kotlinx.android.synthetic.main.activity_catalog_detail.*
 

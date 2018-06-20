@@ -1,7 +1,6 @@
 package com.netnovelreader.common
 
 import android.databinding.BindingAdapter
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Typeface
 import android.support.design.widget.TabLayout
@@ -24,12 +23,13 @@ import com.pageview.PageListener
 import com.pageview.PageView
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.runBlocking
+import java.io.File
 
 @BindingAdapter("android:src")
 fun loadUrl(imageView: ImageView, url: String?) = runBlocking {
     url ?: return@runBlocking
     val realUrl =
-            if (!url.contains("http://")) "http://statics.zhuishushenqi.com$url-covers" else url
+        if (!url.contains("http://")) "http://statics.zhuishushenqi.com$url-covers" else url
     val bitmap = BookCoverCache.get(url)
             ?: async(ReaderApplication.threadPool) {
                 tryIgnoreCatch {
@@ -44,10 +44,14 @@ fun loadUrl(imageView: ImageView, url: String?) = runBlocking {
 }
 
 @BindingAdapter("android:src")
-fun setSrc(imageView: ImageView, bitmap: Bitmap?) {
+fun setSrc(imageView: ImageView, bookname: String?) {
+    if (bookname.isNullOrEmpty()) return
+    val bitmap = File("${ReaderApplication.dirPath}/$bookname", "$bookname.png")
+        .takeIf { it.exists() }
+        ?.let { BitmapFactory.decodeFile(it.path) }
     if (bitmap == null) {
         imageView.setImageDrawable(
-                ContextCompat.getDrawable(imageView.context, R.drawable.cover_default)
+            ContextCompat.getDrawable(imageView.context, R.drawable.cover_default)
         )
     } else {
         imageView.setImageBitmap(bitmap)
@@ -55,7 +59,7 @@ fun setSrc(imageView: ImageView, bitmap: Bitmap?) {
 }
 
 @BindingAdapter("android:backgroundColor")
-fun setBackground(pageView: PageView, background: Int){
+fun setBackground(pageView: PageView, background: Int) {
     pageView.backgroundcolor = background
 }
 
@@ -91,8 +95,8 @@ fun setOnPageChange(readerView: PageView, onPageChange: PageListener.OnPageChang
 
 @BindingAdapter("android:onRefresh")
 fun setRefershListener(
-        refreshLayout: SwipeRefreshLayout,
-        listener: SwipeRefreshLayout.OnRefreshListener?
+    refreshLayout: SwipeRefreshLayout,
+    listener: SwipeRefreshLayout.OnRefreshListener?
 ) {
     refreshLayout.setOnRefreshListener(listener)
 }

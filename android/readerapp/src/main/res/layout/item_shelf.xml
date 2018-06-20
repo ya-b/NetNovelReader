@@ -7,7 +7,7 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.bean.BookInfo" />
+            type="com.netnovelreader.data.local.db.ShelfBean" />
 
         <variable
             name="clickEvent"
@@ -26,8 +26,8 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:onClick="@{() -> clickEvent.readBook(itemDetail.bookname??``)}"
-            android:onLongClick="@{() -> clickEvent.deleteDialog(itemDetail.bookname??``)}">
+            android:onClick="@{() -> clickEvent.readBook(itemDetail.bookName??``)}"
+            android:onLongClick="@{() -> clickEvent.deleteDialog(itemDetail.bookName??``)}">
 
             <ImageView
                 android:id="@+id/bookCover"
@@ -37,7 +37,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:src="@{itemDetail.bitmap}"
+                android:src="@{itemDetail.bookName}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -47,7 +47,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="@{itemDetail.bookname??``}"
+                android:text="@{itemDetail.bookName??``}"
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/bookCover"

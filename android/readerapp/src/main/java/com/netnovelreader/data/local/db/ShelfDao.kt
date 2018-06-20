@@ -1,9 +1,13 @@
 package com.netnovelreader.data.local.db
 
+import android.arch.paging.DataSource
 import android.arch.persistence.room.*
 
 @Dao
 interface ShelfDao {
+
+    @Query("SELECT * FROM ${ReaderDatabase.TABLE_SHELF} order by ${ReaderDatabase.LATESTREAD} DESC")
+    fun allBooks(): DataSource.Factory<Int, ShelfBean>
 
     @Query("SELECT * FROM ${ReaderDatabase.TABLE_SHELF} order by ${ReaderDatabase.LATESTREAD} DESC")
     fun getAll(): List<ShelfBean>?
