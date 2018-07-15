@@ -10,7 +10,7 @@ import android.widget.ViewFlipper
 import kotlin.reflect.KProperty
 
 class PageView : ViewFlipper {
-    var pageNum: Int? by InvalidateAfterSet(-1)                    //页数
+    var pageNum: Int? by InvalidateAfterSet(1)                    //页数
     var backgroundcolor by InvalidateAfterSet(Color.WHITE)
     var textColor by InvalidateAfterSet(Color.BLACK)                    //字体颜色
     var txtFontType: Typeface? by InvalidateAfterSet(Typeface.DEFAULT)  //正文字体类型//背景颜色
@@ -74,9 +74,8 @@ class PageView : ViewFlipper {
         showNext()
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        pageNum = doDrawPrepare?.doDrawPrepare()
+    fun prepare(pageNum: Int) {
+        this.pageNum = pageNum
     }
 
     @SuppressLint("ClickableViewAccessibility")

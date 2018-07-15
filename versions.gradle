@@ -1,0 +1,211 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ext.deps = [:]
+def versions = [:]
+versions.arch_core = "1.1.1"
+versions.room = "1.1.1"
+versions.lifecycle = "1.1.1"
+versions.support = "27.1.1"
+versions.dagger = "2.15"
+versions.junit = "4.12"
+versions.espresso = "3.0.1"
+versions.retrofit = "2.4.0"
+versions.jsoup = "1.11.3"
+versions.okhttp_logging_interceptor = "3.9.0"
+versions.mockwebserver = "3.8.1"
+versions.apache_commons = "2.5"
+versions.mockito = "2.7.19"
+versions.mockito_all = "1.10.19"
+versions.dexmaker = "2.2.0"
+versions.constraint_layout = "1.1.2"
+versions.glide = "4.7.1"
+versions.timber = "4.5.1"
+versions.android_gradle_plugin = "3.3.0-alpha03"
+versions.rxjava2 = "2.1.3"
+versions.rx_android = "2.0.1"
+versions.atsl_runner = "1.0.1"
+versions.atsl_rules = "1.0.1"
+versions.hamcrest = "1.3"
+versions.kotlin = "1.2.50"
+versions.paging = "1.0.0"
+versions.work = "1.0.0-alpha02"
+versions.navigation = "1.0.0-alpha03"
+versions.leakcanary = "1.5.4"
+versions.stetho = "1.5.0"
+versions.timber = "4.7.1"
+versions.logger = "2.2.0"
+versions.circleimageview = "2.2.0"
+versions.ktor = "0.9.3"
+versions.tomcat = "8.5.24"
+versions.mariadb_client = "2.2.5"
+versions.dbutils = "1.7"
+def deps = [:]
+
+def support = [:]
+support.annotations = "com.android.support:support-annotations:$versions.support"
+support.app_compat = "com.android.support:appcompat-v7:$versions.support"
+support.recyclerview = "com.android.support:recyclerview-v7:$versions.support"
+support.cardview = "com.android.support:cardview-v7:$versions.support"
+support.design = "com.android.support:design:$versions.support"
+support.v4 = "com.android.support:support-v4:$versions.support"
+support.core_utils = "com.android.support:support-core-utils:$versions.support"
+deps.support = support
+
+def room = [:]
+room.runtime = "android.arch.persistence.room:runtime:$versions.room"
+room.compiler = "android.arch.persistence.room:compiler:$versions.room"
+room.rxjava2 = "android.arch.persistence.room:rxjava2:$versions.room"
+room.testing = "android.arch.persistence.room:testing:$versions.room"
+deps.room = room
+
+def lifecycle = [:]
+lifecycle.runtime = "android.arch.lifecycle:runtime:$versions.lifecycle"
+lifecycle.extensions = "android.arch.lifecycle:extensions:$versions.lifecycle"
+lifecycle.java8 = "android.arch.lifecycle:common-java8:$versions.lifecycle"
+lifecycle.compiler = "android.arch.lifecycle:compiler:$versions.lifecycle"
+deps.lifecycle = lifecycle
+
+def arch_core = [:]
+arch_core.testing = "android.arch.core:core-testing:$versions.arch_core"
+deps.arch_core = arch_core
+
+deps.paging = "android.arch.paging:runtime:$versions.paging"
+
+def retrofit = [:]
+retrofit.runtime = "com.squareup.retrofit2:retrofit:$versions.retrofit"
+retrofit.gson = "com.squareup.retrofit2:converter-gson:$versions.retrofit"
+retrofit.scalars = "com.squareup.retrofit2:converter-scalars:$versions.retrofit"
+retrofit.rxjava = "com.squareup.retrofit2:adapter-rxjava2:$versions.retrofit"
+retrofit.mock = "com.squareup.retrofit2:retrofit-mock:$versions.retrofit"
+deps.retrofit = retrofit
+
+deps.okhttp_logging_interceptor = "com.squareup.okhttp3:logging-interceptor:${versions.okhttp_logging_interceptor}"
+
+def dagger = [:]
+dagger.runtime = "com.google.dagger:dagger:$versions.dagger"
+dagger.android = "com.google.dagger:dagger-android:$versions.dagger"
+dagger.android_support = "com.google.dagger:dagger-android-support:$versions.dagger"
+dagger.compiler = "com.google.dagger:dagger-compiler:$versions.dagger"
+dagger.android_support_compiler = "com.google.dagger:dagger-android-processor:$versions.dagger"
+deps.dagger = dagger
+
+def espresso = [:]
+espresso.core = "com.android.support.test.espresso:espresso-core:$versions.espresso"
+espresso.contrib = "com.android.support.test.espresso:espresso-contrib:$versions.espresso"
+espresso.intents = "com.android.support.test.espresso:espresso-intents:$versions.espresso"
+deps.espresso = espresso
+
+def atsl = [:]
+atsl.runner = "com.android.support.test:runner:$versions.atsl_runner"
+atsl.rules = "com.android.support.test:rules:$versions.atsl_runner"
+deps.atsl = atsl
+
+def mockito = [:]
+mockito.core = "org.mockito:mockito-core:$versions.mockito"
+mockito.all = "org.mockito:mockito-all:$versions.mockito_all"
+deps.mockito = mockito
+
+def kotlin = [:]
+kotlin.stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlin"
+kotlin.test = "org.jetbrains.kotlin:kotlin-test-junit:$versions.kotlin"
+kotlin.allopen = "org.jetbrains.kotlin:kotlin-allopen:$versions.kotlin"
+deps.kotlin = kotlin
+
+def ktor = [:]
+ktor.servlet = "io.ktor:ktor-server-servlet:${versions.ktor}"
+ktor.location = "io.ktor:ktor-locations:${versions.ktor}"
+ktor.gson = "io.ktor:ktor-gson:${versions.ktor}"
+ktor.auth_jwt = "io.ktor:ktor-auth-jwt:${versions.ktor}"
+ktor.html_builder = "io.ktor:ktor-html-builder:${versions.ktor}"
+deps.ktor = ktor
+
+def glide = [:]
+glide.runtime = "com.github.bumptech.glide:glide:$versions.glide"
+glide.compiler = "com.github.bumptech.glide:compiler:$versions.glide"
+deps.glide = glide
+
+def work = [:]
+work.runtime = "android.arch.work:work-runtime:$versions.work"
+work.testing = "android.arch.work:work-testing:$versions.work"
+work.firebase = "android.arch.work:work-firebase:$versions.work"
+work.runtime_ktx = "android.arch.work:work-runtime-ktx:$versions.work"
+deps.work = work
+
+def navigation = [:]
+navigation.fragment = "android.arch.navigation:navigation-fragment:$versions.navigation"
+navigation.ui = "android.arch.navigation:navigation-ui:$versions.navigation"
+navigation.testing = "android.arch.navigation:navigation-testing:$versions.navigation"
+deps.navigation = navigation
+
+def leakcanary = [:]
+leakcanary.android = "com.squareup.leakcanary:leakcanary-android:$versions.leakcanary"
+leakcanary.android_no_op = "com.squareup.leakcanary:leakcanary-android-no-op:$versions.leakcanary"
+deps.leakcanary = leakcanary
+
+def stetho = [:]
+stetho.runtime = "com.facebook.stetho:stetho:$versions.stetho"
+stetho.okhttp3 = "com.facebook.stetho:stetho-okhttp3:$versions.stetho"
+deps.stetho = stetho
+
+def rxjava2 = [:]
+rxjava2.runtime = "io.reactivex.rxjava2:rxjava:$versions.rxjava2"
+rxjava2.android = "io.reactivex.rxjava2:rxandroid:$versions.rx_android"
+deps.rxjava2 = rxjava2
+
+def tomcat_embed = [:]
+tomcat_embed.core = "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcat}"
+tomcat_embed.jasper = "org.apache.tomcat.embed:tomcat-embed-jasper:${versions.tomcat}"
+deps.tomcat_embed = tomcat_embed
+
+deps.jsoup = "org.jsoup:jsoup:$versions.jsoup"
+deps.dexmaker = "com.linkedin.dexmaker:dexmaker-mockito:$versions.dexmaker"
+deps.constraint_layout = "com.android.support.constraint:constraint-layout:$versions.constraint_layout"
+deps.timber = "com.jakewharton.timber:timber:$versions.timber"
+deps.junit = "junit:junit:$versions.junit"
+deps.mock_web_server = "com.squareup.okhttp3:mockwebserver:$versions.mockwebserver"
+deps.hamcrest = "org.hamcrest:hamcrest-all:$versions.hamcrest"
+deps.timber = "com.jakewharton.timber:timber:$versions.timber"
+deps.logger = "com.orhanobut:logger:$versions.logger"
+deps.circleimageview = "de.hdodenhof:circleimageview:$versions.circleimageview"
+deps.dbutils = "commons-dbutils:commons-dbutils:$versions.dbutils"
+deps.mariadb_client = "org.mariadb.jdbc:mariadb-java-client:$versions.mariadb_client"
+deps.slf4j = "org.slf4j:slf4j-jdk14:1.8.0-beta2"
+
+def gradle_plugin = [:]
+gradle_plugin.android = "com.android.tools.build:gradle:$versions.android_gradle_plugin"
+gradle_plugin.kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
+gradle_plugin.navigation = "android.arch.navigation:navigation-safe-args-gradle-plugin:$versions.navigation"
+gradle_plugin.tomcat = "com.bmuschko:gradle-tomcat-plugin:2.4.2"
+deps.gradle_plugin = gradle_plugin
+
+def build_versions = [:]
+build_versions.min_sdk = 21
+build_versions.target_sdk = 27
+build_versions.compile_sdk = 27
+build_versions.build_tools = "27.0.3"
+ext.build_versions = build_versions
+
+ext.deps = deps
+
+def addRepos(RepositoryHandler handler) {
+    handler.google()
+    handler.jcenter()
+    handler.mavenCentral()
+    handler.maven { url 'https://jitpack.io' }
+    handler.maven { url 'https://dl.bintray.com/kotlin/ktor' }
+}
+ext.addRepos = this.&addRepos

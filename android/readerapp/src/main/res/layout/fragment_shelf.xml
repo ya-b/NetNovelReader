@@ -1,28 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools" xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="com.netnovelreader.viewmodel.ShelfViewModel" />
-    </data>
-
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/shelfRefresh"
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:onRefresh="@{() -> viewModel.updateBooks(true)}"
-        tools:context="com.netnovelreader.ui.activity.ShelfActivity">
+        tools:context=".ui.activities.MainActivity">
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/shelfAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.ActionBar"
+            app:layout_constraintTop_toTopOf="parent">
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/shelfToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                app:popupTheme="@style/AppTheme.ActionBar"
+                app:title="@string/app_name" />
+        </android.support.design.widget.AppBarLayout>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/shelfRecycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layoutManager="LinearLayoutManager"
-            android:clipToPadding="false"
-            android:onScroll="@{(y, s, b) -> viewModel.onShelfScroll(y, s, b)}"
-            android:scrollbars="vertical" />
-    </android.support.v4.widget.SwipeRefreshLayout>
+            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    </android.support.design.widget.CoordinatorLayout>
 </layout>

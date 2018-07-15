@@ -1,40 +1,27 @@
 <resources>
-
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorAccent">@color/orange</item>
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:listDivider">@drawable/diver</item>
     </style>
 
-    <style name="AppThemeBlue" parent="AppTheme">
-        <item name="colorPrimary">@color/colorPrimaryBlue</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDarkBlue</item>
+    <style name="AppTheme.Launch" parent="AppTheme" >
+        <item name="android:windowBackground">@color/light_gray</item>
+    </style>
+    <style name="AppTheme.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="reader_font_size_button">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="AppThemeBlack" parent="AppTheme">
-        <item name="colorPrimary">@color/colorPrimaryBlack</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDarkBlack</item>
-    </style>
 
-    <style name="AppThemeGray" parent="AppTheme">
-        <item name="colorPrimary">@color/colorPrimaryGray</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDarkGray</item>
-    </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="AlertDialog.AppCompat.StopDownload" parent="AlertDialog.AppCompat">
-        <item name="android:windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.SettingsTheme" parent="AppTheme.PopupOverlay">
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-    </style>
-
-    <style name="function_button_style_1">
+    <style name="reader_foot_button">
         <item name="android:background">@android:color/transparent</item>
         <item name="android:textSize">13sp</item>
         <item name="android:gravity">center</item>
@@ -43,49 +30,4 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
     </style>
-
-    <style name="function_button_style_2">
-        <item name="android:background">@android:color/transparent</item>
-        <item name="android:gravity">center</item>
-        <item name="android:padding">5dp</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:textColor">@color/white</item>
-    </style>
-
-    <style name="function_button_style_3">
-        <item name="android:background">@android:color/transparent</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:padding">5dp</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@color/white</item>
-    </style>
-
-    <style name="setting_dialog_button">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:gravity">center</item>
-        <item name="android:background">@drawable/button_bg</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">16sp</item>
-    </style>
-
-    <style name="hot_label_text_view">
-        <item name="android:layout_marginLeft">16dp</item>
-        <item name="android:layout_marginTop">10dp</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:paddingLeft">14dp</item>
-        <item name="android:paddingRight">14dp</item>
-        <item name="android:paddingTop">7dp</item>
-        <item name="android:paddingBottom">7dp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:background">@drawable/hot_label_shape</item>
-    </style>
-
 </resources>

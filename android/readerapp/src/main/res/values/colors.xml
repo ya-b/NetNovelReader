@@ -1,24 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimaryBlue">#3F51B5</color>
-    <color name="colorPrimaryDarkBlue">#303F9F</color>
-    <color name="colorAccentBlue">#FF4081</color>
-
-    <color name="colorPrimaryBlack">#000</color>
-    <color name="colorPrimaryDarkBlack">#000</color>
-    <color name="colorAccentBlack">#FF4081</color>
-
-    <color name="colorPrimaryGray">#444</color>
-    <color name="colorPrimaryDarkGray">#000</color>
-    <color name="colorAccentGray">#FF4081</color>
-
-    <color name="black">#000000</color>
-    <color name="white">#ffffff</color>
+    <color name="white">#fff</color>
+    <color name="black">#000</color>
+    <color name="red">#f00</color>
     <color name="orange">#f90</color>
     <color name="gray">#999</color>
-    <color name="red">#f00</color>
+    <color name="light_gray">#ddd</color>
+
+    <color name="colorPrimary">#222</color>
+    <color name="colorPrimaryDark">#111</color>
+    <color name="colorAccent">#999</color>
+
     <color name="text_gray">#FFC2C2C2</color>
-    <color name="my_dark">#201f1f</color>
 
     <color name="read_bg_default">#CEC29C</color>
     <color name="read_bg_1">#CCEBCC</color>
@@ -31,8 +24,4 @@
     <color name="read_font_2">#92918C</color>
     <color name="read_font_3">#383429</color>
     <color name="read_font_4">#627176</color>
-
-    <color name="read_dialog_button_select">#E25754</color>
-    <color name="read_dialog_bg">#2C2C2C</color>
-    <color name="filter">#FF7043</color>
 </resources>

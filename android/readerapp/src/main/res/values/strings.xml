@@ -1,25 +1,40 @@
 <resources>
+    <!--title and menu-->
     <string name="app_name">小说阅读器</string>
-    <string name="shelf">本地书架</string>
-    <string name="classification">分类排行</string>
-    <string name="permission_warnning">此程序没有执行所需要的权限</string>
-    <string name="deleteBook">删除book?</string>
-    <string name="yes">是</string>
-    <string name="no">否</string>
-    <string name="login">登录</string>
-    <string name="loginorregister">登录/注册</string>
-    <string name="syncRecord">同步阅读记录</string>
-    <string name="restore">恢复</string>
-    <string name="save">保存</string>
-    <string name="cancel">取消</string>
+    <string name="search_button">搜索</string>
     <string name="settings">设置</string>
-    <string name="edit_site">编辑网站规则</string>
-    <string name="update">更新</string>
-    <string name="add">添加</string>
-    <string name="whenconflict">当与本地配置冲突时</string>
-    <string name="yes_local">是,优先本地配置</string>
-    <string name="filter">筛选</string>
+    <string name="edit_site">规则编辑</string>
+    <string name="login">登录</string>
+    <string name="syncRecord">同步阅读记录</string>
+    <string name="add_selector">添加</string>
+    <string name="update_selector">更新</string>
 
+    <!--dialog-->
+    <string name="enter">确定</string>
+    <string name="cancel">取消</string>
+    <string name="add_book">添加书籍</string>
+    <string name="add_and_download">下载所有章节</string>
+    <string name="confim_download_book">是否下载%s</string>
+    <string name="whenconflict">当与本地配置冲突时</string>
+    <string name="perfer_local">优先本地</string>
+    <string name="perfer_net">优先网络</string>
+
+    <!--download-->
+    <string name="already_in_shelf">已在书架中</string>
+    <string name="prepare_download">准备下载</string>
+    <string name="downloading">下载中:%1$d/%2$d,失败:%3$d章,待下载:%4$d本</string>
+    <string name="download_finish">下载完成</string>
+    <string name="download_failed">下载失败</string>
+    <string name="download_book">下载</string>
+    <string name="already_in_task">已在下载中</string>
+    <string name="latest_chapter_get_failed">最新章节获取失败</string>
+
+    <!--read-->
+    <string name="change_source">换源下载</string>
+    <string name="catalog_button">目录</string>
+    <string name="background_button">背景</string>
+
+    <!--setting-->
     <string name="full_screen">阅读界面全屏</string>
     <string name="full_screen_key">fullscreen</string>
     <string name="auto_download">自动下载后面3章</string>
@@ -39,40 +54,20 @@
     <string name="backgroundColorKey">backgroundColor</string>
     <string name="usernameKey">username</string>
     <string name="tokenKey">token</string>
+    <string name="isInit">isinit</string>
 
-    <string name="search_button">搜索</string>
-    <string name="catalog_finish">目录下载完成</string>
-    <string name="downloadAllBook">下载所有未读章节</string>
-    <string name="prepare_download">更新章节列表，准备下载中。。。</string>
-    <string name="downloading">下载中</string>
-    <string name="downloadFailed">下载失败，请重试</string>
-    <string name="wait4download">还有nn项待处理</string>
-    <string name="downloadfailed">共有nn章下载失败</string>
+    <!--read-->
+    <string name="font">字体</string>
 
-    <string name="changeSource">换源下载</string>
-    <string name="catalogButton">目录</string>
-    <string name="setting">设置</string>
-    <string name="backgroundButton">背景</string>
-    <string name="followSystem">跟随系统</string>
-    <string name="follow">人在追</string>
-    <string name="retent">%读者留存</string>
-
-    <string name="hostname">域名</string>
-    <string name="catalogSelector">目录选择器</string>
-    <string name="chapterSelector">章节内容选择器</string>
-    <string name="catalogFilter">目录过滤</string>
-    <string name="chapterFilter">章节过滤</string>
-    <string name="searchUrl">搜索地址</string>
-    <string name="redirectFileld">重定向</string>
-    <string name="redirectUrl">重定向url选择器</string>
-    <string name="noRedirectUrl">url选择器</string>
-    <string name="redirectName">重定向书名选择器</string>
-    <string name="noRedirectName">书名选择器</string>
-    <string name="redirectImage">重定向封面选择器</string>
-    <string name="noRedirectImage">封面选择器</string>
-    <string name="charset">字符编码</string>
-
-    <string name="filter_vcode">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+    <!--login-->
     <string name="username">用户名</string>
-    <string name="password">密　码</string>
+    <string name="password">密码</string>
+    <string name="sign_in_or_up">登录或注册</string>
+    <string name="login_error">登录错误</string>
+    <string name="filter_vcode">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+    <string name="editor_hint">长度不低于4个字符</string>
+
+    <!--record-->
+    <string name="save_record">保存阅读记录</string>
+    <string name="restore_record">恢复阅读记录</string>
 </resources>

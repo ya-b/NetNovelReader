@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="itemDetail"
-            type="com.netnovelreader.data.local.db.ShelfBean" />
-
+            type="com.netnovelreader.repo.db.BookInfoEntity" />
         <variable
-            name="clickEvent"
-            type="com.netnovelreader.viewmodel.ShelfViewModel" />
+            name="clickListener"
+            type="com.netnovelreader.vm.ShelfViewModel" />
+
     </data>
 
     <android.support.v7.widget.CardView
@@ -21,13 +20,13 @@
         android:layout_marginTop="10dp"
         android:layout_marginRight="8dp"
         app:cardCornerRadius="3dp"
-        app:cardElevation="3dp">
+        android:onClick="@{() -> clickListener.readBook(itemDetail.bookname)}"
+        android:onLongClick="@{() -> clickListener.delBook(itemDetail.bookname)}"
+        app:cardElevation="3dp" >
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:onClick="@{() -> clickEvent.readBook(itemDetail.bookName??``)}"
-            android:onLongClick="@{() -> clickEvent.deleteDialog(itemDetail.bookName??``)}">
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/bookCover"
@@ -37,7 +36,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:src="@{itemDetail.bookName}"
+                android:src="@{itemDetail.bookname+`@`+itemDetail.coverPath}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -47,11 +46,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="@{itemDetail.bookName??``}"
+                android:text="@{itemDetail.bookname??``}"
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/bookCover"
-                app:layout_constraintTop_toTopOf="@+id/bookCover"
+                app:layout_constraintStart_toEndOf="@id/bookCover"
+                app:layout_constraintTop_toTopOf="@id/bookCover"
                 tools:text="小说名称" />
 
             <TextView
@@ -64,7 +63,7 @@
                 android:textStyle="italic"
                 app:layout_constraintBottom_toBottomOf="@+id/bookCover"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/nameView"
+                app:layout_constraintStart_toStartOf="@id/nameView"
                 tools:text="最新章节  458" />
 
             <TextView
@@ -74,9 +73,9 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="@{itemDetail.isUpdate??``}"
+                android:text="@{itemDetail.hasUpdate?`●`:``}"
                 android:textColor="@color/red"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintRight_toRightOf="@id/nameView"
                 app:layout_constraintTop_toTopOf="parent"

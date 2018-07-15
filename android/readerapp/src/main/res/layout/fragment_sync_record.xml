@@ -6,12 +6,31 @@
         <import type="android.view.View" />
         <variable
             name="viewModel"
-            type="com.netnovelreader.viewmodel.SettingViewModel" />
+            type="com.netnovelreader.vm.SyncRecordViewModel" />
     </data>
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.fragment.SyncRecordFragment">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.ActionBar"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/syncRecordToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                android:text="@string/edit_site"
+                app:navigationIcon="@drawable/icon_back"
+                app:popupTheme="@style/AppTheme.ActionBar" />
+
+        </android.support.design.widget.AppBarLayout>
 
         <Button
             android:id="@+id/saveRecord"
@@ -20,18 +39,20 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:background="@drawable/button_bg_gray_border"
-            android:text="@string/save"
+            android:text="@string/save_record"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toTopOf="@id/updateRecord" />
 
         <Button
             android:id="@+id/updateRecord"
-            android:onClick="@{() -> viewModel.updateRecord()}"
+            android:onClick="@{() -> viewModel.restoreRecord()}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/button_bg_gray_border"
-            android:text="@string/restore"
+            android:text="@string/restore_record"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

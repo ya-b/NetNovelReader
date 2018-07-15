@@ -7,18 +7,16 @@
 
         <variable
             name="itemDetail"
-            type="com.netnovelreader.bean.SearchBookResult" />
+            type="com.netnovelreader.repo.http.resp.SearchBookResp" />
 
         <variable
             name="clickEvent"
-            type="com.netnovelreader.viewmodel.SearchViewModel" />
+            type="com.netnovelreader.vm.SearchViewModel" />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="@{() -> clickEvent.detailClick(itemDetail.bookname??``)}"
-        tools:background="@color/white">
+        android:layout_height="wrap_content" >
 
         <TextView
             android:id="@+id/resultName"
@@ -65,21 +63,18 @@
             android:layout_height="30dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="16dp"
-            android:background="@color/orange"
             android:gravity="center"
-            android:onClick="@{() -> clickEvent.showDialog(itemDetail)}"
+            android:onClick="@{() -> clickEvent.confirmDownload(itemDetail)}"
             android:paddingStart="16dp"
             android:paddingLeft="16dp"
             android:paddingTop="6dp"
             android:paddingEnd="16dp"
             android:paddingRight="16dp"
             android:paddingBottom="6dp"
-            android:text="下载"
-            android:textColor="@color/read_dialog_button_select"
+            android:text="@string/download_book"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/resultName" />
-
 
     </android.support.constraint.ConstraintLayout>
 

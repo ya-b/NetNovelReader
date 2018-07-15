@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="itemData"
+            type="com.netnovelreader.repo.db.SiteSelectorEntity" />
+
+        <variable
+            name="clickListener"
+            type="com.netnovelreader.vm.SiteSelectorViewModel" />
+    </data>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="6dp"
+        android:text="@{itemData.hostname}"
+        android:textSize="16sp" />
+</layout>

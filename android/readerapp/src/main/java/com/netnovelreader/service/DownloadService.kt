@@ -5,110 +5,125 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
-import com.netnovelreader.ReaderApplication
-import com.netnovelreader.ReaderApplication.Companion.threadPool
-import com.netnovelreader.bean.ChapterBean
-import com.netnovelreader.common.toast
-import com.netnovelreader.data.CatalogManager
-import com.netnovelreader.data.ChapterManager
-import com.netnovelreader.data.local.ReaderDbManager
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
-import java.io.File
-import java.io.IOException
-import java.util.concurrent.LinkedBlockingQueue
+import com.netnovelreader.repo.SearchRepo
+import com.netnovelreader.repo.http.resp.ChapterInfoResp
+import com.netnovelreader.repo.http.resp.SearchBookResp
+import com.netnovelreader.utils.IO_EXECUTOR
+import com.netnovelreader.utils.mkBookDir
+import com.netnovelreader.utils.toast
+import com.netnovelreader.utils.uiThread
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 class DownloadService : IntentService {
     constructor() : super("DownloadService")
     constructor(name: String) : super(name)
 
+    companion object {
+        const val INFO = "info"
+    }
+
+    private lateinit var repo: SearchRepo
     private var mNotificationManager: NotificationManager? = null
     private var builder: NotificationCompat.Builder? = null
-    private val NOTIFYID = 1599407175
-    lateinit var lock: LinkedBlockingQueue<Int>
+    private val notyfyId = 1599407175
 
-    @Volatile
-    private var max = 0                 //下载总数
+    private var max = AtomicInteger()          //下载总数
     private var progress = AtomicInteger()     //下载完成数（包括失败的下载）
-    private var failed = AtomicInteger()              //失败的下载数
-    @Volatile
-    private var remainder = 0            //待下载的书籍数
+    private var failed = AtomicInteger()       //失败下载数
+    private val taskList by lazy { LinkedList<SearchBookResp>() }
 
     override fun onCreate() {
         super.onCreate()
+        repo = SearchRepo(application)
         openNotification()
-        lock = LinkedBlockingQueue()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        remainder++
+        intent?.getParcelableExtra<SearchBookResp>(INFO)?.also {
+            if(taskList.contains(it)) {
+                toast(getString(R.string.already_in_task))
+            } else {
+                taskList.add(it)
+            }
+        }
         return super.onStartCommand(intent, flags, startId)
     }
 
-    @Synchronized
     override fun onHandleIntent(intent: Intent?) {
-        remainder--
-        val tableName = intent?.getStringExtra("tableName")
-        val catalogUrl = intent?.getStringExtra("catalogurl")
-        if (intent == null || tableName.isNullOrEmpty() || catalogUrl.isNullOrEmpty()) return
-        getList(tableName!!, catalogUrl!!).apply { max = this.size }.forEach { bean ->
-            val downloader = ChapterManager(0, tableName, 0)
-            //获取要下载的章节列表
-            launch(threadPool) {
-                try {
-                    downloader.writToDisk(bean, downloader.getChapterTxt(bean))     //下载每一章
-                    progress.incrementAndGet()
-                } catch (e: IOException) {
-                    failed.incrementAndGet()
-                    e.printStackTrace()
-                }
-                synchronized(IntentService::class.java) {
-                    updateNotification(progress.get(), max)
-                    if (progress.get() + failed.get() == max) lock.offer(1)   //下载完成，取消阻塞
-                }
-            }
-        }
-        lock.take()  //阻塞住线程，一次只下载一本书
+        download()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mNotificationManager?.cancel(NOTIFYID)
-        if (failed.get() > 0) {
-            toast(getString(R.string.downloadfailed).replace("nn", "$failed"))
-        }
+        mNotificationManager?.cancel(notyfyId)
+
     }
 
     private fun openNotification() {
         builder = NotificationCompat.Builder(this, "reader")
-                .setTicker(getString(R.string.app_name))
-                .setContentTitle(getString(R.string.prepare_download))
-                .setSmallIcon(R.drawable.notification_icon)
+            .setTicker(getString(R.string.app_name))
+            .setContentTitle(getString(R.string.prepare_download))
+            .setSmallIcon(R.mipmap.ic_launcher)
         mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        mNotificationManager?.notify(NOTIFYID, builder?.build())
+        mNotificationManager?.notify(notyfyId, builder?.build())
     }
 
-    fun updateNotification(progress: Int, max: Int) {
-        val str = if (remainder != 0) ",${getString(R.string.wait4download)}"
-                .replace("nn", "$remainder") else ""
+    private fun updateNotification(progress: Int, max: Int, failed: Int, remain: Int) {
         builder?.setProgress(max, progress, false)
-                ?.setContentTitle("${getString(R.string.downloading)}:$progress/$max$str")
-        launch(UI) { mNotificationManager?.notify(NOTIFYID, builder?.build()) }
+            ?.setContentTitle(
+                String.format(
+                    getString(R.string.downloading),
+                    progress,
+                    max,
+                    failed,
+                    remain
+                )
+            )
+        uiThread { mNotificationManager?.notify(notyfyId, builder?.build()) }
     }
 
-    fun getList(tableName: String, url: String): ArrayList<ChapterBean> {
-        val list = ArrayList<ChapterBean>()
-        try {
-            CatalogManager.download(tableName, url)
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return list
+    private fun download() {
+        if (taskList.size == 0) return
+        repo.getCatalog(taskList[0]) { _, chapterList ->
+            chapterList ?: return@getCatalog
+            max.set(chapterList.size)
+            if(!mkBookDir(taskList[0].bookname)) {
+                //todo 创建文件夹出错
+                return@getCatalog
+            }
+            Observable.fromIterable(chapterList)
+                .flatMap { info ->
+                    Observable.create<Pair<ChapterInfoResp, Boolean>> {
+                        repo.downloadChapter(taskList[0].bookname, info)
+                        it.onNext(Pair(info, true))
+                        it.onComplete()
+                    }.subscribeOn(Schedulers.from(IO_EXECUTOR))
+                }.subscribe(
+                    {
+                        updateNotification(
+                            progress.incrementAndGet(),
+                            max.get(),
+                            failed.get(),
+                            taskList.size - 1
+                        )
+                    },
+                    {
+                        updateNotification(
+                            progress.get(),
+                            max.get(),
+                            failed.incrementAndGet(),
+                            taskList.size - 1
+                        )
+                    },
+                    {
+                        updateNotification(max.get(), max.get(), failed.get(), taskList.size - 1)
+                        taskList.removeFirst()
+                        download()
+                    }
+                )
         }
-        val path = "${ReaderApplication.dirPath}/$tableName".apply { File(this).mkdirs() }
-        ReaderDbManager.getChapterNameAndUrl(tableName, 0).forEach {
-            list.add(ChapterBean(tableName, path, it.key, it.value))
-        }
-        return list
     }
 }

@@ -24,6 +24,11 @@ class PageContent : View {
     var mTxtFontType: Typeface = Typeface.DEFAULT
     var mBottomTextSize = 35f
     var mTextSize = 55f
+        set(value) {
+            if(value > 20f) {
+                field = value
+            }
+        }
     var mIsDrawTime = false
     var mRowSpace = 2f                                                   //行距
 
@@ -60,7 +65,7 @@ class PageContent : View {
             canvas.drawText(date, getMarginLeft(), height - mBottomTextSize, mPaint)
         }
         //底部右下角绘制：章节相关信息    格式为:   第 XXX 章节 YYY章节名  ：  n / 该章节总共页数
-        val bottomText = "${mTitle ?: ""} $mPageNum/$mMaxPageNum"
+        val bottomText = "${mTitle ?: ""} ${if(mPageNum > mMaxPageNum) 0 else mPageNum}/$mMaxPageNum"
         canvas.drawText(
                 bottomText,
                 width - mPaint.measureText(bottomText) - getMarginLeft(),

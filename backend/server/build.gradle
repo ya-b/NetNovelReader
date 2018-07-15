@@ -1,0 +1,45 @@
+apply plugin: 'kotlin'
+apply plugin: 'war'
+apply plugin: 'com.bmuschko.tomcat'
+
+dependencies {
+    implementation deps.kotlin.stdlib
+    implementation deps.ktor.servlet
+    implementation deps.ktor.gson
+    implementation deps.ktor.auth_jwt
+    implementation deps.ktor.location
+    implementation deps.ktor.html_builder
+    implementation deps.dbutils
+    implementation deps.mariadb_client
+    implementation deps.jsoup
+    implementation deps.slf4j
+    testImplementation deps.junit
+    testImplementation deps.hamcrest
+    testImplementation deps.mockito.all
+    tomcat deps.tomcat_embed.core
+    tomcat deps.tomcat_embed.jasper
+}
+
+tomcat {
+    contextPath = "/reader"
+    httpProtocol = "org.apache.coyote.http11.Http11Nio2Protocol"
+    ajpProtocol  = "org.apache.coyote.ajp.AjpNio2Protocol"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}
+
+tasks.withType(War.class) {
+    baseName = "reader"
+}

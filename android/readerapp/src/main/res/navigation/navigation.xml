@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/shelfFragment">
+    <fragment
+        android:id="@+id/shelfFragment"
+        android:name="com.netnovelreader.ui.fragments.ShelfFragment"
+        android:label="ShelfFragment" >
+        <action
+            android:id="@+id/action_shelfFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_shelfFragment_to_siteSelectorsFragment"
+            app:destination="@id/siteSelectorsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_shelfFragment_to_readFragment"
+            app:destination="@id/readFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_shelfFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_shelfFragment_to_syncRecordFragment"
+            app:destination="@id/syncRecordFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.netnovelreader.ui.fragments.SearchFragment"
+        android:label="SearchFragment" >
+        <action
+            android:id="@+id/action_searchFragment_to_shelfFragment"
+            app:destination="@id/shelfFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/readFragment"
+        android:name="com.netnovelreader.ui.fragments.ReadFragment"
+        android:label="ReadFragment" >
+        <argument
+            android:name="bookname"
+            app:type="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/siteSelectorsFragment"
+        android:name="com.netnovelreader.ui.fragments.SiteSelectorsFragment"
+        android:label="SiteSelectorsFragment" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.netnovelreader.ui.fragments.LoginFragment"
+        android:label="LoginFragment" />
+    <fragment
+        android:id="@+id/syncRecordFragment"
+        android:name="com.netnovelreader.ui.fragments.SyncRecordFragment"
+        android:label="SyncRecordFragment" />
+</navigation>

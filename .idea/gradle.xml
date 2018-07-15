@@ -8,11 +8,11 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/android/flowlayout" />
+            <option value="$PROJECT_DIR$/android" />
             <option value="$PROJECT_DIR$/android/pageview" />
             <option value="$PROJECT_DIR$/android/readerapp" />
+            <option value="$PROJECT_DIR$/backend" />
             <option value="$PROJECT_DIR$/backend/server" />
-            <option value="$PROJECT_DIR$/buildSrc" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
