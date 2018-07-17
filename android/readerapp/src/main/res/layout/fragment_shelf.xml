@@ -24,12 +24,20 @@
                 app:title="@string/app_name" />
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/shelfRecycler"
+
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/shelfRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            tools:context="com.netnovelreader.ui.activity.ShelfActivity">
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/shelfRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+        </android.support.v4.widget.SwipeRefreshLayout>
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>

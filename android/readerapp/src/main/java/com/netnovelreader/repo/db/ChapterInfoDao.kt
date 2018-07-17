@@ -12,7 +12,7 @@ interface ChapterInfoDao {
 
     @Query("SELECT * FROM ${ReaderDatabase.TABLE_CATALOG} WHERE ${ReaderDatabase.BOOKNAME} LIKE " +
             ":bookname order by ${ReaderDatabase.CHAPTER_NUM} ASC")
-    fun getAll(bookname: String): List<ChapterInfoEntity>?
+    fun getAll(bookname: String): List<ChapterInfoEntity>
 
     @Query("SELECT * FROM ${ReaderDatabase.TABLE_CATALOG} WHERE ${ReaderDatabase.CHAPTER_NUM} " +
             "= :num AND ${ReaderDatabase.BOOKNAME} LIKE :bookname")

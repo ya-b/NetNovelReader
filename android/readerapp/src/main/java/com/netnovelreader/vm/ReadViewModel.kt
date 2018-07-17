@@ -57,6 +57,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
             )
         )
         allChapters.addAll(repo.getAllChapters(bookName) ?: emptyList())
+        allChapters.lastOrNull()?.chapterNum?.let { maxChapterNum = it }
     }
 
     //获取章节内容
@@ -64,11 +65,10 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         val block = {
             isLoading.set(true)
             repo.getChapter(bookName, chapterNum) { chapter, isError ->
-                if(!isError) {
-                    isLoading.set(false)
-                } else {
+                if(isError) {
                     //todo 重新下载
                 }
+                isLoading.set(false)
                 val chapterName = repo.getChapterInfo(bookName, chapterNum)?.chapterName
                 text.set("${chapterName ?: ""}|$chapter")
             }
@@ -94,13 +94,6 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     }
 
     /**
-     * 下载目录
-     */
-    fun getCatalog() {
-
-    }
-
-    /**
      * 保存阅读记录
      */
     fun setRecord(pageNum: Int) {
@@ -108,22 +101,21 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     }
 
     /**
-     * 自动删除已读章节，但保留最近[notDeleteNum]章
+     * todo 自动删除已读章节，但保留最近[notDeleteNum]章
      */
     fun autoRemove() {
 
     }
 
     fun prepare(): Int {
-        repo.getMaxChapterNum(bookName) { maxChapterNum = it }
         val arr = repo.getRecord(bookName)
-        chapterNum.set(arr[0])
-        getChapter(arr[0])
+        getChapter(arr[0].also { chapterNum.set(it) })
         return arr[1]
     }
 
     fun onNextChapter() {
         isViewShow.forEach { it.value.set(false) }
+        if(isLoading.get()) return
         if(chapterNum.get() < maxChapterNum) {
             getChapter(chapterNum.incrementAndGet())
         }
@@ -131,6 +123,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
 
     fun onPreviousChapter() {
         isViewShow.forEach { it.value.set(false) }
+        if(isLoading.get()) return
         if(chapterNum.get() > 1) {
             getChapter(chapterNum.decrementAndGet())
         }
@@ -146,6 +139,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     }
 
     fun getChapterByCatalog(chapterName: String) {
+        if(isLoading.get()) return
         repo.getChapterInfo(bookName, chapterName) {
             chapterNum.set(it)
             getChapter(it)
@@ -166,7 +160,6 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         when (which) {
             "catalogButton" -> {
                 isViewShow.forEach { it.value.set(false) }
-                getCatalog()
                 showDialogCommand.value = true
             }
             "fontSizeButton" -> {
@@ -245,10 +238,6 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     fun changeBrightness(progress: Int) {
         brightnessCommand.value =
                 (if (progress < 1) 1 else if (progress > 255) 255 else progress) / 255f
-    }
-
-    private fun updateCatalog() {
-
     }
 
     companion object {

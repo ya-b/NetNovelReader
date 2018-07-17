@@ -9,8 +9,8 @@ android {
         applicationId "com.netnovelreader"
         minSdkVersion build_versions.min_sdk
         targetSdkVersion build_versions.target_sdk
-        versionCode 1
-        versionName "1.0"
+        versionCode build_versions.versionCode
+        versionName build_versions.versionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -82,5 +82,4 @@ dependencies {
     testImplementation deps.junit
     androidTestImplementation deps.atsl.runner
     androidTestImplementation deps.espresso.core
-    implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha03'
 }

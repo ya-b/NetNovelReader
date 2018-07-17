@@ -192,14 +192,16 @@ gradle_plugin.navigation = "android.arch.navigation:navigation-safe-args-gradle-
 gradle_plugin.tomcat = "com.bmuschko:gradle-tomcat-plugin:2.4.2"
 deps.gradle_plugin = gradle_plugin
 
+ext.deps = deps
+
 def build_versions = [:]
 build_versions.min_sdk = 21
 build_versions.target_sdk = 27
 build_versions.compile_sdk = 27
 build_versions.build_tools = "27.0.3"
+build_versions.versionCode = "git rev-list HEAD --count".execute().text.trim().toInteger()
+build_versions.versionName = "0.1.$build_versions.versionCode"
 ext.build_versions = build_versions
-
-ext.deps = deps
 
 def addRepos(RepositoryHandler handler) {
     handler.google()
@@ -209,3 +211,4 @@ def addRepos(RepositoryHandler handler) {
     handler.maven { url 'https://dl.bintray.com/kotlin/ktor' }
 }
 ext.addRepos = this.&addRepos
+

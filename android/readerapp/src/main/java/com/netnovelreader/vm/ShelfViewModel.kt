@@ -17,6 +17,7 @@ class ShelfViewModel(var repo: BookInfosRepo, app: Application) : AndroidViewMod
             .build()
     ).build()
     var startReaderFrag: MutableLiveData<StringBuilder> = MutableLiveData()
+    var stopRefershCommand = MutableLiveData<Void>()
 
     fun readBook(bookname: String) {
         startReaderFrag.value = StringBuilder(bookname)
@@ -26,5 +27,11 @@ class ShelfViewModel(var repo: BookInfosRepo, app: Application) : AndroidViewMod
     fun delBook(bookname: String): Boolean {
         ioThread { repo.deleteBook(bookname) }
         return true // onLongClick的返回值
+    }
+
+    fun updateBooks() {
+        repo.updateCatalog {
+            stopRefershCommand.postValue(null)
+        }
     }
 }

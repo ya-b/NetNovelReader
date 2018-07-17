@@ -8,7 +8,7 @@
     </style>
 
     <style name="AppTheme.Launch" parent="AppTheme" >
-        <item name="android:windowBackground">@color/light_gray</item>
+        <item name="android:windowBackground">@drawable/splash</item>
     </style>
     <style name="AppTheme.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 

@@ -39,9 +39,13 @@ class ShelfFragment : Fragment() {
         (activity as MainActivity?)?.setSupportActionBar(binding.shelfToolbar)
         setHasOptionsMenu(true)
 
+        binding.shelfRefresh.setOnRefreshListener { viewModel?.updateBooks() }
         val adapter = ShelfPageListAdapter(viewModel)
         shelfRecycler.adapter = adapter
         viewModel?.allBooks?.observe(this, Observer(adapter::submitList))
+        viewModel?.stopRefershCommand?.observe(this, Observer {
+            binding.shelfRefresh.isRefreshing = false
+        })
         viewModel?.startReaderFrag?.observe(this, Observer { bookname ->
             if (!bookname.isNullOrEmpty()) {
                 val bundle = Bundle().apply { putString("bookname", bookname.toString()) }
@@ -65,6 +69,7 @@ class ShelfFragment : Fragment() {
                     .navigate(R.id.action_shelfFragment_to_searchFragment)
             }
             R.id.action_settings -> {
+
             }
             R.id.edit_site_selector -> {
                 NavHostFragment.findNavController(this)
