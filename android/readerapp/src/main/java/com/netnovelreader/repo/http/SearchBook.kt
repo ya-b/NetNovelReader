@@ -9,6 +9,7 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import java.io.IOException
+import java.net.SocketException
 import java.net.URLEncoder
 import java.util.regex.Pattern
 
@@ -149,14 +150,18 @@ class SearchBook {
 
     @Throws(IOException::class)
     private fun getDocument(url: String): Document? {
-        val bytes = WebService.readerAPI
-            .request(url)
-            .execute()
-            .body()
-            ?.bytes()
+        val bytes = try {
+            WebService.readerAPI
+                .request(url)
+                .execute()
+                .body()
+                ?.bytes()
+        } catch (e: SocketException) {
+            null
+        }
         var document: Document? = null
-        bytes?.inputStream().use {
-            document = Jsoup.parse(it, getCharset(bytes!!), url)
+        bytes?.inputStream()?.use {
+            document = Jsoup.parse(it, getCharset(bytes), url)
         }
         return document
     }
