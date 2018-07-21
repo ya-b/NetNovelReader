@@ -5,12 +5,17 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="preferenceTheme">@style/AppTheme.Preference</item>
     </style>
 
     <style name="AppTheme.Launch" parent="AppTheme" >
         <item name="android:windowBackground">@drawable/splash</item>
     </style>
     <style name="AppTheme.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    
+    <style name="AppTheme.Preference" parent="PreferenceThemeOverlay">
+        <item name="android:layout">@layout/fragment_setting</item>
+    </style>
 
     <style name="reader_font_size_button">
         <item name="android:background">@android:color/transparent</item>

@@ -27,7 +27,7 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
     fun searchBook(bookname: String) {
         if (bookname.isEmpty()) return
         searchResultList.clear()
-        repo.search("极道天魔") { isSearching, resp ->
+        repo.search(bookname) { isSearching, resp ->
             isLoading.set(isSearching)
             if (!TextUtils.isEmpty(resp?.bookname) && !TextUtils.isEmpty(resp?.url)) {
                 searchResultList.add(resp)

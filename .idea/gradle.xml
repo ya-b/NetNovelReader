@@ -8,10 +8,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/android" />
             <option value="$PROJECT_DIR$/android/pageview" />
             <option value="$PROJECT_DIR$/android/readerapp" />
-            <option value="$PROJECT_DIR$/backend" />
             <option value="$PROJECT_DIR$/backend/server" />
           </set>
         </option>

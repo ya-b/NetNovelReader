@@ -69,7 +69,8 @@ class ShelfFragment : Fragment() {
                     .navigate(R.id.action_shelfFragment_to_searchFragment)
             }
             R.id.action_settings -> {
-
+                NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_shelfFragment_to_settingFragment)
             }
             R.id.edit_site_selector -> {
                 NavHostFragment.findNavController(this)

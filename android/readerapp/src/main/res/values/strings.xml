@@ -36,25 +36,24 @@
 
     <!--setting-->
     <string name="full_screen">阅读界面全屏</string>
-    <string name="full_screen_key">fullscreen</string>
+    <string name="full_screen_key">Fullscreen</string>
     <string name="auto_download">自动下载后面3章</string>
-    <string name="auto_download_key">autodownload</string>
+    <string name="auto_download_key">Autodownload</string>
     <string name="auto_remove">自动删除已读章节</string>
-    <string name="auto_remove_key">autoremove</string>
+    <string name="auto_remove_key">Autoremove</string>
     <string name="auto_remove_summary">保留最近3章</string>
-    <string name="theme">主题</string>
-    <string name="themeKey">theme</string>
-    <string name="theme_summary">选择你喜欢的主题</string>
+    <string name="night_mode">夜间模式</string>
+    <string name="nightModeKey">NightMode</string>
     <string name="rowspace">行间距</string>
-    <string name="rowspaceKey">rowspace</string>
+    <string name="rowspaceKey">Rowspace</string>
     <string name="rowspace_summary">选择适合的行距</string>
     <string name="fontSizeKey">FontSize</string>
     <string name="fontTypeKey">FontType</string>
     <string name="fontColorKey">FontColor</string>
-    <string name="backgroundColorKey">backgroundColor</string>
-    <string name="usernameKey">username</string>
-    <string name="tokenKey">token</string>
-    <string name="isInit">isinit</string>
+    <string name="backgroundColorKey">BackgroundColor</string>
+    <string name="usernameKey">Username</string>
+    <string name="tokenKey">Token</string>
+    <string name="isInitKey">Isinit</string>
 
     <!--read-->
     <string name="font">字体</string>
@@ -70,4 +69,7 @@
     <!--record-->
     <string name="save_record">保存阅读记录</string>
     <string name="restore_record">恢复阅读记录</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
