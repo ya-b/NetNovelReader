@@ -13,7 +13,7 @@
     </style>
     <style name="AppTheme.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     
-    <style name="AppTheme.Preference" parent="PreferenceThemeOverlay">
+    <style name="AppTheme.Preference" parent="Preference.Material">
         <item name="android:layout">@layout/fragment_setting</item>
     </style>
 

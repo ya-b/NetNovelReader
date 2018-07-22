@@ -23,10 +23,8 @@ class ViewModelFactory private constructor(private val application: Application)
                         SiteSelectorViewModel(SiteSelectorRepo(application), application)
                 isAssignableFrom(ReadViewModel::class.java) ->
                     ReadViewModel(ChapterInfoRepo(application), application)
-                isAssignableFrom(LoginViewModel::class.java) ->
-                    LoginViewModel(UserInfoRepo(application), application)
-                isAssignableFrom(SyncRecordViewModel::class.java) ->
-                    SyncRecordViewModel(UserInfoRepo(application), application)
+                isAssignableFrom(UserViewModel::class.java) ->
+                    UserViewModel(UserRepo(application), application)
                 else ->
                     AndroidViewModel(application)
             }

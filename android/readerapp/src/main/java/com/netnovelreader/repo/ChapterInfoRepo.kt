@@ -17,13 +17,6 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
 
     fun getAllChapters(bookname: String) = ioThreadFuture { db.chapterInfoDao().getAll(bookname) }
 
-    fun getMaxChapterNum(bookname: String, block: ((Int) -> Unit)?) {
-        ioThread {
-            db.chapterInfoDao().getMaxChapterNum(bookname)
-                .let { block?.invoke(it ?: 0) }
-        }
-    }
-
     fun getChapterInfo(bookname: String, chapterNum: Int) =
         ioThreadFuture { db.chapterInfoDao().getChapterInfo(bookname, chapterNum) }
 
@@ -59,7 +52,7 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
             chapterDao.getChapterInfo(bookname, chapterNum).also {
                 if (it == null) {
                     block?.invoke("", false)
-                } else if (it.isDownloaded == ReaderDatabase.ALLREADY_DOWN
+                } else if (it.isDownloaded == ReaderDatabase.ALREADY_DOWN
                     && File(bookDir(bookname), chapterNum.toString()).exists()) {
                     getChapterFromDisk(it, block)
                 } else {
@@ -115,7 +108,7 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
         Observable.create<String> {
             val str = getChapter(
                 ChapterInfoResp(
-                    entity.chapterNum ?: 1,
+                    entity.chapterNum,
                     entity.chapterName,
                     entity.chapterUrl
                 )
@@ -124,7 +117,7 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
                 File(bookDir(entity.bookname), entity.chapterNum.toString()).writeText(str)
                 db.chapterInfoDao()
                     .getChapterInfo(entity.bookname, entity.chapterNum)
-                    ?.also { it.isDownloaded = ReaderDatabase.ALLREADY_DOWN }
+                    ?.also { it.isDownloaded = ReaderDatabase.ALREADY_DOWN }
                     ?.also { db.chapterInfoDao().update(it) }
             }
             it.onNext(str)
@@ -151,5 +144,27 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
                 { block?.invoke(it, false) },
                 { block?.invoke("", true) }
             )
+    }
+
+    fun downCacheChapter(bookname: String, chapterNum: Int, cacheSize: Int) {
+        if(cacheSize == 0) return
+        ioThread {
+            chapterDao.getRangeChapter(bookname, chapterNum + 1, chapterNum + cacheSize)
+                .forEach {
+                    if (it.isDownloaded != ReaderDatabase.ALREADY_DOWN
+                        && File(bookDir(bookname), chapterNum.toString()).exists()) {
+                        getChapterFromNet(it)
+                    }
+                }
+        }
+    }
+
+    fun delCacheChapter(bookname: String, chapterNum: Int, preserveSize: Int) {
+        if(preserveSize == 0) return
+        ioThread {
+            chapterDao.getRangeChapter(bookname, 1, chapterNum - preserveSize)
+                .map { File(bookDir(bookname), it.chapterNum.toString()) }
+                .forEach { it.deleteRecursively() }
+        }
     }
 }

@@ -18,7 +18,7 @@ class SiteSelectorRepo(app: Application) : Repo(app) {
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
             .subscribe (
                 {
-                    block.invoke(it.rules.apply { forEach { it._id = null } })
+                    block.invoke(it.apply { forEach { it._id = null } })
                 },
                 {
                     block.invoke(emptyList())
@@ -32,5 +32,13 @@ class SiteSelectorRepo(app: Application) : Repo(app) {
     }
 
     fun saveAll(list: List<SiteSelectorEntity>) = ioThread { siteSelectorDao.insert(*list.toTypedArray()) }
+
+
+    fun saveSelector(entity: SiteSelectorEntity) {
+        ioThread {
+            entity._id = siteSelectorDao.getItem(entity.hostname)?._id
+            siteSelectorDao.insert(entity)
+        }
+    }
 
 }

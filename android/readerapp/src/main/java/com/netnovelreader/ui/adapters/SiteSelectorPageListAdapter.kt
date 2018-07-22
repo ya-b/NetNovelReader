@@ -40,7 +40,7 @@ class SiteSelectorPageListAdapter(val vm: SiteSelectorViewModel?) :
 
         fun bindTo(entity: SiteSelectorEntity?) {
             binding.itemData = entity
-            binding.clickListener = vm
+            binding.viewModel = vm
         }
     }
 }

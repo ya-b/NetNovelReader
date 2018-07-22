@@ -21,7 +21,7 @@
         android:layout_marginRight="8dp"
         app:cardCornerRadius="3dp"
         android:onClick="@{() -> clickListener.readBook(itemDetail.bookname)}"
-        android:onLongClick="@{() -> clickListener.delBook(itemDetail.bookname)}"
+        android:onLongClick="@{() -> clickListener.askForDelBook(itemDetail.bookname)}"
         app:cardElevation="3dp" >
 
         <android.support.constraint.ConstraintLayout

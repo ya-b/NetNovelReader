@@ -48,11 +48,13 @@ class ReadFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
         viewModel = activity?.application?.let {
             ViewModelProviders.of(this, ViewModelFactory.getInstance(it))
         }?.get(ReadViewModel::class.java)
-        binding.readerView.isDrawTime = context?.sharedPreferences()
-            ?.get(getString(R.string.full_screen_key), false) ?: false
+        binding.readerView.isDrawTime = false
+//        binding.readerView.isDrawTime = context?.sharedPreferences()
+//            ?.get(getString(R.string.full_screen_key), false) ?: false
         binding.readerView.rowSpace = context?.sharedPreferences()
             ?.get(getString(R.string.rowspaceKey), "1.50")?.toFloat() ?: 1.5f
         binding.viewModel = viewModel
@@ -84,5 +86,10 @@ class ReadFragment : Fragment() {
         catalogView?.scrollToPosition((viewModel?.chapterNum?.get() ?: 1) - 1)
         dialog?.show()
         dialog?.window?.setLayout(readerView.width * 5 / 6, readerView.height * 9 / 10)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel?.autoDelCache()
     }
 }

@@ -35,13 +35,6 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
         <action
-            android:id="@+id/action_shelfFragment_to_syncRecordFragment"
-            app:destination="@id/syncRecordFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
-        <action
             android:id="@+id/action_shelfFragment_to_settingFragment"
             app:destination="@id/settingFragment"
             app:enterAnim="@anim/slide_in_right"
@@ -75,12 +68,8 @@
         android:label="SiteSelectorsFragment" />
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.netnovelreader.ui.fragments.LoginFragment"
+        android:name="com.netnovelreader.ui.fragments.UserFragment"
         android:label="LoginFragment" />
-    <fragment
-        android:id="@+id/syncRecordFragment"
-        android:name="com.netnovelreader.ui.fragments.SyncRecordFragment"
-        android:label="SyncRecordFragment" />
     <fragment
         android:id="@+id/settingFragment"
         android:name="com.netnovelreader.ui.fragments.SettingFragment"

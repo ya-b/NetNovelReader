@@ -7,6 +7,8 @@ import com.netnovelreader.repo.db.ReaderDatabase
 import com.netnovelreader.repo.http.resp.ChapterInfoResp
 import com.netnovelreader.repo.http.resp.SearchBookResp
 import com.netnovelreader.utils.IO_EXECUTOR
+import com.netnovelreader.utils.bookDir
+import com.netnovelreader.utils.ioThread
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 
@@ -17,16 +19,21 @@ class BookInfosRepo(app: Application) : Repo(app) {
         dao.allBooks()
 
     fun deleteBook(bookname: String) {
-        dao.getBookInfo(bookname)?.also { dao.delete(it) }
+        ioThread {
+            dao.getBookInfo(bookname)?.also { dao.delete(it) }
+           bookDir(bookname).deleteRecursively()
+        }
     }
 
     fun setMaxOrderToBook(bookname: String) {
-        dao.getBookInfo(bookname)
-            ?.also {
-                it.orderNumber = dao.getMaxOrderNum() + 1
-                it.hasUpdate = false
-            }
-            ?.also { dao.update(it) }
+        ioThread {
+            dao.getBookInfo(bookname)
+                ?.also {
+                    it.orderNumber = dao.getMaxOrderNum() + 1
+                    it.hasUpdate = false
+                }
+                ?.also { dao.update(it) }
+        }
 
     }
 

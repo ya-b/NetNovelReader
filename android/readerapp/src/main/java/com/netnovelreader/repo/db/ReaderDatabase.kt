@@ -101,7 +101,7 @@ abstract class ReaderDatabase : RoomDatabase() {
         //是否已下载
         const val IS_DOWNLOADED = "is_downloaded"
 
-        const val ALLREADY_DOWN = 1
+        const val ALREADY_DOWN = 1
         const val NOT_DOWN = 2
 
         const val SEARCH_NAME = "searchname"

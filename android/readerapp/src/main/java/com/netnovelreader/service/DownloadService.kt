@@ -72,16 +72,19 @@ class DownloadService : IntentService {
     }
 
     private fun updateNotification(progress: Int, max: Int, failed: Int, remain: Int) {
-        builder?.setProgress(max, progress, false)
-            ?.setContentTitle(
-                String.format(
-                    getString(R.string.downloading),
-                    progress,
-                    max,
-                    failed,
-                    remain
-                )
+        val str = if(progress == max) {
+            String.format(getString(R.string.download_finish), failed)
+        } else {
+            String.format(
+                getString(R.string.downloading),
+                progress,
+                max,
+                failed,
+                remain
             )
+        }
+        builder?.setProgress(max, progress, false)
+            ?.setContentTitle(str)
         uiThread { mNotificationManager?.notify(notyfyId, builder?.build()) }
     }
 

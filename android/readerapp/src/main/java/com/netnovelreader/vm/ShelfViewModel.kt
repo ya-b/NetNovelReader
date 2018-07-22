@@ -6,7 +6,6 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.paging.LivePagedListBuilder
 import android.arch.paging.PagedList
 import com.netnovelreader.repo.BookInfosRepo
-import com.netnovelreader.utils.ioThread
 
 class ShelfViewModel(var repo: BookInfosRepo, app: Application) : AndroidViewModel(app) {
     var allBooks = LivePagedListBuilder(
@@ -16,17 +15,24 @@ class ShelfViewModel(var repo: BookInfosRepo, app: Application) : AndroidViewMod
             .setEnablePlaceholders(false)
             .build()
     ).build()
-    var startReaderFrag: MutableLiveData<StringBuilder> = MutableLiveData()
+    var startReaderFrag = MutableLiveData<StringBuilder>()
+    var dialogCommand = MutableLiveData<StringBuilder>()
     var stopRefershCommand = MutableLiveData<Void>()
 
     fun readBook(bookname: String) {
         startReaderFrag.value = StringBuilder(bookname)
-        ioThread { repo.setMaxOrderToBook(bookname) }
+        repo.setMaxOrderToBook(bookname)
     }
 
-    fun delBook(bookname: String): Boolean {
-        ioThread { repo.deleteBook(bookname) }
+    fun askForDelBook(bookname: String): Boolean {
+        dialogCommand.value = StringBuilder(bookname)
         return true // onLongClick的返回值
+    }
+
+    fun deleteBook(bookname: String) {
+        if(bookname.isNotEmpty()) {
+            repo.deleteBook(bookname)
+        }
     }
 
     fun updateBooks() {

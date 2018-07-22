@@ -1,8 +1,7 @@
 package com.netnovelreader.repo.http
 
-import com.netnovelreader.repo.http.resp.ReadRecordResp
-import com.netnovelreader.repo.http.resp.RespMessage
-import com.netnovelreader.repo.http.resp.SiteSelectorsResp
+import com.netnovelreader.repo.db.BookInfoEntity
+import com.netnovelreader.repo.db.SiteSelectorEntity
 import io.reactivex.Observable
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -34,18 +33,18 @@ object WebService {
 
     interface NovalReaderAPI {
         @GET
-        fun getSiteSelectorList(@Url url: String = "rule/query"): Observable<SiteSelectorsResp>
+        fun getSiteSelectorList(@Url url: String = "rule/query"): Observable<List<SiteSelectorEntity>>
 
         @POST("login")
         @FormUrlEncoded
-        fun login(@Field("username") username: String, @Field("password") password: String): Observable<RespMessage>
+        fun login(@Field("username") username: String, @Field("password") password: String): Observable<ResponseBody>
 
         @POST("record/restore")
-        fun restoreRecord(@Header("Authorization") token: String): Observable<ReadRecordResp>
+        fun restoreRecord(@Header("Authorization") token: String): Observable<ArrayList<BookInfoEntity>>
 
         @POST("record/save")
         @Multipart
-        fun saveRecord(@Header("Authorization") token: String, @Part file: MultipartBody.Part): Observable<RespMessage>
+        fun saveRecord(@Header("Authorization") token: String, @Part file: MultipartBody.Part): Observable<ResponseBody>
 
         @GET
         fun request(@Url url: String): Call<ResponseBody>

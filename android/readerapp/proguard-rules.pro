@@ -30,6 +30,8 @@
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
 ########################retrofit############################
+
 ########################okio############################
 -dontwarn okio.**
 ########################okio############################
+

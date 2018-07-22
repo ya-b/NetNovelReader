@@ -1,5 +1,6 @@
 package com.netnovelreader.ui.fragments
 
+import android.app.AlertDialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
@@ -12,6 +13,8 @@ import com.netnovelreader.ViewModelFactory
 import com.netnovelreader.databinding.FragmentShelfBinding
 import com.netnovelreader.ui.activities.MainActivity
 import com.netnovelreader.ui.adapters.ShelfPageListAdapter
+import com.netnovelreader.utils.get
+import com.netnovelreader.utils.sharedPreferences
 import com.netnovelreader.vm.ShelfViewModel
 import kotlinx.android.synthetic.main.fragment_shelf.*
 
@@ -54,16 +57,35 @@ class ShelfFragment : Fragment() {
                     .navigate(R.id.action_shelfFragment_to_readFragment, bundle)
             }
         })
+        viewModel?.dialogCommand?.observe(this, Observer {
+            val bookname = it?.toString()?.takeIf { it.isNotEmpty() } ?: return@Observer
+            it.delete(0, it.length)
+            AlertDialog.Builder(context)
+                .setTitle(String.format(getString(R.string.delete_book), bookname))
+                .setPositiveButton(R.string.enter, { _,_ -> viewModel?.deleteBook(bookname) })
+                .setNegativeButton(R.string.cancel, null)
+                .create()
+                .show()
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
         menu?.clear()
         inflater?.inflate(R.menu.menu_shelf, menu)
+        context?.sharedPreferences()
+            ?.get(getString(R.string.tokenKey), "")
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { context?.sharedPreferences()?.get(getString(R.string.usernameKey), "user") }
+            ?.let { menu?.findItem(R.id.login)?.setTitle(it) }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
+            R.id.login -> {
+                NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_shelfFragment_to_loginFragment)
+            }
             R.id.search_button -> {
                 NavHostFragment.findNavController(this)
                     .navigate(R.id.action_shelfFragment_to_searchFragment)
@@ -75,14 +97,6 @@ class ShelfFragment : Fragment() {
             R.id.edit_site_selector -> {
                 NavHostFragment.findNavController(this)
                     .navigate(R.id.action_shelfFragment_to_siteSelectorsFragment)
-            }
-            R.id.login -> {
-                NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_shelfFragment_to_loginFragment)
-            }
-            R.id.syncRecord -> {
-                NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_shelfFragment_to_syncRecordFragment)
             }
         }
         return super.onOptionsItemSelected(item)

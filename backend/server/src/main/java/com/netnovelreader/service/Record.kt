@@ -1,9 +1,7 @@
 package com.netnovelreader.service
 
-import com.google.gson.Gson
 import com.netnovelreader.RestoreRecord
 import com.netnovelreader.SaveRecord
-import com.netnovelreader.model.RespMessage
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.auth.authentication
@@ -36,7 +34,7 @@ fun Route.saveRecord(uploadDir: String) {
                     }
                     part.dispose()
                 }
-                call.respond(RespMessage(if (isSuccess) 6 else 7))
+                call.respond(if (isSuccess) "保存成功" else "保存失败")
             }
         }
     }
@@ -48,20 +46,13 @@ fun Route.restoreRecord(uploadDir: String) {
             handle {
                 val username = call.authentication.principal<JWTPrincipal>()?.payload
                         ?.getClaim("username")?.asString() ?: "any"
-                val respMessage = RespMessage(6)
                 try {
                     File(uploadDir, username).readText()
                 } catch (e: IOException) {
-                    respMessage.ret = 7
                     null
-                }?.also { fileText ->
-                    try {
-                        respMessage.books = Gson().fromJson(fileText, RespMessage::class.java).books
-                    } catch (e: Exception) {
-                        respMessage.ret = 7
-                    }
+                }.also {
+                    call.respond(it ?: "")
                 }
-                call.respond(respMessage)
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.netnovelreader.service
 
 import com.netnovelreader.Logout
-import com.netnovelreader.model.RespMessage
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.Cookie
@@ -15,7 +14,7 @@ fun Route.logout() {
             handle {
                 val cookie = Cookie("name", "", path = "/", maxAge = 0)
                 call.response.cookies.append(cookie)
-                call.respond(RespMessage(5))
+                call.respond("退出登录")
             }
         }
     }

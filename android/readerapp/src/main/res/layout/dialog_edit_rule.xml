@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <data>
+        <variable
+            name="data"
+            type="com.netnovelreader.repo.db.SiteSelectorEntity" />
+    </data>
+    
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/hostnameTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="hostname:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/hostname"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.hostname}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/hostnameTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/hostnameTag" />
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/catalogSelectorTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="catalogSelector:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/hostnameTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/catalogSelector"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.catalogSelector}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/catalogSelectorTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/catalogSelectorTag" />
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/chapterSelectorTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="chapterSelector:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/catalogSelectorTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/chapterSelector"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.chapterSelector}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/chapterSelectorTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/chapterSelectorTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/catalogFilterTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="catalogFilter:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/chapterSelectorTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/catalogFilter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.catalogFilter}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/catalogFilterTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/catalogFilterTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/chapterFilterTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="chapterFilter:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/catalogFilterTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/chapterFilter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.chapterFilter}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/chapterFilterTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/chapterFilterTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/searchUrlTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="searchUrl:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/chapterFilterTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/searchUrl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.searchUrl}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/searchUrlTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/searchUrlTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/redirectFileldTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="redirectFileld:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/searchUrlTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/redirectFileld"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.redirectFileld}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/redirectFileldTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/redirectFileldTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/redirectUrlTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="redirectUrl:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/redirectFileldTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/redirectUrl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.redirectUrl}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/redirectUrlTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/redirectUrlTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/noRedirectUrlTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="noRedirectUrl:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/redirectUrlTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/noRedirectUrl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.noRedirectUrl}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/noRedirectUrlTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/noRedirectUrlTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/redirectNameTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="redirectName:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/noRedirectUrlTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/redirectName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.redirectName}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/redirectNameTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/redirectNameTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/noRedirectNameTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="noRedirectName:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/redirectNameTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/noRedirectName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.noRedirectName}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/noRedirectNameTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/noRedirectNameTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/redirectImageTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="redirectImage:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/noRedirectNameTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/redirectImage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.redirectImage}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/redirectImageTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/redirectImageTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/noRedirectImageTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="noRedirectImage:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/redirectImageTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/noRedirectImage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.noRedirectImage}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/noRedirectImageTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/noRedirectImageTag" />
+        
+        
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/charsetTag"
+            android:layout_marginTop="10dp"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="charset:"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/noRedirectImageTag"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/charset"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@={data.charset}"
+            android:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/charsetTag"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/charsetTag" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

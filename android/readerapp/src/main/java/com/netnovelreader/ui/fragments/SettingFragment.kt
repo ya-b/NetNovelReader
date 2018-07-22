@@ -13,22 +13,26 @@ class SettingFragment : PreferenceFragmentCompat() {
     lateinit var toolbar: Toolbar
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-
+        preferenceManager.sharedPreferencesName = context?.applicationContext?.packageName
         addPreferencesFromResource(R.xml.pref_setting)
+        //todo 优化
+        findPreference(getString(R.string.nightModeKey)).setOnPreferenceChangeListener { _, value ->
+            activity?.recreate()
+            true
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        toolbar = view.findViewById<Toolbar>(R.id.settingToolbar)
+        toolbar = view.findViewById(R.id.settingToolbar)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
+        (activity as MainActivity?)?.setSupportActionBar(toolbar)
         toolbar.setNavigationOnClickListener {
             NavHostFragment.findNavController(this).popBackStack()
         }
-        (activity as MainActivity?)?.setSupportActionBar(toolbar)
 
     }
 }

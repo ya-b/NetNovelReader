@@ -75,7 +75,7 @@ class SearchRepo(app: Application) : Repo(app) {
         File(bookDir(bookname), info.id.toString()).writeText(str)
         db.chapterInfoDao()
             .getChapterInfo(bookname, info.chapterName)
-            ?.also { it.isDownloaded = ReaderDatabase.ALLREADY_DOWN }
+            ?.also { it.isDownloaded = ReaderDatabase.ALREADY_DOWN }
             ?.also { db.chapterInfoDao().update(it) }
     }
 

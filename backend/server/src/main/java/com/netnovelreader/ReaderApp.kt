@@ -3,7 +3,6 @@ package com.netnovelreader
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.netnovelreader.db.ReaderDatabase
-import com.netnovelreader.model.RespMessage
 import com.netnovelreader.service.*
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -75,7 +74,7 @@ fun Authentication.Configuration.auth(issuer: String, audience: String, realm: S
 fun StatusPages.Configuration.statusPage(){
     exception<AuthenticationException> { call.respond(HttpStatusCode.Unauthorized) }
     status(HttpStatusCode.NotFound, HttpStatusCode.Unauthorized) {
-        call.respond(RespMessage(it.value, it.description))
+        call.respond("${it.value}\n${it.description}")
     }
 }
 

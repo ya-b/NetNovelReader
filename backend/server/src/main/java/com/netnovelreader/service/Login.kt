@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.netnovelreader.Login
 import com.netnovelreader.db.UserDao
-import com.netnovelreader.model.RespMessage
 import com.netnovelreader.model.UserBean
 import io.ktor.application.call
 import io.ktor.http.HttpMethod
@@ -34,10 +33,9 @@ fun Route.login(issuer: String, audience: String, secret: String, dao: UserDao) 
                 val passwd = parameters["password"] ?: ""
                 var user = dao.getUser(name)
                 when {
-                    name.length < 4 || passwd.length < 4 -> call.respond(RespMessage(4))
-                    user != null && user.password != passwd -> call.respond(RespMessage(3))
+                    name.length < 4 || passwd.length < 4 -> call.respond("")
+                    user != null && user.password != passwd -> call.respond("")
                     else -> {
-                        val msg = RespMessage(1)
                         if(user == null) {
                             user = UserBean().apply {
                                 username = name
@@ -45,11 +43,10 @@ fun Route.login(issuer: String, audience: String, secret: String, dao: UserDao) 
                                 role = 1
                             }
                             dao.addUser(user)
-                            msg.ret = 2
                         }
                         val token = makeToken(user, issuer, audience, secret)
                         call.response.cookies.append("username", "${user.username}")
-                        call.respond(msg.also { it.token = token })
+                        call.respond(token)
                     }
                 }
             }

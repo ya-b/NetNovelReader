@@ -15,7 +15,8 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -54,8 +55,6 @@ dependencies {
 
     implementation deps.lifecycle.runtime
     implementation deps.lifecycle.extensions
-    implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     kapt deps.lifecycle.compiler
     implementation deps.room.runtime
     implementation deps.room.rxjava2

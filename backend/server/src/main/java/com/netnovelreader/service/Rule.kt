@@ -1,14 +1,13 @@
 package com.netnovelreader.service
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.netnovelreader.AddRule
 import com.netnovelreader.DeleteRule
 import com.netnovelreader.ImportRule
 import com.netnovelreader.QueryRule
 import com.netnovelreader.db.SitePreferenceDao
-import com.netnovelreader.model.RespMessage
 import com.netnovelreader.model.SitePreferenceBean
-import com.netnovelreader.model.SitePreferenceJsonBean
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.auth.authenticate
@@ -29,15 +28,17 @@ import io.ktor.routing.Route
 fun Route.queryRule(dao: SitePreferenceDao) {
     location<QueryRule> {
         handle {
-            val params = if(call.request.httpMethod.equals(HttpMethod.Get)) call.parameters else call.receiveParameters()
+            val params =
+                if(call.request.httpMethod.equals(HttpMethod.Get))
+                    call.parameters
+                else
+                    call.receiveParameters()
             val hostname = params["hostname"]
             if (hostname.isNullOrEmpty()) {
-                dao.getAllPreference()?.let { call.respond(RespMessage(6, rules = it.map { it.toShort() })) }
-                        ?: call.respond(RespMessage(7))
+                dao.getAllPreference() ?: emptyList()
             } else {
-                dao.getPreference(hostname!!)?.let { call.respond(RespMessage(6, rule = it.toShort())) }
-                        ?: call.respond(RespMessage(7))
-            }
+                dao.getPreference(hostname!!)?.let { listOf(it) } ?: emptyList()
+            }.let { call.respond(it) }
         }
     }
 }
@@ -47,13 +48,17 @@ fun Route.addRule(dao: SitePreferenceDao) {
         authenticate {
             handle {
                 if (!checkRoleAuth(this, 100)) {
-                    call.respond(HttpStatusCode.Forbidden, RespMessage(8, "Insufficient authority"))
+                    call.respond(HttpStatusCode.Forbidden, "没有权限")
                     return@handle
                 }
-                val param = if(call.request.httpMethod.equals(HttpMethod.Get)) call.parameters else call.receiveParameters()
+                val param =
+                    if(call.request.httpMethod.equals(HttpMethod.Get))
+                        call.parameters
+                    else
+                        call.receiveParameters()
                 val hostname = param["hostname"]
                 if (hostname.isNullOrEmpty()) {
-                    call.respond(RespMessage(7, "failed : hostname is null or empty"))
+                    call.respond("添加失败，hostname不能为空")
                 } else {
                     dao.addPreference(SitePreferenceBean().also {
                         it.hostname = hostname
@@ -71,7 +76,7 @@ fun Route.addRule(dao: SitePreferenceDao) {
                         it.no_redirect_image = param.get("no_redirect_image")
                         it.charset = param.get("charset")
                     })
-                    call.respond(RespMessage(6, "success"))
+                    call.respond("添加成功")
                 }
             }
         }
@@ -83,15 +88,19 @@ fun Route.deleteRule(dao: SitePreferenceDao) {
         authenticate {
             handle {
                 if (checkRoleAuth(this, 100)) {
-                    val params = if(call.request.httpMethod.equals(HttpMethod.Get)) call.parameters else call.receiveParameters()
+                    val params =
+                        if(call.request.httpMethod.equals(HttpMethod.Get))
+                            call.parameters
+                        else
+                            call.receiveParameters()
                     val hostname = params["hostname"]
                     when {
                         hostname == "*" -> dao.deleteAllPreference()
                         !hostname.isNullOrEmpty() -> dao.deletePreference(hostname!!)
                     }
-                    call.respond(RespMessage(6))
+                    call.respond("删除成功")
                 } else {
-                    call.respond(HttpStatusCode.Forbidden, RespMessage(8, "Insufficient authority"))
+                    call.respond(HttpStatusCode.Forbidden, "没有权限")
                 }
             }
         }
@@ -103,7 +112,7 @@ fun Route.importRule(dao: SitePreferenceDao) {
         authenticate {
             handle {
                 if (!checkRoleAuth(this, 100)){
-                    call.respond(HttpStatusCode.Forbidden, RespMessage(8, "Insufficient authority"))
+                    call.respond("没有权限")
                     return@handle
                 }
                 var isSuccess = false
@@ -111,15 +120,16 @@ fun Route.importRule(dao: SitePreferenceDao) {
                     if(it !is PartData.FileItem) return@forEachPart
                     try {
                         it.streamProvider().reader().use {
-                            it.readText().let { Gson().fromJson(it, SitePreferenceJsonBean::class.java) }
-                                ?.arr?.let { dao.addPreference(*it.toTypedArray()); isSuccess = true }
+                            val type = object : TypeToken<ArrayList<SitePreferenceBean>>(){}.type
+                            it.readText().let { Gson().fromJson<ArrayList<SitePreferenceBean>>(it, type) }
+                                ?.let { dao.addPreference(*it.toTypedArray()); isSuccess = true }
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                     it.dispose()
                 }
-                call.respond(RespMessage(if (isSuccess) 6 else 7))
+                call.respond(if (isSuccess) "导入成功" else "导入失败")
             }
         }
     }

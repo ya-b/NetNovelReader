@@ -10,7 +10,9 @@ import android.view.*
 import androidx.navigation.fragment.NavHostFragment
 import com.netnovelreader.R
 import com.netnovelreader.ViewModelFactory
+import com.netnovelreader.databinding.DialogEditRuleBinding
 import com.netnovelreader.databinding.FragmentSiteSelectorsBinding
+import com.netnovelreader.repo.db.SiteSelectorEntity
 import com.netnovelreader.ui.activities.MainActivity
 import com.netnovelreader.ui.adapters.SiteSelectorPageListAdapter
 import com.netnovelreader.vm.SiteSelectorViewModel
@@ -24,8 +26,10 @@ class SiteSelectorsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(inflater,
-            R.layout.fragment_site_selectors, container, false)
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_site_selectors, container, false
+        )
         return binding.root
     }
 
@@ -44,6 +48,9 @@ class SiteSelectorsFragment : Fragment() {
         siteSelectorRecycler.adapter = adapter
 
         viewModel?.allSiteSelector?.observe(this, Observer(adapter::submitList))
+        viewModel?.editPreferenceCommand?.observe(this, Observer {
+            it?.let { editPreferenceDialog(it) }
+        })
 
     }
 
@@ -57,7 +64,25 @@ class SiteSelectorsFragment : Fragment() {
         when (item.itemId) {
             R.id.updateSitePreference -> showUpdateDialog()
             R.id.addSitePreference -> {
-
+                editPreferenceDialog(
+                    SiteSelectorEntity(
+                        null,
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                    )
+                )
             }
         }
         return true
@@ -72,6 +97,22 @@ class SiteSelectorsFragment : Fragment() {
             .setNegativeButton(R.string.perfer_local) { _, _ ->
                 viewModel?.updatePreference(false)
             }
+            .setNeutralButton(R.string.cancel, null)
+            .create()
+            .show()
+    }
+
+    private fun editPreferenceDialog(entity: SiteSelectorEntity) {
+        val binding = DataBindingUtil.inflate<DialogEditRuleBinding>(
+            LayoutInflater.from(context),
+            R.layout.dialog_edit_rule, null, false
+        )
+        binding.data = entity
+        AlertDialog.Builder(context)
+            .setView(binding.root)
+            .setPositiveButton(
+                R.string.enter,
+                { _, _ -> binding.data?.let { viewModel?.savePreference(it) } })
             .setNeutralButton(R.string.cancel, null)
             .create()
             .show()

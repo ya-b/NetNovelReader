@@ -39,7 +39,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     var maxChapterNum = 0                                    //最大章节数
     lateinit var bookName: String                            //书名
     var cacheNum: Int = 0                                   //缓存后面章节数量
-    val notDeleteNum = 3                                     //自动删除已读章节，但保留最近3章
+    val preserveSize = 3                                     //自动删除已读章节，但保留最近3章
     var changeFontSizeFlag = false
 
     fun start() {
@@ -58,6 +58,11 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         )
         allChapters.addAll(repo.getAllChapters(bookName) ?: emptyList())
         allChapters.lastOrNull()?.chapterNum?.let { maxChapterNum = it }
+        getApplication<Application>().apply {
+            sharedPreferences().get(getString(R.string.auto_download_key), false)
+                .takeIf { it }
+                ?.let { cacheNum = 3 }
+        }
     }
 
     //获取章节内容
@@ -86,6 +91,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         } else {
             block.invoke()
         }
+        repo.downCacheChapter(bookName, chapterNum, cacheNum)  //下载chapterNum之后cacheNum章
     }
 
     //todo
@@ -101,10 +107,14 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     }
 
     /**
-     * todo 自动删除已读章节，但保留最近[notDeleteNum]章
+     * 自动删除已读章节，但保留最近3章
      */
-    fun autoRemove() {
-
+    fun autoDelCache() {
+        getApplication<Application>().apply {
+            sharedPreferences().get(getString(R.string.auto_remove_key), false)
+                .takeIf { it }
+                ?.let { repo.delCacheChapter(bookName, chapterNum.get(), 3) }
+        }
     }
 
     fun prepare(): Int {
