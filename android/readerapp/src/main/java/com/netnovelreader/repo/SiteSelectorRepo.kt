@@ -28,7 +28,9 @@ class SiteSelectorRepo(app: Application) : Repo(app) {
     }
 
     fun getSelectorSFromLocal(block: (List<SiteSelectorEntity>) -> Unit) {
-        block.invoke(siteSelectorDao.getAll())
+        ioThread {
+            block.invoke(siteSelectorDao.getAll())
+        }
     }
 
     fun saveAll(list: List<SiteSelectorEntity>) = ioThread { siteSelectorDao.insert(*list.toTypedArray()) }

@@ -20,13 +20,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:backgroundColor="@{viewModel.backgroundColor}"
-            android:onCenterClick="@{() -> viewModel.centerClick()}"
+            android:onCenterClick="@{() -> viewModel.onCenterClick()}"
             android:onNextChapter="@{() -> viewModel.onNextChapter()}"
-            android:onPageChange="@{(index) -> viewModel.setRecord(index)}"
+            android:onPageChange="@{(index) -> viewModel.onPageChange(index)}"
             android:onPreviousChapter="@{() -> viewModel.onPreviousChapter()}"
             android:text="@{viewModel.text}"
             android:textColor="@{viewModel.fontColor}"
             android:textSize="@{viewModel.fontSize}"
+            android:rowSpace="@{viewModel.rowSpace}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -64,7 +65,7 @@
             android:layout_height="wrap_content"
             android:background="@color/black"
             android:visibility="@{viewModel.isViewShow[ReadViewModel.Font_SETTING] ? View.VISIBLE : View.GONE}"
-            app:layout_constraintBottom_toTopOf="@+id/footView"
+            app:layout_constraintBottom_toTopOf="@id/footView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
@@ -73,77 +74,155 @@
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:onClick="@{() -> viewModel.fontSizeChangeEvent(45f)}"
+                android:layout_marginTop="5dp"
+                android:onClick="@{() -> viewModel.changeFontSize(45f)}"
                 android:text="45"
                 android:textColor="@{viewModel.fontSizeSelected[0] ? @color/white : @color/gray}"
-                app:layout_constraintEnd_toStartOf="@id/size50"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toStartOf="@id/size50"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size50"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> viewModel.fontSizeChangeEvent(50f)}"
+                android:onClick="@{() -> viewModel.changeFontSize(50f)}"
                 android:text="50"
                 android:textColor="@{viewModel.fontSizeSelected[1] ? @color/white : @color/gray}"
                 app:layout_constraintEnd_toStartOf="@id/size55"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@id/size45"
-                app:layout_constraintTop_toTopOf="@id/size45" />
+                app:layout_constraintBaseline_toBaselineOf="@id/size45" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size55"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> viewModel.fontSizeChangeEvent(55f)}"
+                android:onClick="@{() -> viewModel.changeFontSize(55f)}"
                 android:text="55"
                 android:textColor="@{viewModel.fontSizeSelected[2] ? @color/white : @color/gray}"
                 app:layout_constraintEnd_toStartOf="@id/size60"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@id/size50"
-                app:layout_constraintTop_toTopOf="@id/size45" />
+                app:layout_constraintBaseline_toBaselineOf="@id/size45" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size60"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> viewModel.fontSizeChangeEvent(60f)}"
+                android:onClick="@{() -> viewModel.changeFontSize(60f)}"
                 android:text="60"
                 android:textColor="@{viewModel.fontSizeSelected[3] ? @color/white : @color/gray}"
                 app:layout_constraintEnd_toStartOf="@id/size65"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@id/size55"
-                app:layout_constraintTop_toTopOf="@id/size45" />
+                app:layout_constraintBaseline_toBaselineOf="@id/size45" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/size65"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> viewModel.fontSizeChangeEvent(65f)}"
+                android:onClick="@{() -> viewModel.changeFontSize(65f)}"
                 android:text="65"
                 android:textColor="@{viewModel.fontSizeSelected[4] ? @color/white : @color/gray}"
                 app:layout_constraintEnd_toStartOf="@id/font_label"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@id/size60"
-                app:layout_constraintTop_toTopOf="@id/size45" />
+                app:layout_constraintBaseline_toBaselineOf="@id/size45" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/font_label"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/font"
+                android:text="@string/font_size"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@id/size65"
-                app:layout_constraintTop_toTopOf="@id/size45" />
+                app:layout_constraintBaseline_toBaselineOf="@id/size45" />
+
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/space25"
+                style="@style/reader_font_size_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:onClick="@{() -> viewModel.changeRowSpace(0.25f)}"
+                android:text="0.25"
+                android:textColor="@{viewModel.rowSpaceSelected[0] ? @color/white : @color/gray}"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@id/space50"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/size45" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/space50"
+                style="@style/reader_font_size_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> viewModel.changeRowSpace(0.50f)}"
+                android:text="0.50"
+                android:textColor="@{viewModel.rowSpaceSelected[1] ? @color/white : @color/gray}"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@id/space75"
+                app:layout_constraintStart_toEndOf="@id/space25"
+                app:layout_constraintBaseline_toBaselineOf="@id/space25" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/space75"
+                style="@style/reader_font_size_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> viewModel.changeRowSpace(0.75f)}"
+                android:text="0.75"
+                android:textColor="@{viewModel.rowSpaceSelected[2] ? @color/white : @color/gray}"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@id/space100"
+                app:layout_constraintStart_toEndOf="@id/size50"
+                app:layout_constraintBaseline_toBaselineOf="@id/space25" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/space100"
+                style="@style/reader_font_size_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> viewModel.changeRowSpace(1.00f)}"
+                android:text="1.00"
+                android:textColor="@{viewModel.rowSpaceSelected[3] ? @color/white : @color/gray}"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@id/space150"
+                app:layout_constraintStart_toEndOf="@id/space75"
+                app:layout_constraintBaseline_toBaselineOf="@id/space25" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/space150"
+                style="@style/reader_font_size_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> viewModel.changeRowSpace(1.50f)}"
+                android:text="1.50"
+                android:textColor="@{viewModel.rowSpaceSelected[4] ? @color/white : @color/gray}"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@id/space_label"
+                app:layout_constraintStart_toEndOf="@id/space100"
+                app:layout_constraintBaseline_toBaselineOf="@id/space25" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/space_label"
+                style="@style/reader_font_size_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/row_space"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@id/space150"
+                app:layout_constraintBaseline_toBaselineOf="@id/space25" />
 
         </android.support.constraint.ConstraintLayout>
 
@@ -204,7 +283,7 @@
                 android:layout_height="35dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginBottom="12dp"
-                android:onClick="@{() -> viewModel.backgroundChangeEvent(0)}"
+                android:onClick="@{() -> viewModel.changeBackground(0)}"
                 android:src="@color/read_bg_default"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/read_bg_2"
@@ -215,7 +294,7 @@
                 android:id="@+id/read_bg_1"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:onClick="@{() -> viewModel.backgroundChangeEvent(1)}"
+                android:onClick="@{() -> viewModel.changeBackground(1)}"
                 android:src="@color/read_bg_1"
                 app:layout_constraintEnd_toStartOf="@id/read_bg_4"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -226,7 +305,7 @@
                 android:id="@+id/read_bg_2"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:onClick="@{() -> viewModel.backgroundChangeEvent(2)}"
+                android:onClick="@{() -> viewModel.changeBackground(2)}"
                 android:src="@color/read_bg_2"
                 app:layout_constraintEnd_toStartOf="@id/read_bg_3"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -237,7 +316,7 @@
                 android:id="@+id/read_bg_3"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:onClick="@{() -> viewModel.backgroundChangeEvent(3)}"
+                android:onClick="@{() -> viewModel.changeBackground(3)}"
                 android:src="@color/read_bg_3"
                 app:layout_constraintEnd_toStartOf="@+id/read_bg_1"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -248,7 +327,7 @@
                 android:id="@+id/read_bg_4"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:onClick="@{() -> viewModel.backgroundChangeEvent(4)}"
+                android:onClick="@{() -> viewModel.changeBackground(4)}"
                 android:src="@color/read_bg_4"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -274,21 +353,21 @@
                 android:id="@+id/catalogButton"
                 style="@style/reader_foot_button"
                 android:drawableTop="@drawable/ic_menu_toc_normal"
-                android:onClick="@{() -> viewModel.footViewClickEvent(`catalogButton`)}"
+                android:onClick="@{() -> viewModel.clickFootView(`catalogButton`)}"
                 android:text="@string/catalog_button" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/fontSizeButton"
                 style="@style/reader_foot_button"
                 android:drawableTop="@drawable/ic_menu_settings_normal"
-                android:onClick="@{() -> viewModel.footViewClickEvent(`fontSizeButton`)}"
+                android:onClick="@{() -> viewModel.clickFootView(`fontSizeButton`)}"
                 android:text="@string/settings" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/backgroundButton"
                 style="@style/reader_foot_button"
                 android:drawableTop="@drawable/ic_menu_mode_night_normal"
-                android:onClick="@{() -> viewModel.footViewClickEvent(`backgroundButton`)}"
+                android:onClick="@{() -> viewModel.clickFootView(`backgroundButton`)}"
                 android:text="@string/background_button" />
         </LinearLayout>
 

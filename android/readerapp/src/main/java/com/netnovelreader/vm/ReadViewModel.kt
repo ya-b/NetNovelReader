@@ -18,6 +18,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     val allChapters by lazy { ObservableArrayList<ChapterInfoEntity>() }   //目录
     val text by lazy { ObservableField<String>("") }                  //一页显示的内容
     val fontSize by lazy { ObservableFloat(55f) }                     //字体大小
+    val rowSpace by lazy { ObservableFloat(0.50f) }                    //字体大小
     val fontColor by lazy { ObservableInt(Color.BLACK) }                    //字体颜色
     val backgroundColor by lazy { ObservableInt(R.color.read_font_default) }//背景颜色
     val isViewShow by lazy {
@@ -29,6 +30,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         )
     }
     val fontSizeSelected = List(5) { ObservableBoolean(false) }   //字体大小设置Button是否选中
+    val rowSpaceSelected = List(5) { ObservableBoolean(false) }   //行距Button是否选中
     val isLoading by lazy { ObservableBoolean(true) }                  //是否显示加载进度条
     val showDialogCommand by lazy { MutableLiveData<Boolean>() }             //显示目录
     val changeSourceCommand by lazy { MutableLiveData<String>() }            //换源下载
@@ -40,17 +42,22 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     lateinit var bookName: String                            //书名
     var cacheNum: Int = 0                                   //缓存后面章节数量
     val preserveSize = 3                                     //自动删除已读章节，但保留最近3章
-    var changeFontSizeFlag = false
 
     fun start() {
         val context = getApplication<Application>()
-        fontSizeChangeEvent(
+        changeFontSize(
             context.sharedPreferences().get(
                 context.getString(R.string.fontSizeKey),
                 50f
             )
         )
-        backgroundChangeEvent(
+        changeRowSpace(
+            context.sharedPreferences().get(
+                context.getString(R.string.rowSpaceKey),
+                0.50f
+            )
+        )
+        changeBackground(
             context.sharedPreferences().get(
                 context.getString(R.string.backgroundColorKey),
                 0
@@ -100,13 +107,6 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     }
 
     /**
-     * 保存阅读记录
-     */
-    fun setRecord(pageNum: Int) {
-        repo.setRecord(bookName, chapterNum.get(), pageNum)
-    }
-
-    /**
      * 自动删除已读章节，但保留最近3章
      */
     fun autoDelCache() {
@@ -124,7 +124,6 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     }
 
     fun onNextChapter() {
-        isViewShow.forEach { it.value.set(false) }
         if(isLoading.get()) return
         if(chapterNum.get() < maxChapterNum) {
             getChapter(chapterNum.incrementAndGet())
@@ -132,20 +131,24 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     }
 
     fun onPreviousChapter() {
-        isViewShow.forEach { it.value.set(false) }
         if(isLoading.get()) return
         if(chapterNum.get() > 1) {
             getChapter(chapterNum.decrementAndGet())
         }
     }
 
-    fun centerClick() {
+    fun onCenterClick() {
         if (isViewShow[FOOT_VIEW]!!.get()) {
             isViewShow.forEach { it.value.set(false) }
         } else {
             isViewShow[FOOT_VIEW]!!.set(true)
             isViewShow[HEAD_VIEW]!!.set(true)
         }
+    }
+
+    fun onPageChange(pageNum: Int) {
+        isViewShow.forEach { it.value.set(false) }
+        repo.setRecord(bookName, chapterNum.get(), pageNum)
     }
 
     fun getChapterByCatalog(chapterName: String) {
@@ -166,7 +169,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         }
     }
 
-    fun footViewClickEvent(which: String) {
+    fun clickFootView(which: String) {
         when (which) {
             "catalogButton" -> {
                 isViewShow.forEach { it.value.set(false) }
@@ -183,8 +186,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         }
     }
 
-    fun fontSizeChangeEvent(float: Float) {
-        changeFontSizeFlag = true
+    fun changeFontSize(float: Float) {
         fontSize.set(float)
         when (float) {
             45f -> {
@@ -217,7 +219,39 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         context.sharedPreferences().put(context.getString(R.string.fontSizeKey), float)
     }
 
-    fun backgroundChangeEvent(which: Int) {
+    fun changeRowSpace(float: Float) {
+        rowSpace.set(float + 1)
+        when (float) {
+            0.25f -> {
+                rowSpaceSelected[0].set(true)
+                rowSpaceSelected.filterIndexed { i, _ -> i != 0 }.forEach { it.set(false) }
+            }
+            0.50f -> {
+                rowSpaceSelected[1].set(true)
+                rowSpaceSelected.filterIndexed { i, _ -> i != 1 }.forEach { it.set(false) }
+            }
+            0.75f -> {
+                rowSpaceSelected[2].set(true)
+                rowSpaceSelected.filterIndexed { i, _ -> i != 2 }.forEach { it.set(false) }
+            }
+            1.00f -> {
+                rowSpaceSelected[3].set(true)
+                rowSpaceSelected.filterIndexed { i, _ -> i != 3 }.forEach { it.set(false) }
+            }
+            1.50f -> {
+                rowSpaceSelected[4].set(true)
+                rowSpaceSelected.filterIndexed { i, _ -> i != 4 }.forEach { it.set(false) }
+            }
+            else -> {
+                rowSpaceSelected[1].set(true)
+                rowSpaceSelected.filterIndexed { i, _ -> i != 1 }.forEach { it.set(false) }
+            }
+        }
+        val context = getApplication<Application>()
+        context.sharedPreferences().put(context.getString(R.string.rowSpaceKey), float)
+    }
+
+    fun changeBackground(which: Int) {
         val context = getApplication<Application>()
         when (which) {
             1 -> {

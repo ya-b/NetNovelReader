@@ -33,6 +33,9 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
                 ?.split("#")?.map { it.toInt() } ?: listOf(1, 1)
         }!!
 
+    /**
+     * 保存阅读记录
+     */
     fun setRecord(bookname: String, chapterNum: Int, pageNum: Int) {
         ioThread {
             db.bookInfoDao().run {

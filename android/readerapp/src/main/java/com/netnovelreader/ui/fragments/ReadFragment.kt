@@ -55,8 +55,6 @@ class ReadFragment : Fragment() {
         binding.readerView.isDrawTime = false
 //        binding.readerView.isDrawTime = context?.sharedPreferences()
 //            ?.get(getString(R.string.full_screen_key), false) ?: false
-        binding.readerView.rowSpace = context?.sharedPreferences()
-            ?.get(getString(R.string.rowspaceKey), "1.50")?.toFloat() ?: 1.5f
         binding.viewModel = viewModel
         viewModel?.bookName = bookname ?: ""
         viewModel?.cacheNum = context?.sharedPreferences()

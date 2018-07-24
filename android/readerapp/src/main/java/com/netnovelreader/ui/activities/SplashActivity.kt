@@ -18,10 +18,6 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         val isInit = sharedPreferences().get(getString(R.string.isInitKey), false)
-        if (!hasPermission()) {
-            ActivityCompat.requestPermissions(this,
-                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
-        }
         if(!isInit) {
             SiteSelectorRepo(application).apply {
                 getSelectorsFromNet {

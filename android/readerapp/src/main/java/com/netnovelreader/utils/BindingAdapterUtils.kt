@@ -50,6 +50,11 @@ fun setOnSeekBarChangeListener(seekBar: SeekBar, listener: OnProgressChangedList
     })
 }
 
+@BindingAdapter("android:rowSpace")
+fun setRowSpace(pageView: PageView, rowSpace: Float) {
+    pageView.rowSpace = rowSpace
+}
+
 @BindingAdapter("android:backgroundColor")
 fun setBackground(pageView: PageView, background: Int) {
     pageView.backgroundcolor = background

@@ -14,6 +14,7 @@ class PageView : ViewFlipper {
     var backgroundcolor by InvalidateAfterSet(Color.WHITE)
     var textColor by InvalidateAfterSet(Color.BLACK)                    //字体颜色
     var txtFontType: Typeface? by InvalidateAfterSet(Typeface.DEFAULT)  //正文字体类型//背景颜色
+    var rowSpace: Float? by InvalidateAfterSet(0.5f)               //行距
     var textSize: Float? by InvalidateAfterSet(50f)               //正文部分默认画笔的大小
     var bottomTextSize: Float = 35f                                     //底部部分默认画笔的大小
     var text: String? by InvalidateAfterSet(null)                 //一个未分割章节,格式：章节名|正文
@@ -21,7 +22,6 @@ class PageView : ViewFlipper {
 
     val FILENOTFOUND = "            "         //表示该章节为空
     var isDrawTime = false                    //左下角是否显示时间
-    var rowSpace = 2f                         //行距
     var maxPageNum = 0                        //最大页数
     var pageFlag = 0                          //0刚进入view，1表示目录跳转，2表示下一页，3表示上一页
     private val MIN_MOVE = 80F                //翻页最小滑动距离
@@ -52,7 +52,7 @@ class PageView : ViewFlipper {
             mTextSize = textSize!!
             mBottomTextSize = bottomTextSize
             mIsDrawTime = isDrawTime
-            mRowSpace = rowSpace
+            mRowSpace = rowSpace!!
             mPageNum = 0
             mMaxPageNum = 0
             mTextColor = textColor!!
@@ -64,7 +64,7 @@ class PageView : ViewFlipper {
             mTextSize = textSize!!
             mBottomTextSize = bottomTextSize
             mIsDrawTime = isDrawTime
-            mRowSpace = rowSpace
+            mRowSpace = rowSpace!!
             mPageNum = 0
             mMaxPageNum = 0
             mTextColor = textColor!!
@@ -179,7 +179,7 @@ class PageView : ViewFlipper {
                 if(pageNum == 0) pageNum = 1
                 mTextArray = textArray[pageNum!! - 1]
             }
-            mRowSpace = rowSpace
+            mRowSpace = rowSpace!!
             mTextSize = textSize!!
             mPageNum = pageNum!!
             mMaxPageNum = maxPageNum
@@ -210,7 +210,7 @@ class PageView : ViewFlipper {
             }
         }
         val arrayList = ArrayList<ArrayList<String>>()
-        val totalCount = getTextHeight() / (textSize!! * rowSpace).toInt()  //一页容纳行数
+        val totalCount = getTextHeight() / (textSize!! * rowSpace!!).toInt()  //一页容纳行数
         for (i in 0..tmplist.size / totalCount) {
             (tmplist.filterIndexed { index, _ -> index > i * totalCount - 1 && index < (i + 1) * totalCount } as ArrayList<String>)
                     .also { arrayList.add(it) }
@@ -225,7 +225,7 @@ class PageView : ViewFlipper {
         operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
             this.value = value
             when (property.name) {
-                "textSize" -> {
+                "rowSpace", "textSize" -> {
                     if (width < 1) return
                     val scale = maxPageNum.toFloat() / pageNum!!
                     textArray = spliteText(text!!)
