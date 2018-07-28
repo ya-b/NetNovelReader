@@ -7,9 +7,8 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import com.netnovelreader.R
 import com.netnovelreader.repo.SiteSelectorRepo
-import com.netnovelreader.utils.get
-import com.netnovelreader.utils.put
-import com.netnovelreader.utils.sharedPreferences
+import com.netnovelreader.utils.*
+import java.io.File
 
 class SplashActivity : AppCompatActivity() {
     val req = 217
@@ -32,6 +31,11 @@ class SplashActivity : AppCompatActivity() {
                 }
             }
         } else {
+            val oldDir = File(booksDirOld())
+            if(oldDir.exists()) {
+                oldDir.copyRecursively(File(booksDir()), true)
+                oldDir.deleteRecursively()
+            }
             application.cacheDir.listFiles().forEach { it.deleteRecursively() }
             if(hasPermission()) {
                 startActivity(Intent(this@SplashActivity, MainActivity::class.java))

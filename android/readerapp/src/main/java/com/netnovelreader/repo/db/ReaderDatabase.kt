@@ -25,7 +25,7 @@ abstract class ReaderDatabase : RoomDatabase() {
                         ".read-content",
                         "分卷阅读|订阅本卷",
                         "",
-                        "https://www.qidian.com/search/?kw=searchname",
+                        "https://www.qidian.com/search/?kw=%s",
                         "",
                         "",
                         ".book-img-text > ul:nth-child(1) > li:nth-child(1) > div:nth-child(2) > h4:nth-child(1) > a:nth-child(1)",
@@ -103,7 +103,5 @@ abstract class ReaderDatabase : RoomDatabase() {
 
         const val ALREADY_DOWN = 1
         const val NOT_DOWN = 2
-
-        const val SEARCH_NAME = "searchname"
     }
 }

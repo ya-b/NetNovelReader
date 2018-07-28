@@ -9,7 +9,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.netnovelreader.R
 import com.netnovelreader.interfaces.OnProgressChangedListener
-import com.pageview.PageListener
+import com.pageview.IPageView
 import com.pageview.PageView
 import java.io.File
 
@@ -61,21 +61,21 @@ fun setBackground(pageView: PageView, background: Int) {
 }
 
 @BindingAdapter("android:onCenterClick")
-fun setOnCenterClick(readerView: PageView, onCenterClick: PageListener.OnCenterClick?) {
+fun setOnCenterClick(readerView: PageView, onCenterClick: IPageView.OnCenterClick?) {
     readerView.onCenterClick = onCenterClick
 }
 
 @BindingAdapter("android:onNextChapter")
-fun setNextChapter(readerView: PageView, onNextChapter: PageListener.OnNextChapter?) {
+fun setNextChapter(readerView: PageView, onNextChapter: IPageView.OnNextChapter?) {
     readerView.onNextChapter = onNextChapter
 }
 
 @BindingAdapter("android:onPreviousChapter")
-fun setPreviousChapter(readerView: PageView, onPreviousChapter: PageListener.OnPreviousChapter?) {
+fun setPreviousChapter(readerView: PageView, onPreviousChapter: IPageView.OnPreviousChapter?) {
     readerView.onPreviousChapter = onPreviousChapter
 }
 
 @BindingAdapter("android:onPageChange")
-fun setOnPageChange(readerView: PageView, onPageChange: PageListener.OnPageChange?) {
+fun setOnPageChange(readerView: PageView, onPageChange: IPageView.OnPageChange?) {
     readerView.onPageChange = onPageChange
 }

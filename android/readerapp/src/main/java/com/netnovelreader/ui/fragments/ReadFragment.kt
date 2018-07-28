@@ -17,8 +17,8 @@ import com.netnovelreader.databinding.FragmentReadBinding
 import com.netnovelreader.ui.adapters.CatalogAdapter
 import com.netnovelreader.utils.get
 import com.netnovelreader.utils.sharedPreferences
+import com.netnovelreader.utils.toast
 import com.netnovelreader.vm.ReadViewModel
-import kotlinx.android.synthetic.main.fragment_read.*
 
 class ReadFragment : Fragment() {
 
@@ -53,8 +53,7 @@ class ReadFragment : Fragment() {
             ViewModelProviders.of(this, ViewModelFactory.getInstance(it))
         }?.get(ReadViewModel::class.java)
         binding.readerView.isDrawTime = false
-//        binding.readerView.isDrawTime = context?.sharedPreferences()
-//            ?.get(getString(R.string.full_screen_key), false) ?: false
+
         binding.viewModel = viewModel
         viewModel?.bookName = bookname ?: ""
         viewModel?.cacheNum = context?.sharedPreferences()
@@ -63,12 +62,16 @@ class ReadFragment : Fragment() {
         viewModel?.start()
         viewModel?.brightnessCommand?.observe(this, Observer {
             it ?: return@Observer
-            activity?.window?.attributes = activity?.window?.attributes?.apply { screenBrightness = it }
+            activity?.window?.attributes =
+                    activity?.window?.attributes?.apply { screenBrightness = it }
         })
         viewModel?.showDialogCommand?.observe(this, Observer {
             if (it == true) showDialog() else dialog?.dismiss()
         })
-        viewModel?.prepare()?.let { binding.readerView.prepare(it) }
+        viewModel?.initPageViewCommand?.observe(this,
+            Observer { binding.readerView.prepare(it ?: 1) }
+        )
+        viewModel?.toastCommand?.observe(this, Observer { it?.let { context?.toast(it) } })
     }
 
     //显示目录
@@ -83,7 +86,7 @@ class ReadFragment : Fragment() {
         }
         catalogView?.scrollToPosition((viewModel?.chapterNum?.get() ?: 1) - 1)
         dialog?.show()
-        dialog?.window?.setLayout(readerView.width * 5 / 6, readerView.height * 9 / 10)
+        dialog?.window?.setLayout(binding.root.width * 5 / 6, binding.root.height * 9 / 10)
     }
 
     override fun onDestroy() {

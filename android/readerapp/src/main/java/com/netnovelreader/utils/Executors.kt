@@ -11,8 +11,6 @@ fun ioThread(f: () -> Unit) {
     IO_EXECUTOR.execute(f)
 }
 
-fun <T> ioThreadFuture(f: () -> T) = IO_EXECUTOR.submit(f).get()
-
 fun uiThread(f: () -> Unit) {
     UI_EXECUTOR.post { f.invoke() }
 }

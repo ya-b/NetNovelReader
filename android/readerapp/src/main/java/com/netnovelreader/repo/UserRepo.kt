@@ -5,8 +5,11 @@ import com.google.gson.Gson
 import com.netnovelreader.R
 import com.netnovelreader.repo.db.BookInfoEntity
 import com.netnovelreader.repo.http.WebService
-import com.netnovelreader.utils.*
-import io.reactivex.Observable
+import com.netnovelreader.utils.IO_EXECUTOR
+import com.netnovelreader.utils.get
+import com.netnovelreader.utils.put
+import com.netnovelreader.utils.sharedPreferences
+import io.reactivex.MaybeSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
@@ -23,7 +26,7 @@ class UserRepo(app: Application) : Repo(app) {
             .subscribe(
                 {
                     var token = it?.string()
-                    if(token.isNullOrEmpty()) {
+                    if (token.isNullOrEmpty()) {
                         block.invoke(null)
                     } else {
                         app.sharedPreferences().put(app.getString(R.string.tokenKey), token!!)
@@ -43,13 +46,16 @@ class UserRepo(app: Application) : Repo(app) {
     }
 
     fun uploadRecord(block: (String) -> Unit) {
-        Observable.create<String> {
-            val str = db.bookInfoDao().getAll()
-                .let { Gson().toJson(it) }
-            it.onNext(str)
-            it.onComplete()
-        }.subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .flatMap { str ->
+        db.bookInfoDao()
+            .getAll()
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .flatMap { list ->
+                MaybeSource<String> {
+                    it.onSuccess(Gson().toJson(list))
+                    it.onComplete()
+                }
+            }
+            .flatMapObservable { str ->
                 val body = RequestBody.create(MediaType.parse("text/plain"), str)
                 val filePart = MultipartBody.Part.createFormData("fileupload", "record", body)
                 WebService.readerAPI.saveRecord(getToken(), filePart)
@@ -72,7 +78,7 @@ class UserRepo(app: Application) : Repo(app) {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    if(it != null) {
+                    if (it != null) {
                         saveRecordToDb(it)
                         block.invoke(true)
                     } else {
@@ -84,16 +90,19 @@ class UserRepo(app: Application) : Repo(app) {
     }
 
     private fun saveRecordToDb(record: List<BookInfoEntity>) {
-        ioThread {
-            val local = db.bookInfoDao().getAll()
-            record.forEach { recordItem ->
-                recordItem._id = null
-                local.firstOrNull { it.bookname == recordItem.bookname }
-                    ?.let { recordItem._id = it._id }
+        db.bookInfoDao()
+            .getAll()
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe {
+                record.forEach { recordItem ->
+                    recordItem._id = null
+                    it.firstOrNull { it.bookname == recordItem.bookname }
+                        ?.let { recordItem._id = it._id }
+                }
+                db.bookInfoDao().insert(*record.toTypedArray())
             }
-            db.bookInfoDao().insert(*record.toTypedArray())
-        }
     }
 
-    private fun getToken() = "Bearer ${ app.sharedPreferences().get(app.getString(R.string.tokenKey),"") }"
+    private fun getToken() =
+        "Bearer ${app.sharedPreferences().get(app.getString(R.string.tokenKey), "")}"
 }

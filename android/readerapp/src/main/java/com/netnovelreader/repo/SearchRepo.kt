@@ -1,44 +1,36 @@
 package com.netnovelreader.repo
 
 import android.app.Application
-import android.util.Log
 import com.netnovelreader.R
 import com.netnovelreader.repo.db.BookInfoEntity
 import com.netnovelreader.repo.db.ChapterInfoEntity
 import com.netnovelreader.repo.db.ReaderDatabase
-import com.netnovelreader.repo.db.SiteSelectorEntity
 import com.netnovelreader.repo.http.WebService
 import com.netnovelreader.repo.http.resp.ChapterInfoResp
 import com.netnovelreader.repo.http.resp.SearchBookResp
 import com.netnovelreader.utils.*
 import io.reactivex.Observable
-import io.reactivex.observers.DisposableObserver
+import io.reactivex.SingleSource
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import java.io.*
 
 class SearchRepo(app: Application) : Repo(app) {
-    private var searchWorker: SearchRespObserver? = null
 
     /**
      * 搜索书，如果已在搜索，则取消当前搜索，重新搜
      */
     @Throws(IOException::class)
-    fun search(bookname: String, call: (Boolean, SearchBookResp?) -> Unit) {
-        searchWorker?.dispose()
-        searchWorker = SearchRespObserver(call)
-        Observable.create<List<SiteSelectorEntity>> {
-            it.onNext(db.siteSelectorDao().getAll())
-            it.onComplete()
-        }.subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .flatMap { Observable.fromIterable(it) }
+    fun search(bookname: String) =
+        db.siteSelectorDao().getAll().subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .flatMapObservable { Observable.fromIterable(it) }
             .observeOn(Schedulers.from(IO_EXECUTOR))
             .flatMap { item ->
                 Observable.create<SearchBookResp> {
                     it.onNext(WebService.searchBook.search(bookname, item))
                     it.onComplete()
                 }.subscribeOn(Schedulers.from(IO_EXECUTOR))
-            }.subscribe(searchWorker!!)
-    }
+            }
 
     /**
      *
@@ -71,24 +63,34 @@ class SearchRepo(app: Application) : Repo(app) {
 
     @Throws(IOException::class)
     fun downloadChapter(bookname: String, info: ChapterInfoResp) {
-        val str = getChapter(info)
-        File(bookDir(bookname), info.id.toString()).writeText(str)
-        db.chapterInfoDao()
-            .getChapterInfo(bookname, info.chapterName)
-            ?.also { it.isDownloaded = ReaderDatabase.ALREADY_DOWN }
-            ?.also { db.chapterInfoDao().update(it) }
+        getChapter(info)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                { str ->
+                    File(bookDir(bookname), info.id.toString()).writeText(str)
+                    db.chapterInfoDao()
+                        .getChapterInfo(bookname, info.chapterName).subscribe({
+                            it.isDownloaded = ReaderDatabase.ALREADY_DOWN
+                            db.chapterInfoDao().update(it)
+                        }, {
+
+                        })
+                },
+                {
+                    LoggerFactory.getLogger(this.javaClass).warn("downloadChapter$it")
+                })
     }
 
     //下载书籍图片(搜索时顺便获取)
     fun downloadImage(bookname: String, imageUrl: String) {
         val path = "${bookDir(bookname)}".let { "$it${File.separator}$COVER_NAME" }
-        if(imageUrl.isEmpty() || File(path).exists()) return
+        if (imageUrl.isEmpty() || File(path).exists()) return
         ioThread {
             try {
                 WebService.readerAPI.request(imageUrl).execute().body()?.byteStream()?.use { ins ->
                     FileOutputStream(path).use { os -> ins.copyTo(os) }
                 }
-            }catch (e: IOException) {
+            } catch (e: IOException) {
                 e.printStackTrace()
             }
         }
@@ -99,14 +101,14 @@ class SearchRepo(app: Application) : Repo(app) {
         item: SearchBookResp,
         call: ((SearchBookResp?, List<ChapterInfoResp>?) -> Unit)? = null
     ) {
-        Observable
-            .create<List<ChapterInfoResp>> {
-                val chapters = getCatalog(item)
-                item.latestChapter = chapters.last().chapterName
-                it.onNext(chapters)
-                it.onComplete()
-            }.subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe(
+        getCatalog(item)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .flatMap { chapters ->
+                SingleSource<List<ChapterInfoResp>> {
+                    item.latestChapter = chapters.last().chapterName
+                    it.onSuccess(chapters)
+                }
+            }.subscribe(
                 { list ->
                     call?.invoke(item, list)
                     try {
@@ -115,7 +117,7 @@ class SearchRepo(app: Application) : Repo(app) {
                             File(app.cacheDir, getFileName(item)).outputStream()
                         ).use { it.writeObject(list) }
                     } catch (e: IOException) {
-                        Log.w("${this.javaClass.name}: write object error", e)
+                        LoggerFactory.getLogger(this.javaClass).warn("getCatalogFromNet$e")
                     }
                 },
                 {
@@ -126,7 +128,7 @@ class SearchRepo(app: Application) : Repo(app) {
                         },
                         null
                     )
-                    Log.w("${this.javaClass.name}: down catalog error", it)
+                    LoggerFactory.getLogger(this.javaClass).warn("getCatalogFromNet$it")
                 }
             )
     }
@@ -149,21 +151,7 @@ class SearchRepo(app: Application) : Repo(app) {
 
     fun addBook(book: BookInfoEntity) = db.bookInfoDao().insert(book)
 
-    fun isBookDownloaded(bookname: String) = db.bookInfoDao().getBookInfo(bookname) != null
-
-    class SearchRespObserver(private val call: (Boolean, SearchBookResp?) -> Unit) :
-        DisposableObserver<SearchBookResp>() {
-        override fun onNext(t: SearchBookResp) {
-            call.invoke(true, t)
-        }
-
-        override fun onComplete() {
-            call.invoke(false, null)
-        }
-
-        override fun onError(e: Throwable) {
-            call.invoke(false, null)
-            Log.w(this.javaClass.name, e)
-        }
-    }
+    fun isBookDownloaded(bookname: String) =
+        db.bookInfoDao()
+            .getBookInfo(bookname)
 }

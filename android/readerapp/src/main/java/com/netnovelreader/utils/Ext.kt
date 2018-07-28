@@ -37,7 +37,7 @@ fun Context.toast(msg: String) {
     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 }
 
-fun String.toMD5(): String {
+fun String.toMD5(): String =
     try {
         val  instance:MessageDigest = MessageDigest.getInstance("MD5")//获取md5加密对象
         val digest:ByteArray = instance.digest(this.toByteArray())//对字符串加密，返回字节数组
@@ -50,11 +50,8 @@ fun String.toMD5(): String {
             }
             sb.append(hexString)
         }
-        return sb.toString()
-
+        sb.toString()
     } catch (e: NoSuchAlgorithmException) {
         e.printStackTrace()
+        ""
     }
-
-    return ""
-}

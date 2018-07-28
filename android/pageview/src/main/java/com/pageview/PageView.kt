@@ -9,19 +9,19 @@ import android.view.MotionEvent
 import android.widget.ViewFlipper
 import kotlin.reflect.KProperty
 
-class PageView : ViewFlipper {
-    var pageNum: Int? by InvalidateAfterSet(1)                    //页数
-    var backgroundcolor by InvalidateAfterSet(Color.WHITE)
-    var textColor by InvalidateAfterSet(Color.BLACK)                    //字体颜色
-    var txtFontType: Typeface? by InvalidateAfterSet(Typeface.DEFAULT)  //正文字体类型//背景颜色
-    var rowSpace: Float? by InvalidateAfterSet(0.5f)               //行距
-    var textSize: Float? by InvalidateAfterSet(50f)               //正文部分默认画笔的大小
-    var bottomTextSize: Float = 35f                                     //底部部分默认画笔的大小
-    var text: String? by InvalidateAfterSet(null)                 //一个未分割章节,格式：章节名|正文
+class PageView : ViewFlipper, IPageView {
+    override var pageNum: Int by InvalidateAfterSet(1)                    //页数
+    override var backgroundcolor: Int by InvalidateAfterSet(Color.WHITE)
+    override var textColor: Int by InvalidateAfterSet(Color.BLACK)                    //字体颜色
+    override var txtFontType: Typeface by InvalidateAfterSet(Typeface.DEFAULT)  //正文字体类型//背景颜色
+    override var rowSpace: Float by InvalidateAfterSet(0.5f)               //行距
+    override var textSize: Float by InvalidateAfterSet(50f)               //正文部分默认画笔的大小
+    override var bottomTextSize: Float = 35f                                     //底部部分默认画笔的大小
+    override var text: String by InvalidateAfterSet("")                 //一个未分割章节,格式：章节名|正文
     var title: String = ""                                             //章节名称
+    override var isDrawTime = false                    //左下角是否显示时间
 
     val FILENOTFOUND = "            "         //表示该章节为空
-    var isDrawTime = false                    //左下角是否显示时间
     var maxPageNum = 0                        //最大页数
     var pageFlag = 0                          //0刚进入view，1表示目录跳转，2表示下一页，3表示上一页
     private val MIN_MOVE = 80F                //翻页最小滑动距离
@@ -33,11 +33,10 @@ class PageView : ViewFlipper {
     var moveStart = FloatArray(2)        //手势判断
     var moveEnd = FloatArray(2)          //手势判断
 
-    var doDrawPrepare: PageListener.DoDrawPrepare? = null          //第一次绘制时调用
-    var onNextChapter: PageListener.OnNextChapter? = null          // 下一章
-    var onPreviousChapter: PageListener.OnPreviousChapter? = null  //上一章
-    var onCenterClick: PageListener.OnCenterClick? = null          //点击view中间部分
-    var onPageChange: PageListener.OnPageChange? = null            //当翻页时调用，向前向后翻页，同一章内翻页，翻至其他章节都会调用
+    override var onNextChapter: IPageView.OnNextChapter? = null          // 下一章
+    override var onPreviousChapter: IPageView.OnPreviousChapter? = null  //上一章
+    override var onCenterClick: IPageView.OnCenterClick? = null          //点击view中间部分
+    override var onPageChange: IPageView.OnPageChange? = null            //当翻页时调用，向前向后翻页，同一章内翻页，翻至其他章节都会调用
 
     constructor(context: Context) : super(context){
         init(context)
@@ -48,33 +47,33 @@ class PageView : ViewFlipper {
 
     fun init(context: Context){
         PageContent(context).apply {
-            mBgColor = backgroundcolor!!
-            mTextSize = textSize!!
+            mBgColor = backgroundcolor
+            mTextSize = textSize
             mBottomTextSize = bottomTextSize
             mIsDrawTime = isDrawTime
-            mRowSpace = rowSpace!!
+            mRowSpace = rowSpace
             mPageNum = 0
             mMaxPageNum = 0
-            mTextColor = textColor!!
-            mTxtFontType = txtFontType!!
+            mTextColor = textColor
+            mTxtFontType = txtFontType
             this@PageView.addView(this)
         }
         PageContent(context).apply {
-            mBgColor = backgroundcolor!!
-            mTextSize = textSize!!
+            mBgColor = backgroundcolor
+            mTextSize = textSize
             mBottomTextSize = bottomTextSize
             mIsDrawTime = isDrawTime
-            mRowSpace = rowSpace!!
+            mRowSpace = rowSpace
             mPageNum = 0
             mMaxPageNum = 0
-            mTextColor = textColor!!
-            mTxtFontType = txtFontType!!
+            mTextColor = textColor
+            mTxtFontType = txtFontType
             this@PageView.addView(this)
         }
         showNext()
     }
 
-    fun prepare(pageNum: Int) {
+    override fun prepare(pageNum: Int) {
         this.pageNum = pageNum
     }
 
@@ -147,8 +146,8 @@ class PageView : ViewFlipper {
             setOutAnimation(getContext(), R.anim.slide_out_top)
         }
         pageFlag = 2
-        if (pageNum!! < maxPageNum) {
-            pageNum = pageNum!! + 1
+        if (pageNum < maxPageNum) {
+            pageNum = pageNum + 1
         } else {
             onNextChapter?.onNextChapter()
         }
@@ -163,29 +162,29 @@ class PageView : ViewFlipper {
             setOutAnimation(getContext(), R.anim.slide_out_bottom)
         }
         pageFlag = 3
-        if (pageNum!! < 2) {
+        if (pageNum < 2) {
             onPreviousChapter?.onPreviousChapter()
         } else {
-            pageNum = pageNum!! - 1
+            pageNum = pageNum - 1
         }
     }
 
     private fun displayView(){
         val another = (displayedChild + 1) % 2
         (getChildAt(another) as PageContent).apply {
-            mBgColor = backgroundcolor!!
+            mBgColor = backgroundcolor
             if(maxPageNum > 0){
-                if(pageNum!! > textArray.size) pageNum = textArray.size
+                if(pageNum > textArray.size) pageNum = textArray.size
                 if(pageNum == 0) pageNum = 1
-                mTextArray = textArray[pageNum!! - 1]
+                mTextArray = textArray[pageNum - 1]
             }
-            mRowSpace = rowSpace!!
-            mTextSize = textSize!!
-            mPageNum = pageNum!!
+            mRowSpace = rowSpace
+            mTextSize = textSize
+            mPageNum = pageNum
             mMaxPageNum = maxPageNum
-            mTextColor = textColor!!
+            mTextColor = textColor
             mTitle = title
-            mTxtFontType = txtFontType!!
+            mTxtFontType = txtFontType
         }
         displayedChild = another
     }
@@ -203,14 +202,14 @@ class PageView : ViewFlipper {
         val tmplist = ArrayList<String>()
         tmpArray.forEach {
             val tmp = "  " + it.trim()
-            val totalCount = getTextWidth() / textSize!!.toInt() //一行容纳字数
+            val totalCount = getTextWidth() / textSize.toInt() //一行容纳字数
             for (i in 0..tmp.length / totalCount) {
                 tmp.filterIndexed { index, _ -> index > i * totalCount - 1 && index < (i + 1) * totalCount }
                         .also { tmplist.add(it) }
             }
         }
         val arrayList = ArrayList<ArrayList<String>>()
-        val totalCount = getTextHeight() / (textSize!! * rowSpace!!).toInt()  //一页容纳行数
+        val totalCount = getTextHeight() / (textSize * rowSpace).toInt()  //一页容纳行数
         for (i in 0..tmplist.size / totalCount) {
             (tmplist.filterIndexed { index, _ -> index > i * totalCount - 1 && index < (i + 1) * totalCount } as ArrayList<String>)
                     .also { arrayList.add(it) }
@@ -218,26 +217,26 @@ class PageView : ViewFlipper {
         return arrayList
     }
 
-    inner class InvalidateAfterSet<T>(@Volatile var value: T? = null) {
-        operator fun getValue(thisRef: Any?, property: KProperty<*>): T? = value
+    inner class InvalidateAfterSet<T>(@Volatile var value: T) {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T = value
 
         @Synchronized
-        operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+        operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
             this.value = value
             when (property.name) {
                 "rowSpace", "textSize" -> {
                     if (width < 1) return
-                    val scale = maxPageNum.toFloat() / pageNum!!
-                    textArray = spliteText(text!!)
-                    maxPageNum = if (text!!.substring(title.length + 1).equals(FILENOTFOUND)
-                        || text.isNullOrEmpty()) 0 else textArray.size
+                    val scale = maxPageNum.toFloat() / pageNum
+                    textArray = spliteText(text)
+                    maxPageNum = if (text.substring(title.length + 1).equals(FILENOTFOUND)
+                        || text.isEmpty()) 0 else textArray.size
                     pageNum = (maxPageNum / scale).toInt().takeIf { it != 0 } ?: 1
                 }
                 "text" -> {
                     if (width < 1) return
-                    textArray = spliteText(text!!)
-                    maxPageNum = if (text!!.substring(title.length + 1).equals(FILENOTFOUND)
-                        || text.isNullOrEmpty()) 0 else textArray.size
+                    textArray = spliteText(text)
+                    maxPageNum = if (text.substring(title.length + 1).equals(FILENOTFOUND)
+                        || text.isEmpty()) 0 else textArray.size
                     pageNum = when (pageFlag) {
                         0 -> if (maxPageNum == 0) 0 else if (pageNum == 0) 1 else pageNum
                         1, 2 -> if (maxPageNum == 0) 0 else 1
@@ -246,7 +245,7 @@ class PageView : ViewFlipper {
                     }
                 }
                 "pageNum" -> {
-                    onPageChange?.onPageChange(pageNum!!)
+                    onPageChange?.onPageChange(pageNum)
                     displayView()
                 }
                 else -> {

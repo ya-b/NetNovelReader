@@ -7,6 +7,7 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
+import org.slf4j.LoggerFactory
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -20,7 +21,13 @@ object WebService {
             .client(
                 OkHttpClient.Builder()
                     .connectTimeout(3, TimeUnit.SECONDS)
-                    .addNetworkInterceptor(HttpLoggingInterceptor())
+                    .addNetworkInterceptor(
+                        HttpLoggingInterceptor(
+                            HttpLoggingInterceptor.Logger {
+                                LoggerFactory.getLogger(this.javaClass).debug(it)
+                            }
+                        ).apply { setLevel(HttpLoggingInterceptor.Level.HEADERS) }
+                    )
                     .build()
             )
             .baseUrl("http://139.159.226.67/reader/")

@@ -1,173 +1,142 @@
 package com.netnovelreader.repo
 
 import android.app.Application
-import com.netnovelreader.repo.db.BookInfoEntity
 import com.netnovelreader.repo.db.ChapterInfoEntity
 import com.netnovelreader.repo.db.ReaderDatabase
 import com.netnovelreader.repo.http.resp.ChapterInfoResp
 import com.netnovelreader.repo.http.resp.SearchBookResp
-import com.netnovelreader.utils.*
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.netnovelreader.utils.IO_EXECUTOR
+import com.netnovelreader.utils.bookDir
+import com.netnovelreader.utils.ioThread
+import io.reactivex.SingleSource
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import java.io.File
 
 class ChapterInfoRepo(app: Application) : Repo(app) {
     private var chapterDao = db.chapterInfoDao()
 
-    fun getAllChapters(bookname: String) = ioThreadFuture { db.chapterInfoDao().getAll(bookname) }
+    fun getAllChapters(bookname: String) = db.chapterInfoDao().getAll(bookname)
 
     fun getChapterInfo(bookname: String, chapterNum: Int) =
-        ioThreadFuture { db.chapterInfoDao().getChapterInfo(bookname, chapterNum) }
+        db.chapterInfoDao().getChapterInfo(bookname, chapterNum)
 
-    fun getChapterInfo(bookname: String, chapterName: String, block: (Int) -> Unit) {
-        ioThread {
-            val entity = db.chapterInfoDao().getChapterInfo(bookname, chapterName)
-            block.invoke(entity?.chapterNum ?: 0)
-        }
-    }
+    fun getChapterInfo(bookname: String, chapterName: String) =
+        db.chapterInfoDao().getChapterInfo(bookname, chapterName)
 
     fun getRecord(bookname: String) =
-        ioThreadFuture {
-            db.bookInfoDao().getBookInfo(bookname)?.readRecord
-                ?.split("#")?.map { it.toInt() } ?: listOf(1, 1)
-        }!!
+        db.bookInfoDao()
+            .getBookInfo(bookname)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .flatMap {  info ->
+                SingleSource<List<Int>> {
+                    val arr = info.readRecord.split("#").map { it.toInt() }
+                    it.onSuccess(arr)
+                }
+            }
 
     /**
      * 保存阅读记录
      */
     fun setRecord(bookname: String, chapterNum: Int, pageNum: Int) {
-        ioThread {
-            db.bookInfoDao().run {
-                getBookInfo(bookname)
-                    ?.apply { readRecord = "$chapterNum#${if (pageNum < 1) 1 else pageNum}" }
-                    ?.let { update(it) }
-            }
-        }
-    }
-
-    fun getChapter(
-        bookname: String,
-        chapterNum: Int,
-        block: ((String, Boolean) -> Unit)? = null
-    ) {
-        ioThread {
-            chapterDao.getChapterInfo(bookname, chapterNum).also {
-                if (it == null) {
-                    block?.invoke("", false)
-                } else if (it.isDownloaded == ReaderDatabase.ALREADY_DOWN
-                    && File(bookDir(bookname), chapterNum.toString()).exists()) {
-                    getChapterFromDisk(it, block)
-                } else {
-                    getChapterFromNet(it, block)
-                }
-            }
-        }
-    }
-
-    fun downloadCatalog(bookname: String, block: (List<ChapterInfoEntity>) -> Unit) {
-        Observable.create<BookInfoEntity?> {
-            val info = db.bookInfoDao().getBookInfo(bookname)
-            if (info == null) {
-                it.onError(Throwable("error on get book info"))
-            } else {
-                it.onNext(info)
-                it.onComplete()
-            }
-        }
+        db.bookInfoDao()
+            .getBookInfo(bookname)
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .observeOn(Schedulers.from(IO_EXECUTOR))
-            .flatMap { info ->
-                Observable.create<List<ChapterInfoResp>> {
-                    getCatalog(
-                        SearchBookResp(
-                            bookname, info.downloadUrl, info.coverPath, info.latestChapter
-                        )
-                    ).run {
-                        it.onNext(this)
-                        it.onComplete()
-                    }
-                }
-            }.observeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe (
+            .subscribe(
                 {
-                    it.map {
-                        ChapterInfoEntity( null, it.id, bookname, it.chapterName, it.chapterUrl,
-                            ReaderDatabase.NOT_DOWN )
-                    }.also { db.chapterInfoDao().insert(*it.toTypedArray()) }
-                        .also { block.invoke(it) }
+                    it.readRecord = "$chapterNum#${if (pageNum < 1) 1 else pageNum}"
+                    db.bookInfoDao().update(it)
                 },
                 {
-                    block.invoke(emptyList())
+                    LoggerFactory.getLogger(this.javaClass).warn("setRecord$it")
+                })
+    }
+
+    fun getChapter(bookname: String, chapterNum: Int) =
+        chapterDao.getChapterInfo(bookname, chapterNum)
+            .flatMap {
+                if (it.isDownloaded == ReaderDatabase.ALREADY_DOWN
+                    && File(bookDir(bookname), chapterNum.toString()).exists()) {
+                    getChapterFromDisk(it)
+                } else {
+                    getChapterFromNet(it)
                 }
-            )
-
-    }
-
-    private fun getChapterFromNet(
-        entity: ChapterInfoEntity,
-        block: ((String, Boolean) -> Unit)? = null
-    ) {
-        Observable.create<String> {
-            val str = getChapter(
-                ChapterInfoResp(
-                    entity.chapterNum,
-                    entity.chapterName,
-                    entity.chapterUrl
-                )
-            )
-            if (mkBookDir(entity.bookname)) {
-                File(bookDir(entity.bookname), entity.chapterNum.toString()).writeText(str)
-                db.chapterInfoDao()
-                    .getChapterInfo(entity.bookname, entity.chapterNum)
-                    ?.also { it.isDownloaded = ReaderDatabase.ALREADY_DOWN }
-                    ?.also { db.chapterInfoDao().update(it) }
             }
-            it.onNext(str)
-            it.onComplete()
-        }.subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { block?.invoke(it, false) },
-                { block?.invoke("", true) }
-            )
-    }
 
-    private fun getChapterFromDisk(
-        entity: ChapterInfoEntity,
-        block: ((String, Boolean) -> Unit)? = null
-    ) {
-        val file = File(bookDir(entity.bookname), entity.chapterNum.toString())  //章节文件地址
-        Observable.create<String> {
-            it.onNext(file.readText())
-            it.onComplete()
-        }.subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { block?.invoke(it, false) },
-                { block?.invoke("", true) }
+    fun downloadCatalog(bookname: String) =
+        db.bookInfoDao()
+            .getBookInfo(bookname)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .flatMap { info ->
+                getCatalog(
+                    SearchBookResp(
+                        bookname, info.downloadUrl, info.coverPath, info.latestChapter
+                    )
+                )
+            }.map {
+                it.map {
+                    ChapterInfoEntity(
+                        null, it.id, bookname, it.chapterName, it.chapterUrl,
+                        ReaderDatabase.NOT_DOWN
+                    )
+                }
+            }
+
+    private fun getChapterFromNet(entity: ChapterInfoEntity) =
+        getChapter(
+            ChapterInfoResp(
+                entity.chapterNum,
+                entity.chapterName,
+                entity.chapterUrl
             )
-    }
+        ).subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .flatMap { str ->
+                SingleSource<String> {
+                    File(bookDir(entity.bookname), entity.chapterNum.toString()).writeText(str)
+                    db.chapterInfoDao()
+                        .getChapterInfo(entity.bookname, entity.chapterNum).subscribe({
+                            it.isDownloaded = ReaderDatabase.ALREADY_DOWN
+                            db.chapterInfoDao().update(it)
+                        }, {
+
+                        })
+                    it.onSuccess(str)
+                }
+            }
+
+    private fun getChapterFromDisk(entity: ChapterInfoEntity) =
+        SingleSource<String> {
+            val file = File(bookDir(entity.bookname), entity.chapterNum.toString())  //章节文件地址
+            it.onSuccess(file.readText())
+        }
 
     fun downCacheChapter(bookname: String, chapterNum: Int, cacheSize: Int) {
-        if(cacheSize == 0) return
-        ioThread {
-            chapterDao.getRangeChapter(bookname, chapterNum + 1, chapterNum + cacheSize)
-                .forEach {
+        if (cacheSize == 0) return
+        chapterDao.getRangeChapter(bookname, chapterNum + 1, chapterNum + cacheSize)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe {
+                it.forEach {
                     if (it.isDownloaded != ReaderDatabase.ALREADY_DOWN
                         && File(bookDir(bookname), chapterNum.toString()).exists()) {
                         getChapterFromNet(it)
                     }
                 }
-        }
+            }
     }
 
     fun delCacheChapter(bookname: String, chapterNum: Int, preserveSize: Int) {
-        if(preserveSize == 0) return
+        if (preserveSize == 0) return
+        chapterDao.getRangeChapter(bookname, 1, chapterNum - preserveSize)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe {
+                it.map { File(bookDir(bookname), it.chapterNum.toString()) }
+                    .forEach { it.deleteRecursively() }
+            }
+    }
+
+    fun saveCatalog(list: List<ChapterInfoEntity>) {
         ioThread {
-            chapterDao.getRangeChapter(bookname, 1, chapterNum - preserveSize)
-                .map { File(bookDir(bookname), it.chapterNum.toString()) }
-                .forEach { it.deleteRecursively() }
+            db.chapterInfoDao().insert(*list.toTypedArray())
         }
     }
 }

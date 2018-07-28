@@ -11,8 +11,10 @@ import com.netnovelreader.repo.SearchRepo
 import com.netnovelreader.repo.db.BookInfoEntity
 import com.netnovelreader.repo.http.resp.SearchBookResp
 import com.netnovelreader.utils.COVER_NAME
+import com.netnovelreader.utils.IO_EXECUTOR
 import com.netnovelreader.utils.bookDir
-import com.netnovelreader.utils.ioThread
+import io.reactivex.observers.DisposableObserver
+import io.reactivex.schedulers.Schedulers
 import java.io.File
 
 class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel(app) {
@@ -23,24 +25,39 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
     val downloadCommand = MutableLiveData<SearchBookResp>()
     val toaskCommand = MutableLiveData<String>()
     val confirmCommand = MutableLiveData<SearchBookResp>()
+    private var searchObserver: DisposableObserver<SearchBookResp>? = null
 
+    @Synchronized
     fun searchBook(bookname: String) {
         if (bookname.isEmpty()) return
         searchResultList.clear()
-        repo.search(bookname) { isSearching, resp ->
-            isLoading.set(isSearching)
-            if (!TextUtils.isEmpty(resp?.bookname) && !TextUtils.isEmpty(resp?.url)) {
-                searchResultList.add(resp)
-            }
-            //下载封面图片
-            if(resp?.imageUrl != null && !File(bookDir(bookname), COVER_NAME).exists()) {
-                repo.downloadImage(bookname, resp.imageUrl)
-            }
-            //搜索完成后，再获取最新章节
-            if (!isSearching) {
-                getLatestChapter(searchResultList)
+        searchObserver?.dispose()
+        if(searchObserver == null) {
+            searchObserver = object : DisposableObserver<SearchBookResp>() {
+                override fun onNext(t: SearchBookResp) {
+                    isLoading.set(true)
+                    if (!TextUtils.isEmpty(t.bookname) && !TextUtils.isEmpty(t.url)) {
+                        searchResultList.add(t)
+                    }
+                    //下载封面图片
+                    if(!File(bookDir(bookname), COVER_NAME).exists()) {
+                        repo.downloadImage(bookname, t.imageUrl)
+                    }
+                }
+
+                override fun onComplete() {
+                    isLoading.set(false)
+                    //搜索完成后，再获取最新章节
+                    getLatestChapter(searchResultList)
+                }
+
+                override fun onError(e: Throwable) {
+                    isLoading.set(false)
+                    getLatestChapter(searchResultList)
+                }
             }
         }
+        repo.search(bookname).subscribeOn(Schedulers.from(IO_EXECUTOR)).subscribe(searchObserver!!)
     }
 
     fun confirmDownload(book: SearchBookResp) {
@@ -48,24 +65,26 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
     }
 
     fun download(book: SearchBookResp, isOnlyAdd: Boolean) {
-        ioThread {
-            if (repo.isBookDownloaded(book.bookname)) {
-                toaskCommand.postValue(getApplication<Application>().getString(R.string.already_in_shelf))
-            } else {
-                if (!isOnlyAdd) {
-                    downloadCommand.postValue(book)
-                }
-                repo.addBook(
-                    BookInfoEntity(
-                        null, book.bookname, book.url, "1#1",
-                        true, book.latestChapter, 0, book.imageUrl
+        repo.isBookDownloaded(book.bookname)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                {
+                    toaskCommand.postValue(getApplication<Application>().getString(R.string.already_in_shelf))
+                },
+                {
+                    if (!isOnlyAdd) {
+                        downloadCommand.postValue(book)
+                    }
+                    repo.addBook(
+                        BookInfoEntity(
+                            null, book.bookname, book.url, "1#1",
+                            true, book.latestChapter, 0, book.imageUrl
+                        )
                     )
-                )
-                repo.getCatalog(book) { _, chapters ->
-                    repo.setCatalog(book.bookname, chapters ?: emptyList())
-                }
-            }
-        }
+                    repo.getCatalog(book) { _, chapters ->
+                        repo.setCatalog(book.bookname, chapters ?: emptyList())
+                    }
+                })
     }
 
     fun exit() {

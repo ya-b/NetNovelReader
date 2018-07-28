@@ -9,9 +9,13 @@ import android.support.v4.content.ContextCompat
 import com.netnovelreader.R
 import com.netnovelreader.repo.ChapterInfoRepo
 import com.netnovelreader.repo.db.ChapterInfoEntity
+import com.netnovelreader.utils.IO_EXECUTOR
 import com.netnovelreader.utils.get
 import com.netnovelreader.utils.put
 import com.netnovelreader.utils.sharedPreferences
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicInteger
 
 class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewModel(app) {
@@ -36,6 +40,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     val changeSourceCommand by lazy { MutableLiveData<String>() }            //换源下载
     val brightnessCommand by lazy { MutableLiveData<Float>() }               //亮度
     val toastCommand = MutableLiveData<String>()
+    val initPageViewCommand = MutableLiveData<Int>()
     var chapterNum = AtomicInteger(1)              //章节数
     @Volatile
     var maxChapterNum = 0                                    //最大章节数
@@ -63,8 +68,17 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
                 0
             )
         )
-        allChapters.addAll(repo.getAllChapters(bookName) ?: emptyList())
-        allChapters.lastOrNull()?.chapterNum?.let { maxChapterNum = it }
+        repo.getAllChapters(bookName)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe {
+                allChapters.addAll(it)
+                allChapters.lastOrNull()?.chapterNum?.let { maxChapterNum = it }
+                if (allChapters.size == 0) {
+                    downloadCatalog()
+                } else {
+                    initPageNum()
+                }
+            }
         getApplication<Application>().apply {
             sharedPreferences().get(getString(R.string.auto_download_key), false)
                 .takeIf { it }
@@ -74,31 +88,41 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
 
     //获取章节内容
     fun getChapter(chapterNum: Int) {
-        val block = {
-            isLoading.set(true)
-            repo.getChapter(bookName, chapterNum) { chapter, isError ->
-                if(isError) {
-                    //todo 重新下载
-                }
-                isLoading.set(false)
-                val chapterName = repo.getChapterInfo(bookName, chapterNum)?.chapterName
-                text.set("${chapterName ?: ""}|$chapter")
-            }
-        }
         if (showDialogCommand.value == true) showDialogCommand.postValue(false)
-        if(allChapters.size < 1) {
-            repo.downloadCatalog(bookName) {
-                if(it.isNotEmpty()) {
-                    allChapters.addAll(it)
-                    block.invoke()
-                } else {
-                    toastCommand.postValue("error")
-                }
-            }
-        } else {
-            block.invoke()
-        }
+        isLoading.set(true)
+        repo.getChapter(bookName, chapterNum)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                { chapter ->
+                    isLoading.set(false)
+                    var chapterName = allChapters.filter { it.chapterNum == chapterNum }
+                        .firstOrNull()?.chapterName ?: ""
+                    text.set("${chapterName}|$chapter")
+                },
+                {
+                    //todo 重新下载
+                    LoggerFactory.getLogger(this.javaClass).warn("getChapter$it")
+                })
         repo.downCacheChapter(bookName, chapterNum, cacheNum)  //下载chapterNum之后cacheNum章
+    }
+
+    /**
+     * 重装app，恢复阅读记录时调用（此时有阅读记录，但没有目录）
+     */
+    fun downloadCatalog() {
+        repo.downloadCatalog(bookName)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                {
+                    allChapters.addAll(it)
+                    initPageNum()
+                    repo.saveCatalog(it)
+                },
+                {
+                    toastCommand.postValue("error on get catalog")
+                    LoggerFactory.getLogger(this.javaClass).warn("downloadCatalog$it")
+                }
+            )
     }
 
     //todo
@@ -117,22 +141,29 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         }
     }
 
-    fun prepare(): Int {
-        val arr = repo.getRecord(bookName)
-        getChapter(arr[0].also { chapterNum.set(it) })
-        return arr[1]
+    fun initPageNum() {
+        repo.getRecord(bookName)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    getChapter(it[0].also { chapterNum.set(it) })
+                    initPageViewCommand.postValue(it[1])
+                },
+                {
+                    initPageViewCommand.postValue(1)
+                })
     }
 
     fun onNextChapter() {
-        if(isLoading.get()) return
-        if(chapterNum.get() < maxChapterNum) {
+        if (isLoading.get()) return
+        if (chapterNum.get() < maxChapterNum) {
             getChapter(chapterNum.incrementAndGet())
         }
     }
 
     fun onPreviousChapter() {
-        if(isLoading.get()) return
-        if(chapterNum.get() > 1) {
+        if (isLoading.get()) return
+        if (chapterNum.get() > 1) {
             getChapter(chapterNum.decrementAndGet())
         }
     }
@@ -152,21 +183,31 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     }
 
     fun getChapterByCatalog(chapterName: String) {
-        if(isLoading.get()) return
-        repo.getChapterInfo(bookName, chapterName) {
-            chapterNum.set(it)
-            getChapter(it)
-        }
+        if (isLoading.get()) return
+        repo.getChapterInfo(bookName, chapterName)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                {
+                    chapterNum.set(it.chapterNum)
+                    getChapter(it.chapterNum)
+                },
+                {
+                    LoggerFactory.getLogger(this.javaClass).warn("getChapterByCatalog$it")
+                })
     }
 
     fun changeSource() {
         isViewShow.forEach { it.value.set(false) }
-        val chapterName = repo.getChapterInfo(bookName, chapterNum.get())?.chapterName
-        if(chapterName.isNullOrEmpty()) {
-            //todo 章节错误
-        } else {
-            changeSourceCommand.value = chapterName
-        }
+        repo.getChapterInfo(bookName, chapterNum.get())
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                {
+                    changeSourceCommand.value = it.chapterName
+                },
+                {
+                    toastCommand.postValue("error on get chapter")
+                    LoggerFactory.getLogger(this.javaClass).warn("changeSource$it")
+                })
     }
 
     fun clickFootView(which: String) {

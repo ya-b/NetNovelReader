@@ -39,7 +39,6 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
-
     applicationVariants.all { variant ->
         variant.outputs.all {
             if (variant.name.equalsIgnoreCase('release')){
@@ -86,6 +85,9 @@ dependencies {
 
     implementation deps.circleimageview
     implementation deps.glide.runtime
+
+    implementation deps.slf4j_api
+    implementation deps.logback_android
 
     debugImplementation deps.leakcanary.android
     releaseImplementation deps.leakcanary.android_no_op

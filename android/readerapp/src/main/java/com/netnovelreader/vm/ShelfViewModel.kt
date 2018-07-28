@@ -6,6 +6,8 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.paging.LivePagedListBuilder
 import android.arch.paging.PagedList
 import com.netnovelreader.repo.BookInfosRepo
+import com.netnovelreader.utils.IO_EXECUTOR
+import io.reactivex.schedulers.Schedulers
 
 class ShelfViewModel(var repo: BookInfosRepo, app: Application) : AndroidViewModel(app) {
     var allBooks = LivePagedListBuilder(
@@ -36,8 +38,16 @@ class ShelfViewModel(var repo: BookInfosRepo, app: Application) : AndroidViewMod
     }
 
     fun updateBooks() {
-        repo.updateCatalog {
-            stopRefershCommand.postValue(null)
-        }
+        repo.updateCatalog()
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                {
+                    repo.writeToDB(it.first, it.second)
+                }, {
+                    stopRefershCommand.postValue(null)
+                }, {
+                    stopRefershCommand.postValue(null)
+                }
+            )
     }
 }

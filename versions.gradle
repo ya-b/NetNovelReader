@@ -53,6 +53,8 @@ versions.ktor = "0.9.3"
 versions.tomcat = "8.5.24"
 versions.mariadb_client = "2.2.5"
 versions.dbutils = "1.7"
+versions.slf4j = "1.7.25"
+versions.logback_android = "1.1.1-12"
 def deps = [:]
 
 def support = [:]
@@ -184,7 +186,9 @@ deps.logger = "com.orhanobut:logger:$versions.logger"
 deps.circleimageview = "de.hdodenhof:circleimageview:$versions.circleimageview"
 deps.dbutils = "commons-dbutils:commons-dbutils:$versions.dbutils"
 deps.mariadb_client = "org.mariadb.jdbc:mariadb-java-client:$versions.mariadb_client"
-deps.slf4j = "org.slf4j:slf4j-jdk14:1.8.0-beta2"
+deps.slf4j = "org.slf4j:slf4j-jdk14:$versions.slf4j"
+deps.slf4j_api = "org.slf4j:slf4j-api:$versions.slf4j"
+deps.logback_android = "com.github.tony19:logback-android:$versions.logback_android"
 
 def gradle_plugin = [:]
 gradle_plugin.android = "com.android.tools.build:gradle:$versions.android_gradle_plugin"
@@ -205,8 +209,8 @@ build_versions.versionName = "0.1.$build_versions.versionCode"
 ext.build_versions = build_versions
 
 def addRepos(RepositoryHandler handler) {
-    handler.google()
     handler.jcenter()
+    handler.google()
     handler.mavenCentral()
     handler.maven { url 'https://jitpack.io' }
     handler.maven { url 'https://dl.bintray.com/kotlin/ktor' }

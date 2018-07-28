@@ -16,7 +16,7 @@ class SettingFragment : PreferenceFragmentCompat() {
         preferenceManager.sharedPreferencesName = context?.applicationContext?.packageName
         addPreferencesFromResource(R.xml.pref_setting)
         //todo 优化
-        findPreference(getString(R.string.nightModeKey)).setOnPreferenceChangeListener { _, value ->
+        findPreference(getString(R.string.nightModeKey)).setOnPreferenceChangeListener { _, _ ->
             activity?.recreate()
             true
         }
