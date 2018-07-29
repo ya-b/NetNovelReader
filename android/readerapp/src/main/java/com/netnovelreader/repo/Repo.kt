@@ -12,7 +12,7 @@ import io.reactivex.SingleSource
 import io.reactivex.schedulers.Schedulers
 import java.io.IOException
 
-abstract class Repo(var app: Application) {
+abstract class Repo(val app: Application) {
     val db = ReaderDatabase.getInstance(app)
 
     @Throws(IOException::class)
@@ -47,7 +47,7 @@ abstract class Repo(var app: Application) {
                     val arr = selector.catalogFilter.split("|")
                     val removeList = ArrayList<ChapterInfoResp>()
                     arr.forEach { filter ->
-                        chapterList.filter { it.chapterName == filter }
+                        chapterList.filter { filter.isNotEmpty() && it.chapterName.contains(filter) }
                             .let { removeList.addAll(it) }
                     }
                     chapterList.removeAll(removeList)

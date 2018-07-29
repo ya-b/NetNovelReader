@@ -37,6 +37,7 @@ object WebService {
             .create(NovalReaderAPI::class.java)
     }
     val searchBook by lazy { SearchBook() }
+    val bookLinkRanking by lazy { BookLinkRanking() }
 
     interface NovalReaderAPI {
         @GET

@@ -41,13 +41,12 @@
 
                 <TextView
                     android:id="@+id/searchViewText"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="15dp"
-                    android:layout_weight="1"
-                    android:textSize="20sp"
-                    android:visibility="@{viewModel.isChangeSource ? View.VISIBLE : View.GONE}" />
+                    android:visibility="gone"
+                    android:textSize="20sp" />
 
                 <android.support.v7.widget.SearchView
                     android:id="@+id/searchView"
@@ -57,7 +56,6 @@
                     android:layout_weight="1"
                     android:iconifiedByDefault="false"
                     android:textSize="12sp"
-                    android:visibility="@{viewModel.isChangeSource ? View.INVISIBLE : View.VISIBLE}"
                     app:queryHint="输入书名" />
 
             </LinearLayout>

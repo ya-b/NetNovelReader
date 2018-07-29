@@ -1,58 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:startDestination="@id/shelfFragment">
+    app:startDestination="@id/homeFragment">
     <fragment
-        android:id="@+id/shelfFragment"
-        android:name="com.netnovelreader.ui.fragments.ShelfFragment"
-        android:label="ShelfFragment" >
+        android:id="@+id/homeFragment"
+        android:name="com.netnovelreader.ui.fragments.HomeFragment"
+        android:label="HomeFragment" >
         <action
-            android:id="@+id/action_shelfFragment_to_searchFragment"
-            app:destination="@id/searchFragment"
+            android:id="@+id/action_homeFragment_to_settingFragment"
+            app:destination="@id/settingFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
         <action
-            android:id="@+id/action_shelfFragment_to_siteSelectorsFragment"
+            android:id="@+id/action_homeFragment_to_siteSelectorsFragment"
             app:destination="@id/siteSelectorsFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
         <action
-            android:id="@+id/action_shelfFragment_to_readFragment"
-            app:destination="@id/readFragment"
+            android:id="@+id/action_homeFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
         <action
-            android:id="@+id/action_shelfFragment_to_loginFragment"
+            android:id="@+id/action_homeFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
         <action
-            android:id="@+id/action_shelfFragment_to_settingFragment"
-            app:destination="@id/settingFragment"
+            android:id="@+id/action_homeFragment_to_readFragment"
+            app:destination="@id/readFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
+        android:id="@+id/shelfFragment"
+        android:name="com.netnovelreader.ui.fragments.ShelfFragment"
+        android:label="ShelfFragment" />
+    <fragment
         android:id="@+id/searchFragment"
         android:name="com.netnovelreader.ui.fragments.SearchFragment"
         android:label="SearchFragment" >
-        <action
-            android:id="@+id/action_searchFragment_to_shelfFragment"
-            app:destination="@id/shelfFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+        <argument
+            android:name="type"
+            app:type="integer" />
+        <argument
+            android:name="bookname"
+            app:type="string" />
+        <argument
+            android:name="chapterName"
+            app:type="string" />
     </fragment>
     <fragment
         android:id="@+id/readFragment"
@@ -61,6 +67,13 @@
         <argument
             android:name="bookname"
             app:type="string" />
+        <action
+            android:id="@+id/action_readFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/siteSelectorsFragment"

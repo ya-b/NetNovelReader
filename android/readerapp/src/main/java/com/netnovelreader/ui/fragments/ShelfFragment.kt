@@ -6,15 +6,14 @@ import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
 import com.netnovelreader.R
 import com.netnovelreader.ViewModelFactory
 import com.netnovelreader.databinding.FragmentShelfBinding
-import com.netnovelreader.ui.activities.MainActivity
 import com.netnovelreader.ui.adapters.ShelfPageListAdapter
-import com.netnovelreader.utils.get
-import com.netnovelreader.utils.sharedPreferences
 import com.netnovelreader.vm.ShelfViewModel
 import kotlinx.android.synthetic.main.fragment_shelf.*
 
@@ -39,8 +38,6 @@ class ShelfFragment : Fragment() {
         viewModel = activity?.application?.let {
             ViewModelProviders.of(this, ViewModelFactory.getInstance(it))
         }?.get(ShelfViewModel::class.java)
-        (activity as MainActivity?)?.setSupportActionBar(binding.shelfToolbar)
-        setHasOptionsMenu(true)
 
         binding.shelfRefresh.setOnRefreshListener { viewModel?.updateBooks() }
         val adapter = ShelfPageListAdapter(viewModel)
@@ -54,7 +51,7 @@ class ShelfFragment : Fragment() {
                 val bundle = Bundle().apply { putString("bookname", bookname.toString()) }
                 bookname!!.delete(0, bookname.length)   //会调用多次，先这样 todo 优化
                 NavHostFragment.findNavController(this@ShelfFragment)
-                    .navigate(R.id.action_shelfFragment_to_readFragment, bundle)
+                    .navigate(R.id.action_homeFragment_to_readFragment, bundle)
             }
         })
         viewModel?.dialogCommand?.observe(this, Observer {
@@ -69,36 +66,4 @@ class ShelfFragment : Fragment() {
         })
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        super.onCreateOptionsMenu(menu, inflater)
-        menu?.clear()
-        inflater?.inflate(R.menu.menu_shelf, menu)
-        context?.sharedPreferences()
-            ?.get(getString(R.string.tokenKey), "")
-            ?.takeIf { it.isNotEmpty() }
-            ?.let { context?.sharedPreferences()?.get(getString(R.string.usernameKey), "user") }
-            ?.let { menu?.findItem(R.id.login)?.setTitle(it) }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            R.id.login -> {
-                NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_shelfFragment_to_loginFragment)
-            }
-            R.id.search_button -> {
-                NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_shelfFragment_to_searchFragment)
-            }
-            R.id.action_settings -> {
-                NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_shelfFragment_to_settingFragment)
-            }
-            R.id.edit_site_selector -> {
-                NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_shelfFragment_to_siteSelectorsFragment)
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
 }

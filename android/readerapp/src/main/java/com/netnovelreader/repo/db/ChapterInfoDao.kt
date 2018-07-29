@@ -27,6 +27,9 @@ interface ChapterInfoDao {
     @Query("SELECT * FROM ${ReaderDatabase.TABLE_CATALOG}  WHERE ${ReaderDatabase.BOOKNAME} LIKE :bookname AND ${ReaderDatabase.CHAPTER_NUM} BETWEEN :start AND :end")
     fun getRangeChapter(bookname: String, start: Int, end: Int): Maybe<List<ChapterInfoEntity>>
 
+    @Query("DELETE FROM ${ReaderDatabase.TABLE_CATALOG}  WHERE ${ReaderDatabase.BOOKNAME} LIKE :bookname")
+    fun deleteBook(bookname: String)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg entities: ChapterInfoEntity)
 

@@ -52,13 +52,16 @@ class SearchRepo(app: Application) : Repo(app) {
      * 保存到数据库
      */
     fun setCatalog(bookname: String, chapters: List<ChapterInfoResp>) {
-        chapters.map {
-            ChapterInfoEntity(
-                null, it.id, bookname, it.chapterName,
-                it.chapterUrl, ReaderDatabase.NOT_DOWN
-            )
-        }.toTypedArray()
-            .let { db.chapterInfoDao().insert(*it) }
+        ioThread {
+            db.chapterInfoDao().deleteBook(bookname)
+            chapters.map {
+                ChapterInfoEntity(
+                    null, it.id, bookname, it.chapterName,
+                    it.chapterUrl, ReaderDatabase.NOT_DOWN
+                )
+            }.toTypedArray()
+                .let { db.chapterInfoDao().insert(*it) }
+        }
     }
 
     @Throws(IOException::class)
@@ -97,7 +100,7 @@ class SearchRepo(app: Application) : Repo(app) {
     }
 
     @Throws(IOException::class)
-    private fun getCatalogFromNet(
+    fun getCatalogFromNet(
         item: SearchBookResp,
         call: ((SearchBookResp?, List<ChapterInfoResp>?) -> Unit)? = null
     ) {
@@ -135,7 +138,7 @@ class SearchRepo(app: Application) : Repo(app) {
 
     @Suppress("UNCHECKED_CAST")
     @Throws(IOException::class)
-    private fun getCatalogFromCache(
+    fun getCatalogFromCache(
         item: SearchBookResp,
         call: ((SearchBookResp?, List<ChapterInfoResp>?) -> Unit)? = null
     ) {
@@ -149,7 +152,9 @@ class SearchRepo(app: Application) : Repo(app) {
     //url的md5值作为文件名
     private fun getFileName(item: SearchBookResp) = item.url.toMD5()
 
-    fun addBook(book: BookInfoEntity) = db.bookInfoDao().insert(book)
+    fun addBookToShelf(book: BookInfoEntity) = db.bookInfoDao().insert(book)
+
+    fun getBookInShelf(bookname: String) = db.bookInfoDao().getBookInfo(bookname)
 
     fun isBookDownloaded(bookname: String) =
         db.bookInfoDao()

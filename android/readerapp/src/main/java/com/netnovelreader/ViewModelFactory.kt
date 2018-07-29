@@ -25,6 +25,8 @@ class ViewModelFactory private constructor(private val application: Application)
                     ReadViewModel(ChapterInfoRepo(application), application)
                 isAssignableFrom(UserViewModel::class.java) ->
                     UserViewModel(UserRepo(application), application)
+                isAssignableFrom(RankingViewModel::class.java) ->
+                        RankingViewModel(RankingRepo(application), application)
                 else ->
                     AndroidViewModel(application)
             }

@@ -39,6 +39,9 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
+    lintOptions {
+        disable 'GoogleAppIndexingWarning'
+    }
     applicationVariants.all { variant ->
         variant.outputs.all {
             if (variant.name.equalsIgnoreCase('release')){

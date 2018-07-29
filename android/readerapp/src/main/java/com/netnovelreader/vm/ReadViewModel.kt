@@ -37,9 +37,10 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     val rowSpaceSelected = List(5) { ObservableBoolean(false) }   //行距Button是否选中
     val isLoading by lazy { ObservableBoolean(true) }                  //是否显示加载进度条
     val showDialogCommand by lazy { MutableLiveData<Boolean>() }             //显示目录
-    val changeSourceCommand by lazy { MutableLiveData<String>() }            //换源下载
+    val changeSourceCommand by lazy { MutableLiveData<StringBuilder>() }            //换源下载
     val brightnessCommand by lazy { MutableLiveData<Float>() }               //亮度
     val toastCommand = MutableLiveData<String>()
+    val exitCommand = MutableLiveData<Void>()
     val initPageViewCommand = MutableLiveData<Int>()
     var chapterNum = AtomicInteger(1)              //章节数
     @Volatile
@@ -202,7 +203,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
             .subscribe(
                 {
-                    changeSourceCommand.value = it.chapterName
+                    changeSourceCommand.postValue(StringBuilder(it.chapterName))
                 },
                 {
                     toastCommand.postValue("error on get chapter")
@@ -323,6 +324,10 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     fun changeBrightness(progress: Int) {
         brightnessCommand.value =
                 (if (progress < 1) 1 else if (progress > 255) 255 else progress) / 255f
+    }
+
+    fun exit() {
+        exitCommand.postValue(null)
     }
 
     companion object {

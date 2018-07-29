@@ -22,11 +22,20 @@ import com.netnovelreader.ui.adapters.SearchResultAdapter
 import com.netnovelreader.utils.toast
 import com.netnovelreader.vm.SearchViewModel
 
-
 class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private var viewModel: SearchViewModel? = null
     private lateinit var binding: FragmentSearchBinding
+    private var type: Int? = null
+    private var bookname: String? = null
+    private var chapterName: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        type = arguments?.getInt("type")
+        bookname = arguments?.getString("bookname")
+        chapterName = arguments?.getString("chapterName")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,6 +64,19 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         binding.searchView.setOnQueryTextListener(this)
         binding.searchView.onActionViewExpanded()
 
+        when (type) {
+            TYPE_RANKING -> {
+                binding.searchViewText.also { it.text = bookname }.visibility = View.VISIBLE
+                binding.searchView.visibility = View.INVISIBLE
+                viewModel?.searchBook(bookname ?: "")
+            }
+            TYPE_CHANGESOURCE -> {
+                binding.searchViewText.also { it.text = bookname }.visibility = View.VISIBLE
+                binding.searchView.visibility = View.INVISIBLE
+                viewModel?.changeSourceSearch(bookname ?: "", chapterName ?: "")
+            }
+        }
+
         viewModel?.exitCommand?.observe(this, Observer {
             binding.searchView.clearFocus()
             NavHostFragment.findNavController(this).popBackStack()
@@ -68,7 +90,11 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         })
         viewModel?.confirmCommand?.observe(this, Observer {
             it ?: return@Observer
-            dialog(it)
+            if (type == TYPE_CHANGESOURCE) {
+                dialogChangeSource(it)
+            } else {
+                dialog(it)
+            }
         })
     }
 
@@ -87,9 +113,32 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         AlertDialog.Builder(context!!)
             .setTitle(String.format(getString(R.string.download_book), search.bookname))
             .setPositiveButton(R.string.add_book) { _, _ -> viewModel?.download(search, true) }
-            .setNegativeButton(R.string.add_and_download) { _, _ -> viewModel?.download(search, false) }
+            .setNegativeButton(R.string.add_and_download) { _, _ ->
+                viewModel?.download(search, false)
+            }
             .setNeutralButton(R.string.cancel, null)
             .create()
             .show()
+    }
+
+    private fun dialogChangeSource(search: SearchBookResp) {
+        context ?: return
+        AlertDialog.Builder(context!!)
+            .setTitle(getString(R.string.change_source))
+            .setPositiveButton(R.string.enter) { _, _ ->
+                viewModel?.changeSourceDownload(search, chapterName ?: "")
+            }
+            .setNeutralButton(R.string.cancel, null)
+            .create()
+            .show()
+    }
+
+    companion object {
+        @JvmStatic
+        val TYPE_SEARCH = 0
+        @JvmStatic
+        val TYPE_RANKING = 1
+        @JvmStatic
+        val TYPE_CHANGESOURCE = 2
     }
 }

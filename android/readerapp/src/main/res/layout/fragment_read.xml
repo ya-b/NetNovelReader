@@ -33,30 +33,50 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <!--顶部-->
-        <android.support.constraint.ConstraintLayout
+
+        <android.support.design.widget.AppBarLayout
             android:id="@+id/headerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/black"
-            android:padding="5dp"
+            android:theme="@style/AppTheme.ActionBar"
             android:visibility="@{viewModel.isViewShow[ReadViewModel.HEAD_VIEW] ? View.VISIBLE : View.GONE}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/changeSouce"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:gravity="center"
-                android:onClick="@{() -> viewModel.changeSource()}"
-                android:text="@string/change_source"
-                android:textColor="@color/white"
-                android:textSize="13sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
-        </android.support.constraint.ConstraintLayout>
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:theme="@style/AppTheme.ActionBar"
+                android:padding="5dp">
+                <ImageButton
+                    android:id="@+id/backButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:background="@drawable/icon_back"
+                    android:contentDescription="@string/app_name"
+                    android:onClick="@{() -> viewModel.exit()}"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/changeSouce"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center"
+                    android:onClick="@{() -> viewModel.changeSource()}"
+                    android:text="@string/change_source"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.design.widget.AppBarLayout>
+
 
         <!--字体设置-->
         <android.support.constraint.ConstraintLayout

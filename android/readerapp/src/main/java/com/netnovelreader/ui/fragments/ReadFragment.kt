@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.NavHostFragment
 import com.netnovelreader.R
 import com.netnovelreader.ViewModelFactory
 import com.netnovelreader.databinding.FragmentReadBinding
@@ -72,6 +73,20 @@ class ReadFragment : Fragment() {
             Observer { binding.readerView.prepare(it ?: 1) }
         )
         viewModel?.toastCommand?.observe(this, Observer { it?.let { context?.toast(it) } })
+        viewModel?.exitCommand?.observe(this, Observer {
+            NavHostFragment.findNavController(this).popBackStack()
+        })
+        viewModel?.changeSourceCommand?.observe(this, Observer {
+            it?.takeIf { it.length > 0 } ?: return@Observer
+            val bundle = Bundle().apply {
+                putInt("type", SearchFragment.TYPE_CHANGESOURCE)
+                putString("bookname", bookname)
+                putString("chapterName", it.toString())
+            }
+            it.delete(0, it.length)
+            NavHostFragment.findNavController(this@ReadFragment)
+                .navigate(R.id.action_readFragment_to_searchFragment, bundle)
+        })
     }
 
     //显示目录
