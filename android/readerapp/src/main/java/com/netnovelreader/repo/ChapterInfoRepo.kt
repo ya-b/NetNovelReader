@@ -8,6 +8,7 @@ import com.netnovelreader.repo.http.resp.SearchBookResp
 import com.netnovelreader.utils.IO_EXECUTOR
 import com.netnovelreader.utils.bookDir
 import com.netnovelreader.utils.ioThread
+import io.reactivex.Observable
 import io.reactivex.SingleSource
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -114,14 +115,12 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
         if (cacheSize == 0) return
         chapterDao.getRangeChapter(bookname, chapterNum + 1, chapterNum + cacheSize)
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe {
-                it.forEach {
-                    if (it.isDownloaded != ReaderDatabase.ALREADY_DOWN
-                        && File(bookDir(bookname), chapterNum.toString()).exists()) {
-                        getChapterFromNet(it)
-                    }
-                }
-            }
+            .flatMapObservable {
+                it.filter { it.isDownloaded != ReaderDatabase.ALREADY_DOWN
+                        || !File(bookDir(bookname), chapterNum.toString()).exists() }
+                    .let { Observable.fromIterable(it) }
+            }.flatMapSingle { getChapterFromNet(it) }
+            .subscribe()
     }
 
     fun delCacheChapter(bookname: String, chapterNum: Int, preserveSize: Int) {

@@ -72,5 +72,6 @@
     <string name="restore_record">恢复阅读记录</string>
 
     <string name="ranking_come_from">数据来源于booklink.me</string>
+    <string name="retry">重试</string>
 
 </resources>

@@ -39,8 +39,8 @@ class RankingFragment : Fragment() {
 
         val adapter = RankingPageListAdapter(viewModel)
         binding.rankingRecycler.adapter = adapter
-
         viewModel?.ranking?.observe(this, Observer(adapter::submitList))
+        viewModel?.networkState?.observe(this, Observer(adapter::setNetworkState))
         viewModel?.searchCommand?.observe(this, Observer {
             it.takeIf { (it?.length ?: 0) > 0  } ?: return@Observer
             val bookname = it!!.toString()

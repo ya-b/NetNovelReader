@@ -52,12 +52,14 @@
 
             <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/latestChapter"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:text="@{bean.latestChapter??``}"
                 android:textSize="14sp"
+                android:gravity="end"
                 app:layout_constraintBaseline_toBaselineOf="@id/bookname"
+                app:layout_constraintStart_toEndOf="@id/bookname"
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:text="最新章节  458" />
 
