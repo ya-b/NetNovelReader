@@ -198,7 +198,9 @@ class PageView : ViewFlipper, IPageView {
     private fun spliteText(text: String?): ArrayList<ArrayList<String>> {
         if (text.isNullOrEmpty() || getTextWidth() == 0) return ArrayList()
         title = text!!.substring(0, text.indexOf("|"))
-        val tmpArray = text.substring(text.indexOf("|") + 1).split("\n")
+        val content = text.substring(text.indexOf("|") + 1)
+        if(content.isEmpty()) return ArrayList()
+        val tmpArray = content.split("\n")
         val tmplist = ArrayList<String>()
         tmpArray.forEach {
             val tmp = "  " + it.trim()

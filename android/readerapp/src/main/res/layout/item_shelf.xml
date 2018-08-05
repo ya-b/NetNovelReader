@@ -36,7 +36,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:src="@{itemDetail.bookname+`@`+itemDetail.coverPath}"
+                android:path="@{itemDetail.bookname+`@`+itemDetail.coverPath}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

@@ -8,7 +8,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.netnovelreader.R
 import com.netnovelreader.databinding.ItemRankingBinding
-import com.netnovelreader.databinding.ItemRankingNetworkStateBinding
+import com.netnovelreader.databinding.ItemRankingNetworkErrorBinding
 import com.netnovelreader.databinding.ItemRankingSourceBinding
 import com.netnovelreader.repo.http.paging.NetworkState
 import com.netnovelreader.repo.http.resp.BookLinkResp
@@ -18,10 +18,10 @@ class RankingPageListAdapter(val vm: RankingViewModel?) :
     PagedListAdapter<BookLinkResp, RecyclerView.ViewHolder>(diffCallback) {
     companion object {
         private val diffCallback = object : DiffUtil.ItemCallback<BookLinkResp>() {
-            override fun areItemsTheSame(oldItem: BookLinkResp?, newItem: BookLinkResp?) =
-                oldItem?.bookname == newItem?.bookname
+            override fun areItemsTheSame(oldItem: BookLinkResp, newItem: BookLinkResp) =
+                oldItem.bookname == newItem.bookname
 
-            override fun areContentsTheSame(oldItem: BookLinkResp?, newItem: BookLinkResp?) =
+            override fun areContentsTheSame(oldItem: BookLinkResp, newItem: BookLinkResp) =
                 oldItem == newItem
         }
     }
@@ -35,8 +35,8 @@ class RankingPageListAdapter(val vm: RankingViewModel?) :
                 viewType, parent, false
             ).let { RankingViewHolder(it, vm) }
 
-            R.layout.item_ranking_network_state ->
-                DataBindingUtil.inflate<ItemRankingNetworkStateBinding>(
+            R.layout.item_ranking_network_error ->
+                DataBindingUtil.inflate<ItemRankingNetworkErrorBinding>(
                     LayoutInflater.from(parent.context),
                     viewType, parent, false
                 ).also { it.clickHandler = vm }
@@ -60,7 +60,7 @@ class RankingPageListAdapter(val vm: RankingViewModel?) :
     override fun getItemViewType(position: Int): Int =
         if (position == 0) {
             if (hasExtraRow()) {
-                R.layout.item_ranking_network_state
+                R.layout.item_ranking_network_error
             } else {
                 R.layout.item_ranking_source
             }

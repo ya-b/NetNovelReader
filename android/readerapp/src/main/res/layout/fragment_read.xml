@@ -54,14 +54,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:background="@drawable/icon_back"
+                    android:background="@drawable/ic_arrow_back"
                     android:contentDescription="@string/app_name"
                     android:onClick="@{() -> viewModel.exit()}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
-                <android.support.v7.widget.AppCompatButton
+                <android.support.v7.widget.AppCompatTextView
                     android:id="@+id/changeSouce"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -256,7 +256,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <ImageView
+            <android.support.v7.widget.AppCompatImageView
                 android:id="@+id/imageView"
                 android:layout_width="19dp"
                 android:layout_height="19dp"
@@ -266,9 +266,9 @@
                 app:layout_constraintBottom_toTopOf="@id/read_bg_default"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/brightness_min" />
+                app:srcCompat="@drawable/ic_brightness_low" />
 
-            <SeekBar
+            <android.support.v7.widget.AppCompatSeekBar
                 android:id="@+id/sb_brightness"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -283,7 +283,7 @@
                 app:layout_constraintStart_toEndOf="@id/imageView"
                 app:layout_constraintTop_toTopOf="@id/imageView" />
 
-            <ImageView
+            <android.support.v7.widget.AppCompatImageView
                 android:id="@+id/imageView2"
                 android:layout_width="19dp"
                 android:layout_height="19dp"
@@ -293,8 +293,8 @@
                 app:layout_constraintBottom_toTopOf="@id/read_bg_default"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/sb_brightness"
-                app:layout_constraintTop_toTopOf="@id/imageView"
-                app:srcCompat="@drawable/brightness_max" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_brightness_high" />
 
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -372,35 +372,48 @@
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/catalogButton"
                 style="@style/reader_foot_button"
-                android:drawableTop="@drawable/ic_menu_toc_normal"
+                android:drawableTop="@drawable/ic_format_list_bulleted"
                 android:onClick="@{() -> viewModel.clickFootView(`catalogButton`)}"
                 android:text="@string/catalog_button" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/fontSizeButton"
                 style="@style/reader_foot_button"
-                android:drawableTop="@drawable/ic_menu_settings_normal"
+                android:drawableTop="@drawable/ic_settings"
                 android:onClick="@{() -> viewModel.clickFootView(`fontSizeButton`)}"
                 android:text="@string/settings" />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/backgroundButton"
                 style="@style/reader_foot_button"
-                android:drawableTop="@drawable/ic_menu_mode_night_normal"
+                android:drawableTop="@drawable/ic_brightness_2"
                 android:onClick="@{() -> viewModel.clickFootView(`backgroundButton`)}"
                 android:text="@string/background_button" />
         </LinearLayout>
 
-        <android.support.v4.widget.ContentLoadingProgressBar
-            android:id="@+id/loadingbar"
-            style="?android:attr/progressBarStyle"
+        <LinearLayout
+            android:id="@+id/retry_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="@{viewModel.isLoading ? View.VISIBLE : View.GONE}"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:onClick="@{ () -> viewModel.retryFailed() }"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" >
+
+            <android.support.v7.widget.AppCompatImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_refresh"
+                android:layout_gravity="center"/>
+            <android.support.v7.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/retry"/>
+        </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>
 </layout>

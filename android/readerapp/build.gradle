@@ -1,5 +1,3 @@
-import java.text.SimpleDateFormat
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -40,13 +38,23 @@ android {
         sourceCompatibility 1.8
     }
     lintOptions {
+        abortOnError false
         disable 'GoogleAppIndexingWarning'
     }
     applicationVariants.all { variant ->
         variant.outputs.all {
             if (variant.name.equalsIgnoreCase('release')){
-                def df = new SimpleDateFormat("yyyyMMdd")
-                outputFileName = "reader_${df.format(new Date())}_${defaultConfig.versionName}.apk"
+                def df = new java.text.SimpleDateFormat("yyyyMMdd")
+                outputFileName = "reader_${defaultConfig.versionName}_${df.format(new Date())}.apk"
+            }
+        }
+        variant.assemble.doLast { assemble ->
+            if(assemble.name.contains("Release")) {
+                copy {
+                    from variant.outputs*.outputFile
+                    into rootDir.getAbsolutePath() + File.separator + "apk"
+                }
+                delete variant.outputs*.outputFile
             }
         }
     }
@@ -55,6 +63,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":pageview")
+    implementation project(":loadingdialog")
 
     implementation deps.kotlin.stdlib
 

@@ -92,16 +92,16 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
             )
         ).subscribeOn(Schedulers.from(IO_EXECUTOR))
             .flatMap { str ->
-                SingleSource<String> {
+                SingleSource<String> { singleObserver ->
                     File(bookDir(entity.bookname), entity.chapterNum.toString()).writeText(str)
                     db.chapterInfoDao()
                         .getChapterInfo(entity.bookname, entity.chapterNum).subscribe({
                             it.isDownloaded = ReaderDatabase.ALREADY_DOWN
                             db.chapterInfoDao().update(it)
                         }, {
-
+                            singleObserver.onError(it)
                         })
-                    it.onSuccess(str)
+                    singleObserver.onSuccess(str)
                 }
             }
 

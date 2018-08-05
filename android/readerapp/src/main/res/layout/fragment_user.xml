@@ -26,7 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorPrimary"
-                app:navigationIcon="@drawable/icon_back"
+                app:navigationIcon="@drawable/ic_arrow_back"
                 app:popupTheme="@style/AppTheme.ActionBar"
                 app:title="@string/login" />
 

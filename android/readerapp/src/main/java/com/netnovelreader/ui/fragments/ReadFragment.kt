@@ -1,6 +1,7 @@
 package com.netnovelreader.ui.fragments
 
 import android.app.AlertDialog
+import android.app.Dialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
@@ -12,9 +13,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
+import com.loadingdialog.LoadingDialog
 import com.netnovelreader.R
 import com.netnovelreader.ViewModelFactory
 import com.netnovelreader.databinding.FragmentReadBinding
+import com.netnovelreader.repo.http.paging.NetworkState
 import com.netnovelreader.ui.adapters.CatalogAdapter
 import com.netnovelreader.utils.get
 import com.netnovelreader.utils.sharedPreferences
@@ -28,6 +31,7 @@ class ReadFragment : Fragment() {
     private var dialog: AlertDialog? = null
     private var catalogView: RecyclerView? = null
     private lateinit var binding: FragmentReadBinding
+    private var loadingDialog: Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +53,7 @@ class ReadFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
+        context?.let { loadingDialog = LoadingDialog(context!!) }
         viewModel = activity?.application?.let {
             ViewModelProviders.of(this, ViewModelFactory.getInstance(it))
         }?.get(ReadViewModel::class.java)
@@ -87,13 +91,30 @@ class ReadFragment : Fragment() {
             NavHostFragment.findNavController(this@ReadFragment)
                 .navigate(R.id.action_readFragment_to_searchFragment, bundle)
         })
+        viewModel?.networkState?.observe(this, Observer {
+            when(it) {
+                NetworkState.LOADING -> {
+                    loadingDialog?.show()
+                    binding.retryLayout.visibility = View.GONE
+                }
+                NetworkState.LOADED -> {
+                    loadingDialog?.dismiss()
+                    binding.retryLayout.visibility = View.GONE
+                }
+                else -> {
+                    loadingDialog?.dismiss()
+                    binding.retryLayout.visibility = View.VISIBLE
+                }
+            }
+        })
     }
 
     //显示目录
     private fun showDialog() {
+        context ?: return
         if (dialog == null) {
             val builder = AlertDialog.Builder(context)
-            catalogView = RecyclerView(context)
+            catalogView = RecyclerView(context!!)
             catalogView?.layoutManager = LinearLayoutManager(context)
             val adapter = CatalogAdapter(viewModel, viewModel?.allChapters)
             catalogView?.adapter = adapter

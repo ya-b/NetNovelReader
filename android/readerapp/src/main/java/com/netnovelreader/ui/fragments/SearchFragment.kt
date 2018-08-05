@@ -1,5 +1,6 @@
 package com.netnovelreader.ui.fragments
 
+import android.app.Dialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
@@ -13,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
+import com.loadingdialog.LoadingDialog
 import com.netnovelreader.R
 import com.netnovelreader.ViewModelFactory
 import com.netnovelreader.databinding.FragmentSearchBinding
@@ -29,6 +31,7 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
     private var type: Int? = null
     private var bookname: String? = null
     private var chapterName: String? = null
+    private var loadingDialog: Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +54,7 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        context?.let { loadingDialog = LoadingDialog(context!!) }
         viewModel = activity?.application?.let {
             ViewModelProviders.of(this, ViewModelFactory.getInstance(it))
         }?.get(SearchViewModel::class.java)
@@ -94,6 +98,13 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
                 dialogChangeSource(it)
             } else {
                 dialog(it)
+            }
+        })
+        viewModel?.isLoading?.observe(this, Observer {
+            if(it == false && loadingDialog?.isShowing == true) {
+                loadingDialog?.dismiss()
+            } else {
+                loadingDialog?.show()
             }
         })
     }

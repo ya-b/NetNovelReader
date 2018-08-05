@@ -22,15 +22,22 @@ abstract class Repo(val app: Application) {
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
             .flatMap { entity ->
                 SingleSource<String> {
-                    var result = WebService.searchBook
-                        .getChapterContent(
-                            chapterInfoResp.chapterUrl,
-                            entity.chapterSelector
-                        )
-                        .replace(" ", "\n\n  ")
+                    var result = try {
+                        WebService.searchBook
+                            .getChapterContent(
+                                chapterInfoResp.chapterUrl,
+                                entity.chapterSelector
+                            ).replace(" ", "\n\n  ")
+                    } catch (e: IOException) {
+                        null
+                    }
                     entity.chapterFilter.split("|")
-                        .forEach { result = result.replace(it, "") }
-                    it.onSuccess(result)
+                        .forEach { result = result?.replace(it, "") }
+                    if(result.isNullOrEmpty()) {
+                        it.onError(Throwable("error"))
+                    } else {
+                        it.onSuccess(result)
+                    }
                 }
             }
 

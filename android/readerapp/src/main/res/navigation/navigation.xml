@@ -55,10 +55,10 @@
             app:type="integer" />
         <argument
             android:name="bookname"
-            app:type="string" />
+            app:type="string" app:nullable="true"/>
         <argument
             android:name="chapterName"
-            app:type="string" />
+            app:type="string" app:nullable="true"/>
     </fragment>
     <fragment
         android:id="@+id/readFragment"
@@ -66,7 +66,7 @@
         android:label="ReadFragment" >
         <argument
             android:name="bookname"
-            app:type="string" />
+            app:type="string" app:nullable="true"/>
         <action
             android:id="@+id/action_readFragment_to_searchFragment"
             app:destination="@id/searchFragment"

@@ -15,10 +15,10 @@ class SiteSelectorPageListAdapter(val vm: SiteSelectorViewModel?) :
     PagedListAdapter<SiteSelectorEntity, SiteSelectorPageListAdapter.SelectorViewHolder>(diffCallback) {
     companion object {
         private val diffCallback = object : DiffUtil.ItemCallback<SiteSelectorEntity>() {
-            override fun areItemsTheSame(oldItem: SiteSelectorEntity?, newItem: SiteSelectorEntity?) =
-                oldItem?._id ?: -1 == newItem?._id ?: -2
+            override fun areItemsTheSame(oldItem: SiteSelectorEntity, newItem: SiteSelectorEntity) =
+                oldItem._id ?: -1 == newItem._id ?: -2
 
-            override fun areContentsTheSame(oldItem: SiteSelectorEntity?, newItem: SiteSelectorEntity?) =
+            override fun areContentsTheSame(oldItem: SiteSelectorEntity, newItem: SiteSelectorEntity) =
                 oldItem == newItem
         }
     }

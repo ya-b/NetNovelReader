@@ -5,4 +5,5 @@ def module(group, name) {
 
 module('android', 'readerapp')
 module('android', 'pageview')
+module('android', 'loadingdialog')
 module('backend', 'server')

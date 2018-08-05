@@ -15,7 +15,7 @@ import java.io.File
 
 const val COVER_NAME = "cover.png"
 
-@BindingAdapter("android:src")
+@BindingAdapter("android:path")
 fun loadPath(imageView: ImageView, path: String?) {
     path?.trim()?.takeIf { it.isNotEmpty() } ?: return
     val file = path.substring(0, path.indexOf("@")).let{ File(bookDir(it),COVER_NAME) }

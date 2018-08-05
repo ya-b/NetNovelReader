@@ -15,10 +15,10 @@ class ShelfPageListAdapter(val vm: ShelfViewModel?) :
     PagedListAdapter<BookInfoEntity, ShelfPageListAdapter.ShelfViewHolder>(diffCallback) {
     companion object {
         private val diffCallback = object : DiffUtil.ItemCallback<BookInfoEntity>() {
-            override fun areItemsTheSame(oldItem: BookInfoEntity?, newItem: BookInfoEntity?) =
-                oldItem?._id ?: -1 == newItem?._id ?: -2
+            override fun areItemsTheSame(oldItem: BookInfoEntity, newItem: BookInfoEntity) =
+                oldItem._id ?: -1 == newItem._id ?: -2
 
-            override fun areContentsTheSame(oldItem: BookInfoEntity?, newItem: BookInfoEntity?) =
+            override fun areContentsTheSame(oldItem: BookInfoEntity, newItem: BookInfoEntity) =
                 oldItem == newItem
         }
     }

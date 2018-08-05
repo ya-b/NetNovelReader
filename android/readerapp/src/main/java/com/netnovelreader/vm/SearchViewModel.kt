@@ -4,7 +4,6 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.databinding.ObservableArrayList
-import android.databinding.ObservableBoolean
 import android.text.TextUtils
 import com.netnovelreader.R
 import com.netnovelreader.repo.SearchRepo
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel(app) {
-    val isLoading = ObservableBoolean(false)
+    val isLoading = MutableLiveData<Boolean>()
     val searchResultList = ObservableArrayList<SearchBookResp>()
     val exitCommand = MutableLiveData<Void>()
     val downloadCommand = MutableLiveData<SearchBookResp>()
@@ -35,7 +34,7 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
         if (searchObserver == null) {
             searchObserver = object : DisposableObserver<SearchBookResp>() {
                 override fun onNext(t: SearchBookResp) {
-                    isLoading.set(true)
+                    isLoading.postValue(true)
                     if (!TextUtils.isEmpty(t.bookname) && !TextUtils.isEmpty(t.url)) {
                         searchResultList.add(t)
                     }
@@ -46,13 +45,13 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
                 }
 
                 override fun onComplete() {
-                    isLoading.set(false)
+                    isLoading.postValue(false)
                     //搜索完成后，再获取最新章节
                     getLatestChapter(searchResultList)
                 }
 
                 override fun onError(e: Throwable) {
-                    isLoading.set(false)
+                    isLoading.postValue(false)
                     getLatestChapter(searchResultList)
                 }
             }
@@ -67,7 +66,7 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
             .subscribe(
                 {
-                    isLoading.set(true)
+                    isLoading.postValue(true)
                     repo.getBookInShelf(bookname).subscribe (
                         { entity ->
                             if(it.url == entity.downloadUrl) return@subscribe
@@ -81,8 +80,8 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
                             LoggerFactory.getLogger(this.javaClass).warn("error on changeSourceSearch")
                         })
                 },
-                { isLoading.set(false) },
-                { isLoading.set(false) }
+                { isLoading.postValue(false) },
+                { isLoading.postValue(false) }
             )
     }
 

@@ -16,7 +16,7 @@
             android:background="@color/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.ActionBar"
-            app:navigationIcon="@drawable/icon_back"
+            app:navigationIcon="@drawable/ic_arrow_back"
             app:title="@string/settings" />
 
     </android.support.design.widget.AppBarLayout>
