@@ -12,27 +12,16 @@ class SiteSelectorRepo(app: Application) : Repo(app) {
     private val siteSelectorDao = db.siteSelectorDao()
     val allSiteSelectors = siteSelectorDao.allSelectors()
 
-    fun getSelectorsFromNet(block: (List<SiteSelectorEntity>) -> Unit) {
+    fun getSelectorsFromNet() =
         WebService.readerAPI
             .getSiteSelectorList()
-            .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe(
-                {
-                    block.invoke(it.apply { forEach { it._id = null } })
-                },
-                {
-                    block.invoke(emptyList())
-                }
-            )
-    }
+            .map {
+                it.apply { forEach { it._id = null } }
+            }
 
-    fun getSelectorSFromLocal(block: (List<SiteSelectorEntity>) -> Unit) {
+    fun getSelectorsFromLocal() =
         siteSelectorDao.getAll()
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe {
-                block.invoke(it)
-            }
-    }
 
     fun saveAll(list: List<SiteSelectorEntity>) =
         ioThread { siteSelectorDao.insert(*list.toTypedArray()) }

@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import com.netnovelreader.R
 import com.netnovelreader.repo.SiteSelectorRepo
 import com.netnovelreader.utils.*
+import io.reactivex.schedulers.Schedulers
 import java.io.File
 
 class SplashActivity : AppCompatActivity() {
@@ -17,27 +18,32 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         val isInit = sharedPreferences().get(getString(R.string.isInitKey), false)
-        if(!isInit) {
+        if (!isInit) {
             SiteSelectorRepo(application).apply {
-                getSelectorsFromNet {
-                    sharedPreferences().put(getString(R.string.isInitKey), it.size > 0)
-                    saveAll(it)
-                    if(hasPermission()) {
-                        startActivity(Intent(this@SplashActivity, MainActivity::class.java))
-                        finish()
-                    } else {
-                        requirePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, req)
+                getSelectorsFromNet()
+                    .subscribeOn(Schedulers.from(IO_EXECUTOR))
+                    .subscribe {
+                        sharedPreferences().put(getString(R.string.isInitKey), it.size > 0)
+                        saveAll(it)
+                        if (hasPermission()) {
+                            startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+                            finish()
+                        } else {
+                            requirePermission(
+                                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                req
+                            )
+                        }
                     }
-                }
             }
         } else {
             val oldDir = File(booksDirOld())
-            if(oldDir.exists()) {
+            if (oldDir.exists()) {
                 oldDir.copyRecursively(File(booksDir()), true)
                 oldDir.deleteRecursively()
             }
             application.cacheDir.listFiles().forEach { it.deleteRecursively() }
-            if(hasPermission()) {
+            if (hasPermission()) {
                 startActivity(Intent(this@SplashActivity, MainActivity::class.java))
                 finish()
             } else {
@@ -52,8 +58,8 @@ class SplashActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if(requestCode == req) {
-            if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == req) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startActivity(Intent(this@SplashActivity, MainActivity::class.java))
             }
             finish()

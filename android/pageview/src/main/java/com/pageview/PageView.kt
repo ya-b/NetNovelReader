@@ -21,7 +21,6 @@ class PageView : ViewFlipper, IPageView {
     var title: String = ""                                             //章节名称
     override var isDrawTime = false                    //左下角是否显示时间
 
-    val FILENOTFOUND = "            "         //表示该章节为空
     var maxPageNum = 0                        //最大页数
     var pageFlag = 0                          //0刚进入view，1表示目录跳转，2表示下一页，3表示上一页
     private val MIN_MOVE = 80F                //翻页最小滑动距离
@@ -230,14 +229,14 @@ class PageView : ViewFlipper, IPageView {
                     if (width < 1) return
                     val scale = maxPageNum.toFloat() / pageNum
                     textArray = spliteText(text)
-                    maxPageNum = if (text.substring(title.length + 1).equals(FILENOTFOUND)
+                    maxPageNum = if (text.length <= title.length + 1
                         || text.isEmpty()) 0 else textArray.size
                     pageNum = (maxPageNum / scale).toInt().takeIf { it != 0 } ?: 1
                 }
                 "text" -> {
                     if (width < 1) return
                     textArray = spliteText(text)
-                    maxPageNum = if (text.substring(title.length + 1).equals(FILENOTFOUND)
+                    maxPageNum = if (text.length <= title.length + 1
                         || text.isEmpty()) 0 else textArray.size
                     pageNum = when (pageFlag) {
                         0 -> if (maxPageNum == 0) 0 else if (pageNum == 0) 1 else pageNum

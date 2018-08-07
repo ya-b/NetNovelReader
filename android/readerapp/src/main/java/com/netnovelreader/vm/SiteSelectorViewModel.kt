@@ -7,6 +7,10 @@ import android.arch.paging.LivePagedListBuilder
 import android.arch.paging.PagedList
 import com.netnovelreader.repo.SiteSelectorRepo
 import com.netnovelreader.repo.db.SiteSelectorEntity
+import com.netnovelreader.utils.IO_EXECUTOR
+import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
+import io.reactivex.schedulers.Schedulers
 
 class SiteSelectorViewModel(val repo: SiteSelectorRepo, app: Application) : AndroidViewModel(app) {
     val allSiteSelector = LivePagedListBuilder(
@@ -19,22 +23,28 @@ class SiteSelectorViewModel(val repo: SiteSelectorRepo, app: Application) : Andr
     val editPreferenceCommand = MutableLiveData<SiteSelectorEntity>()
 
     fun updatePreference(perferNet: Boolean) {
-        repo.getSelectorsFromNet { netList ->
-            repo.getSelectorSFromLocal { localList ->
-                if(perferNet) {
-                    netList.forEach { item ->
-                        localList.firstOrNull { item.hostname == it.hostname }
+        Observable.zip(
+            repo.getSelectorsFromNet(),
+            repo.getSelectorsFromLocal().toObservable(),
+            BiFunction<List<SiteSelectorEntity>, List<SiteSelectorEntity>,
+                    Pair<List<SiteSelectorEntity>, List<SiteSelectorEntity>>> { t1, t2 ->
+                Pair(t1, t2)
+            }
+        ).subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe {
+                if (perferNet) {
+                    it.first.forEach { item ->
+                        it.second.firstOrNull { item.hostname == it.hostname }
                             ?.let { item._id = it._id }
                     }
-                    repo.saveAll(netList)
+                    repo.saveAll(it.first)
                 } else {
-                    val list = netList.filter { item ->
-                        localList.none { item.hostname == it.hostname }
+                    val list = it.first.filter { item ->
+                        it.second.none { item.hostname == it.hostname }
                     }
                     repo.saveAll(list)
                 }
             }
-        }
     }
 
     fun editPreference(entity: SiteSelectorEntity) {
@@ -42,7 +52,7 @@ class SiteSelectorViewModel(val repo: SiteSelectorRepo, app: Application) : Andr
     }
 
     fun savePreference(entity: SiteSelectorEntity) {
-        if(entity.hostname.isEmpty()) {
+        if (entity.hostname.isEmpty()) {
             return
         }
         repo.saveSelector(entity)

@@ -12,6 +12,8 @@ import com.netnovelreader.repo.http.resp.SearchBookResp
 import com.netnovelreader.utils.COVER_NAME
 import com.netnovelreader.utils.IO_EXECUTOR
 import com.netnovelreader.utils.bookDir
+import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -62,27 +64,25 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
     fun changeSourceSearch(bookname: String, chapterName: String) {
         if (bookname.isEmpty()) return
         if (chapterName.isEmpty()) return
-        repo.search(bookname)
-            .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe(
-                {
-                    isLoading.postValue(true)
-                    repo.getBookInShelf(bookname).subscribe (
-                        { entity ->
-                            if(it.url == entity.downloadUrl) return@subscribe
-                            repo.getCatalogFromNet(it) { key, list ->
-                                list?.firstOrNull { it.chapterName == chapterName }?.let {
-                                    searchResultList.add(key)
-                                }
-                            }
-                        },
-                        {
-                            LoggerFactory.getLogger(this.javaClass).warn("error on changeSourceSearch")
-                        })
-                },
-                { isLoading.postValue(false) },
-                { isLoading.postValue(false) }
-            )
+        Observable.zip(
+            repo.search(bookname),
+            repo.getBookInShelf(bookname).subscribeOn(Schedulers.from(IO_EXECUTOR)).toObservable(),
+            BiFunction<SearchBookResp, BookInfoEntity, Pair<SearchBookResp, BookInfoEntity>> { t, u ->
+                Pair(t, u)
+            }
+        ).subscribe (
+            {
+                isLoading.postValue(true)
+                if (it.first.url == it.second.downloadUrl) return@subscribe
+                repo.getCatalogFromNet(it.first) { key, list ->
+                    list?.firstOrNull { it.chapterName == chapterName }?.let {
+                        searchResultList.add(key)
+                    }
+                }
+            },
+            { isLoading.postValue(false) },
+            { isLoading.postValue(false) }
+        )
     }
 
     fun confirmDownload(book: SearchBookResp) {

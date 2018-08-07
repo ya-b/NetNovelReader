@@ -9,6 +9,8 @@ import com.netnovelreader.repo.http.resp.SearchBookResp
 import com.netnovelreader.utils.IO_EXECUTOR
 import com.netnovelreader.utils.bookDir
 import io.reactivex.Observable
+import io.reactivex.Single
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 
@@ -32,18 +34,21 @@ class BookInfosRepo(app: Application) : Repo(app) {
     }
 
     fun setMaxOrderToBook(bookname: String) {
-        dao.getBookInfo(bookname)
-            .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe({
-                dao.getMaxOrderNum().subscribe { num ->
-                    it.orderNumber = num + 1
-                    it.hasUpdate = false
-                    dao.update(it)
+        Single.zip(
+            dao.getBookInfo(bookname),
+            dao.getMaxOrderNum().toSingle(),
+            BiFunction<BookInfoEntity, Int, Pair<BookInfoEntity, Int>> { b, i -> Pair(b, i) }
+        ).subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                {
+                    it.first.orderNumber = it.second + 1
+                    it.first.hasUpdate = false
+                    dao.update(it.first)
+                },
+                {
+                    LoggerFactory.getLogger(this.javaClass).warn("setMaxOrderToBook$it")
                 }
-            }, {
-                LoggerFactory.getLogger(this.javaClass).warn("setMaxOrderToBook$it")
-            })
-
+            )
     }
 
     fun updateCatalog() =

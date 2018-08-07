@@ -41,7 +41,7 @@ class BookLinkTopClickDataSource(val cacheDir: File) : PageKeyedDataSource<Strin
                 callback.onResult(it, null, "2")
             },
             {
-                val error = NetworkState.error(it.toString() ?: "unknown err")
+                val error = NetworkState.error(it.toString())
                 networkState.postValue(error)
                 initialLoad.postValue(error)
                 retry = { loadInitial(params, callback) }
@@ -62,7 +62,7 @@ class BookLinkTopClickDataSource(val cacheDir: File) : PageKeyedDataSource<Strin
                 callback.onResult(it, if (nextKey == 51) null else nextKey.toString())
             },
             {
-                networkState.postValue(NetworkState.error(it.toString() ?: "unknown err"))
+                networkState.postValue(NetworkState.error(it.toString()))
                 retry = { loadAfter(params, callback) }
             })
     }

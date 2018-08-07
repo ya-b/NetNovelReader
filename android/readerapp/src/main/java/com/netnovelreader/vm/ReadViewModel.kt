@@ -100,6 +100,9 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
                     text.set("${chapterName}|$chapter")
                 },
                 {
+                    val chapterName = allChapters.filter { it.chapterNum == chapterNum }
+                        .firstOrNull()?.chapterName ?: ""
+                    text.set("${chapterName}|")
                     retry = { getChapter(chapterNum) }
                     networkState.postValue(NetworkState.error("error"))
                     LoggerFactory.getLogger(this.javaClass).warn("getChapter$it")
@@ -156,9 +159,6 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
             .subscribe(
                 {
                     chapterNum.set(it[0])
-                    val chapterName = allChapters.filter { it.chapterNum == chapterNum.get() }
-                        .firstOrNull()?.chapterName ?: ""
-                    text.set("${chapterName}|")
                     getChapter(it[0])
                     initPageViewCommand.postValue(it[1])
                 },
@@ -170,9 +170,6 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     fun onNextChapter() {
         if (chapterNum.get() < maxChapterNum) {
             val chapterNum = chapterNum.incrementAndGet()
-            val chapterName = allChapters.filter { it.chapterNum == chapterNum }
-                .firstOrNull()?.chapterName ?: ""
-            text.set("${chapterName}|")
             getChapter(chapterNum)
         }
     }
@@ -180,9 +177,6 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     fun onPreviousChapter() {
         if (chapterNum.get() > 1) {
             val chapterNum = chapterNum.decrementAndGet()
-            val chapterName = allChapters.filter { it.chapterNum == chapterNum }
-                .firstOrNull()?.chapterName ?: ""
-            text.set("${chapterName}|")
             getChapter(chapterNum)
         }
     }
@@ -207,9 +201,9 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
             .subscribe(
                 {
                     chapterNum.set(it.chapterNum)
-                    val chapterName = allChapters.filter { it.chapterNum == chapterNum.get() }
+                    val title = allChapters.filter { it.chapterNum == chapterNum.get() }
                         .firstOrNull()?.chapterName ?: ""
-                    text.set("${chapterName}|")
+                    text.set("${title}|")
                     getChapter(it.chapterNum)
                 },
                 {

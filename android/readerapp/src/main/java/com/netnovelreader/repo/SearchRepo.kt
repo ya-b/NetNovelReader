@@ -10,7 +10,9 @@ import com.netnovelreader.repo.http.resp.ChapterInfoResp
 import com.netnovelreader.repo.http.resp.SearchBookResp
 import com.netnovelreader.utils.*
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.SingleSource
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import java.io.*
@@ -29,6 +31,8 @@ class SearchRepo(app: Application) : Repo(app) {
                 Observable.create<SearchBookResp> {
                     it.onNext(WebService.searchBook.search(bookname, item))
                     it.onComplete()
+                }.onErrorReturn {
+                    SearchBookResp("", "", "", "")
                 }.subscribeOn(Schedulers.from(IO_EXECUTOR))
             }
 
@@ -66,18 +70,18 @@ class SearchRepo(app: Application) : Repo(app) {
 
     @Throws(IOException::class)
     fun downloadChapter(bookname: String, info: ChapterInfoResp) {
-        getChapter(info)
-            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+        Single.zip(
+            getChapter(info),
+            db.chapterInfoDao().getChapterInfo(bookname, info.chapterName),
+            BiFunction<String, ChapterInfoEntity, Pair<String, ChapterInfoEntity>> { t1, t2 ->
+                Pair(t1, t2)
+            }
+        ).subscribeOn(Schedulers.from(IO_EXECUTOR))
             .subscribe(
-                { str ->
-                    File(bookDir(bookname), info.id.toString()).writeText(str)
-                    db.chapterInfoDao()
-                        .getChapterInfo(bookname, info.chapterName).subscribe({
-                            it.isDownloaded = ReaderDatabase.ALREADY_DOWN
-                            db.chapterInfoDao().update(it)
-                        }, {
-
-                        })
+                {
+                    File(bookDir(bookname), info.id.toString()).writeText(it.first)
+                    it.second.isDownloaded = ReaderDatabase.ALREADY_DOWN
+                    db.chapterInfoDao().update(it.second)
                 },
                 {
                     LoggerFactory.getLogger(this.javaClass).warn("downloadChapter$it")
