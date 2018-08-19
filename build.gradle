@@ -18,3 +18,12 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task sortDependencies << {
+    def sb = new StringBuilder()
+    file('versions.gradle').readLines()
+        .findAll { !it.isEmpty() }
+        .sort { a, b -> a.startsWith("versions") && b.startsWith("versions") ? a <=> b : 0 }
+        .forEach { sb.append("${it.startsWith("def") ? "\n" : ""}$it\n") }
+    file('versions.gradle').write(sb.toString())
+}

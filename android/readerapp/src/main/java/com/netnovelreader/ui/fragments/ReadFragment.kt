@@ -128,5 +128,6 @@ class ReadFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel?.autoDelCache()
+        viewModel?.destroy()
     }
 }

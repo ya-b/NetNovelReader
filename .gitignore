@@ -5,6 +5,4 @@
 /build
 /captures
 .externalNativeBuild
-app/libs/
-app/schemas/com.netnovelreader.data.local.db.ReaderDatabase/
 /.idea/

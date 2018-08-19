@@ -6,7 +6,6 @@ import com.netnovelreader.repo.http.WebService
 import com.netnovelreader.utils.IO_EXECUTOR
 import com.netnovelreader.utils.ioThread
 import io.reactivex.schedulers.Schedulers
-import org.slf4j.LoggerFactory
 
 class SiteSelectorRepo(app: Application) : Repo(app) {
     private val siteSelectorDao = db.siteSelectorDao()
@@ -15,29 +14,17 @@ class SiteSelectorRepo(app: Application) : Repo(app) {
     fun getSelectorsFromNet() =
         WebService.readerAPI
             .getSiteSelectorList()
-            .map {
-                it.apply { forEach { it._id = null } }
+            .map { list ->
+                list.apply { forEach { it._id = null } }
             }
 
-    fun getSelectorsFromLocal() =
-        siteSelectorDao.getAll()
-            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+    fun getSelectorsFromLocal() = siteSelectorDao.getAll().subscribeOn(Schedulers.from(IO_EXECUTOR))
 
     fun saveAll(list: List<SiteSelectorEntity>) =
         ioThread { siteSelectorDao.insert(*list.toTypedArray()) }
 
-
     fun saveSelector(entity: SiteSelectorEntity) {
-        siteSelectorDao.getItem(entity.hostname)
-            .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe(
-                {
-                    entity._id = it._id
-                    siteSelectorDao.insert(entity)
-                },
-                {
-                    LoggerFactory.getLogger(this.javaClass).warn("saveSelector$it")
-                })
+        ioThread { siteSelectorDao.insert(entity) }
     }
 
 }

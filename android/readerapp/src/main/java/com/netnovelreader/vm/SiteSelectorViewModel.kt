@@ -9,6 +9,7 @@ import com.netnovelreader.repo.SiteSelectorRepo
 import com.netnovelreader.repo.db.SiteSelectorEntity
 import com.netnovelreader.utils.IO_EXECUTOR
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 
@@ -21,6 +22,11 @@ class SiteSelectorViewModel(val repo: SiteSelectorRepo, app: Application) : Andr
             .build()
     ).build()
     val editPreferenceCommand = MutableLiveData<SiteSelectorEntity>()
+    var compositeDisposable: CompositeDisposable = CompositeDisposable()
+
+    fun destroy() {
+        compositeDisposable.dispose()
+    }
 
     fun updatePreference(perferNet: Boolean) {
         Observable.zip(
@@ -31,20 +37,20 @@ class SiteSelectorViewModel(val repo: SiteSelectorRepo, app: Application) : Andr
                 Pair(t1, t2)
             }
         ).subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe {
+            .subscribe { pair ->
                 if (perferNet) {
-                    it.first.forEach { item ->
-                        it.second.firstOrNull { item.hostname == it.hostname }
+                    pair.first.forEach { item ->
+                        pair.second.firstOrNull { item.hostname == it.hostname }
                             ?.let { item._id = it._id }
                     }
-                    repo.saveAll(it.first)
+                    repo.saveAll(pair.first)
                 } else {
-                    val list = it.first.filter { item ->
-                        it.second.none { item.hostname == it.hostname }
+                    val list = pair.first.filter { item ->
+                        pair.second.none { item.hostname == it.hostname }
                     }
                     repo.saveAll(list)
                 }
-            }
+            }.let { compositeDisposable.add(it) }
     }
 
     fun editPreference(entity: SiteSelectorEntity) {

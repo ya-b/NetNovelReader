@@ -7,14 +7,27 @@ import android.arch.lifecycle.MutableLiveData
 import android.databinding.ObservableBoolean
 import com.netnovelreader.R
 import com.netnovelreader.repo.UserRepo
+import com.netnovelreader.repo.db.BookInfoEntity
+import com.netnovelreader.utils.IO_EXECUTOR
 import com.netnovelreader.utils.get
+import com.netnovelreader.utils.put
 import com.netnovelreader.utils.sharedPreferences
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
+import io.reactivex.schedulers.Schedulers
 
 class UserViewModel(val repo: UserRepo, app: Application) : AndroidViewModel(app) {
 
     val isLoading = ObservableBoolean(false)
     val toastCommand = MutableLiveData<String>()
     val exitCommand = MutableLiveData<Void>()
+    var compositeDisposable: CompositeDisposable = CompositeDisposable()
+
+    fun destroy() {
+        compositeDisposable.dispose()
+    }
 
     fun login(username: String, passwd: String) {
         val app = getApplication<Application>()
@@ -23,14 +36,21 @@ class UserViewModel(val repo: UserRepo, app: Application) : AndroidViewModel(app
             return
         }
         isLoading.set(true)
-        repo.login(username, passwd) { token ->
-            isLoading.set(false)
-            if(token.isNullOrEmpty()) {
-                toastCommand.value = app.getString(R.string.login_error)
-            } else {
-                toastCommand.value = Activity.RESULT_OK.toString()
-            }
-        }
+        repo.login(username, passwd)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe (
+                {
+                    if(it.second.isNullOrEmpty()) {
+                        toastCommand.value = app.getString(R.string.login_error)
+                    } else {
+                        app.sharedPreferences().put(app.getString(R.string.tokenKey), it.second)
+                        app.sharedPreferences().put(app.getString(R.string.usernameKey), it.first)
+                        toastCommand.value = Activity.RESULT_OK.toString()
+                    }
+                },
+                {
+                    toastCommand.value = app.getString(R.string.login_error)
+                }).let { compositeDisposable.add(it) }
     }
 
     fun logout() {
@@ -50,21 +70,43 @@ class UserViewModel(val repo: UserRepo, app: Application) : AndroidViewModel(app
 
     fun saveRecord() {
         isLoading.set(true)
-        repo.uploadRecord {
-            toastCommand.value = it
-            isLoading.set(false)
-        }
+        repo.uploadRecord().subscribe(
+            {
+                toastCommand.value = it.string()
+                isLoading.set(false)
+            },
+            {
+                toastCommand.value = "error"
+                isLoading.set(false)
+            }
+        ).let { compositeDisposable.add(it) }
     }
 
     fun restoreRecord() {
         isLoading.set(true)
-        repo.downloadRecord {
-            if(it) {
-                toastCommand.value = "Success"
-            } else {
-                toastCommand.value = "Failed"
+        Observable.zip(repo.downloadRecord(), repo.existsRecord().toObservable(),
+            BiFunction<List<BookInfoEntity>, List<BookInfoEntity>,
+                    Pair<List<BookInfoEntity>, List<BookInfoEntity>>> { t1, t2 -> Pair(t1, t2) })
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .observeOn(AndroidSchedulers.mainThread())
+            .map { pair ->
+                pair.apply {
+                    first.forEach { recordItem ->
+                        recordItem._id = null
+                        second.firstOrNull { it.bookname == recordItem.bookname }
+                            ?.let { recordItem._id = it._id }
+                    }
+                }
             }
-            isLoading.set(false)
-        }
+            .subscribe (
+                {
+                    repo.insertRecord(it.first)
+                    toastCommand.value = "Success"
+                    isLoading.set(false)
+                },
+                {
+                    toastCommand.value = "Failed"
+                    isLoading.set(false)
+                }).let { compositeDisposable.add(it) }
     }
 }
