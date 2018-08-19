@@ -22,6 +22,7 @@
 
     <!--download-->
     <string name="already_in_shelf">已在书架中</string>
+    <string name="add_to_shelf">添加成功</string>
     <string name="prepare_download">准备下载</string>
     <string name="downloading">下载中:%1$d/%2$d,失败:%3$d章,待下载:%4$d本</string>
     <string name="download_finish">下载完成,失败:%d章</string>

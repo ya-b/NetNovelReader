@@ -20,6 +20,15 @@ interface BookInfoDao {
     @Query("SELECT max(${ReaderDatabase.ORDER_NUM}) from ${ReaderDatabase.TABLE_SHELF}")
     fun getMaxOrderNum(): Maybe<Int>
 
+    @Query("update ${ReaderDatabase.TABLE_SHELF} set ${ReaderDatabase.ORDER_NUM}=(" +
+            "select * from (select ifnull((" +
+            "select max(${ReaderDatabase.ORDER_NUM}) from ${ReaderDatabase.TABLE_SHELF}), 0)) as t" +
+            ") + 1, ${ReaderDatabase.HAS_UPDATE} = 0 where  ${ReaderDatabase.BOOKNAME} LIKE :bookname;")
+    fun setMaxOrderToBook(bookname: String)
+
+    @Query("DELETE FROM ${ReaderDatabase.TABLE_SHELF} WHERE ${ReaderDatabase.BOOKNAME} LIKE :bookname")
+    fun delete(bookname: String)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg entities: BookInfoEntity)
 

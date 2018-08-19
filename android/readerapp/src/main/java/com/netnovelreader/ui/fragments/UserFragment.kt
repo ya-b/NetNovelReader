@@ -62,4 +62,9 @@ class UserFragment : Fragment() {
             }
         })
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel?.destroy()
+    }
 }

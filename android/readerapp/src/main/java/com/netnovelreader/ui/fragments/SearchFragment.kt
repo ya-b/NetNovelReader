@@ -109,6 +109,11 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         })
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel?.destroy()
+    }
+
     override fun onQueryTextSubmit(query: String): Boolean {
         viewModel?.searchBook(query)
         binding.searchView.clearFocus()                    //提交搜索commit后收起键盘

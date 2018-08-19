@@ -66,4 +66,8 @@ class ShelfFragment : Fragment() {
         })
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel?.destroy()
+    }
 }

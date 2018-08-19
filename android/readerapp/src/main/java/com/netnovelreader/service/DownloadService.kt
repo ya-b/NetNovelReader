@@ -6,14 +6,14 @@ import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
 import com.netnovelreader.repo.SearchRepo
-import com.netnovelreader.repo.http.resp.ChapterInfoResp
+import com.netnovelreader.repo.db.ReaderDatabase
 import com.netnovelreader.repo.http.resp.SearchBookResp
-import com.netnovelreader.utils.IO_EXECUTOR
+import com.netnovelreader.utils.bookDir
 import com.netnovelreader.utils.mkBookDir
 import com.netnovelreader.utils.toast
 import com.netnovelreader.utils.uiThread
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
+import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -87,46 +87,47 @@ class DownloadService : IntentService {
             ?.setContentTitle(str)
         uiThread { mNotificationManager?.notify(notyfyId, builder?.build()) }
     }
-
     private fun download() {
         if (taskList.size == 0) return
-        repo.getCatalog(taskList[0]) { _, chapterList ->
-            chapterList ?: return@getCatalog
-            max.set(chapterList.size)
-            if(!mkBookDir(taskList[0].bookname)) {
-                //todo 创建文件夹出错
-                return@getCatalog
+        repo.getCatalogs(taskList[0])
+            .flatMapObservable {
+                max.set(it.second.size)
+                mkBookDir(it.first.bookname)
+                Observable.fromIterable(it.second)
+            }.flatMap { info ->
+                repo.downloadChapter(taskList[0].bookname, info).toObservable()
             }
-            Observable.fromIterable(chapterList)
-                .flatMap { info ->
-                    Observable.create<Pair<ChapterInfoResp, Boolean>> {
-                        repo.downloadChapter(taskList[0].bookname, info)
-                        it.onNext(Pair(info, true))
-                        it.onComplete()
-                    }.subscribeOn(Schedulers.from(IO_EXECUTOR))
-                }.subscribe(
-                    {
-                        updateNotification(
-                            progress.incrementAndGet(),
-                            max.get(),
-                            failed.get(),
-                            taskList.size - 1
-                        )
-                    },
-                    {
+            .subscribe(
+                {
+                    if(it.first.trim().isEmpty()) {
                         updateNotification(
                             progress.get(),
                             max.get(),
                             failed.incrementAndGet(),
                             taskList.size - 1
                         )
-                    },
-                    {
-                        updateNotification(max.get(), max.get(), failed.get(), taskList.size - 1)
-                        taskList.removeFirst()
-                        download()
+                    } else {
+                        File(bookDir(taskList[0].bookname), it.third.id.toString()).writeText(it.first)
+                        it.second.isDownloaded = ReaderDatabase.ALREADY_DOWN
+                        repo.updateChapter(it.second)
+                        updateNotification(
+                            progress.incrementAndGet(),
+                            max.get(),
+                            failed.get(),
+                            taskList.size - 1
+                        )
                     }
-                )
-        }
+                },
+                {
+                    updateNotification(max.get(), max.get(), failed.get(), taskList.size - 1)
+                    taskList.removeFirst()
+                    download()
+                },
+                {
+                    updateNotification(max.get(), max.get(), failed.get(), taskList.size - 1)
+                    taskList.removeFirst()
+                    download()
+                }
+            )
     }
 }

@@ -52,7 +52,7 @@ android {
             if(assemble.name.contains("Release")) {
                 copy {
                     from variant.outputs*.outputFile
-                    into rootDir.getAbsolutePath() + File.separator + "apk"
+                    into rootDir.getAbsolutePath() + File.separator + "build"
                 }
                 delete variant.outputs*.outputFile
             }

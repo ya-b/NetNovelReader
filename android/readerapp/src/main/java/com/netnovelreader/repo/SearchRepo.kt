@@ -8,49 +8,44 @@ import com.netnovelreader.repo.db.ReaderDatabase
 import com.netnovelreader.repo.http.WebService
 import com.netnovelreader.repo.http.resp.ChapterInfoResp
 import com.netnovelreader.repo.http.resp.SearchBookResp
-import com.netnovelreader.utils.*
+import com.netnovelreader.utils.IO_EXECUTOR
+import com.netnovelreader.utils.ioThread
+import com.netnovelreader.utils.toMD5
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.SingleSource
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
+import okhttp3.ResponseBody
 import org.slf4j.LoggerFactory
-import java.io.*
+import retrofit2.Response
+import java.io.File
+import java.io.IOException
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 
 class SearchRepo(app: Application) : Repo(app) {
 
     /**
      * 搜索书，如果已在搜索，则取消当前搜索，重新搜
      */
-    @Throws(IOException::class)
     fun search(bookname: String) =
         db.siteSelectorDao().getAll().subscribeOn(Schedulers.from(IO_EXECUTOR))
             .flatMapObservable { Observable.fromIterable(it) }
             .observeOn(Schedulers.from(IO_EXECUTOR))
             .flatMap { item ->
-                Observable.create<SearchBookResp> {
-                    it.onNext(WebService.searchBook.search(bookname, item))
-                    it.onComplete()
-                }.onErrorReturn {
-                    SearchBookResp("", "", "", "")
-                }.subscribeOn(Schedulers.from(IO_EXECUTOR))
+                WebService.searchBook.search(bookname, item)
+                    .toObservable()
+                    .subscribeOn(Schedulers.from(IO_EXECUTOR))
+                    .onErrorReturn{ SearchBookResp("", "", "", "") }
             }
 
-    /**
-     *
-     * @call :    给@SearchBookResp设置最新章节，并回调
-     */
-    @Throws(IOException::class)
-    fun getCatalog(
-        item: SearchBookResp,
-        call: ((SearchBookResp?, List<ChapterInfoResp>?) -> Unit)? = null
-    ) {
+    fun getCatalogs(item: SearchBookResp) =
         if (app.cacheDir.list().contains(getFileName(item))) {
-            getCatalogFromCache(item, call)
+            getCatalogFromCache(item)
         } else {
-            getCatalogFromNet(item, call)
+            getCatalogFromNet(item)
         }
-    }
 
     /**
      * 保存到数据库
@@ -68,90 +63,58 @@ class SearchRepo(app: Application) : Repo(app) {
         }
     }
 
-    @Throws(IOException::class)
-    fun downloadChapter(bookname: String, info: ChapterInfoResp) {
+    fun downloadChapter(bookname: String, info: ChapterInfoResp) =
         Single.zip(
-            getChapter(info),
+            getChapter(info).retry(1).onErrorReturn { "" },
             db.chapterInfoDao().getChapterInfo(bookname, info.chapterName),
-            BiFunction<String, ChapterInfoEntity, Pair<String, ChapterInfoEntity>> { t1, t2 ->
-                Pair(t1, t2)
+            BiFunction<String, ChapterInfoEntity,
+                    Triple<String, ChapterInfoEntity, ChapterInfoResp>> { t1, t2 ->
+                Triple(t1, t2, info)
             }
         ).subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe(
-                {
-                    File(bookDir(bookname), info.id.toString()).writeText(it.first)
-                    it.second.isDownloaded = ReaderDatabase.ALREADY_DOWN
-                    db.chapterInfoDao().update(it.second)
-                },
-                {
-                    LoggerFactory.getLogger(this.javaClass).warn("downloadChapter$it")
-                })
-    }
 
-    //下载书籍图片(搜索时顺便获取)
-    fun downloadImage(bookname: String, imageUrl: String) {
-        val path = "${bookDir(bookname)}".let { "$it${File.separator}$COVER_NAME" }
-        if (imageUrl.isEmpty() || File(path).exists()) return
-        ioThread {
-            try {
-                WebService.readerAPI.request(imageUrl).execute().body()?.byteStream()?.use { ins ->
-                    FileOutputStream(path).use { os -> ins.copyTo(os) }
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
+    fun updateChapter(vararg chapterInfoEntity: ChapterInfoEntity) {
+        db.runInTransaction {
+            chapterInfoEntity.forEach {
+                db.chapterInfoDao().update(it)
             }
         }
     }
 
-    @Throws(IOException::class)
-    fun getCatalogFromNet(
-        item: SearchBookResp,
-        call: ((SearchBookResp?, List<ChapterInfoResp>?) -> Unit)? = null
-    ) {
+    //下载书籍图片(搜索时顺便获取)
+    fun downloadImage(imageUrl: String): Single<Response<ResponseBody>> =
+        WebService.readerAPI
+            .request(imageUrl)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+
+    fun getCatalogFromNet(item: SearchBookResp) =
         getCatalog(item)
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
             .flatMap { chapters ->
-                SingleSource<List<ChapterInfoResp>> {
-                    item.latestChapter = chapters.last().chapterName
-                    it.onSuccess(chapters)
-                }
-            }.subscribe(
-                { list ->
-                    call?.invoke(item, list)
+                SingleSource<Pair<SearchBookResp, List<ChapterInfoResp>>> {
+                    item.latestChapter = chapters.lastOrNull()?.chapterName
+                            ?: app.getString(R.string.latest_chapter_get_failed)
                     try {
                         //url的md5值作为文件名， 写入磁盘缓存
                         ObjectOutputStream(
                             File(app.cacheDir, getFileName(item)).outputStream()
-                        ).use { it.writeObject(list) }
+                        ).use { stream -> stream.writeObject(chapters) }
                     } catch (e: IOException) {
                         LoggerFactory.getLogger(this.javaClass).warn("getCatalogFromNet$e")
                     }
-                },
-                {
-                    //下载目录失败
-                    call?.invoke(
-                        item.apply {
-                            latestChapter = app.getString(R.string.latest_chapter_get_failed)
-                        },
-                        null
-                    )
-                    LoggerFactory.getLogger(this.javaClass).warn("getCatalogFromNet$it")
+                    it.onSuccess(Pair(item, chapters))
                 }
-            )
-    }
+            }
 
     @Suppress("UNCHECKED_CAST")
-    @Throws(IOException::class)
-    fun getCatalogFromCache(
-        item: SearchBookResp,
-        call: ((SearchBookResp?, List<ChapterInfoResp>?) -> Unit)? = null
-    ) {
-        var result: List<ChapterInfoResp>? = null
-        ObjectInputStream(File(app.cacheDir, getFileName(item)).inputStream())
-            .use { result = it.readObject() as List<ChapterInfoResp> }
-        result?.last()?.chapterName?.let { item.latestChapter = it }
-        call?.invoke(item, result)
-    }
+    fun getCatalogFromCache(item: SearchBookResp) =
+        Single.create<Pair<SearchBookResp, List<ChapterInfoResp>>> { emitter ->
+            var result: List<ChapterInfoResp>? = null
+            ObjectInputStream(File(app.cacheDir, getFileName(item)).inputStream())
+                .use { result = it.readObject() as List<ChapterInfoResp> }
+            result?.last()?.chapterName?.let { item.latestChapter = it }
+            emitter.onSuccess(Pair(item, result.orEmpty()))
+        }
 
     //url的md5值作为文件名
     private fun getFileName(item: SearchBookResp) = item.url.toMD5()
@@ -160,7 +123,5 @@ class SearchRepo(app: Application) : Repo(app) {
 
     fun getBookInShelf(bookname: String) = db.bookInfoDao().getBookInfo(bookname)
 
-    fun isBookDownloaded(bookname: String) =
-        db.bookInfoDao()
-            .getBookInfo(bookname)
+    fun isBookDownloaded(bookname: String) = db.bookInfoDao().getBookInfo(bookname)
 }

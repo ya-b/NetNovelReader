@@ -3,12 +3,13 @@ package com.netnovelreader.repo.http
 import com.netnovelreader.repo.db.BookInfoEntity
 import com.netnovelreader.repo.db.SiteSelectorEntity
 import io.reactivex.Observable
+import io.reactivex.Single
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import org.slf4j.LoggerFactory
-import retrofit2.Call
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -16,20 +17,19 @@ import retrofit2.http.*
 import java.util.concurrent.TimeUnit
 
 object WebService {
+    val okHttpClient = OkHttpClient.Builder()
+        .connectTimeout(3, TimeUnit.SECONDS)
+        .addNetworkInterceptor(
+            HttpLoggingInterceptor(
+                HttpLoggingInterceptor.Logger {
+                    LoggerFactory.getLogger(this.javaClass).debug(it)
+                }
+            ).apply { setLevel(HttpLoggingInterceptor.Level.HEADERS) }
+        )
+        .build()
     val readerAPI: NovalReaderAPI by lazy {
         Retrofit.Builder()
-            .client(
-                OkHttpClient.Builder()
-                    .connectTimeout(3, TimeUnit.SECONDS)
-                    .addNetworkInterceptor(
-                        HttpLoggingInterceptor(
-                            HttpLoggingInterceptor.Logger {
-                                LoggerFactory.getLogger(this.javaClass).debug(it)
-                            }
-                        ).apply { setLevel(HttpLoggingInterceptor.Level.HEADERS) }
-                    )
-                    .build()
-            )
+            .client(okHttpClient)
             .baseUrl("http://139.159.226.67/reader/")
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -55,6 +55,6 @@ object WebService {
         fun saveRecord(@Header("Authorization") token: String, @Part file: MultipartBody.Part): Observable<ResponseBody>
 
         @GET
-        fun request(@Url url: String): Call<ResponseBody>
+        fun request(@Url url: String): Single<Response<ResponseBody>>
     }
 }

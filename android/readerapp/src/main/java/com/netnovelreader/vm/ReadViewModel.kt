@@ -11,9 +11,12 @@ import com.netnovelreader.repo.ChapterInfoRepo
 import com.netnovelreader.repo.db.ChapterInfoEntity
 import com.netnovelreader.repo.http.paging.NetworkState
 import com.netnovelreader.utils.*
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
 class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewModel(app) {
@@ -44,8 +47,10 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     @Volatile
     var maxChapterNum = 0                                    //最大章节数
     lateinit var bookName: String                            //书名
+    var remainNum = 3                                       //删除已读章节，但保留最近3章
     var cacheNum: Int = 0                                   //缓存后面章节数量
     var retry: (() -> Any)? = null
+    var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     fun start() {
         val context = getApplication<Application>()
@@ -67,22 +72,40 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
                 0
             )
         )
-        repo.getAllChapters(bookName)
+        repo.getChapterCount(bookName)
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe {
-                allChapters.addAll(it)
-                allChapters.lastOrNull()?.chapterNum?.let { maxChapterNum = it }
-                if (allChapters.size == 0) {
-                    downloadCatalog()
+            .flatMap { int ->
+                if (int < 1) {
+                    repo.downloadCatalog(bookName)
                 } else {
+                    Single.create<List<ChapterInfoEntity>> { it.onSuccess(emptyList()) }
+                }
+            }.map { list ->
+                list.also {
+                    if (it.isNotEmpty()) {
+                        repo.saveCatalog(it)
+                    }
                     initPageNum()
                 }
-            }
+            }.flatMap { repo.getAllChapters(bookName).toSingle() }
+            .subscribe(
+                { list ->
+                    allChapters.clear()
+                    allChapters.addAll(list)
+                    allChapters.lastOrNull()?.chapterNum?.let { maxChapterNum = it }
+                },
+                {
+                    LoggerFactory.getLogger(ReadViewModel::class.java).debug(it.toString())
+                }).let { compositeDisposable.add(it) }
         getApplication<Application>().apply {
             sharedPreferences().get(getString(R.string.auto_download_key), false)
                 .takeIf { it }
                 ?.let { cacheNum = 3 }
         }
+    }
+
+    fun destroy() {
+        compositeDisposable.clear()
     }
 
     //获取章节内容
@@ -95,51 +118,27 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
                 { chapter ->
                     retry = null
                     networkState.postValue(NetworkState.LOADED)
-                    var chapterName = allChapters.filter { it.chapterNum == chapterNum }
+                    val chapterName = allChapters.filter { it.chapterNum == chapterNum }
                         .firstOrNull()?.chapterName ?: ""
                     text.set("${chapterName}|$chapter")
                 },
-                {
+                { t ->
                     val chapterName = allChapters.filter { it.chapterNum == chapterNum }
                         .firstOrNull()?.chapterName ?: ""
                     text.set("${chapterName}|")
                     retry = { getChapter(chapterNum) }
                     networkState.postValue(NetworkState.error("error"))
-                    LoggerFactory.getLogger(this.javaClass).warn("getChapter$it")
-                })
-        repo.downCacheChapter(bookName, chapterNum, cacheNum)  //下载chapterNum之后cacheNum章
+                    LoggerFactory.getLogger(this.javaClass).warn("getChapter$t")
+                }).let { compositeDisposable.add(it) }
+        if(cacheNum > 0) {
+            repo.downCacheChapter(bookName, chapterNum, cacheNum).subscribe()  //下载chapterNum之后cacheNum章
+        }
     }
 
     fun retryFailed() {
         val prevRetry = retry
         retry = null
-        prevRetry?.let {
-            ioThread { it.invoke() }
-        }
-    }
-
-    /**
-     * 重装app，恢复阅读记录时调用（此时有阅读记录，但没有目录）
-     */
-    fun downloadCatalog() {
-        repo.downloadCatalog(bookName)
-            .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe(
-                {
-                    allChapters.addAll(it)
-                    initPageNum()
-                    repo.saveCatalog(it)
-                },
-                {
-                    toastCommand.postValue("error on get catalog")
-                    LoggerFactory.getLogger(this.javaClass).warn("downloadCatalog$it")
-                }
-            )
-    }
-
-    //todo
-    fun reloadCurrentChapter() {
-
+        ioThread { prevRetry?.invoke() }
     }
 
     /**
@@ -148,8 +147,12 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     fun autoDelCache() {
         getApplication<Application>().apply {
             sharedPreferences().get(getString(R.string.auto_remove_key), false)
-                .takeIf { it }
-                ?.let { repo.delCacheChapter(bookName, chapterNum.get(), 3) }
+                .takeIf { it && remainNum > 0 }
+                ?.let { repo.delCacheChapter(bookName, chapterNum.get(), remainNum) }
+                ?.subscribe { list ->
+                    list.map { File(bookDir(bookName), it.chapterNum.toString()) }
+                        .forEach { it.deleteRecursively() }
+                }
         }
     }
 
@@ -164,7 +167,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
                 },
                 {
                     initPageViewCommand.postValue(1)
-                })
+                }).let { compositeDisposable.add(it) }
     }
 
     fun onNextChapter() {
@@ -192,24 +195,34 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
 
     fun onPageChange(pageNum: Int) {
         isViewShow.forEach { it.value.set(false) }
-        repo.setRecord(bookName, chapterNum.get(), pageNum)
+        //保存阅读记录
+        repo.getBookInfo(bookName)
+            .subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                {
+                    it.readRecord = "${chapterNum.get()}#${if (pageNum < 1) 1 else pageNum}"
+                    repo.updateBookInfo(it)
+                },
+                {
+                    LoggerFactory.getLogger(this.javaClass).warn("setRecord$it")
+                }).let { compositeDisposable.add(it) }
     }
 
     fun getChapterByCatalog(chapterName: String) {
         repo.getChapterInfo(bookName, chapterName)
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
             .subscribe(
-                {
-                    chapterNum.set(it.chapterNum)
+                { chapterEntity ->
+                    chapterNum.set(chapterEntity.chapterNum)
                     val title = allChapters.filter { it.chapterNum == chapterNum.get() }
                         .firstOrNull()?.chapterName ?: ""
                     text.set("${title}|")
-                    getChapter(it.chapterNum)
+                    getChapter(chapterEntity.chapterNum)
                 },
                 {
                     LoggerFactory.getLogger(this.javaClass).warn("getChapterByCatalog$it")
                     toastCommand.postValue("error!!!")
-                })
+                }).let { compositeDisposable.add(it) }
     }
 
     fun changeSource() {
@@ -223,7 +236,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
                 {
                     toastCommand.postValue("error on get chapter")
                     LoggerFactory.getLogger(this.javaClass).warn("changeSource$it")
-                })
+                }).let { compositeDisposable.add(it) }
     }
 
     fun clickFootView(which: String) {

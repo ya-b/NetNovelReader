@@ -41,10 +41,10 @@ class RankingFragment : Fragment() {
         binding.rankingRecycler.adapter = adapter
         viewModel?.ranking?.observe(this, Observer(adapter::submitList))
         viewModel?.networkState?.observe(this, Observer(adapter::setNetworkState))
-        viewModel?.searchCommand?.observe(this, Observer {
-            it.takeIf { (it?.length ?: 0) > 0  } ?: return@Observer
-            val bookname = it!!.toString()
-            it.delete(0, it.length)
+        viewModel?.searchCommand?.observe(this, Observer { sb ->
+            sb.takeIf { (it?.length ?: 0) > 0  } ?: return@Observer
+            val bookname = sb!!.toString()
+            sb.delete(0, sb.length)
             val bundle = Bundle().apply {
                 putString("bookname", bookname)
                 putInt("type", SearchFragment.TYPE_RANKING)

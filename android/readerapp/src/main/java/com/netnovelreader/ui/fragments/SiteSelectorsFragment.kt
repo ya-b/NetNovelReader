@@ -51,7 +51,11 @@ class SiteSelectorsFragment : Fragment() {
         viewModel?.editPreferenceCommand?.observe(this, Observer {
             it?.let { editPreferenceDialog(it) }
         })
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel?.destroy()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
