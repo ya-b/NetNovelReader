@@ -6,6 +6,7 @@ import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.netnovelreader.R
 import com.netnovelreader.repo.SearchRepo
+import com.netnovelreader.repo.db.ChapterInfoEntity
 import com.netnovelreader.repo.db.ReaderDatabase
 import com.netnovelreader.repo.http.resp.SearchBookResp
 import com.netnovelreader.utils.bookDir
@@ -13,9 +14,11 @@ import com.netnovelreader.utils.mkBookDir
 import com.netnovelreader.utils.toast
 import com.netnovelreader.utils.uiThread
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.collections.ArrayList
 
 class DownloadService : IntentService {
     constructor() : super("DownloadService")
@@ -34,6 +37,8 @@ class DownloadService : IntentService {
     private var progress = AtomicInteger()     //下载完成数（包括失败的下载）
     private var failed = AtomicInteger()       //失败下载数
     private val taskList by lazy { LinkedList<SearchBookResp>() }
+    private val resultList = ArrayList<ChapterInfoEntity>()
+    private var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     override fun onCreate() {
         super.onCreate()
@@ -87,8 +92,13 @@ class DownloadService : IntentService {
             ?.setContentTitle(str)
         uiThread { mNotificationManager?.notify(notyfyId, builder?.build()) }
     }
+
     private fun download() {
-        if (taskList.size == 0) return
+        if (taskList.size == 0) {
+            compositeDisposable.clear()
+            return
+        }
+        resultList.clear()
         repo.getCatalogs(taskList[0])
             .flatMapObservable {
                 max.set(it.second.size)
@@ -100,34 +110,31 @@ class DownloadService : IntentService {
             .subscribe(
                 {
                     if(it.first.trim().isEmpty()) {
-                        updateNotification(
-                            progress.get(),
-                            max.get(),
-                            failed.incrementAndGet(),
-                            taskList.size - 1
-                        )
+                        failed.incrementAndGet()
                     } else {
                         File(bookDir(taskList[0].bookname), it.third.id.toString()).writeText(it.first)
                         it.second.isDownloaded = ReaderDatabase.ALREADY_DOWN
-                        repo.updateChapter(it.second)
-                        updateNotification(
-                            progress.incrementAndGet(),
-                            max.get(),
-                            failed.get(),
-                            taskList.size - 1
-                        )
+                        resultList.add(it.second)
                     }
+                    updateNotification(
+                        progress.incrementAndGet(),
+                        max.get(),
+                        failed.get(),
+                        taskList.size - 1
+                    )
                 },
                 {
                     updateNotification(max.get(), max.get(), failed.get(), taskList.size - 1)
+                    repo.updateChapter(resultList)
                     taskList.removeFirst()
                     download()
                 },
                 {
                     updateNotification(max.get(), max.get(), failed.get(), taskList.size - 1)
+                    repo.updateChapter(resultList)
                     taskList.removeFirst()
                     download()
                 }
-            )
+            ).also { compositeDisposable.add(it) }
     }
 }

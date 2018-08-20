@@ -31,6 +31,7 @@ class SplashActivity : AppCompatActivity() {
                                 startMainActivity()
                             },
                             {
+                                toast(getString(R.string.get_site_selector_failed))
                                 startMainActivity()
                             })
                     .also { compositeDisposable.add(it) }

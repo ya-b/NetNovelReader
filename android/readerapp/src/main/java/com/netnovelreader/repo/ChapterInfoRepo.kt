@@ -1,7 +1,6 @@
 package com.netnovelreader.repo
 
 import android.app.Application
-import com.netnovelreader.repo.db.BookInfoEntity
 import com.netnovelreader.repo.db.ChapterInfoEntity
 import com.netnovelreader.repo.db.ReaderDatabase
 import com.netnovelreader.repo.http.resp.ChapterInfoResp
@@ -12,6 +11,7 @@ import com.netnovelreader.utils.ioThread
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.SingleSource
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import java.io.File
 
@@ -30,8 +30,8 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
 
     fun getBookInfo(bookname: String) = db.bookInfoDao().getBookInfo(bookname)
 
-    fun updateBookInfo(bookInfoEntity: BookInfoEntity) =
-        ioThread { db.bookInfoDao().update(bookInfoEntity) }
+    fun setRecord(bookname: String, record: String) =
+        ioThread { db.bookInfoDao().setRecord(bookname, record) }
 
     fun getRecord(bookname: String) =
         getBookInfo(bookname)
@@ -51,15 +51,11 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
                     getChapterFromDisk(it)
                 } else {
                     getChapterFromNet(it)
-                }
-            }.flatMap {  str ->
-                Single.create<String> {
-                    if(str.isEmpty()) {
-                        it.onError(Throwable("error"))
-                    } else {
-                        it.onSuccess(str)
+                }.zipWith(Single.just(it),
+                    BiFunction<String, ChapterInfoEntity, Pair<String, ChapterInfoEntity>> { t1, t2 ->
+                        Pair(t1, t2)
                     }
-                }
+                )
             }
 
     fun downloadCatalog(bookname: String) =
@@ -83,7 +79,7 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
     private fun getChapterFromNet(entity: ChapterInfoEntity) =
         getChapter(ChapterInfoResp(entity.chapterNum, entity.chapterName, entity.chapterUrl))
             .map {
-                if(it.trim().isNotEmpty()) {
+                if (it.trim().isNotEmpty()) {
                     File(bookDir(entity.bookname), entity.chapterNum.toString()).writeText(it)
                     entity.isDownloaded = ReaderDatabase.ALREADY_DOWN
                     db.chapterInfoDao().update(entity)
@@ -92,7 +88,7 @@ class ChapterInfoRepo(app: Application) : Repo(app) {
             }
 
     private fun getChapterFromDisk(entity: ChapterInfoEntity) =
-        SingleSource<String> {
+        Single.create<String> {
             val file = File(bookDir(entity.bookname), entity.chapterNum.toString())  //章节文件地址
             it.onSuccess(file.readText())
         }

@@ -30,6 +30,7 @@
     <string name="download_book">下载</string>
     <string name="already_in_task">已在下载中</string>
     <string name="latest_chapter_get_failed">最新章节获取失败</string>
+    <string name="get_site_selector_failed">获取配置失败</string>
 
     <!--read-->
     <string name="change_source">换源下载</string>

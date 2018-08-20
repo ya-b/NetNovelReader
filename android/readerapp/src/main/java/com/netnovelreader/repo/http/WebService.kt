@@ -24,7 +24,7 @@ object WebService {
                 HttpLoggingInterceptor.Logger {
                     LoggerFactory.getLogger(this.javaClass).debug(it)
                 }
-            ).apply { setLevel(HttpLoggingInterceptor.Level.HEADERS) }
+            ).apply { setLevel(HttpLoggingInterceptor.Level.BASIC) }
         )
         .build()
     val readerAPI: NovalReaderAPI by lazy {

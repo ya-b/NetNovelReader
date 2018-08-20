@@ -80,14 +80,16 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
                 } else {
                     Single.create<List<ChapterInfoEntity>> { it.onSuccess(emptyList()) }
                 }
-            }.map { list ->
-                list.also {
-                    if (it.isNotEmpty()) {
-                        repo.saveCatalog(it)
-                    }
+            }.flatMap {
+                if (it.isNotEmpty()) {
+                    repo.saveCatalog(it)
                     initPageNum()
+                    Single.just(it)
+                } else {
+                    initPageNum()
+                    repo.getAllChapters(bookName).toSingle()
                 }
-            }.flatMap { repo.getAllChapters(bookName).toSingle() }
+            }
             .subscribe(
                 { list ->
                     allChapters.clear()
@@ -115,23 +117,24 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
         repo.getChapter(bookName, chapterNum)
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
             .subscribe(
-                { chapter ->
-                    retry = null
-                    networkState.postValue(NetworkState.LOADED)
-                    val chapterName = allChapters.filter { it.chapterNum == chapterNum }
-                        .firstOrNull()?.chapterName ?: ""
-                    text.set("${chapterName}|$chapter")
+                { pair ->
+                    text.set("${pair.second.chapterName}|${pair.first}")
+                    if (pair.first.isNotEmpty()) {
+                        retry = null
+                        networkState.postValue(NetworkState.LOADED)
+                    } else {
+                        retry = { getChapter(chapterNum) }
+                        networkState.postValue(NetworkState.error("error"))
+                    }
                 },
                 { t ->
-                    val chapterName = allChapters.filter { it.chapterNum == chapterNum }
-                        .firstOrNull()?.chapterName ?: ""
-                    text.set("${chapterName}|")
-                    retry = { getChapter(chapterNum) }
-                    networkState.postValue(NetworkState.error("error"))
                     LoggerFactory.getLogger(this.javaClass).warn("getChapter$t")
-                }).let { compositeDisposable.add(it) }
+                })
+            .let { compositeDisposable.add(it) }
         if(cacheNum > 0) {
-            repo.downCacheChapter(bookName, chapterNum, cacheNum).subscribe()  //下载chapterNum之后cacheNum章
+            repo.downCacheChapter(bookName, chapterNum, cacheNum)  //下载chapterNum之后cacheNum章
+                .subscribe()
+                .let { compositeDisposable.add(it) }
         }
     }
 
@@ -196,16 +199,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     fun onPageChange(pageNum: Int) {
         isViewShow.forEach { it.value.set(false) }
         //保存阅读记录
-        repo.getBookInfo(bookName)
-            .subscribeOn(Schedulers.from(IO_EXECUTOR))
-            .subscribe(
-                {
-                    it.readRecord = "${chapterNum.get()}#${if (pageNum < 1) 1 else pageNum}"
-                    repo.updateBookInfo(it)
-                },
-                {
-                    LoggerFactory.getLogger(this.javaClass).warn("setRecord$it")
-                }).let { compositeDisposable.add(it) }
+        repo.setRecord(bookName, "${chapterNum.get()}#${if (pageNum < 1) 1 else pageNum}")
     }
 
     fun getChapterByCatalog(chapterName: String) {

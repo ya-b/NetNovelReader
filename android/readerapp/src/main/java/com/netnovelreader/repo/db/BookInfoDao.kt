@@ -26,6 +26,10 @@ interface BookInfoDao {
             ") + 1, ${ReaderDatabase.HAS_UPDATE} = 0 where  ${ReaderDatabase.BOOKNAME} LIKE :bookname;")
     fun setMaxOrderToBook(bookname: String)
 
+    @Query("update ${ReaderDatabase.TABLE_SHELF} set ${ReaderDatabase.READ_RECORD}=:record " +
+            "WHERE ${ReaderDatabase.BOOKNAME} LIKE :bookname")
+    fun setRecord(bookname: String, record: String)
+
     @Query("DELETE FROM ${ReaderDatabase.TABLE_SHELF} WHERE ${ReaderDatabase.BOOKNAME} LIKE :bookname")
     fun delete(bookname: String)
 

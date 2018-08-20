@@ -73,9 +73,9 @@ class SearchRepo(app: Application) : Repo(app) {
             }
         ).subscribeOn(Schedulers.from(IO_EXECUTOR))
 
-    fun updateChapter(vararg chapterInfoEntity: ChapterInfoEntity) {
+    fun updateChapter(chapterInfoEntitys: List<ChapterInfoEntity>) {
         db.runInTransaction {
-            chapterInfoEntity.forEach {
+            chapterInfoEntitys.forEach {
                 db.chapterInfoDao().update(it)
             }
         }
