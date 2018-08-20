@@ -25,7 +25,7 @@ class SiteSelectorViewModel(val repo: SiteSelectorRepo, app: Application) : Andr
     var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     fun destroy() {
-        compositeDisposable.dispose()
+        compositeDisposable.clear()
     }
 
     fun updatePreference(perferNet: Boolean) {

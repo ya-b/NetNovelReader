@@ -1,15 +1,15 @@
 <configuration debug="true">
 
-    <appender name="file" class="ch.qos.logback.core.FileAppender">
-        <file>/sdcard/com.netnovelreader/log/reader.log</file>
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/${EXT_DIR:-${DATA_DIR}}/${PACKAGE_NAME}/log/reader.log</file>
+        <lazy>true</lazy>
+        <append>true</append>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-
-            <fileNamePattern>/sdcard/com.netnovelreader/log/log.%d.txt</fileNamePattern>
+            <fileNamePattern>/${EXT_DIR:-${DATA_DIR}}/${PACKAGE_NAME}/log/reader.%d.log</fileNamePattern>
             <MaxHistory>30</MaxHistory>
-
         </rollingPolicy>
     </appender>
 

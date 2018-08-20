@@ -30,7 +30,7 @@ class ShelfViewModel(var repo: BookInfosRepo, app: Application) : AndroidViewMod
     var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     fun destroy() {
-        compositeDisposable.dispose()
+        compositeDisposable.clear()
     }
 
     fun readBook(bookname: String) {

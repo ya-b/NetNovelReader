@@ -36,7 +36,7 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
             : DisposableObserver<Pair<SearchBookResp, List<ChapterInfoResp>>>? = null
 
     fun destroy() {
-        compositeDisposable.dispose()
+        compositeDisposable.clear()
     }
 
     @Synchronized

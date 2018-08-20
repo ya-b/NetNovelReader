@@ -26,7 +26,7 @@ class UserViewModel(val repo: UserRepo, app: Application) : AndroidViewModel(app
     var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     fun destroy() {
-        compositeDisposable.dispose()
+        compositeDisposable.clear()
     }
 
     fun login(username: String, passwd: String) {

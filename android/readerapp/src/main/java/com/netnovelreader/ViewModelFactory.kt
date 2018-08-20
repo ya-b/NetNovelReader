@@ -18,15 +18,15 @@ class ViewModelFactory private constructor(private val application: Application)
                 isAssignableFrom(ShelfViewModel::class.java) ->
                     ShelfViewModel(BookInfosRepo(application), application)
                 isAssignableFrom(SearchViewModel::class.java) ->
-                        SearchViewModel(SearchRepo(application), application)
+                    SearchViewModel(SearchRepo(application), application)
                 isAssignableFrom(SiteSelectorViewModel::class.java) ->
-                        SiteSelectorViewModel(SiteSelectorRepo(application), application)
+                    SiteSelectorViewModel(SiteSelectorRepo(application), application)
                 isAssignableFrom(ReadViewModel::class.java) ->
                     ReadViewModel(ChapterInfoRepo(application), application)
                 isAssignableFrom(UserViewModel::class.java) ->
                     UserViewModel(UserRepo(application), application)
                 isAssignableFrom(RankingViewModel::class.java) ->
-                        RankingViewModel(RankingRepo(application), application)
+                    RankingViewModel(RankingRepo(application), application)
                 else ->
                     AndroidViewModel(application)
             }
@@ -36,7 +36,8 @@ class ViewModelFactory private constructor(private val application: Application)
     companion object {
 
         @SuppressLint("StaticFieldLeak")
-        @Volatile private var INSTANCE: ViewModelFactory? = null
+        @Volatile
+        private var INSTANCE: ViewModelFactory? = null
 
         fun getInstance(application: Application) =
                 INSTANCE ?: synchronized(ViewModelFactory::class.java) {
