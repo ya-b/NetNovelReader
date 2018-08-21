@@ -15,9 +15,10 @@ class BookInfosRepo(app: Application) : Repo(app) {
 
     fun getAllBookInfos() = dao.allBooks()
 
-    fun updateBookInfo(bookInfoEntity: BookInfoEntity) = dao.update(bookInfoEntity)
+    fun updateBookInfo(bookInfoEntity: BookInfoEntity) =
+        ioThread { dao.update(bookInfoEntity) }
 
-    fun getAllChapter(bookname: String) = db.chapterInfoDao().getAll(bookname)
+    fun getChapterNum(bookname: String) = db.chapterInfoDao().getChapterNum(bookname)
 
     fun insertChapters(vararg chapterInfoEntity: ChapterInfoEntity) {
         ioThread { db.chapterInfoDao().insert(*chapterInfoEntity) }

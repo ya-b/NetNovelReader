@@ -9,7 +9,6 @@ import com.netnovelreader.repo.http.WebService
 import com.netnovelreader.repo.http.resp.ChapterInfoResp
 import com.netnovelreader.repo.http.resp.SearchBookResp
 import com.netnovelreader.utils.IO_EXECUTOR
-import com.netnovelreader.utils.ioThread
 import com.netnovelreader.utils.toMD5
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -51,15 +50,16 @@ class SearchRepo(app: Application) : Repo(app) {
      * 保存到数据库
      */
     fun setCatalog(bookname: String, chapters: List<ChapterInfoResp>) {
-        ioThread {
-            db.chapterInfoDao().deleteBook(bookname)
-            chapters.map {
-                ChapterInfoEntity(
-                    null, it.id, bookname, it.chapterName,
-                    it.chapterUrl, ReaderDatabase.NOT_DOWN
-                )
-            }.toTypedArray()
-                .let { db.chapterInfoDao().insert(*it) }
+        chapters.map {
+            ChapterInfoEntity(
+                null, it.id, bookname, it.chapterName,
+                it.chapterUrl, ReaderDatabase.NOT_DOWN
+            )
+        }.also {
+            db.runInTransaction {
+                db.chapterInfoDao().deleteBook(bookname)
+                db.chapterInfoDao().insert(*it.toTypedArray())
+            }
         }
     }
 

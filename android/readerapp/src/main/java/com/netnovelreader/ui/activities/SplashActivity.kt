@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import com.netnovelreader.R
 import com.netnovelreader.repo.SiteSelectorRepo
 import com.netnovelreader.utils.*
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.io.File
@@ -23,18 +24,19 @@ class SplashActivity : AppCompatActivity() {
         val repo = SiteSelectorRepo(application)
         if (!isInit) {
             repo.getSelectorsFromNet()
-                    .subscribeOn(Schedulers.from(IO_EXECUTOR))
-                    .subscribe(
-                            {
-                                sharedPreferences().put(getString(R.string.isInitKey), it.size > 0)
-                                repo.saveAll(it)
-                                startMainActivity()
-                            },
-                            {
-                                toast(getString(R.string.get_site_selector_failed))
-                                startMainActivity()
-                            })
-                    .also { compositeDisposable.add(it) }
+                .subscribeOn(Schedulers.from(IO_EXECUTOR))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        sharedPreferences().put(getString(R.string.isInitKey), it.size > 0)
+                        repo.saveAll(it)
+                        startMainActivity()
+                    },
+                    {
+                        toast(getString(R.string.get_site_selector_failed))
+                        startMainActivity()
+                    })
+                .also { compositeDisposable.add(it) }
         } else {
             val oldDir = File(booksDirOld())
             if (oldDir.exists()) {
@@ -52,9 +54,9 @@ class SplashActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == req) {
@@ -75,10 +77,10 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun hasPermission() =
-            ActivityCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
+        ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
 
     private fun requirePermission(permission: String, reqCode: Int) {
         ActivityCompat.requestPermissions(this, Array(1) { permission }, reqCode)

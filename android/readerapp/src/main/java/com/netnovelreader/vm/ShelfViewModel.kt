@@ -44,7 +44,7 @@ class ShelfViewModel(var repo: BookInfosRepo, app: Application) : AndroidViewMod
     }
 
     fun deleteBook(bookname: String) {
-        if(bookname.isNotEmpty()) {
+        if (bookname.isNotEmpty()) {
             repo.deleteBook(bookname)
         }
     }
@@ -53,43 +53,32 @@ class ShelfViewModel(var repo: BookInfosRepo, app: Application) : AndroidViewMod
         repo.updateCatalog()
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
             .flatMap {
-                Observable.zip(Observable.just(it),
-                    repo.getAllChapter(it.first.bookname).toObservable(),
-                    BiFunction<Pair<BookInfoEntity, List<ChapterInfoResp>>, List<ChapterInfoEntity>,
-                            Triple<BookInfoEntity, List<ChapterInfoResp>, List<ChapterInfoEntity>>>
-                    { t1, t2 -> Triple(t1.first, t1.second, t2) })
+                Observable.zip(
+                    Observable.just(it),
+                    repo.getChapterNum(it.first.bookname).toObservable(),
+                    BiFunction<Pair<BookInfoEntity, List<ChapterInfoResp>>, Int,
+                            Triple<BookInfoEntity, List<ChapterInfoResp>, Int>>
+                    { t1, t2 -> Triple(t1.first, t1.second, t2) }
+                )
+            }.map {
+                if(it.third < it.second.size) {
+                    Pair(it.first, it.second.subList(it.third, it.second.size))
+                } else {
+                    Pair(it.first, emptyList())
+                }
             }
             .subscribe(
-                { triple ->
-                    val bookInfoEntity = triple.first
-                    val newChapters = triple.second
-                    val existsChapters = triple.third
-                    //大于int的表示更新章节， ChapterInfoEntity表示数据库里的最后一章
-                    var index = Pair(0, ChapterInfoEntity(null, 0, "", "", "", 0))
-                    for (i in newChapters.size - 1 downTo 0) {
-                        val entity = existsChapters.filter { it.chapterName == newChapters[i].chapterName }
-                        if (entity.isNotEmpty()) {
-                            index = Pair(i, entity.last())
-                            break
-                        }
-                    }
-                    if (index.first < newChapters.size - 1) {
-                        newChapters.subList(index.first + 1, newChapters.size)
-                            .apply {
-                                forEachIndexed { i, chapterInfoResp ->
-                                    chapterInfoResp.id = index.first + i + 1
-                                }
-                            }.map {
-                                ChapterInfoEntity(
-                                    null, it.id, bookInfoEntity.bookname, it.chapterName,
-                                    it.chapterUrl, ReaderDatabase.NOT_DOWN
-                                )
-                            }.let { repo.insertChapters(*it.toTypedArray()) }
-                        bookInfoEntity.apply {
-                            latestChapter = newChapters.lastOrNull()?.chapterName ?: ""
-                            hasUpdate = true
-                        }.let { repo.updateBookInfo(it) }
-                    }
+                {
+                    if(it.second.isEmpty()) return@subscribe
+                    it.second.map { c ->
+                        ChapterInfoEntity(
+                            null, c.id, it.first.bookname, c.chapterName,
+                            c.chapterUrl, ReaderDatabase.NOT_DOWN
+                        )
+                    }.let { list -> repo.insertChapters(*list.toTypedArray()) }
+                    it.first.latestChapter = it.second.last().chapterName
+                    it.first.hasUpdate = true
+                    repo.updateBookInfo(it.first)
                 }, {
                     stopRefershCommand.postValue(null)
                 }, {

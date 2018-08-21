@@ -23,7 +23,7 @@ interface BookInfoDao {
     @Query("update ${ReaderDatabase.TABLE_SHELF} set ${ReaderDatabase.ORDER_NUM}=(" +
             "select * from (select ifnull((" +
             "select max(${ReaderDatabase.ORDER_NUM}) from ${ReaderDatabase.TABLE_SHELF}), 0)) as t" +
-            ") + 1, ${ReaderDatabase.HAS_UPDATE} = 0 where  ${ReaderDatabase.BOOKNAME} LIKE :bookname;")
+            ") + 1, ${ReaderDatabase.HAS_UPDATE} = 0 where ${ReaderDatabase.BOOKNAME} LIKE :bookname;")
     fun setMaxOrderToBook(bookname: String)
 
     @Query("update ${ReaderDatabase.TABLE_SHELF} set ${ReaderDatabase.READ_RECORD}=:record " +

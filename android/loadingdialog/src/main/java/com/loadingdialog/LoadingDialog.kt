@@ -9,7 +9,7 @@ import kotlin.concurrent.schedule
 class LoadingDialog(context: Context) : Dialog(context, R.style.LoadingDialog) {
     val progressBar by lazy { ProgressBar(context) }
     var timer: Timer? = null
-    var TIME_OUT = 10000L
+    var TIME_OUT = -1L
 
     constructor(context: Context, timeout: Long): this(context) {
         TIME_OUT = timeout
@@ -22,13 +22,17 @@ class LoadingDialog(context: Context) : Dialog(context, R.style.LoadingDialog) {
 
     override fun show() {
         super.show()
-        timer = Timer().apply {
-            schedule(TIME_OUT) { dismiss() }
+        if(TIME_OUT > 0) {
+            timer = Timer().apply {
+                schedule(TIME_OUT) { dismiss() }
+            }
         }
     }
 
     override fun dismiss() {
         super.dismiss()
-        timer?.cancel()
+        if(TIME_OUT > 0) {
+            timer?.cancel()
+        }
     }
 }

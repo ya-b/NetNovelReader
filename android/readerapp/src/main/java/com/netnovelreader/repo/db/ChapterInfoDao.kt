@@ -1,16 +1,11 @@
 package com.netnovelreader.repo.db
 
-import android.arch.paging.DataSource
 import android.arch.persistence.room.*
 import io.reactivex.Maybe
 import io.reactivex.Single
 
 @Dao
 interface ChapterInfoDao {
-
-    @Query("SELECT * FROM ${ReaderDatabase.TABLE_CATALOG} WHERE ${ReaderDatabase.BOOKNAME} LIKE " +
-            ":bookname order by ${ReaderDatabase.CHAPTER_NUM} ASC")
-    fun allChapters(bookname: String): DataSource.Factory<Int, ChapterInfoEntity>
 
     @Query("SELECT * FROM ${ReaderDatabase.TABLE_CATALOG} WHERE ${ReaderDatabase.BOOKNAME} LIKE " +
             ":bookname order by ${ReaderDatabase.CHAPTER_NUM} ASC")
