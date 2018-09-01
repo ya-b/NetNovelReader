@@ -1,14 +1,14 @@
 package com.netnovelreader.vm
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.arch.paging.LivePagedListBuilder
-import android.arch.paging.PagedList
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
 import com.netnovelreader.repo.SiteSelectorRepo
 import com.netnovelreader.repo.db.SiteSelectorEntity
 import com.netnovelreader.utils.IO_EXECUTOR
-import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
@@ -29,9 +29,9 @@ class SiteSelectorViewModel(val repo: SiteSelectorRepo, app: Application) : Andr
     }
 
     fun updatePreference(perferNet: Boolean) {
-        Observable.zip(
+        Single.zip(
             repo.getSelectorsFromNet(),
-            repo.getSelectorsFromLocal().toObservable(),
+            repo.getSelectorsFromLocal(),
             BiFunction<List<SiteSelectorEntity>, List<SiteSelectorEntity>,
                     Pair<List<SiteSelectorEntity>, List<SiteSelectorEntity>>> { t1, t2 ->
                 Pair(t1, t2)

@@ -2,35 +2,19 @@ package com.netnovelreader
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
-import com.netnovelreader.repo.*
-import com.netnovelreader.vm.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
 class ViewModelFactory private constructor(private val application: Application) :
-        ViewModelProvider.NewInstanceFactory() {
+    ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
+    @Throws(ReflectiveOperationException::class, SecurityException::class)
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return with(modelClass) {
-            when {
-                isAssignableFrom(ShelfViewModel::class.java) ->
-                    ShelfViewModel(BookInfosRepo(application), application)
-                isAssignableFrom(SearchViewModel::class.java) ->
-                    SearchViewModel(SearchRepo(application), application)
-                isAssignableFrom(SiteSelectorViewModel::class.java) ->
-                    SiteSelectorViewModel(SiteSelectorRepo(application), application)
-                isAssignableFrom(ReadViewModel::class.java) ->
-                    ReadViewModel(ChapterInfoRepo(application), application)
-                isAssignableFrom(UserViewModel::class.java) ->
-                    UserViewModel(UserRepo(application), application)
-                isAssignableFrom(RankingViewModel::class.java) ->
-                    RankingViewModel(RankingRepo(application), application)
-                else ->
-                    AndroidViewModel(application)
-            }
-        } as T
+        val repoClass = modelClass.getDeclaredField("repo").type
+        val repo = repoClass.getConstructor(Application::class.java).newInstance(application)
+        return modelClass.getConstructor(repoClass, Application::class.java)
+            .newInstance(repo, application)
     }
 
     companion object {
@@ -40,9 +24,9 @@ class ViewModelFactory private constructor(private val application: Application)
         private var INSTANCE: ViewModelFactory? = null
 
         fun getInstance(application: Application) =
-                INSTANCE ?: synchronized(ViewModelFactory::class.java) {
-                    INSTANCE ?: ViewModelFactory(application)
-                            .also { INSTANCE = it }
-                }
+            INSTANCE ?: synchronized(ViewModelFactory::class.java) {
+                INSTANCE ?: ViewModelFactory(application)
+                    .also { INSTANCE = it }
+            }
     }
 }

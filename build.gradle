@@ -19,7 +19,7 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-task sortDependencies << {
+task sortDependencies doLast {
     def sb = new StringBuilder()
     file('versions.gradle').readLines()
         .findAll { !it.isEmpty() }

@@ -1,9 +1,9 @@
 package com.netnovelreader.ui.adapters
 
-import android.arch.paging.PagedListAdapter
-import android.databinding.DataBindingUtil
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.paging.PagedListAdapter
+import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.netnovelreader.R
@@ -36,7 +36,7 @@ class ShelfPageListAdapter(val vm: ShelfViewModel?) :
     }
 
     class ShelfViewHolder(var binding: ItemShelfBinding, val vm: ShelfViewModel?) :
-        RecyclerView.ViewHolder(binding.root) {
+        androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
 
         fun bindTo(entity: BookInfoEntity?) {
             binding.itemDetail = entity

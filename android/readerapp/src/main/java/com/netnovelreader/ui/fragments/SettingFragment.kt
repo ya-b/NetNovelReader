@@ -2,8 +2,8 @@ package com.netnovelreader.ui.fragments
 
 
 import android.os.Bundle
-import android.support.v7.preference.PreferenceFragmentCompat
-import android.support.v7.widget.Toolbar
+import androidx.preference.PreferenceFragmentCompat
+import androidx.appcompat.widget.Toolbar
 import android.view.View
 import androidx.navigation.fragment.NavHostFragment
 import com.netnovelreader.R

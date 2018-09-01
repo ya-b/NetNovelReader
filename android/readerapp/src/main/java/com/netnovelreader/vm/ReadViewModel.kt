@@ -1,11 +1,11 @@
 package com.netnovelreader.vm
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.databinding.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.databinding.*
 import android.graphics.Color
-import android.support.v4.content.ContextCompat
+import androidx.core.content.ContextCompat
 import com.netnovelreader.R
 import com.netnovelreader.repo.ChapterInfoRepo
 import com.netnovelreader.repo.db.ChapterInfoEntity
@@ -38,6 +38,7 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
     val rowSpaceSelected = List(5) { ObservableBoolean(false) }   //行距Button是否选中
     val networkState by lazy { MutableLiveData<NetworkState>() }                  //是否显示加载进度条
     val showDialogCommand by lazy { MutableLiveData<Boolean>() }             //显示目录
+    val cacheDialogCommand by lazy { MutableLiveData<Void>() }
     val changeSourceCommand by lazy { MutableLiveData<StringBuilder>() }            //换源下载
     val brightnessCommand by lazy { MutableLiveData<Float>() }               //亮度
     val toastCommand = MutableLiveData<String>()
@@ -231,6 +232,18 @@ class ReadViewModel(val repo: ChapterInfoRepo, app: Application) : AndroidViewMo
                     toastCommand.postValue("error on get chapter")
                     LoggerFactory.getLogger(this.javaClass).warn("changeSource$it")
                 }).let { compositeDisposable.add(it) }
+    }
+
+    fun showCacheDialog() {
+        isViewShow.forEach { it.value.set(false) }
+        cacheDialogCommand.postValue(null)
+    }
+
+    fun cacheContent() {
+        isViewShow.forEach { it.value.set(false) }
+        repo.downCacheChapter(bookName, chapterNum.get() + 1, 99999)  //下载chapterNum之后cacheNum章
+            .subscribe()
+            .let { compositeDisposable.add(it) }
     }
 
     fun clickFootView(which: String) {

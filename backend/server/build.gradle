@@ -8,11 +8,10 @@ dependencies {
     implementation deps.ktor.gson
     implementation deps.ktor.auth_jwt
     implementation deps.ktor.location
-    implementation deps.ktor.html_builder
+    implementation deps.exposed
     implementation deps.dbutils
     implementation deps.mariadb_client
     implementation deps.jsoup
-    implementation deps.slf4j
     testImplementation deps.junit
     testImplementation deps.hamcrest
     testImplementation deps.mockito.all

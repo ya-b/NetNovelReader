@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>rule editor</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="js/getUserName.js"></script>
+    <script type="text/javascript" src="js/formUpload.js"></script>
+</head>
+<body onload="getUserName('username')">
+<a href="login.html"><div id=username></div></a><a href="logout">退出</a><br/>
+    <h3>-------------import---------------------</h3>
+    <form id="form-upload" enctype="multipart/form-data">
+        <input type="file" name="fileupload"/><br />
+        <input type="button" onclick="upload('#form-upload','rule/import')" value="import"/>
+    </form>
+    <h3>-------------query---------------------</h3>
+    <form id="form-query" enctype="multipart/form-data">
+        hostname:<input type="text" name="hostname"><br>
+        <input type="button" onclick="upload('#form-query','rule/query')">
+    </form>
+    <h3>-------------add---------------------</h3>
+    <form id="form-add" enctype="multipart/form-data">
+        hostname:<input type="text" name="hostname"><br>
+        catalogSelector:<input type="text" name="catalog_selector"><br>
+        chapterSelector:<input type="text" name="chapter_selector"><br>
+        catalogFilter:<input type="text" name="catalog_filter"><br>
+        chapterFilter:<input type="text" name="chapter_filter"><br>
+        searchUrl:<input type="text" name="search_url"><br>
+        redirectFileld:<input type="text" name="redirect_fileld"><br>
+        redirectUrl:<input type="text" name="redirect_selector"><br>
+        noRedirectUrl:<input type="text" name="no_redirect_selector"><br>
+        redirectName:<input type="text" name="redirect_name"><br>
+        noRedirectName:<input type="text" name="no_redirect_name"><br>
+        redirectImage:<input type="text" name="redirect_image"><br>
+        noRedirectImage:<input type="text" name="no_redirect_image"><br>
+        charset:<input type="text" name="charset"><br>
+        <input type="button" onclick="upload('#form-add','rule/add')">
+    </form>
+    <h3>-------------delete---------------------</h3>
+    <form id="form-delete" enctype="multipart/form-data">
+        hostname:<input type="text" name="hostname"><br>
+        <input type="button" onclick="upload('#form-delete','rule/delete')">
+    </form>
+</body>
+</html>

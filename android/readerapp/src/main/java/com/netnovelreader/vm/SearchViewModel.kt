@@ -1,23 +1,23 @@
 package com.netnovelreader.vm
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.databinding.ObservableArrayList
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.databinding.ObservableArrayList
 import android.text.TextUtils
 import com.netnovelreader.R
 import com.netnovelreader.repo.SearchRepo
 import com.netnovelreader.repo.db.BookInfoEntity
 import com.netnovelreader.repo.http.resp.ChapterInfoResp
 import com.netnovelreader.repo.http.resp.SearchBookResp
-import com.netnovelreader.utils.COVER_NAME
+import com.netnovelreader.COVER_NAME
 import com.netnovelreader.utils.IO_EXECUTOR
 import com.netnovelreader.utils.bookDir
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
-import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -31,9 +31,8 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
     val toaskCommand = MutableLiveData<String>()
     val confirmCommand = MutableLiveData<SearchBookResp>()
     var compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private var searchObserver: DisposableObserver<SearchBookResp>? = null
-    private var latestChapterObserver
-            : DisposableObserver<Pair<SearchBookResp, List<ChapterInfoResp>>>? = null
+    private var searchObserver: Disposable? = null
+    private var latestChapterObserver: Disposable? = null
 
     fun destroy() {
         compositeDisposable.clear()
@@ -45,29 +44,28 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
         isLoading.postValue(true)
         searchResultList.clear()
         searchObserver?.dispose()
-        searchObserver = object : DisposableObserver<SearchBookResp>() {
-            override fun onNext(t: SearchBookResp) {
-                if (!TextUtils.isEmpty(t.bookname) && !TextUtils.isEmpty(t.url)) {
-                    searchResultList.add(t)
+        repo.search(bookname).subscribeOn(Schedulers.from(IO_EXECUTOR))
+            .subscribe(
+                {
+                    if (!TextUtils.isEmpty(it.bookname) && !TextUtils.isEmpty(it.url)) {
+                        searchResultList.add(it)
+                    }
+                    //下载封面图片
+                    if (!File(bookDir(bookname), COVER_NAME).exists()) {
+                        downloadImg(bookname, it.imageUrl)
+                    }
+                },
+                {
+                    isLoading.postValue(false)
+                    //搜索完成后，再获取最新章节
+                    getLatestChapter(searchResultList)
+                },
+                {
+                    isLoading.postValue(false)
+                    getLatestChapter(searchResultList)
                 }
-                //下载封面图片
-                if (!File(bookDir(bookname), COVER_NAME).exists()) {
-                    downloadImg(bookname, t.imageUrl)
-                }
-            }
-
-            override fun onComplete() {
-                isLoading.postValue(false)
-                //搜索完成后，再获取最新章节  p2jPxLYERl8Z 1993
-                getLatestChapter(searchResultList)
-            }
-
-            override fun onError(e: Throwable) {
-                isLoading.postValue(false)
-                getLatestChapter(searchResultList)
-            }
-        }
-        repo.search(bookname).subscribeOn(Schedulers.from(IO_EXECUTOR)).subscribe(searchObserver!!)
+            )
+            .also { searchObserver = it }
     }
 
     fun changeSourceSearch(bookname: String, chapterName: String) {
@@ -87,7 +85,8 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
                 },
                 { isLoading.postValue(false) },
                 { isLoading.postValue(false) }
-            ).let { compositeDisposable.add(it) }
+            )
+            .let { compositeDisposable.add(it) }
     }
 
     fun confirmDownload(book: SearchBookResp) {
@@ -99,32 +98,28 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
             .subscribeOn(Schedulers.from(IO_EXECUTOR))
             .subscribe(
                 {
-                    toaskCommand.postValue(getApplication<Application>().getString(R.string.already_in_shelf))
-                },
-                { _ ->
-                    if (!isOnlyAdd) {
-                        downloadCommand.postValue(book)
+                    if(it._id != null) {
+                        toaskCommand.postValue(getApplication<Application>().getString(R.string.already_in_shelf))
+                    } else {
+                        if (!isOnlyAdd) {
+                            downloadCommand.postValue(book)
+                        }
+                        addBook(book)
+                        toaskCommand.postValue(getApplication<Application>().getString(R.string.add_to_shelf))
                     }
-                    repo.addBookToShelf(
-                        BookInfoEntity(
-                            null, book.bookname, book.url, "1#1",
-                            true, book.latestChapter, 0, book.imageUrl
-                        )
-                    )
-                    toaskCommand.postValue(getApplication<Application>().getString(R.string.add_to_shelf))
-                    repo.getCatalogs(book)
-                        .subscribe(
-                            {
-                                repo.setCatalog(book.bookname, it.second)
-                            },
-                            {
-                                LoggerFactory.getLogger(SearchViewModel::class.java)
-                                    .debug(it.toString())
-                            })
-                }).let { compositeDisposable.add(it) }
+                    when {
+                        it._id != null ->
+                            toaskCommand.postValue(getApplication<Application>().getString(R.string.already_in_shelf))
+
+                    }
+                },
+                { t -> LoggerFactory.getLogger(SearchViewModel::class.java).debug(t.toString()) }
+            )
+            .let { compositeDisposable.add(it) }
     }
 
     fun changeSourceDownload(book: SearchBookResp, chapterName: String) {
+        isLoading.postValue(true)
         Single.zip(repo.getCatalogs(book),
             repo.getBookInShelf(book.bookname),
             BiFunction<Pair<SearchBookResp, List<ChapterInfoResp>>, BookInfoEntity,
@@ -142,12 +137,14 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
                     repo.setCatalog(book.bookname, pair.second)
                     bookDir(book.bookname).listFiles { _, name -> !name.equals(COVER_NAME) }
                         .forEach { it.delete() }
+                    isLoading.postValue(false)
                     exit()
                 },
                 {
                     toaskCommand.postValue(getApplication<Application>().getString(R.string.download_failed))
                     LoggerFactory.getLogger(SearchViewModel::class.java).debug(it.toString())
-                }).let { compositeDisposable.add(it) }
+                })
+            .let { compositeDisposable.add(it) }
     }
 
     fun exit() {
@@ -156,25 +153,12 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
 
     private fun getLatestChapter(respList: ObservableArrayList<SearchBookResp>) {
         latestChapterObserver?.dispose()
-        latestChapterObserver =
-                object : DisposableObserver<Pair<SearchBookResp, List<ChapterInfoResp>>>() {
-                    override fun onComplete() {
-
-                    }
-
-                    override fun onNext(t: Pair<SearchBookResp, List<ChapterInfoResp>>) {
-                        respList.set(respList.indexOf(t.first), t.first)
-                    }
-
-                    override fun onError(e: Throwable) {
-
-                    }
-                }
         Observable.fromIterable(respList)
             .flatMap {
                 repo.getCatalogs(it).toObservable().subscribeOn(Schedulers.from(IO_EXECUTOR))
             }
-            .subscribe(latestChapterObserver!!)
+            .subscribe({ respList.set(respList.indexOf(it.first), it.first) })
+            .also { latestChapterObserver = it }
     }
 
     private fun downloadImg(bookname: String, imageUrl: String) {
@@ -191,5 +175,24 @@ class SearchViewModel(var repo: SearchRepo, app: Application) : AndroidViewModel
                 {
                     LoggerFactory.getLogger(SearchRepo::class.java).warn("downloadImage:$it")
                 }).let { compositeDisposable.add(it) }
+    }
+
+    private fun addBook(book: SearchBookResp) {
+        repo.addBookToShelf(
+            BookInfoEntity(
+                null, book.bookname, book.url, "1#1",
+                true, book.latestChapter, 0, book.imageUrl
+            )
+        )
+        repo.getCatalogs(book)
+            .subscribe(
+                {
+                    repo.setCatalog(book.bookname, it.second)
+                },
+                {
+                    LoggerFactory.getLogger(SearchViewModel::class.java)
+                        .debug(it.toString())
+                })
+            .also { compositeDisposable.add(it) }
     }
 }

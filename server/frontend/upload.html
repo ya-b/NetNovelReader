@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload File</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="js/getUserName.js"></script>
+    <script type="text/javascript" src="js/formUpload.js"></script>
+</head>
+<body onload="getUserName('username')">
+<a href="login.html"><div id=username></div></a><a href="logout">退出</a><br/>
+<form id="form-upload" enctype="multipart/form-data">
+    <input type="file" name="fileupload"/><br />
+    <input type="button" onclick="upload('#form-upload','record/save')" value="upload file" />
+</form>
+</body>
+
+</html>

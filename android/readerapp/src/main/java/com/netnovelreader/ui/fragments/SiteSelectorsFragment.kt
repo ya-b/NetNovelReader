@@ -1,11 +1,11 @@
 package com.netnovelreader.ui.fragments
 
 import android.app.AlertDialog
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
-import android.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.*
 import androidx.navigation.fragment.NavHostFragment
 import com.netnovelreader.R
@@ -18,7 +18,7 @@ import com.netnovelreader.ui.adapters.SiteSelectorPageListAdapter
 import com.netnovelreader.vm.SiteSelectorViewModel
 import kotlinx.android.synthetic.main.fragment_site_selectors.*
 
-class SiteSelectorsFragment : Fragment() {
+class SiteSelectorsFragment : androidx.fragment.app.Fragment() {
     private var viewModel: SiteSelectorViewModel? = null
     private lateinit var binding: FragmentSiteSelectorsBinding
 

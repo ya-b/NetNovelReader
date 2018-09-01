@@ -7,12 +7,12 @@
             name="viewModel"
             type="com.netnovelreader.vm.UserViewModel" />
     </data>
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.fragment.LoginFragment">
 
-        <android.support.design.widget.AppBarLayout
+        <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/loginAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,7 +21,7 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <android.support.v7.widget.Toolbar
+            <androidx.appcompat.widget.Toolbar
                 android:id="@+id/loginToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
@@ -30,7 +30,7 @@
                 app:popupTheme="@style/AppTheme.ActionBar"
                 app:title="@string/login" />
 
-        </android.support.design.widget.AppBarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
 
         <LinearLayout
             android:id="@+id/loginLayout"
@@ -41,7 +41,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-            <android.support.v7.widget.AppCompatEditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
                 android:hint="@string/username"/>
 
 
-            <android.support.v7.widget.AppCompatEditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
                 android:digits="@string/filter_vcode"
                 android:hint="@string/password"/>
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/loginBtn"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
@@ -86,7 +86,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/saveRecord"
                 android:onClick="@{() -> viewModel.saveRecord()}"
                 android:layout_width="match_parent"
@@ -95,7 +95,7 @@
                 android:background="@drawable/button_bg_gray_border"
                 android:text="@string/save_record" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/updateRecord"
                 android:onClick="@{() -> viewModel.restoreRecord()}"
                 android:layout_width="match_parent"
@@ -105,7 +105,7 @@
                 android:background="@drawable/button_bg_gray_border"
                 android:text="@string/restore_record" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/logoutBtn"
                 android:onClick="@{() -> viewModel.logout()}"
                 android:layout_marginStart="2dp"
@@ -119,7 +119,7 @@
                 android:layout_marginBottom="8dp"/>
         </LinearLayout>
 
-        <android.support.v4.widget.ContentLoadingProgressBar
+        <androidx.core.widget.ContentLoadingProgressBar
             android:id="@+id/searloadingbar"
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
@@ -129,5 +129,5 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

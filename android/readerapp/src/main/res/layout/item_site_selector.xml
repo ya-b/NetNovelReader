@@ -12,7 +12,7 @@
             type="com.netnovelreader.vm.SiteSelectorViewModel" />
     </data>
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"

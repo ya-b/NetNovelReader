@@ -3,10 +3,11 @@ package com.netnovelreader.service
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.netnovelreader.Login
-import com.netnovelreader.db.UserDao
-import com.netnovelreader.model.UserBean
+import com.netnovelreader.db.User
+import com.netnovelreader.db.Users
 import io.ktor.application.call
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.locations.location
 import io.ktor.request.header
 import io.ktor.request.receiveParameters
@@ -14,8 +15,9 @@ import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.routing.Route
 import io.ktor.routing.method
+import org.jetbrains.exposed.sql.transactions.transaction
 
-fun Route.login(issuer: String, audience: String, secret: String, dao: UserDao) {
+fun Route.login(issuer: String, audience: String, secret: String) {
     location<Login> {
         method(HttpMethod.Get) {
             handle {
@@ -31,21 +33,23 @@ fun Route.login(issuer: String, audience: String, secret: String, dao: UserDao) 
                 val parameters = call.receiveParameters()
                 val name = parameters["username"] ?: ""
                 val passwd = parameters["password"] ?: ""
-                var user = dao.getUser(name)
+                var user: User? = null
+                transaction {
+                    user = User.find { Users.username.eq(name) }.firstOrNull()
+                }
                 when {
-                    name.length < 4 || passwd.length < 4 -> call.respond("")
-                    user != null && user.password != passwd -> call.respond("")
+                    name.length < 4 || passwd.length < 4 ->
+                        call.respond(HttpStatusCode.Forbidden, "长度不能小于4")
+                    user != null && user?.password != passwd ->
+                        call.respond(HttpStatusCode.Forbidden, "密码错误")
                     else -> {
-                        if(user == null) {
-                            user = UserBean().apply {
-                                username = name
-                                password = passwd
-                                role = 1
-                            }
-                            dao.addUser(user)
-                        }
-                        val token = makeToken(user, issuer, audience, secret)
-                        call.response.cookies.append("username", "${user.username}")
+                        user ?: User.new {
+                            username = name
+                            password = passwd
+                            role = 1
+                        }.also { user = it }
+                        val token = makeToken(user!!, issuer, audience, secret)
+                        call.response.cookies.append("username", user!!.username)
                         call.respond(token)
                     }
                 }
@@ -54,7 +58,7 @@ fun Route.login(issuer: String, audience: String, secret: String, dao: UserDao) 
     }
 }
 
-fun makeToken(user: UserBean, issuer: String, audience: String, secret: String) = JWT.create()
+fun makeToken(user: User, issuer: String, audience: String, secret: String) = JWT.create()
     .withSubject("Authentication")
     .withIssuer(issuer)
     .withAudience(audience)

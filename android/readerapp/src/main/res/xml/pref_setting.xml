@@ -10,6 +10,7 @@
         android:summary="@string/auto_remove_summary"
         android:title="@string/auto_remove" />
     <SwitchPreference
+        android:icon="@drawable/ic_format_list_bulleted"
         android:defaultValue="false"
         android:key="@string/nightModeKey"
         android:title="@string/night_mode" />

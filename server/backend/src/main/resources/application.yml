@@ -1,0 +1,20 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /reader
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+  datasource:
+    url: jdbc:mariadb://localhost:3306/test?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 12345
+    driver-class-name: org.mariadb.jdbc.Driver
+
+jwt:
+  subject: Authentication
+  issuer: reader
+  audience: jwt-audience
+  secret: lcP5traclaaljt8ZaSf8

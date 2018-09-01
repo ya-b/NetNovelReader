@@ -1,9 +1,12 @@
 package com.netnovelreader.service
 
 import android.app.IntentService
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
-import android.support.v4.app.NotificationCompat
+import android.graphics.Color
+import android.os.Build
+import androidx.core.app.NotificationCompat
 import com.netnovelreader.R
 import com.netnovelreader.repo.SearchRepo
 import com.netnovelreader.repo.db.ChapterInfoEntity
@@ -32,6 +35,9 @@ class DownloadService : IntentService {
     private var mNotificationManager: NotificationManager? = null
     private var builder: NotificationCompat.Builder? = null
     private val notyfyId = 1599407175
+    private val CHANNEL_ID = "netnovelreader"
+    private val CHANNEL_NAME = "netnovelreader"
+    private val CHANNEL_DESC = "netnovelreader"
 
     private var max = AtomicInteger()          //下载总数
     private var progress = AtomicInteger()     //下载完成数（包括失败的下载）
@@ -48,7 +54,7 @@ class DownloadService : IntentService {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.getParcelableExtra<SearchBookResp>(INFO)?.also {
-            if(taskList.contains(it)) {
+            if (taskList.contains(it)) {
                 toast(getString(R.string.already_in_task))
             } else {
                 taskList.add(it)
@@ -68,16 +74,26 @@ class DownloadService : IntentService {
     }
 
     private fun openNotification() {
+        mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance)
+                .apply {
+                    description = CHANNEL_DESC
+                    setShowBadge(false)
+                }
+            mNotificationManager?.createNotificationChannel(channel)
+
+        }
         builder = NotificationCompat.Builder(this, "reader")
             .setTicker(getString(R.string.app_name))
             .setContentTitle(getString(R.string.prepare_download))
             .setSmallIcon(R.mipmap.ic_launcher)
-        mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager?.notify(notyfyId, builder?.build())
     }
 
     private fun updateNotification(progress: Int, max: Int, failed: Int, remain: Int) {
-        val str = if(progress == max) {
+        val str = if (progress == max) {
             String.format(getString(R.string.download_finish), failed)
         } else {
             String.format(
@@ -109,7 +125,7 @@ class DownloadService : IntentService {
             }
             .subscribe(
                 {
-                    if(it.first.trim().isEmpty()) {
+                    if (it.first.trim().isEmpty()) {
                         failed.incrementAndGet()
                     } else {
                         File(bookDir(taskList[0].bookname), it.third.id.toString()).writeText(it.first)

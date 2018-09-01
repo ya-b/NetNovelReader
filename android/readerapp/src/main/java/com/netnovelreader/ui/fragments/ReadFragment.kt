@@ -2,13 +2,13 @@ package com.netnovelreader.ui.fragments
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
-import android.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,12 +24,13 @@ import com.netnovelreader.utils.sharedPreferences
 import com.netnovelreader.utils.toast
 import com.netnovelreader.vm.ReadViewModel
 
-class ReadFragment : Fragment() {
+class ReadFragment : androidx.fragment.app.Fragment() {
 
     private var bookname: String? = null
     private var viewModel: ReadViewModel? = null
     private var dialog: AlertDialog? = null
-    private var catalogView: RecyclerView? = null
+    private var cacheDialog: AlertDialog? = null
+    private var catalogView: androidx.recyclerview.widget.RecyclerView? = null
     private lateinit var binding: FragmentReadBinding
     private var loadingDialog: Dialog? = null
 
@@ -73,6 +74,7 @@ class ReadFragment : Fragment() {
         viewModel?.showDialogCommand?.observe(this, Observer {
             if (it == true) showDialog() else dialog?.dismiss()
         })
+        viewModel?.cacheDialogCommand?.observe(this, Observer { showCacheDialog() })
         viewModel?.initPageViewCommand?.observe(this,
             Observer { binding.readerView.prepare(it ?: 1) }
         )
@@ -114,8 +116,8 @@ class ReadFragment : Fragment() {
         context ?: return
         if (dialog == null) {
             val builder = AlertDialog.Builder(context)
-            catalogView = RecyclerView(context!!)
-            catalogView?.layoutManager = LinearLayoutManager(context)
+            catalogView = androidx.recyclerview.widget.RecyclerView(context!!)
+            catalogView?.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             val adapter = CatalogAdapter(viewModel, viewModel?.allChapters)
             catalogView?.adapter = adapter
             dialog = builder.setView(catalogView).create()
@@ -123,6 +125,19 @@ class ReadFragment : Fragment() {
         catalogView?.scrollToPosition((viewModel?.chapterNum?.get() ?: 1) - 1)
         dialog?.show()
         dialog?.window?.setLayout(binding.root.width * 5 / 6, binding.root.height * 9 / 10)
+    }
+
+    //显示目录
+    private fun showCacheDialog() {
+        context ?: return
+        androidx.appcompat.app.AlertDialog.Builder(context!!)
+            .setTitle(getString(R.string.cache_content))
+            .setPositiveButton(R.string.enter) { _, _ ->
+                viewModel?.cacheContent()
+            }
+            .setNeutralButton(R.string.cancel, null)
+            .create()
+            .show()
     }
 
     override fun onDestroy() {

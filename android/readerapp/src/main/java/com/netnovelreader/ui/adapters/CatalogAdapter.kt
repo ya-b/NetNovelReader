@@ -1,9 +1,9 @@
 package com.netnovelreader.ui.adapters
 
-import android.databinding.DataBindingUtil
-import android.databinding.ObservableArrayList
-import android.databinding.ObservableList
-import android.support.v7.widget.RecyclerView
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ObservableArrayList
+import androidx.databinding.ObservableList
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.netnovelreader.R
@@ -16,7 +16,7 @@ import com.netnovelreader.vm.ReadViewModel
 class CatalogAdapter(
     val vm: ReadViewModel?,
     private val dataList: ObservableArrayList<ChapterInfoEntity>?
-) : RecyclerView.Adapter<CatalogAdapter.CatalogViewHolder>() {
+) : androidx.recyclerview.widget.RecyclerView.Adapter<CatalogAdapter.CatalogViewHolder>() {
     private val listener by lazy {
         object : ObservableList.OnListChangedCallback<ObservableArrayList<SearchBookResp>>() {
             override fun onChanged(sender: ObservableArrayList<SearchBookResp>?) =
@@ -49,12 +49,12 @@ class CatalogAdapter(
         }
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+    override fun onAttachedToRecyclerView(recyclerView: androidx.recyclerview.widget.RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         dataList?.addOnListChangedCallback(listener)
     }
 
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+    override fun onDetachedFromRecyclerView(recyclerView: androidx.recyclerview.widget.RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         dataList?.removeOnListChangedCallback(listener)
     }
@@ -74,7 +74,7 @@ class CatalogAdapter(
     override fun getItemCount(): Int = dataList?.size ?: 0
 
     class CatalogViewHolder(var binding: ItemCatalogBinding, val vm: ReadViewModel?) :
-        RecyclerView.ViewHolder(binding.root) {
+        androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
 
         fun bindTo(entity: ChapterInfoEntity?) {
             binding.itemDetail = entity

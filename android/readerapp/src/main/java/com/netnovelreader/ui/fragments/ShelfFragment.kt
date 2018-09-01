@@ -1,11 +1,11 @@
 package com.netnovelreader.ui.fragments
 
 import android.app.AlertDialog
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
-import android.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +17,7 @@ import com.netnovelreader.ui.adapters.ShelfPageListAdapter
 import com.netnovelreader.vm.ShelfViewModel
 import kotlinx.android.synthetic.main.fragment_shelf.*
 
-class ShelfFragment : Fragment() {
+class ShelfFragment : androidx.fragment.app.Fragment() {
 
     private var viewModel: ShelfViewModel? = null
     lateinit var binding: FragmentShelfBinding

@@ -1,9 +1,8 @@
 package com.netnovelreader.ui.fragments
 
-
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.*
 import androidx.navigation.fragment.NavHostFragment
 
@@ -14,7 +13,7 @@ import com.netnovelreader.ui.adapters.PageViewAdapter
 import com.netnovelreader.utils.get
 import com.netnovelreader.utils.sharedPreferences
 
-class HomeFragment : Fragment() {
+class HomeFragment : androidx.fragment.app.Fragment() {
     lateinit var binding: FragmentHomeBinding
 
     override fun onCreateView(

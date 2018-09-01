@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="8dp">
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/error_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/retry_button"
             style="@style/Widget.AppCompat.Button.Colored"
             android:onClick="@{ () -> clickHandler.retry() }"

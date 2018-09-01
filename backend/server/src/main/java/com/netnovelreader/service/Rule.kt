@@ -6,8 +6,9 @@ import com.netnovelreader.AddRule
 import com.netnovelreader.DeleteRule
 import com.netnovelreader.ImportRule
 import com.netnovelreader.QueryRule
-import com.netnovelreader.db.SitePreferenceDao
-import com.netnovelreader.model.SitePreferenceBean
+import com.netnovelreader.db.SitePreference
+import com.netnovelreader.db.SitePreferences
+import com.netnovelreader.model.SitePreferenceJsonBean
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.auth.authenticate
@@ -24,26 +25,38 @@ import io.ktor.request.receiveMultipart
 import io.ktor.request.receiveParameters
 import io.ktor.response.respond
 import io.ktor.routing.Route
+import org.jetbrains.exposed.sql.transactions.transaction
 
-fun Route.queryRule(dao: SitePreferenceDao) {
+fun Route.queryRule() {
     location<QueryRule> {
         handle {
-            val params =
-                if(call.request.httpMethod.equals(HttpMethod.Get))
-                    call.parameters
-                else
-                    call.receiveParameters()
-            val hostname = params["hostname"]
-            if (hostname.isNullOrEmpty()) {
-                dao.getAllPreference() ?: emptyList()
-            } else {
-                dao.getPreference(hostname!!)?.let { listOf(it) } ?: emptyList()
-            }.let { call.respond(it) }
+            var list: List<SitePreference>? = null
+            transaction {
+                list = SitePreference.all().toMutableList()
+            }
+            list?.map { sitePreference ->
+                SitePreferenceJsonBean.SitePreferenceBean(
+                    sitePreference.hostname,
+                    sitePreference.catalog_selector,
+                    sitePreference.chapter_selector,
+                    sitePreference.catalog_filter,
+                    sitePreference.chapter_filter,
+                    sitePreference.search_url,
+                    sitePreference.redirect_fileld,
+                    sitePreference.redirect_url,
+                    sitePreference.no_redirect_url,
+                    sitePreference.redirect_name,
+                    sitePreference.no_redirect_name,
+                    sitePreference.redirect_image,
+                    sitePreference.no_redirect_image,
+                    sitePreference.charset
+                )
+            }.also { beans -> call.respond(beans ?: emptyList<SitePreferenceJsonBean.SitePreferenceBean>()) }
         }
     }
 }
 
-fun Route.addRule(dao: SitePreferenceDao) {
+fun Route.addRule() {
     location<AddRule> {
         authenticate {
             handle {
@@ -52,30 +65,32 @@ fun Route.addRule(dao: SitePreferenceDao) {
                     return@handle
                 }
                 val param =
-                    if(call.request.httpMethod.equals(HttpMethod.Get))
+                    if (call.request.httpMethod.equals(HttpMethod.Get))
                         call.parameters
                     else
                         call.receiveParameters()
                 val hostname = param["hostname"]
                 if (hostname.isNullOrEmpty()) {
-                    call.respond("添加失败，hostname不能为空")
+                    call.respond(HttpStatusCode.BadRequest, "添加失败，hostname不能为空")
                 } else {
-                    dao.addPreference(SitePreferenceBean().also {
-                        it.hostname = hostname
-                        it.catalog_selector = param.get("catalog_selector")
-                        it.chapter_selector = param.get("chapter_selector")
-                        it.catalog_filter = param.get("catalog_filter")
-                        it.chapter_filter = param.get("chapter_filter")
-                        it.search_url = param.get("search_url")
-                        it.redirect_fileld = param.get("redirect_fileld")
-                        it.redirect_url = param.get("redirect_url")
-                        it.no_redirect_url = param.get("no_redirect_url")
-                        it.redirect_name = param.get("redirect_name")
-                        it.no_redirect_name = param.get("no_redirect_name")
-                        it.redirect_image = param.get("redirect_image")
-                        it.no_redirect_image = param.get("no_redirect_image")
-                        it.charset = param.get("charset")
-                    })
+                    transaction {
+                        SitePreference.new {
+                            this.hostname = hostname!!
+                            catalog_selector = param.get("catalog_selector") ?: ""
+                            chapter_selector = param.get("chapter_selector") ?: ""
+                            catalog_filter = param.get("catalog_filter") ?: ""
+                            chapter_filter = param.get("chapter_filter") ?: ""
+                            search_url = param.get("search_url") ?: ""
+                            redirect_fileld = param.get("redirect_fileld") ?: ""
+                            redirect_url = param.get("redirect_url") ?: ""
+                            no_redirect_url = param.get("no_redirect_url") ?: ""
+                            redirect_name = param.get("redirect_name") ?: ""
+                            no_redirect_name = param.get("no_redirect_name") ?: ""
+                            redirect_image = param.get("redirect_image") ?: ""
+                            no_redirect_image = param.get("no_redirect_image") ?: ""
+                            charset = param.get("charset") ?: ""
+                        }
+                    }
                     call.respond("添加成功")
                 }
             }
@@ -83,20 +98,25 @@ fun Route.addRule(dao: SitePreferenceDao) {
     }
 }
 
-fun Route.deleteRule(dao: SitePreferenceDao) {
+fun Route.deleteRule() {
     location<DeleteRule> {
         authenticate {
             handle {
                 if (checkRoleAuth(this, 100)) {
                     val params =
-                        if(call.request.httpMethod.equals(HttpMethod.Get))
+                        if (call.request.httpMethod.equals(HttpMethod.Get))
                             call.parameters
                         else
                             call.receiveParameters()
                     val hostname = params["hostname"]
                     when {
-                        hostname == "*" -> dao.deleteAllPreference()
-                        !hostname.isNullOrEmpty() -> dao.deletePreference(hostname!!)
+                        hostname == "*" -> transaction {
+                            SitePreference.all().forEach { item -> item.delete() }
+                        }
+                        !hostname.isNullOrEmpty() -> transaction {
+                            SitePreference.find { SitePreferences.hostname.eq(hostname!!) }
+                                .forEach { item -> item.delete() }
+                        }
                     }
                     call.respond("删除成功")
                 } else {
@@ -107,27 +127,51 @@ fun Route.deleteRule(dao: SitePreferenceDao) {
     }
 }
 
-fun Route.importRule(dao: SitePreferenceDao) {
+fun Route.importRule() {
     location<ImportRule> {
         authenticate {
             handle {
-                if (!checkRoleAuth(this, 100)){
+                if (!checkRoleAuth(this, 100)) {
                     call.respond("没有权限")
                     return@handle
                 }
-                var isSuccess = false
-                call.receiveMultipart().forEachPart {
-                    if(it !is PartData.FileItem) return@forEachPart
-                    try {
-                        it.streamProvider().reader().use {
-                            val type = object : TypeToken<ArrayList<SitePreferenceBean>>(){}.type
-                            it.readText().let { Gson().fromJson<ArrayList<SitePreferenceBean>>(it, type) }
-                                ?.let { dao.addPreference(*it.toTypedArray()); isSuccess = true }
+                var isSuccess = true
+                call.receiveMultipart().forEachPart { part ->
+                    if (part !is PartData.FileItem) return@forEachPart
+                    val list = part.streamProvider().reader().use { input ->
+                        val type = object :
+                            TypeToken<ArrayList<SitePreferenceJsonBean.SitePreferenceBean>>() {}.type
+                        try {
+                            Gson().fromJson<ArrayList<SitePreferenceJsonBean.SitePreferenceBean>>(
+                                input.readText(), type
+                            )
+                        } catch (e: Exception) {
+                            isSuccess = false
+                            null
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
-                    it.dispose()
+                    transaction {
+                        list?.forEach { bean ->
+                            if (bean.hostname.isNullOrEmpty()) return@forEach
+                            SitePreference.new {
+                                hostname = bean.hostname ?: ""
+                                catalog_selector = bean.catalog_selector ?: ""
+                                chapter_selector = bean.chapter_selector ?: ""
+                                catalog_filter = bean.catalog_filter ?: ""
+                                chapter_filter = bean.chapter_filter ?: ""
+                                search_url = bean.search_url ?: ""
+                                redirect_fileld = bean.redirect_fileld ?: ""
+                                redirect_url = bean.redirect_url ?: ""
+                                no_redirect_url = bean.no_redirect_url ?: ""
+                                redirect_name = bean.redirect_name ?: ""
+                                no_redirect_name = bean.no_redirect_name ?: ""
+                                redirect_image = bean.redirect_image ?: ""
+                                no_redirect_image = bean.no_redirect_image ?: ""
+                                charset = bean.charset ?: ""
+                            }
+                        }
+                    }
+                    part.dispose()
                 }
                 call.respond(if (isSuccess) "导入成功" else "导入失败")
             }

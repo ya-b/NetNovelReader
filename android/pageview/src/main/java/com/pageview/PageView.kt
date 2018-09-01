@@ -196,7 +196,7 @@ class PageView : ViewFlipper, IPageView {
 
     private fun spliteText(text: String?): ArrayList<ArrayList<String>> {
         if (text.isNullOrEmpty() || getTextWidth() == 0) return ArrayList()
-        title = text!!.substring(0, text.indexOf("|"))
+        title = text.substring(0, text.indexOf("|"))
         val content = text.substring(text.indexOf("|") + 1)
         if(content.isEmpty()) return ArrayList()
         val tmpArray = content.split("\n")
@@ -213,7 +213,7 @@ class PageView : ViewFlipper, IPageView {
         val totalCount = getTextHeight() / (textSize * rowSpace).toInt()  //一页容纳行数
         for (i in 0..tmplist.size / totalCount) {
             (tmplist.filterIndexed { index, _ -> index > i * totalCount - 1 && index < (i + 1) * totalCount } as ArrayList<String>)
-                    .also { arrayList.add(it) }
+                    .takeIf { it.isNotEmpty() }?.also { arrayList.add(it) }
         }
         return arrayList
     }

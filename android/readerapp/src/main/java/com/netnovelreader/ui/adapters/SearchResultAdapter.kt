@@ -1,9 +1,9 @@
 package com.netnovelreader.ui.adapters
 
-import android.databinding.DataBindingUtil
-import android.databinding.ObservableArrayList
-import android.databinding.ObservableList
-import android.support.v7.widget.RecyclerView
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ObservableArrayList
+import androidx.databinding.ObservableList
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.netnovelreader.R
@@ -15,17 +15,17 @@ import com.netnovelreader.vm.SearchViewModel
 class SearchResultAdapter(
     var vm: SearchViewModel?,
     private var searchResultList: ObservableArrayList<SearchBookResp>?
-) : RecyclerView.Adapter<SearchResultAdapter.SearchViewHolder>() {
+) : androidx.recyclerview.widget.RecyclerView.Adapter<SearchResultAdapter.SearchViewHolder>() {
 
     lateinit var listener: ItemChangedCallback
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+    override fun onAttachedToRecyclerView(recyclerView: androidx.recyclerview.widget.RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         listener = ItemChangedCallback(this)
         searchResultList?.addOnListChangedCallback(listener)
     }
 
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+    override fun onDetachedFromRecyclerView(recyclerView: androidx.recyclerview.widget.RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         searchResultList?.removeOnListChangedCallback(listener)
     }
@@ -45,7 +45,7 @@ class SearchResultAdapter(
     override fun getItemCount(): Int = searchResultList?.size ?: 0
 
     class SearchViewHolder(var binding: ItemSearchBinding, var vm: SearchViewModel?) :
-        RecyclerView.ViewHolder(binding.root) {
+        androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
 
         fun bindTo(entity: SearchBookResp?) {
             binding.itemDetail = entity

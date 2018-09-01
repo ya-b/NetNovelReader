@@ -11,7 +11,7 @@ android {
         targetSdkVersion build_versions.target_sdk
         versionCode build_versions.versionCode
         versionName build_versions.versionName
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -41,47 +41,32 @@ android {
         abortOnError false
         disable 'GoogleAppIndexingWarning'
     }
-    applicationVariants.all { variant ->
-        variant.outputs.all {
-            if (variant.name.equalsIgnoreCase('release')){
-                def df = new java.text.SimpleDateFormat("yyyyMMdd")
-                outputFileName = "reader_${defaultConfig.versionName}_${df.format(new Date())}.apk"
-            }
-        }
-        variant.assemble.doLast { assemble ->
-            if(assemble.name.contains("Release")) {
-                copy {
-                    from variant.outputs*.outputFile
-                    into rootDir.getAbsolutePath() + File.separator + "build"
-                }
-                delete variant.outputs*.outputFile
-            }
-        }
-    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":pageview")
     implementation project(":loadingdialog")
+    implementation project(":repo")
+    implementation project(":utils")
 
     implementation deps.kotlin.stdlib
 
-    implementation deps.support.v4
-    implementation deps.support.app_compat
-    implementation deps.constraint_layout
-    implementation deps.support.cardview
-    implementation deps.support.recyclerview
-    implementation deps.support.design
-    implementation deps.support.preference
+    implementation deps.androidx.app_compat
+    implementation deps.androidx.cardview
+    implementation deps.androidx.recyclerview
+    implementation deps.androidx.preference
+    implementation deps.androidx.constraint_layout
 
-    implementation deps.lifecycle.runtime
-    implementation deps.lifecycle.extensions
-    kapt deps.lifecycle.compiler
-    implementation deps.room.runtime
-    implementation deps.room.rxjava2
-    kapt deps.room.compiler
-    implementation deps.paging
+    implementation deps.androidx.lifecycle.extensions
+    kapt deps.androidx.lifecycle.compiler
+
+    implementation deps.androidx.room.runtime
+    implementation deps.androidx.room.rxjava2
+    kapt deps.androidx.room.compiler
+
+    implementation deps.androidx.paging.runtime
+
     implementation deps.navigation.ui
     implementation deps.navigation.fragment
 
@@ -98,7 +83,7 @@ dependencies {
     implementation deps.circleimageview
     implementation deps.glide.runtime
 
-    implementation deps.slf4j_api
+    implementation deps.slf4j.api
     implementation deps.logback_android
 
     debugImplementation deps.leakcanary.android

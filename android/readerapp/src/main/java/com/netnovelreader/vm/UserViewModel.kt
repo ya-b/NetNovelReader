@@ -2,9 +2,9 @@ package com.netnovelreader.vm
 
 import android.app.Activity
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.databinding.ObservableBoolean
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.databinding.ObservableBoolean
 import com.netnovelreader.R
 import com.netnovelreader.repo.UserRepo
 import com.netnovelreader.repo.db.BookInfoEntity
@@ -12,7 +12,7 @@ import com.netnovelreader.utils.IO_EXECUTOR
 import com.netnovelreader.utils.get
 import com.netnovelreader.utils.put
 import com.netnovelreader.utils.sharedPreferences
-import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
@@ -46,10 +46,12 @@ class UserViewModel(val repo: UserRepo, app: Application) : AndroidViewModel(app
                         app.sharedPreferences().put(app.getString(R.string.tokenKey), it.second)
                         app.sharedPreferences().put(app.getString(R.string.usernameKey), it.first)
                         toastCommand.value = Activity.RESULT_OK.toString()
+                        isLoading.set(false)
                     }
                 },
                 {
                     toastCommand.value = app.getString(R.string.login_error)
+                    isLoading.set(false)
                 }).let { compositeDisposable.add(it) }
     }
 
@@ -84,7 +86,7 @@ class UserViewModel(val repo: UserRepo, app: Application) : AndroidViewModel(app
 
     fun restoreRecord() {
         isLoading.set(true)
-        Observable.zip(repo.downloadRecord(), repo.existsRecord().toObservable(),
+        Single.zip(repo.downloadRecord(), repo.existsRecord(),
             BiFunction<List<BookInfoEntity>, List<BookInfoEntity>,
                     Pair<List<BookInfoEntity>, List<BookInfoEntity>>> { t1, t2 -> Pair(t1, t2) })
             .subscribeOn(Schedulers.from(IO_EXECUTOR))

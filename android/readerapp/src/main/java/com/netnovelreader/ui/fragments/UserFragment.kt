@@ -1,11 +1,11 @@
 package com.netnovelreader.ui.fragments
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
-import android.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +17,7 @@ import com.netnovelreader.ui.activities.MainActivity
 import com.netnovelreader.utils.toast
 import com.netnovelreader.vm.UserViewModel
 
-class UserFragment : Fragment() {
+class UserFragment : androidx.fragment.app.Fragment() {
     var viewModel: UserViewModel? = null
     lateinit var binding: FragmentUserBinding
 

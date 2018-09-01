@@ -10,7 +10,7 @@
             type="com.netnovelreader.vm.ReadViewModel" />
     </data>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
@@ -34,7 +34,7 @@
 
         <!--顶部-->
 
-        <android.support.design.widget.AppBarLayout
+        <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/headerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -44,12 +44,12 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <android.support.constraint.ConstraintLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:theme="@style/AppTheme.ActionBar"
                 android:padding="5dp">
-                <ImageButton
+                <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/backButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -61,7 +61,21 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
-                <android.support.v7.widget.AppCompatTextView
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/cacheContent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center"
+                    android:onClick="@{() -> viewModel.showCacheDialog()}"
+                    android:text="@string/cache_content"
+                    android:textColor="@color/white"
+                    android:layout_marginEnd="10dp"
+                    app:layout_constraintEnd_toStartOf="@id/changeSouce"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/changeSouce"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -74,13 +88,13 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
-            </android.support.constraint.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </android.support.design.widget.AppBarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
 
 
         <!--字体设置-->
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fontSetting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -90,7 +104,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/size45"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -104,7 +118,7 @@
                 app:layout_constraintEnd_toStartOf="@id/size50"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/size50"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -117,7 +131,7 @@
                 app:layout_constraintStart_toEndOf="@id/size45"
                 app:layout_constraintBaseline_toBaselineOf="@id/size45" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/size55"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -130,7 +144,7 @@
                 app:layout_constraintStart_toEndOf="@id/size50"
                 app:layout_constraintBaseline_toBaselineOf="@id/size45" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/size60"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -143,7 +157,7 @@
                 app:layout_constraintStart_toEndOf="@id/size55"
                 app:layout_constraintBaseline_toBaselineOf="@id/size45" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/size65"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -156,7 +170,7 @@
                 app:layout_constraintStart_toEndOf="@id/size60"
                 app:layout_constraintBaseline_toBaselineOf="@id/size45" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/font_label"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -168,7 +182,7 @@
                 app:layout_constraintBaseline_toBaselineOf="@id/size45" />
 
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/space25"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -182,7 +196,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/size45" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/space50"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -195,7 +209,7 @@
                 app:layout_constraintStart_toEndOf="@id/space25"
                 app:layout_constraintBaseline_toBaselineOf="@id/space25" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/space75"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -208,7 +222,7 @@
                 app:layout_constraintStart_toEndOf="@id/size50"
                 app:layout_constraintBaseline_toBaselineOf="@id/space25" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/space100"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -221,7 +235,7 @@
                 app:layout_constraintStart_toEndOf="@id/space75"
                 app:layout_constraintBaseline_toBaselineOf="@id/space25" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/space150"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -234,7 +248,7 @@
                 app:layout_constraintStart_toEndOf="@id/space100"
                 app:layout_constraintBaseline_toBaselineOf="@id/space25" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/space_label"
                 style="@style/reader_font_size_button"
                 android:layout_width="0dp"
@@ -245,9 +259,9 @@
                 app:layout_constraintStart_toEndOf="@id/space150"
                 app:layout_constraintBaseline_toBaselineOf="@id/space25" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/backgroundSetting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -257,7 +271,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <android.support.v7.widget.AppCompatImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/imageView"
                 android:layout_width="19dp"
                 android:layout_height="19dp"
@@ -269,7 +283,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_brightness_low" />
 
-            <android.support.v7.widget.AppCompatSeekBar
+            <androidx.appcompat.widget.AppCompatSeekBar
                 android:id="@+id/sb_brightness"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -284,7 +298,7 @@
                 app:layout_constraintStart_toEndOf="@id/imageView"
                 app:layout_constraintTop_toTopOf="@id/imageView" />
 
-            <android.support.v7.widget.AppCompatImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/imageView2"
                 android:layout_width="19dp"
                 android:layout_height="19dp"
@@ -355,7 +369,7 @@
                 app:layout_constraintStart_toEndOf="@id/read_bg_1"
                 app:layout_constraintTop_toTopOf="@id/read_bg_default" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!--底部-->
         <LinearLayout
@@ -370,21 +384,21 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent">
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/catalogButton"
                 style="@style/reader_foot_button"
                 android:drawableTop="@drawable/ic_format_list_bulleted"
                 android:onClick="@{() -> viewModel.clickFootView(`catalogButton`)}"
                 android:text="@string/catalog_button" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/fontSizeButton"
                 style="@style/reader_foot_button"
                 android:drawableTop="@drawable/ic_settings"
                 android:onClick="@{() -> viewModel.clickFootView(`fontSizeButton`)}"
                 android:text="@string/settings" />
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/backgroundButton"
                 style="@style/reader_foot_button"
                 android:drawableTop="@drawable/ic_brightness_2"
@@ -404,17 +418,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" >
 
-            <android.support.v7.widget.AppCompatImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_refresh"
                 android:layout_gravity="center"/>
-            <android.support.v7.widget.AppCompatTextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/retry"/>
         </LinearLayout>
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
