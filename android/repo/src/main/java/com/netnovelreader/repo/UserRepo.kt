@@ -11,7 +11,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 class UserRepo(app: Application) : Repo(app) {
 
@@ -37,7 +38,7 @@ class UserRepo(app: Application) : Repo(app) {
                 }
             }
             .flatMap { str ->
-                val body = RequestBody.create(MediaType.parse("text/plain"), str)
+                val body = "text/plain".toMediaTypeOrNull().let { str.toRequestBody(it) }
                 val filePart = MultipartBody.Part.createFormData("fileupload", "record", body)
                 WebService.readerAPI.saveRecord(getToken(), filePart)
             }.subscribeOn(Schedulers.from(IO_EXECUTOR))

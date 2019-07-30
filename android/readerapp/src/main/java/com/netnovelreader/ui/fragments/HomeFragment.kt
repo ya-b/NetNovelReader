@@ -1,11 +1,10 @@
 package com.netnovelreader.ui.fragments
 
-import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.*
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
-
 import com.netnovelreader.R
 import com.netnovelreader.databinding.FragmentHomeBinding
 import com.netnovelreader.ui.activities.MainActivity
@@ -13,7 +12,7 @@ import com.netnovelreader.ui.adapters.PageViewAdapter
 import com.netnovelreader.utils.get
 import com.netnovelreader.utils.sharedPreferences
 
-class HomeFragment : androidx.fragment.app.Fragment() {
+class HomeFragment : Fragment() {
     lateinit var binding: FragmentHomeBinding
 
     override fun onCreateView(
@@ -41,7 +40,7 @@ class HomeFragment : androidx.fragment.app.Fragment() {
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         menu?.clear()
         inflater?.inflate(R.menu.menu_shelf, menu)
@@ -52,7 +51,7 @@ class HomeFragment : androidx.fragment.app.Fragment() {
             ?.let { menu?.findItem(R.id.login)?.setTitle(it) }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item?.itemId) {
             R.id.login -> {
                 NavHostFragment.findNavController(this)

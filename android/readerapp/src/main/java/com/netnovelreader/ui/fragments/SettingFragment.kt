@@ -6,6 +6,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.appcompat.widget.Toolbar
 import android.view.View
 import androidx.navigation.fragment.NavHostFragment
+import androidx.preference.SwitchPreference
 import com.netnovelreader.R
 import com.netnovelreader.ui.activities.MainActivity
 
@@ -16,7 +17,8 @@ class SettingFragment : PreferenceFragmentCompat() {
         preferenceManager.sharedPreferencesName = context?.applicationContext?.packageName
         addPreferencesFromResource(R.xml.pref_setting)
         //todo 优化
-        findPreference(getString(R.string.nightModeKey)).setOnPreferenceChangeListener { _, _ ->
+
+        (findPreference(getString(R.string.nightModeKey)) as SwitchPreference?)?.setOnPreferenceChangeListener { _, _ ->
             activity?.recreate()
             true
         }

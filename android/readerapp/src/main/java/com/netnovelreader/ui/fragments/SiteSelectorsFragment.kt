@@ -58,10 +58,10 @@ class SiteSelectorsFragment : androidx.fragment.app.Fragment() {
         viewModel?.destroy()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        menu?.clear()
-        inflater?.inflate(R.menu.menu_site_selector, menu)
+        menu.clear()
+        inflater.inflate(R.menu.menu_site_selector, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

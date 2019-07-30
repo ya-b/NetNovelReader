@@ -16,29 +16,34 @@ import java.util.concurrent.TimeUnit
 
 object WebService {
     val TIMEOUT = 3L
-    val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
-        .readTimeout(TIMEOUT, TimeUnit.SECONDS)
-        .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
-        .addNetworkInterceptor(
-            HttpLoggingInterceptor(
-                HttpLoggingInterceptor.Logger {
+    lateinit var readerAPI: NovalReaderAPI
+    val searchBook by lazy { SearchBook() }
+    val bookLinkRanking by lazy { BookLinkRanking() }
 
-                }
-            ).apply { setLevel(HttpLoggingInterceptor.Level.BASIC) }
-        )
-        .build()
-    val readerAPI: NovalReaderAPI by lazy {
-        Retrofit.Builder()
+    fun init(logger: HttpLoggingInterceptor.Logger?) {
+        val okHttpClient = OkHttpClient.Builder()
+            .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
+            .addNetworkInterceptor(
+                HttpLoggingInterceptor(
+                    logger ?: HttpLoggingInterceptor.Logger.DEFAULT
+//                    object : HttpLoggingInterceptor.Logger {
+//                        override fun log(message: String) {
+//                        }
+//                    }
+                ).apply { this.level = HttpLoggingInterceptor.Level.BASIC }
+            )
+            .build()
+        readerAPI = Retrofit.Builder()
             .client(okHttpClient)
             .baseUrl("http://139.159.226.67/reader/")
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
             .create(NovalReaderAPI::class.java)
+
     }
-    val searchBook by lazy { SearchBook() }
-    val bookLinkRanking by lazy { BookLinkRanking() }
 
     interface NovalReaderAPI {
         @GET

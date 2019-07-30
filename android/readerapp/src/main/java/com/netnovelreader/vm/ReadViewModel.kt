@@ -1,11 +1,11 @@
 package com.netnovelreader.vm
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.databinding.*
 import android.graphics.Color
 import androidx.core.content.ContextCompat
+import androidx.databinding.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import com.netnovelreader.R
 import com.netnovelreader.repo.ChapterInfoRepo
 import com.netnovelreader.repo.db.ChapterInfoEntity

@@ -20,7 +20,7 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
-        val isInit = sharedPreferences().get(getString(R.string.isInitKey), false)
+        val isInit = sharedPreferences().get(getString(R.string.isInitKey), true)
         val repo = SiteSelectorRepo(application)
         if (!isInit) {
             repo.getSelectorsFromNet()
