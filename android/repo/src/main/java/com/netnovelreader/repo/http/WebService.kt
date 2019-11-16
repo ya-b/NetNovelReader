@@ -3,6 +3,7 @@ package com.netnovelreader.repo.http
 import com.netnovelreader.repo.db.BookInfoEntity
 import com.netnovelreader.repo.db.SiteSelectorEntity
 import io.reactivex.Single
+import okhttp3.Interceptor
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -25,6 +26,15 @@ object WebService {
             .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
             .readTimeout(TIMEOUT, TimeUnit.SECONDS)
             .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
+            .addNetworkInterceptor(object : Interceptor{
+                override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+                    val request = chain.request()
+                        .newBuilder()
+                        .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0")
+                        .build()
+                    return chain.proceed(request)
+                }
+            })
             .addNetworkInterceptor(
                 HttpLoggingInterceptor(
                     logger ?: HttpLoggingInterceptor.Logger.DEFAULT
@@ -32,7 +42,7 @@ object WebService {
 //                        override fun log(message: String) {
 //                        }
 //                    }
-                ).apply { this.level = HttpLoggingInterceptor.Level.BASIC }
+                ).apply { this.level = HttpLoggingInterceptor.Level.BODY }
             )
             .build()
         readerAPI = Retrofit.Builder()
