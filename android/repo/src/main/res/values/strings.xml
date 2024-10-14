@@ -1,5 +1,0 @@
-<resources>
-    <string name="latest_chapter_get_failed">最新章节获取失败</string>
-    <string name="usernameKey">Username</string>
-    <string name="tokenKey">Token</string>
-</resources>
