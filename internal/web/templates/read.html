@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>输入阅读 - 沉浸式小说阅读器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar">
+        <a class="nav-btn" href="index.html">📚 我的书架</a>
+        <a class="nav-btn active" href="read.html">🔗 输入阅读</a>
+    </div>
+
+    <button id="sidebar-toggle" onclick="toggleSidebar()" title="收起/展开侧边栏"></button>
+    <script src="sidebar.js"></script>
+    <script>initSidebarState();</script>
+
+    <div id="main-content">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <h2>读取指定链接</h2>
+            <p style="color: var(--text-light);">输入小说章节的URL地址进行解析阅读：</p>
+            <div class="input-group">
+                <input type="text" id="url-input" placeholder="例如: https://www.sudugu.org/21/3521727-4.html">
+                <button class="action-btn" onclick="fetchCustomUrl()">开始阅读</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function fetchCustomUrl() {
+            const url = document.getElementById('url-input').value.trim();
+            if (!url) {
+                alert('请先输入链接！');
+                return;
+            }
+            window.location.href = 'chapter.html?url=' + encodeURIComponent(url);
+        }
+
+    </script>
+</body>
+</html>

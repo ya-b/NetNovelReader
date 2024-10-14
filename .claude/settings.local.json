@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(curl -sL https://raw.githubusercontent.com/Davincible/chromedp-undetected/master/README.md)",
+      "Bash(curl *)"
+    ]
+  }
+}

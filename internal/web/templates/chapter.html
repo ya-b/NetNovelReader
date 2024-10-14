@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>章节阅读 - 沉浸式小说阅读器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar">
+        <a class="nav-btn" href="index.html">📚 我的书架</a>
+        <a class="nav-btn" href="read.html">🔗 输入阅读</a>
+    </div>
+
+    <button id="sidebar-toggle" onclick="toggleSidebar()" title="收起/展开侧边栏"></button>
+    <script src="sidebar.js"></script>
+    <script>initSidebarState();</script>
+
+    <div id="main-content">
+        <div id="reader-title">加载中...</div>
+        <div id="reader-chapter-name"></div>
+        <div id="reader-text"></div>
+        <div class="bottom-nav">
+            <button class="action-btn" id="retry-btn" style="display: none;" onclick="retryChapter()">🔄 重试</button>
+            <a class="action-btn" id="next-chapter-btn" style="display: none;" href="#">下一章</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1';
+        let currentNextUrl = null;
+        let lastReadUrl = null;
+
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        async function readChapter(url) {
+            if (!url) return;
+            lastReadUrl = url;
+
+            document.getElementById('reader-title').textContent = '正在解析内容...';
+            document.getElementById('reader-chapter-name').textContent = '';
+            document.getElementById('reader-text').textContent = '';
+            document.getElementById('next-chapter-btn').style.display = 'none';
+            document.getElementById('retry-btn').style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('reader-title').textContent = data.book_name || '未知书名';
+                document.getElementById('reader-chapter-name').textContent = data.chapter_name || '未知章节';
+                document.getElementById('reader-text').textContent = data.content || '无内容';
+                document.getElementById('retry-btn').style.display = 'none';
+
+                if (data.next_url) {
+                    currentNextUrl = data.next_url;
+                    const nextBtn = document.getElementById('next-chapter-btn');
+                    nextBtn.href = 'chapter.html?url=' + encodeURIComponent(data.next_url);
+                    nextBtn.style.display = 'inline-block';
+                } else {
+                    currentNextUrl = null;
+                }
+
+                document.getElementById('main-content').scrollTop = 0;
+
+            } catch (error) {
+                console.error('读取章节失败:', error);
+                document.getElementById('reader-title').textContent = '读取失败';
+                document.getElementById('reader-text').textContent = '请检查本地服务是否正常运行。';
+                document.getElementById('retry-btn').style.display = 'inline-block';
+            }
+        }
+
+        function retryChapter() {
+            if (lastReadUrl) {
+                readChapter(lastReadUrl);
+            }
+        }
+
+
+        window.onload = function() {
+            const url = getQueryParam('url');
+            if (url) {
+                readChapter(url);
+            } else {
+                document.getElementById('reader-title').textContent = '未指定章节';
+                document.getElementById('reader-text').textContent = '请从书架或输入阅读页面选择章节。';
+            }
+        };
+    </script>
+</body>
+</html>
