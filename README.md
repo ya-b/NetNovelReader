@@ -11,7 +11,7 @@ WEBUI_PORT=56789          # 可选，默认 56789
 CHROME_DRIVER=none       # 当前 none / chrome, 选择chrome，会使用chrome浏览器获取网页内容
 CHROME_VERSION=147
 CHROME_DATA_DIR=D:\chrome-user-data   # chrome 数据目录，可以为空。不要使用相对路径
-PG_URI=postgres://user:password@host:5432/dbname?search_path=my_novel&sslmode=disable
+DB_URI=postgres://user:password@host:5432/dbname?search_path=my_novel&sslmode=disable # mysql://user:pass@/dbname?parseTime=True sqlite:///D:/repo/novel.db
 ```
 
 ## 运行

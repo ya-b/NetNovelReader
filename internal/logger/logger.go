@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -48,7 +49,7 @@ func (f *pythonStyleFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 var Log = logrus.New()
 
-func Init() *os.File {
+func Init(uiType string) *os.File {
 	exe, err := os.Executable()
 	if err != nil {
 		Log.Fatalf("get executable path: %v", err)
@@ -58,7 +59,11 @@ func Init() *os.File {
 	if err != nil {
 		Log.Fatalf("open log file %s: %v", logFile, err)
 	}
-	Log.SetOutput(f)
+	if uiType == "webui" {
+		Log.SetOutput(io.MultiWriter(f, os.Stdout))
+	} else {
+		Log.SetOutput(f)
+	}
 	Log.SetFormatter(&pythonStyleFormatter{})
 	Log.Infof("log output redirected to %s", logFile)
 	return f

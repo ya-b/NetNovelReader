@@ -16,7 +16,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	if f := logger.Init(); f != nil {
+	if f := logger.Init(config.Get().UIType); f != nil {
 		defer f.Close()
 	}
 

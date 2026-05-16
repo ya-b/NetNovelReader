@@ -17,7 +17,7 @@ go test ./...                    # all tests
 go test ./tests/parser -run TestRuleParserCSSRules -v   # single test
 ```
 
-`.env` (or `.env.example`) must exist next to the executable; `config.Get()` looks up `.env` relative to the running binary, not the working directory. PostgreSQL schema is encoded in `PG_URI` via the `search_path=...` query parameter — there is no separate `PG_SCHEMA` env var. Tables are auto-migrated via GORM (`repo.Migrate`) at WebUI/TUI startup; seed `book_sources` from `configs/booksources.sql`.
+`.env` (or `.env.example`) must exist next to the executable; `config.Get()` looks up `.env` relative to the running binary, not the working directory. Database connection is configured via `DB_URI` and may point to PostgreSQL, MySQL, or SQLite. PostgreSQL schema is still encoded in the URI query string via `search_path=...` when using Postgres. Tables are auto-migrated via GORM (`repo.Migrate`) at WebUI/TUI startup; seed `book_sources` from `configs/booksources.sql`.
 
 ## Architecture
 

@@ -17,7 +17,7 @@ type Settings struct {
 	ChromeDriver   string `env:"CHROME_DRIVER" envDefault:"none"`
 	ChromeVersion  int    `env:"CHROME_VERSION" envDefault:"147"`
 	ChromeDataDir  string `env:"CHROME_DATA_DIR" envDefault:"./chrome-user-data"`
-	PGURI          string `env:"PG_URI"`
+	DBURI          string `env:"DB_URI"`
 }
 
 var (
