@@ -10,6 +10,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-reader/reader/internal/config"
 	"github.com/go-reader/reader/internal/logger"
+	"github.com/go-reader/reader/internal/model"
+	"github.com/go-reader/reader/internal/parser"
 	"github.com/go-reader/reader/internal/processor"
 	"github.com/go-reader/reader/internal/repo"
 )
@@ -34,6 +36,40 @@ type recordResponse struct {
 	ChapterName string `json:"chapter_name"`
 	ChapterURL  string `json:"chapter_url"`
 	UpdateTime  string `json:"update_time"`
+}
+
+type bookSourceResponse struct {
+	ID                int64  `json:"id"`
+	BookSourceName    string `json:"book_source_name"`
+	BookSourceURL     string `json:"book_source_url"`
+	BookNameRule      string `json:"book_name_rule"`
+	ChapterNameRule   string `json:"chapter_name_rule"`
+	ContentRule       string `json:"content_rule"`
+	NextContentURLRule string `json:"next_content_url_rule"`
+	Enabled           bool   `json:"enabled"`
+}
+
+type bookSourceRequest struct {
+	BookSourceName    string `json:"book_source_name"`
+	BookSourceURL     string `json:"book_source_url"`
+	BookNameRule      string `json:"book_name_rule"`
+	ChapterNameRule   string `json:"chapter_name_rule"`
+	ContentRule       string `json:"content_rule"`
+	NextContentURLRule string `json:"next_content_url_rule"`
+	Enabled           bool   `json:"enabled"`
+}
+
+type bookSourcePreviewRequest struct {
+	Source bookSourceRequest `json:"source"`
+	URL    string            `json:"url"`
+}
+
+type bookSourcePreviewResponse struct {
+	BookName    string `json:"book_name"`
+	ChapterName string `json:"chapter_name"`
+	ChapterURL  string `json:"chapter_url"`
+	Content     string `json:"content"`
+	NextURL     string `json:"next_url"`
 }
 
 type loginRequest struct {
@@ -109,6 +145,162 @@ func handleDeleteRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func handleListBookSources(w http.ResponseWriter, r *http.Request) {
+	sources, err := repo.GetAllBookSources(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	out := make([]bookSourceResponse, 0, len(sources))
+	for _, src := range sources {
+		out = append(out, toBookSourceResponse(src))
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func handleGetBookSource(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDParam(r, "id")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid id")
+		return
+	}
+	src, err := repo.GetBookSource(r.Context(), id)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, toBookSourceResponse(*src))
+}
+
+func handleCreateBookSource(w http.ResponseWriter, r *http.Request) {
+	req, ok := decodeBookSourceRequest(w, r)
+	if !ok {
+		return
+	}
+	src := bookSourceFromRequest(req)
+	if err := repo.CreateBookSource(r.Context(), &src); err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusCreated, toBookSourceResponse(src))
+}
+
+func handleUpdateBookSource(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDParam(r, "id")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid id")
+		return
+	}
+	req, ok := decodeBookSourceRequest(w, r)
+	if !ok {
+		return
+	}
+	src := bookSourceFromRequest(req)
+	src.ID = id
+	if err := repo.UpdateBookSource(r.Context(), &src); err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, toBookSourceResponse(src))
+}
+
+func handleDeleteBookSource(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDParam(r, "id")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid id")
+		return
+	}
+	if err := repo.DeleteBookSource(r.Context(), id); err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func handlePreviewBookSource(proc *processor.Processor) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req bookSourcePreviewRequest
+		body, _ := io.ReadAll(r.Body)
+		if err := json.Unmarshal(body, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "invalid body")
+			return
+		}
+		if req.URL == "" {
+			writeError(w, http.StatusBadRequest, "url required")
+			return
+		}
+		if err := proc.Driver.Get(r.Context(), req.URL); err != nil {
+			writeError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		html, err := proc.Driver.PageSource(r.Context())
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		src := bookSourceFromRequest(req.Source)
+		c, err := parser.NewRuleParser().ParseContent(&src, req.URL, html)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.ChapterURL = req.URL
+		writeJSON(w, http.StatusOK, bookSourcePreviewResponse{
+			BookName:    c.BookName,
+			ChapterName: c.ChapterName,
+			ChapterURL:  c.ChapterURL,
+			Content:     c.Content,
+			NextURL:     c.NextURL,
+		})
+	}
+}
+
+func decodeBookSourceRequest(w http.ResponseWriter, r *http.Request) (bookSourceRequest, bool) {
+	var req bookSourceRequest
+	body, _ := io.ReadAll(r.Body)
+	if err := json.Unmarshal(body, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid body")
+		return bookSourceRequest{}, false
+	}
+	return req, true
+}
+
+func bookSourceFromRequest(req any) model.BookSource {
+	switch v := req.(type) {
+	case bookSourceRequest:
+		return model.BookSource{
+			BookSourceName:     v.BookSourceName,
+			BookSourceURL:      v.BookSourceURL,
+			BookNameRule:       v.BookNameRule,
+			ChapterNameRule:    v.ChapterNameRule,
+			ContentRule:        v.ContentRule,
+			NextContentURLRule: v.NextContentURLRule,
+			Enabled:            v.Enabled,
+		}
+	case bookSourcePreviewRequest:
+		return bookSourceFromRequest(v.Source)
+	default:
+		return model.BookSource{}
+	}
+}
+
+func toBookSourceResponse(src model.BookSource) bookSourceResponse {
+	return bookSourceResponse{
+		ID:                 src.ID,
+		BookSourceName:     src.BookSourceName,
+		BookSourceURL:      src.BookSourceURL,
+		BookNameRule:       src.BookNameRule,
+		ChapterNameRule:    src.ChapterNameRule,
+		ContentRule:        src.ContentRule,
+		NextContentURLRule: src.NextContentURLRule,
+		Enabled:            src.Enabled,
+	}
+}
+
+func parseIDParam(r *http.Request, name string) (int64, error) {
+	return strconv.ParseInt(chi.URLParam(r, name), 10, 64)
 }
 
 func handleReadURL(proc *processor.Processor) http.HandlerFunc {

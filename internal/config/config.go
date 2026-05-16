@@ -38,3 +38,9 @@ func Get() *Settings {
 	})
 	return settings
 }
+
+// ResetForTest clears the cached settings so tests can re-read environment overrides.
+func ResetForTest() {
+	once = sync.Once{}
+	settings = nil
+}

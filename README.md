@@ -28,16 +28,11 @@ go build -o reader.exe ./cmd/reader
 ## WebUI 监听 `WEBUI_PORT`，默认 `:56789`，访问 <http://localhost:56789/>。
 
 
-### API
-
-- `GET  /`                   重定向到 `/ui/index.html`
-- `GET  /api/v1/records`     阅读记录列表
-- `POST /api/v1/read`        `{"url":"..."}` 读取章节
-- `POST /api/v1/login`       `{"token":"..."}` 登录
-
 ![webui书架](./screenshot/webui书架.png)
 
 ![webui阅读](./screenshot/webui阅读.png)
+
+![webui书源](./screenshot/webui书源.png)
 
 
 ## TUI 使用说明

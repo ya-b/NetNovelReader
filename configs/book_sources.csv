@@ -1,0 +1,5 @@
+id,bookSourceName,bookSourceUrl,bookName,chapterName,content,nextContentUrl,enabled
+1,sudugu.org,https://www.sudugu.org,@css:title@text##^([^\s]+)\s.*##$1,@css:title@text##^[^\s]+\s+([^-]+)-.*##$1,@css:div.con,"@css:div.prenext span:nth-child(3) a[href*=""html""]@href",true
+2,read.qidian.com,https://read.qidian.com,@css:title@text##^([^_]+)_.*##$1,@css:title@text##^[^_]+_+([^-]+)在线阅读-.*##$1,@css:.read-content@text##\u3000##  ##,@css:#j_chapterNext@href,true
+3,www.qidian.com,https://www.qidian.com,@css:title@text##^(.*?)\s_《(.*?)》.*##$2,@css:title@text##^(.*?)\s_《(.*?)》.*##$1,@css:.content p@text##\u3000##  ##,"@css:.nav-btn-group a:contains(""下一章"")@href",true
+4,69shuba.com,https://www.69shuba.com,@css:title@text##^(.*?)-(.*?)-69书吧##$1,@css:title@text##^(.*?)-(.*?)-69书吧##$2,@css:.txtnav@text##\u2003##  ##,@css:.page1 a:nth-child(4)@href,true

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书源管理 - 小说阅读器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar">
+        <a class="nav-btn" href="index.html">📚 我的书架</a>
+        <a class="nav-btn" href="read.html">🔗 输入阅读</a>
+        <a class="nav-btn active" href="sources.html">🧩 书源管理</a>
+    </div>
+
+    <button id="sidebar-toggle" onclick="toggleSidebar()" title="收起/展开侧边栏"></button>
+    <script src="sidebar.js"></script>
+    <script>initSidebarState();</script>
+
+    <div id="main-content">
+        <div style="max-width: 1280px; margin: 0 auto;">
+            <div class="page-toolbar">
+                <h2 style="margin: 0;">书源管理</h2>
+                <button class="action-btn mini-btn" onclick="openEditor()">新增书源</button>
+            </div>
+
+            <table class="source-table">
+                <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>地址</th>
+                        <th>状态</th>
+                        <th>规则</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="source-list">
+                    <tr><td colspan="5">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="editor-overlay" class="overlay">
+        <div class="dialog">
+            <h3 id="editor-title">新增书源</h3>
+            <div class="form-grid">
+                <div class="form-field">
+                    <label>书源名称</label>
+                    <input type="text" id="source-name">
+                </div>
+                <div class="form-field">
+                    <label>书源地址</label>
+                    <input type="text" id="source-url">
+                </div>
+                <div class="form-field">
+                    <label>状态</label>
+                    <input type="checkbox" id="source-enabled" style="width: 18px; height: 18px;">
+                </div>
+                <div class="form-field">
+                    <label>书名规则</label>
+                    <input type="text" id="book-name-rule">
+                </div>
+                <div class="form-field">
+                    <label>章节名规则</label>
+                    <input type="text" id="chapter-name-rule">
+                </div>
+                <div class="form-field full">
+                    <label>正文规则</label>
+                    <textarea id="content-rule"></textarea>
+                </div>
+                <div class="form-field full">
+                    <label>下一章规则</label>
+                    <input type="text" id="next-url-rule">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="action-btn secondary-btn" onclick="closeEditor()">取消</button>
+                <button class="action-btn secondary-btn" onclick="openPreviewDialog()">预览</button>
+                <button class="action-btn" onclick="saveSource()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="preview-overlay" class="overlay">
+        <div class="dialog">
+            <h3>预览解析</h3>
+            <div class="input-group" style="margin-top: 0;">
+                <input type="text" id="preview-url" placeholder="输入要预览的章节 URL">
+                <button class="action-btn" onclick="runPreview()">确定</button>
+                <button class="action-btn secondary-btn" onclick="closePreviewDialog()">关闭</button>
+            </div>
+            <div class="preview-layout">
+                <div class="preview-box">
+                    <div><strong>书名</strong></div>
+                    <pre id="preview-book">-</pre>
+                    <div style="margin-top: 12px;"><strong>章节名</strong></div>
+                    <pre id="preview-chapter">-</pre>
+                    <div style="margin-top: 12px;"><strong>下一章</strong></div>
+                    <pre id="preview-next">-</pre>
+                </div>
+                <div class="preview-box">
+                    <div><strong>正文</strong></div>
+                    <pre id="preview-content">-</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-overlay" class="overlay">
+        <div class="dialog" style="max-width: 420px;">
+            <h3>删除确认</h3>
+            <p id="confirm-message">确定要删除这个书源吗？</p>
+            <div class="form-actions">
+                <button class="action-btn secondary-btn" onclick="closeConfirm()">取消</button>
+                <button class="action-btn danger-btn" onclick="confirmDelete()">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1';
+        let editingId = null;
+        let deletingId = null;
+
+        function emptySource() {
+            return {
+                book_source_name: '',
+                book_source_url: '',
+                book_name_rule: '',
+                chapter_name_rule: '',
+                content_rule: '',
+                next_content_url_rule: '',
+                enabled: true,
+            };
+        }
+
+        function readForm() {
+            return {
+                book_source_name: document.getElementById('source-name').value.trim(),
+                book_source_url: document.getElementById('source-url').value.trim(),
+                book_name_rule: document.getElementById('book-name-rule').value.trim(),
+                chapter_name_rule: document.getElementById('chapter-name-rule').value.trim(),
+                content_rule: document.getElementById('content-rule').value.trim(),
+                next_content_url_rule: document.getElementById('next-url-rule').value.trim(),
+                enabled: document.getElementById('source-enabled').checked,
+            };
+        }
+
+        function fillForm(source) {
+            document.getElementById('source-name').value = source.book_source_name || '';
+            document.getElementById('source-url').value = source.book_source_url || '';
+            document.getElementById('book-name-rule').value = source.book_name_rule || '';
+            document.getElementById('chapter-name-rule').value = source.chapter_name_rule || '';
+            document.getElementById('content-rule').value = source.content_rule || '';
+            document.getElementById('next-url-rule').value = source.next_content_url_rule || '';
+            document.getElementById('source-enabled').checked = source.enabled !== false;
+        }
+
+        function openEditor(source) {
+            editingId = source && source.id ? source.id : null;
+            document.getElementById('editor-title').textContent = editingId ? '编辑书源' : '新增书源';
+            fillForm(source || emptySource());
+            document.getElementById('editor-overlay').classList.add('active');
+        }
+
+        function closeEditor() {
+            document.getElementById('editor-overlay').classList.remove('active');
+        }
+
+        function openPreviewDialog() {
+            document.getElementById('preview-overlay').classList.add('active');
+            document.getElementById('preview-url').focus();
+        }
+
+        function closePreviewDialog() {
+            document.getElementById('preview-overlay').classList.remove('active');
+        }
+
+        function closeConfirm() {
+            deletingId = null;
+            document.getElementById('confirm-overlay').classList.remove('active');
+        }
+
+        async function loadSources() {
+            const tbody = document.getElementById('source-list');
+            tbody.innerHTML = '<tr><td colspan="5">正在加载...</td></tr>';
+            try {
+                const res = await fetch(`${API_BASE}/book_sources`);
+                const data = await res.json();
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5">暂无书源。</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                data.forEach(source => {
+                    const tr = document.createElement('tr');
+                    const tdName = document.createElement('td');
+                    tdName.textContent = source.book_source_name || '';
+                    const tdUrl = document.createElement('td');
+                    tdUrl.textContent = source.book_source_url || '';
+                    const tdEnabled = document.createElement('td');
+                    tdEnabled.textContent = source.enabled ? '启用' : '停用';
+                    const tdRule = document.createElement('td');
+                    tdRule.textContent = source.content_rule || '';
+                    const tdActions = document.createElement('td');
+                    tdActions.className = 'actions';
+
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'action-btn mini-btn secondary-btn';
+                    editBtn.textContent = '编辑';
+                    editBtn.onclick = () => openEditor(source);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'action-btn mini-btn secondary-btn';
+                    deleteBtn.style.marginLeft = '8px';
+                    deleteBtn.textContent = '删除';
+                    deleteBtn.onclick = () => showDelete(source.id, source.book_source_name || '');
+
+                    tdActions.appendChild(editBtn);
+                    tdActions.appendChild(deleteBtn);
+
+                    tr.appendChild(tdName);
+                    tr.appendChild(tdUrl);
+                    tr.appendChild(tdEnabled);
+                    tr.appendChild(tdRule);
+                    tr.appendChild(tdActions);
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="5">加载失败。</td></tr>';
+            }
+        }
+
+        async function saveSource() {
+            const body = readForm();
+            const method = editingId ? 'PUT' : 'POST';
+            const url = editingId ? `${API_BASE}/book_sources/${editingId}` : `${API_BASE}/book_sources`;
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) {
+                alert('保存失败');
+                return;
+            }
+            closeEditor();
+            loadSources();
+        }
+
+        function showDelete(id, name) {
+            deletingId = id;
+            document.getElementById('confirm-message').textContent = `确定要删除「${name}」吗？`;
+            document.getElementById('confirm-overlay').classList.add('active');
+        }
+
+        async function confirmDelete() {
+            if (!deletingId) return;
+            const id = deletingId;
+            closeConfirm();
+            const res = await fetch(`${API_BASE}/book_sources/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                alert('删除失败');
+                return;
+            }
+            loadSources();
+        }
+
+        async function runPreview() {
+            const url = document.getElementById('preview-url').value.trim();
+            if (!url) {
+                alert('请先输入 URL');
+                return;
+            }
+            const payload = {
+                source: readForm(),
+                url,
+            };
+            const res = await fetch(`${API_BASE}/book_sources/preview`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.detail || '预览失败');
+                return;
+            }
+            document.getElementById('preview-book').textContent = data.book_name || '-';
+            document.getElementById('preview-chapter').textContent = data.chapter_name || '-';
+            document.getElementById('preview-next').textContent = data.next_url || '-';
+            document.getElementById('preview-content').textContent = data.content || '-';
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        window.onload = loadSources;
+    </script>
+</body>
+</html>
