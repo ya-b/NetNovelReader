@@ -18,12 +18,14 @@ import (
 type Processor struct {
 	Driver webdriver.Driver
 	Engine *parser.Engine
+	cache  *lruCache
 }
 
 func New(driverName string) *Processor {
 	return &Processor{
 		Driver: webdriver.New(driverName),
 		Engine: parser.NewEngine(),
+		cache:  newLRUCache(100),
 	}
 }
 
@@ -63,12 +65,23 @@ func (p *Processor) ReadContent(ctx context.Context, pageSource string) (*model.
 }
 
 func (p *Processor) loadURL(ctx context.Context, url string) (string, error) {
+	if val, ok := p.cache.Get(url); ok {
+		logger.Log.Infof("cache hit for url %s", url)
+		return val, nil
+	}
+	logger.Log.Infof("cache miss for url %s", url)
+
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 	if err := p.Driver.Get(ctx, url); err != nil {
 		return "", err
 	}
-	return p.Driver.PageSource(ctx)
+	src, err := p.Driver.PageSource(ctx)
+	if err != nil {
+		return "", err
+	}
+	p.cache.Add(url, src)
+	return src, nil
 }
 
 func (p *Processor) postProcess(c *model.ChapterContent) *model.ChapterContent {
@@ -88,5 +101,6 @@ func (p *Processor) postProcess(c *model.ChapterContent) *model.ChapterContent {
 		}
 		c.Content = strings.Join(out, "\n")
 	}
+	c.Content = postprocess.ToSimplified(c.Content)
 	return c
 }
