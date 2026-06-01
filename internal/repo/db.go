@@ -105,7 +105,7 @@ func seedBookSources(g *gorm.DB) error {
 	for _, src := range sources {
 		var count int64
 		if err := g.Model(&model.BookSource{}).
-			Where("bookSourceUrl = ?", src.BookSourceURL).
+			Where(&model.BookSource{BookSourceURL: src.BookSourceURL}).
 			Count(&count).Error; err != nil {
 			return err
 		}

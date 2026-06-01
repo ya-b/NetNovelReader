@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-reader/reader/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // GetEnabledBookSources returns all book sources with enabled=true.
@@ -28,7 +29,12 @@ func GetAllBookSources(ctx context.Context) ([]model.BookSource, error) {
 		return nil, err
 	}
 	var sources []model.BookSource
-	if err := g.WithContext(ctx).Order("bookSourceName ASC, id ASC").Find(&sources).Error; err != nil {
+	if err := g.WithContext(ctx).Clauses(clause.OrderBy{
+		Columns: []clause.OrderByColumn{
+			{Column: clause.Column{Name: "bookSourceName"}},
+			{Column: clause.Column{Name: "id"}},
+		},
+	}).Find(&sources).Error; err != nil {
 		return nil, err
 	}
 	return sources, nil
