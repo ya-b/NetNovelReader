@@ -11,7 +11,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/ansi v0.11.6
 	github.com/chromedp/chromedp v0.15.1
-	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/joho/godotenv v1.5.1
 	github.com/longbridgeapp/opencc v0.3.13
 	github.com/sirupsen/logrus v1.9.4
