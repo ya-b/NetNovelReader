@@ -27,6 +27,13 @@ type booksMsg struct {
 	err     error
 }
 
+type backupMsg struct {
+	action string
+	path   string
+	stats  repo.BackupStats
+	err    error
+}
+
 type mode int
 
 const (
@@ -196,6 +203,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.renderBooks(msg.records)
 		return m, nil
 
+	case backupMsg:
+		m.loading = false
+		m.loadURL = ""
+		m.renderBackupResult(msg)
+		return m, nil
+
 	case spinner.TickMsg:
 		if !m.loading {
 			return m, nil
@@ -230,6 +243,26 @@ func (m *Model) handleEnter() (tea.Model, tea.Cmd) {
 		}
 	case strings.HasPrefix(cmd, "/open "):
 		return m, m.cmdOpenURL(strings.TrimPrefix(cmd, "/open "))
+	case cmd == "/export":
+		m.renderMessage("备份", "用法: /export path/to/backup.json")
+		return m, nil
+	case strings.HasPrefix(cmd, "/export "):
+		path := commandPath(cmd, "/export ")
+		if path == "" {
+			m.renderMessage("备份", "用法: /export path/to/backup.json")
+			return m, nil
+		}
+		return m, m.cmdExport(path)
+	case cmd == "/import":
+		m.renderMessage("备份", "用法: /import path/to/backup.json")
+		return m, nil
+	case strings.HasPrefix(cmd, "/import "):
+		path := commandPath(cmd, "/import ")
+		if path == "" {
+			m.renderMessage("备份", "用法: /import path/to/backup.json")
+			return m, nil
+		}
+		return m, m.cmdImport(path)
 	case strings.HasPrefix(cmd, "http"):
 		return m, m.cmdOpenURL(cmd)
 	}
@@ -278,12 +311,81 @@ func (m *Model) cmdBooks() tea.Cmd {
 	return tea.Batch(load, m.spinner.Tick)
 }
 
+func (m *Model) cmdExport(path string) tea.Cmd {
+	m.loading = true
+	m.loadURL = "导出: " + path
+	m.lineLinks = nil
+	m.renderLoading()
+	load := func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+		stats, err := repo.ExportDatabase(ctx, path)
+		return backupMsg{action: "export", path: path, stats: stats, err: err}
+	}
+	return tea.Batch(load, m.spinner.Tick)
+}
+
+func (m *Model) cmdImport(path string) tea.Cmd {
+	m.loading = true
+	m.loadURL = "导入: " + path
+	m.lineLinks = nil
+	m.renderLoading()
+	load := func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+		stats, err := repo.ImportDatabase(ctx, path)
+		return backupMsg{action: "import", path: path, stats: stats, err: err}
+	}
+	return tea.Batch(load, m.spinner.Tick)
+}
+
 // renderLoading paints the current loading indicator into the viewport so the
 // user sees the spinner in the main content area while a request is in flight.
 func (m *Model) renderLoading() {
 	head, headLines := m.viewportHeader()
 	m.viewport.SetContent(head + m.wrap(m.spinner.View()+" 加载中: "+m.loadURL))
 	m.lineLinks = make([]string, headLines)
+	m.viewport.GotoTop()
+}
+
+func (m *Model) renderBackupResult(msg backupMsg) {
+	title := "备份"
+	if msg.action == "export" {
+		title = "导出"
+	}
+	if msg.action == "import" {
+		title = "导入"
+	}
+	if msg.err != nil {
+		m.renderMessage(title, "错误: "+msg.err.Error())
+		return
+	}
+
+	verb := "导出"
+	if msg.action == "import" {
+		verb = "导入"
+	}
+	body := fmt.Sprintf("%s完成: %s\n\nrecords: %d\nbook_sources: %d\nllm_configs: %d",
+		verb,
+		msg.path,
+		msg.stats.Records,
+		msg.stats.BookSources,
+		msg.stats.LLMConfigs,
+	)
+	m.renderMessage(title, body)
+}
+
+func (m *Model) renderMessage(title, body string) {
+	m.mode = modeContent
+	m.state = &model.ChapterContent{ChapterName: title}
+	m.lineLinks = nil
+	head, headLines := m.viewportHeader()
+	wrapped := m.wrap(body)
+	m.lineLinks = make([]string, headLines)
+	if wrapped != "" {
+		m.lineLinks = append(m.lineLinks, make([]string, strings.Count(wrapped, "\n")+1)...)
+	}
+	m.viewport.SetContent(head + wrapped)
 	m.viewport.GotoTop()
 }
 
@@ -407,7 +509,7 @@ func (m *Model) View() string {
 	b.WriteString(m.viewport.View())
 	if m.showInput {
 		b.WriteString("\n" + inputStyle.Render("> "+m.input) + "\n")
-		b.WriteString(hintStyle.Render("/open <url> /next /refresh /reload /books /exit  |  鼠标滚轮滚动，点击书架行或“下一章”URL 打开，Esc 退出"))
+		b.WriteString(hintStyle.Render("/open <url> /next /refresh /reload /books /export <path> /import <path> /exit  |  鼠标滚轮滚动，点击书架行或“下一章”URL 打开，Esc 退出"))
 	}
 	return b.String()
 }
@@ -431,4 +533,9 @@ func truncate(s string, n int) string {
 		return string(r[:n])
 	}
 	return string(r[:n-1]) + "…"
+}
+
+func commandPath(cmd, prefix string) string {
+	path := strings.TrimSpace(strings.TrimPrefix(cmd, prefix))
+	return strings.Trim(path, `"'`)
 }
