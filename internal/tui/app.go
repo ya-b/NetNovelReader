@@ -60,6 +60,10 @@ type Model struct {
 	// that should be opened when the line is clicked. Empty slots are inert.
 	lineLinks []string
 	prefixKey bool
+	// books holds the records shown in modeBooks; bookSel is the
+	// keyboard-selected index into it.
+	books   []model.Record
+	bookSel int
 }
 
 const (
@@ -127,6 +131,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case tea.KeyEnter:
 			if !m.showInput {
+				if m.mode == modeBooks && len(m.books) > 0 {
+					return m, m.cmdOpenURL(m.books[m.bookSel].ChapterURL)
+				}
 				return m, nil
 			}
 			m.showInput = false
@@ -157,7 +164,21 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.input += string(msg.Runes)
 			return m, nil
-		case tea.KeyPgUp, tea.KeyPgDown, tea.KeyUp, tea.KeyDown, tea.KeyHome, tea.KeyEnd:
+		case tea.KeyUp, tea.KeyDown:
+			if m.mode == modeBooks && !m.showInput && len(m.books) > 0 {
+				if msg.Type == tea.KeyUp && m.bookSel > 0 {
+					m.bookSel--
+				} else if msg.Type == tea.KeyDown && m.bookSel < len(m.books)-1 {
+					m.bookSel++
+				}
+				m.renderBooks()
+				m.ensureBookVisible()
+				return m, nil
+			}
+			var cmd tea.Cmd
+			m.viewport, cmd = m.viewport.Update(msg)
+			return m, cmd
+		case tea.KeyPgUp, tea.KeyPgDown, tea.KeyHome, tea.KeyEnd:
 			var cmd tea.Cmd
 			m.viewport, cmd = m.viewport.Update(msg)
 			return m, cmd
@@ -200,7 +221,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.viewport.GotoTop()
 			return m, nil
 		}
-		m.renderBooks(msg.records)
+		m.books = msg.records
+		m.bookSel = 0
+		m.renderBooks()
+		m.viewport.GotoTop()
 		return m, nil
 
 	case backupMsg:
@@ -221,10 +245,42 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+const helpText = `命令:
+  /help              显示本帮助
+  /books             打开书架
+  /next              下一章
+  /refresh           重新获取当前章节
+  /reload            重新读取当前内容（不重新获取）
+  /open <url>        打开指定 URL
+  /export <path>     导出数据库到备份文件
+  /import <path>     从备份文件导入数据库
+  /exit, /quit       退出
+  <url>              直接输入网址打开
+
+快捷键:
+  /                  打开命令输入栏
+  Enter              书架: 打开选中书籍 / 输入: 提交命令
+  Backspace          删除输入（清空时关闭输入栏）
+  ↑ / ↓              书架: 上下选择 / 内容: 滚动
+  PgUp / PgDn        翻页滚动
+  Home / End         滚动到顶部 / 底部
+  → 右方向键          下一章
+  鼠标左键            点击链接（章节 / 下一章）
+  鼠标滚轮            滚动内容
+
+Ctrl+B 前缀键（按下后再按下列键）:
+  b                  书架
+  n                  下一章
+  r                  重新读取当前内容
+  q                  退出`
+
 func (m *Model) handleEnter() (tea.Model, tea.Cmd) {
 	cmd := strings.TrimSpace(m.input)
 	m.input = ""
 	switch {
+	case cmd == "/help":
+		m.renderMessage("帮助", helpText)
+		return m, nil
 	case cmd == "/exit" || cmd == "/quit":
 		return m, tea.Quit
 	case cmd == "/books":
@@ -455,8 +511,9 @@ func (m *Model) renderContent() {
 	m.viewport.GotoTop()
 }
 
-// renderBooks lays out the bookshelf, recording the URL for each displayed row.
-func (m *Model) renderBooks(records []model.Record) {
+// renderBooks lays out the bookshelf from m.books, underlining the
+// keyboard-selected row and recording the URL for each displayed row.
+func (m *Model) renderBooks() {
 	m.mode = modeBooks
 	m.state = &model.ChapterContent{ChapterName: "书架"}
 
@@ -468,14 +525,17 @@ func (m *Model) renderBooks(records []model.Record) {
 	b.WriteString(strings.Repeat("─", max(1, m.width-1)) + "\n")
 
 	// Two non-clickable lines so far (header + separator).
-	m.lineLinks = make([]string, 0, len(records)+2)
+	m.lineLinks = make([]string, 0, len(m.books)+2)
 	m.lineLinks = append(m.lineLinks, "", "")
 
-	for _, r := range records {
+	for i, r := range m.books {
 		line := fmt.Sprintf("%-24s  %-30s  %s",
 			truncate(r.BookName, 24),
 			truncate(r.ChapterName, 30),
 			r.UpdateTime.Local().Format(time.DateTime))
+		if i == m.bookSel {
+			line = selectedBookStyle.Render(line)
+		}
 		b.WriteString(line + "\n")
 		m.lineLinks = append(m.lineLinks, r.ChapterURL)
 	}
@@ -483,7 +543,25 @@ func (m *Model) renderBooks(records []model.Record) {
 	head, headLines := m.viewportHeader()
 	m.lineLinks = append(make([]string, headLines), m.lineLinks...)
 	m.viewport.SetContent(head + b.String())
-	m.viewport.GotoTop()
+}
+
+// ensureBookVisible scrolls the viewport so the keyboard-selected bookshelf
+// row stays within view as the selection moves.
+func (m *Model) ensureBookVisible() {
+	if len(m.books) == 0 {
+		return
+	}
+	// Header table row + separator occupy two lines before the first record.
+	_, headLines := m.viewportHeader()
+	selLine := headLines + 2 + m.bookSel
+	top := m.viewport.YOffset
+	bottom := top + m.viewport.Height - 1
+	switch {
+	case selLine < top:
+		m.viewport.SetYOffset(selLine)
+	case selLine > bottom:
+		m.viewport.SetYOffset(selLine - m.viewport.Height + 1)
+	}
 }
 
 // urlAt maps an absolute screen Y (0-based from the top of the program) to a
@@ -500,8 +578,9 @@ func (m *Model) urlAt(screenY int) string {
 }
 
 var (
-	inputStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Padding(0, 1)
-	hintStyle  = lipgloss.NewStyle().Faint(true)
+	inputStyle        = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Padding(0, 1)
+	hintStyle         = lipgloss.NewStyle().Faint(true)
+	selectedBookStyle = lipgloss.NewStyle().Underline(true)
 )
 
 func (m *Model) View() string {
@@ -509,7 +588,7 @@ func (m *Model) View() string {
 	b.WriteString(m.viewport.View())
 	if m.showInput {
 		b.WriteString("\n" + inputStyle.Render("> "+m.input) + "\n")
-		b.WriteString(hintStyle.Render("/open <url> /next /refresh /reload /books /export <path> /import <path> /exit  |  鼠标滚轮滚动，点击书架行或“下一章”URL 打开，Esc 退出"))
+		b.WriteString(hintStyle.Render("/help 显示帮助"))
 	}
 	return b.String()
 }
