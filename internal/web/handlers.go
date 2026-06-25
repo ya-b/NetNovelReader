@@ -11,8 +11,8 @@ import (
 	"github.com/go-reader/reader/internal/config"
 	"github.com/go-reader/reader/internal/logger"
 	"github.com/go-reader/reader/internal/model"
-	"github.com/go-reader/reader/internal/parser"
 	"github.com/go-reader/reader/internal/processor"
+	"github.com/go-reader/reader/internal/reading"
 	"github.com/go-reader/reader/internal/repo"
 )
 
@@ -20,14 +20,6 @@ const authCookieName = "auth_token"
 
 type readURLRequest struct {
 	URL string `json:"url"`
-}
-
-type readURLResponse struct {
-	BookName    string `json:"book_name"`
-	ChapterName string `json:"chapter_name"`
-	ChapterURL  string `json:"chapter_url"`
-	Content     string `json:"content"`
-	NextURL     string `json:"next_url"`
 }
 
 type recordResponse struct {
@@ -39,37 +31,29 @@ type recordResponse struct {
 }
 
 type bookSourceResponse struct {
-	ID                int64  `json:"id"`
-	BookSourceName    string `json:"book_source_name"`
-	BookSourceURL     string `json:"book_source_url"`
-	BookNameRule      string `json:"book_name_rule"`
-	ChapterNameRule   string `json:"chapter_name_rule"`
-	ContentRule       string `json:"content_rule"`
+	ID                 int64  `json:"id"`
+	BookSourceName     string `json:"book_source_name"`
+	BookSourceURL      string `json:"book_source_url"`
+	BookNameRule       string `json:"book_name_rule"`
+	ChapterNameRule    string `json:"chapter_name_rule"`
+	ContentRule        string `json:"content_rule"`
 	NextContentURLRule string `json:"next_content_url_rule"`
-	Enabled           bool   `json:"enabled"`
+	Enabled            bool   `json:"enabled"`
 }
 
 type bookSourceRequest struct {
-	BookSourceName    string `json:"book_source_name"`
-	BookSourceURL     string `json:"book_source_url"`
-	BookNameRule      string `json:"book_name_rule"`
-	ChapterNameRule   string `json:"chapter_name_rule"`
-	ContentRule       string `json:"content_rule"`
+	BookSourceName     string `json:"book_source_name"`
+	BookSourceURL      string `json:"book_source_url"`
+	BookNameRule       string `json:"book_name_rule"`
+	ChapterNameRule    string `json:"chapter_name_rule"`
+	ContentRule        string `json:"content_rule"`
 	NextContentURLRule string `json:"next_content_url_rule"`
-	Enabled           bool   `json:"enabled"`
+	Enabled            bool   `json:"enabled"`
 }
 
 type bookSourcePreviewRequest struct {
 	Source bookSourceRequest `json:"source"`
 	URL    string            `json:"url"`
-}
-
-type bookSourcePreviewResponse struct {
-	BookName    string `json:"book_name"`
-	ChapterName string `json:"chapter_name"`
-	ChapterURL  string `json:"chapter_url"`
-	Content     string `json:"content"`
-	NextURL     string `json:"next_url"`
 }
 
 type loginRequest struct {
@@ -114,23 +98,25 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func handleGetRecords(w http.ResponseWriter, r *http.Request) {
-	records, err := repo.GetAllRecords(r.Context(), "update_time DESC")
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
+func handleGetRecords(svc *reading.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		records, err := svc.Bookshelf(r.Context())
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		out := make([]recordResponse, 0, len(records))
+		for _, rec := range records {
+			out = append(out, recordResponse{
+				ID:          rec.ID,
+				BookName:    rec.BookName,
+				ChapterName: rec.ChapterName,
+				ChapterURL:  rec.ChapterURL,
+				UpdateTime:  rec.UpdateTime.Local().Format(time.DateTime),
+			})
+		}
+		writeJSON(w, http.StatusOK, out)
 	}
-	out := make([]recordResponse, 0, len(records))
-	for _, rec := range records {
-		out = append(out, recordResponse{
-			ID:          rec.ID,
-			BookName:    rec.BookName,
-			ChapterName: rec.ChapterName,
-			ChapterURL:  rec.ChapterURL,
-			UpdateTime:  rec.UpdateTime.Local().Format(time.DateTime),
-		})
-	}
-	writeJSON(w, http.StatusOK, out)
 }
 
 func handleDeleteRecord(w http.ResponseWriter, r *http.Request) {
@@ -231,29 +217,13 @@ func handlePreviewBookSource(proc *processor.Processor) http.HandlerFunc {
 			writeError(w, http.StatusBadRequest, "url required")
 			return
 		}
-		if err := proc.Driver.Get(r.Context(), req.URL); err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		html, err := proc.Driver.PageSource(r.Context())
-		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
 		src := bookSourceFromRequest(req.Source)
-		c, err := parser.NewRuleParser().ParseContent(&src, req.URL, html)
+		c, err := proc.PreviewSource(r.Context(), &src, req.URL)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		c.ChapterURL = req.URL
-		writeJSON(w, http.StatusOK, bookSourcePreviewResponse{
-			BookName:    c.BookName,
-			ChapterName: c.ChapterName,
-			ChapterURL:  c.ChapterURL,
-			Content:     c.Content,
-			NextURL:     c.NextURL,
-		})
+		writeJSON(w, http.StatusOK, c)
 	}
 }
 
@@ -303,7 +273,7 @@ func parseIDParam(r *http.Request, name string) (int64, error) {
 	return strconv.ParseInt(chi.URLParam(r, name), 10, 64)
 }
 
-func handleReadURL(proc *processor.Processor) http.HandlerFunc {
+func handleReadURL(svc *reading.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req readURLRequest
 		body, _ := io.ReadAll(r.Body)
@@ -311,18 +281,12 @@ func handleReadURL(proc *processor.Processor) http.HandlerFunc {
 			writeError(w, http.StatusBadRequest, "invalid body")
 			return
 		}
-		c, err := proc.ReadURLContent(r.Context(), req.URL)
+		c, err := svc.Open(r.Context(), req.URL)
 		if err != nil {
 			logger.Log.Errorf("read url %s: %v", req.URL, err)
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		writeJSON(w, http.StatusOK, readURLResponse{
-			BookName:    c.BookName,
-			ChapterName: c.ChapterName,
-			ChapterURL:  c.ChapterURL,
-			Content:     c.Content,
-			NextURL:     c.NextURL,
-		})
+		writeJSON(w, http.StatusOK, c)
 	}
 }

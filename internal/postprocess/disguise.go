@@ -2,6 +2,7 @@ package postprocess
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -27,4 +28,18 @@ func GenLog() string {
 	lvl := logLevels[rand.Intn(len(logLevels))]
 	cls := classNames[rand.Intn(len(classNames))]
 	return time.Now().Format("2006-01-02 15:04:05") + " " + lvl + " " + cls + ": "
+}
+
+// Disguise prepends a fake log-line prefix (GenLog) to every line of content so
+// a shared terminal looks like a build log rather than a novel. Blank lines are
+// prefixed too, matching the line count of the input.
+func Disguise(content string) string {
+	if content == "" {
+		return content
+	}
+	lines := strings.Split(content, "\n")
+	for i, line := range lines {
+		lines[i] = GenLog() + line
+	}
+	return strings.Join(lines, "\n")
 }

@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-reader/reader/internal/config"
 	"github.com/go-reader/reader/internal/logger"
 	"github.com/go-reader/reader/internal/model"
 	"github.com/go-reader/reader/internal/parser"
@@ -84,6 +83,23 @@ func (p *Processor) loadURL(ctx context.Context, url string) (string, error) {
 	return src, nil
 }
 
+// PreviewSource fetches url and runs the given (possibly unsaved) book source's
+// rules against it, returning the extracted chapter. It skips engine
+// source-matching, persists no record, and applies no post-processing — it is
+// for book-source authoring (Preview), not reading.
+func (p *Processor) PreviewSource(ctx context.Context, src *model.BookSource, url string) (*model.ChapterContent, error) {
+	html, err := p.loadURL(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	c, err := parser.NewRuleParser().ParseContent(src, url, html)
+	if err != nil {
+		return nil, err
+	}
+	c.ChapterURL = url
+	return c, nil
+}
+
 func (p *Processor) postProcess(c *model.ChapterContent) *model.ChapterContent {
 	c.BookName = postprocess.ToSimplified(c.BookName)
 	c.ChapterName = postprocess.ToSimplified(c.ChapterName)
@@ -93,13 +109,6 @@ func (p *Processor) postProcess(c *model.ChapterContent) *model.ChapterContent {
 			c.Content = strings.ReplaceAll(c.Content, "\n\n", "\n")
 		}
 		c.Content = strings.ReplaceAll(c.Content, "\n", "\n\n")
-	}
-	if config.Get().UIType == "tui" && c.Content != "" {
-		var out []string
-		for _, line := range strings.Split(c.Content, "\n") {
-			out = append(out, postprocess.GenLog()+line)
-		}
-		c.Content = strings.Join(out, "\n")
 	}
 	c.Content = postprocess.ToSimplified(c.Content)
 	return c

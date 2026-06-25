@@ -14,17 +14,20 @@ import (
 	"github.com/go-reader/reader/internal/config"
 	"github.com/go-reader/reader/internal/model"
 	"github.com/go-reader/reader/internal/processor"
+	"github.com/go-reader/reader/internal/reading"
 	"github.com/go-reader/reader/internal/repo"
 )
 
 type chapterMsg struct {
 	chapter *model.ChapterContent
 	err     error
+	reqID   int
 }
 
 type booksMsg struct {
 	records []model.Record
 	err     error
+	reqID   int
 }
 
 type backupMsg struct {
@@ -32,6 +35,7 @@ type backupMsg struct {
 	path   string
 	stats  repo.BackupStats
 	err    error
+	reqID  int
 }
 
 type mode int
@@ -43,7 +47,7 @@ const (
 
 // Model is the Bubble Tea model.
 type Model struct {
-	proc     *processor.Processor
+	svc      *reading.Service
 	state    *model.ChapterContent
 	input    string
 	width    int
@@ -64,6 +68,10 @@ type Model struct {
 	// keyboard-selected index into it.
 	books   []model.Record
 	bookSel int
+	// cancel aborts the current in-flight load so new input supersedes it;
+	// reqID tags each load so a superseded request's result is discarded.
+	cancel context.CancelFunc
+	reqID  int
 }
 
 const (
@@ -85,8 +93,9 @@ func Run(ctx context.Context) error {
 	sp.Spinner = spinner.Dot
 	sp.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 
+	svc := reading.New(proc, reading.Disguised())
 	m := &Model{
-		proc:      proc,
+		svc:       svc,
 		state:     &model.ChapterContent{},
 		viewport:  viewport.New(80, 20),
 		spinner:   sp,
@@ -198,6 +207,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	case chapterMsg:
+		if msg.reqID != m.reqID {
+			return m, nil
+		}
 		m.loading = false
 		m.loadURL = ""
 		if msg.err != nil {
@@ -213,6 +225,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case booksMsg:
+		if msg.reqID != m.reqID {
+			return m, nil
+		}
 		m.loading = false
 		m.loadURL = ""
 		if msg.err != nil {
@@ -228,6 +243,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case backupMsg:
+		if msg.reqID != m.reqID {
+			return m, nil
+		}
 		m.loading = false
 		m.loadURL = ""
 		m.renderBackupResult(msg)
@@ -325,72 +343,70 @@ func (m *Model) handleEnter() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m *Model) cmdOpenURL(url string) tea.Cmd {
+// beginLoad cancels any in-flight load, then arms loading state for a new one.
+// It returns the request context, its cancel func (the spawned goroutine should
+// defer it), and a request id. Results whose id no longer matches m.reqID are
+// discarded by the Update handlers so a superseded request can't clobber the view.
+func (m *Model) beginLoad(loadURL string, timeout time.Duration) (context.Context, context.CancelFunc, int) {
+	if m.cancel != nil {
+		m.cancel()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	m.cancel = cancel
+	m.reqID++
 	m.loading = true
-	m.loadURL = url
+	m.loadURL = loadURL
 	m.lineLinks = nil
 	m.renderLoading()
+	return ctx, cancel, m.reqID
+}
+
+func (m *Model) cmdOpenURL(url string) tea.Cmd {
+	ctx, cancel, id := m.beginLoad(url, 60*time.Second)
 	load := func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
-		c, err := m.proc.ReadURLContent(ctx, url)
-		return chapterMsg{chapter: c, err: err}
+		c, err := m.svc.Open(ctx, url)
+		return chapterMsg{chapter: c, err: err, reqID: id}
 	}
 	return tea.Batch(load, m.spinner.Tick)
 }
 
 func (m *Model) cmdReadCurrentContent() tea.Cmd {
-	m.loading = true
-	m.loadURL = m.state.ChapterURL
-	m.lineLinks = nil
-	m.renderLoading()
+	ctx, cancel, id := m.beginLoad(m.state.ChapterURL, 60*time.Second)
 	load := func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
-		c, err := m.proc.ReadContent(ctx, "")
-		return chapterMsg{chapter: c, err: err}
+		c, err := m.svc.ReloadCurrent(ctx)
+		return chapterMsg{chapter: c, err: err, reqID: id}
 	}
 	return tea.Batch(load, m.spinner.Tick)
 }
 
 func (m *Model) cmdBooks() tea.Cmd {
-	m.loading = true
-	m.loadURL = "书架"
-	m.lineLinks = nil
-	m.renderLoading()
+	ctx, cancel, id := m.beginLoad("书架", 10*time.Second)
 	load := func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		recs, err := repo.GetAllRecords(ctx, "update_time DESC")
-		return booksMsg{records: recs, err: err}
+		recs, err := m.svc.Bookshelf(ctx)
+		return booksMsg{records: recs, err: err, reqID: id}
 	}
 	return tea.Batch(load, m.spinner.Tick)
 }
 
 func (m *Model) cmdExport(path string) tea.Cmd {
-	m.loading = true
-	m.loadURL = "导出: " + path
-	m.lineLinks = nil
-	m.renderLoading()
+	ctx, cancel, id := m.beginLoad("导出: "+path, 5*time.Minute)
 	load := func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
 		stats, err := repo.ExportDatabase(ctx, path)
-		return backupMsg{action: "export", path: path, stats: stats, err: err}
+		return backupMsg{action: "export", path: path, stats: stats, err: err, reqID: id}
 	}
 	return tea.Batch(load, m.spinner.Tick)
 }
 
 func (m *Model) cmdImport(path string) tea.Cmd {
-	m.loading = true
-	m.loadURL = "导入: " + path
-	m.lineLinks = nil
-	m.renderLoading()
+	ctx, cancel, id := m.beginLoad("导入: "+path, 5*time.Minute)
 	load := func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
 		stats, err := repo.ImportDatabase(ctx, path)
-		return backupMsg{action: "import", path: path, stats: stats, err: err}
+		return backupMsg{action: "import", path: path, stats: stats, err: err, reqID: id}
 	}
 	return tea.Batch(load, m.spinner.Tick)
 }

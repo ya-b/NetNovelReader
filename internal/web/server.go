@@ -8,6 +8,7 @@ import (
 	"github.com/go-reader/reader/internal/config"
 	"github.com/go-reader/reader/internal/logger"
 	"github.com/go-reader/reader/internal/processor"
+	"github.com/go-reader/reader/internal/reading"
 	"github.com/go-reader/reader/internal/repo"
 )
 
@@ -26,6 +27,8 @@ func Run(ctx context.Context, addr string) error {
 		}
 	}()
 
+	svc := reading.New(proc)
+
 	r := chi.NewRouter()
 	r.Use(AuthMiddleware)
 
@@ -38,9 +41,9 @@ func Run(ctx context.Context, addr string) error {
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Post("/login", handleLogin)
-		r.Get("/records", handleGetRecords)
+		r.Get("/records", handleGetRecords(svc))
 		r.Delete("/records/{id}", handleDeleteRecord)
-		r.Post("/read", handleReadURL(proc))
+		r.Post("/read", handleReadURL(svc))
 		r.Get("/book_sources", handleListBookSources)
 		r.Post("/book_sources", handleCreateBookSource)
 		r.Get("/book_sources/{id}", handleGetBookSource)
