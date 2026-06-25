@@ -70,8 +70,10 @@ type Model struct {
 	bookSel int
 	// cancel aborts the current in-flight load so new input supersedes it;
 	// reqID tags each load so a superseded request's result is discarded.
-	cancel context.CancelFunc
-	reqID  int
+	cancel         context.CancelFunc
+	reqID          int
+	lastDeleteTime time.Time
+	lastDeleteSel  int
 }
 
 const (
@@ -95,12 +97,13 @@ func Run(ctx context.Context) error {
 
 	svc := reading.New(proc, reading.Disguised())
 	m := &Model{
-		svc:       svc,
-		state:     &model.ChapterContent{},
-		viewport:  viewport.New(80, 20),
-		spinner:   sp,
-		showInput: false,
-		prefixKey: false,
+		svc:           svc,
+		state:         &model.ChapterContent{},
+		viewport:      viewport.New(80, 20),
+		spinner:       sp,
+		showInput:     false,
+		prefixKey:     false,
+		lastDeleteSel: -1,
 	}
 	_, err := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion()).Run()
 	return err
@@ -117,6 +120,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.resizeViewport()
 		return m, nil
 	case tea.KeyMsg:
+		if msg.Type != tea.KeyDelete {
+			m.lastDeleteTime = time.Time{}
+			m.lastDeleteSel = -1
+		}
 		if m.prefixKey {
 			var cmd tea.Cmd = nil
 			switch string(msg.Runes) {
@@ -188,11 +195,49 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.viewport, cmd = m.viewport.Update(msg)
 			return m, cmd
 		case tea.KeyPgUp, tea.KeyPgDown, tea.KeyHome, tea.KeyEnd:
+			if m.mode == modeBooks && !m.showInput && len(m.books) > 0 {
+				pageSize := m.viewport.Height
+				if pageSize < 1 {
+					pageSize = 1
+				}
+				if msg.Type == tea.KeyPgUp {
+					m.bookSel -= pageSize
+					if m.bookSel < 0 {
+						m.bookSel = 0
+					}
+				} else if msg.Type == tea.KeyPgDown {
+					m.bookSel += pageSize
+					if m.bookSel >= len(m.books) {
+						m.bookSel = len(m.books) - 1
+					}
+				} else if msg.Type == tea.KeyHome {
+					m.bookSel = 0
+				} else if msg.Type == tea.KeyEnd {
+					m.bookSel = len(m.books) - 1
+				}
+				m.renderBooks()
+				m.ensureBookVisible()
+				return m, nil
+			}
 			var cmd tea.Cmd
 			m.viewport, cmd = m.viewport.Update(msg)
 			return m, cmd
 		case tea.KeyRight:
 			return m, m.cmdOpenURL(m.state.NextURL)
+		case tea.KeyDelete:
+			if m.mode == modeBooks && !m.showInput && len(m.books) > 0 {
+				if time.Since(m.lastDeleteTime) < 1*time.Second && m.lastDeleteSel == m.bookSel {
+					id := m.books[m.bookSel].ID
+					m.lastDeleteTime = time.Time{}
+					m.lastDeleteSel = -1
+					var cmd = m.cmdDeleteBook(id)
+					m.ensureBookVisible()
+					return m, cmd
+				}
+				m.lastDeleteTime = time.Now()
+				m.lastDeleteSel = m.bookSel
+				return m, nil
+			}
 		}
 
 	case tea.MouseMsg:
@@ -237,9 +282,23 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.books = msg.records
-		m.bookSel = 0
+		if m.bookSel >= len(m.books) {
+			m.bookSel = len(m.books) - 1
+		}
+		if m.bookSel < 0 {
+			m.bookSel = 0
+		}
 		m.renderBooks()
-		m.viewport.GotoTop()
+		m.ensureBookVisible()
+		return m, nil
+
+	case deleteMsg:
+		m.loading = false
+		m.loadURL = ""
+		if msg.err != nil {
+			m.viewport.SetContent(m.wrap("删除失败: " + msg.err.Error()))
+			m.viewport.GotoTop()
+		}
 		return m, nil
 
 	case backupMsg:
@@ -387,6 +446,24 @@ func (m *Model) cmdBooks() tea.Cmd {
 		defer cancel()
 		recs, err := m.svc.Bookshelf(ctx)
 		return booksMsg{records: recs, err: err, reqID: id}
+	}
+	return tea.Batch(load, m.spinner.Tick)
+}
+
+type deleteMsg struct {
+	err error
+}
+
+func (m *Model) cmdDeleteBook(id int64) tea.Cmd {
+	ctx, cancel, reqID := m.beginLoad("正在删除书籍...", 10*time.Second)
+	load := func() tea.Msg {
+		defer cancel()
+		err := repo.DeleteRecord(ctx, id)
+		if err != nil {
+			return deleteMsg{err: err}
+		}
+		recs, err := repo.GetAllRecords(ctx, "update_time DESC")
+		return booksMsg{records: recs, err: err, reqID: reqID}
 	}
 	return tea.Batch(load, m.spinner.Tick)
 }
