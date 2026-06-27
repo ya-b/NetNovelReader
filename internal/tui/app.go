@@ -133,8 +133,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmd = m.cmdOpenURL(m.state.NextURL)
 			case "q":
 				return m, tea.Quit
-			case "r":
-				cmd = m.cmdReadCurrentContent()
 			}
 			m.prefixKey = false
 			return m, cmd
@@ -267,6 +265,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.lineLinks = nil
 		m.state = msg.chapter
 		m.renderContent()
+		// 预加载下一章
+		if m.state.NextURL != "" {
+			return m, m.cmdPrefetch(m.state.NextURL)
+		}
 		return m, nil
 
 	case booksMsg:
@@ -327,7 +329,6 @@ const helpText = `命令:
   /books             打开书架
   /next              下一章
   /refresh           重新获取当前章节
-  /reload            重新读取当前内容（不重新获取）
   /open <url>        打开指定 URL
   /export <path>     导出数据库到备份文件
   /import <path>     从备份文件导入数据库
@@ -348,7 +349,6 @@ const helpText = `命令:
 Ctrl+B 前缀键（按下后再按下列键）:
   b                  书架
   n                  下一章
-  r                  重新读取当前内容
   q                  退出`
 
 func (m *Model) handleEnter() (tea.Model, tea.Cmd) {
@@ -369,10 +369,6 @@ func (m *Model) handleEnter() (tea.Model, tea.Cmd) {
 	case cmd == "/refresh":
 		if m.state.ChapterURL != "" {
 			return m, m.cmdOpenURL(m.state.ChapterURL)
-		}
-	case cmd == "/reload":
-		if m.state.ChapterURL != "" {
-			return m, m.cmdReadCurrentContent()
 		}
 	case strings.HasPrefix(cmd, "/open "):
 		return m, m.cmdOpenURL(strings.TrimPrefix(cmd, "/open "))
@@ -430,14 +426,13 @@ func (m *Model) cmdOpenURL(url string) tea.Cmd {
 	return tea.Batch(load, m.spinner.Tick)
 }
 
-func (m *Model) cmdReadCurrentContent() tea.Cmd {
-	ctx, cancel, id := m.beginLoad(m.state.ChapterURL, 60*time.Second)
-	load := func() tea.Msg {
+func (m *Model) cmdPrefetch(url string) tea.Cmd {
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
-		c, err := m.svc.ReloadCurrent(ctx)
-		return chapterMsg{chapter: c, err: err, reqID: id}
+		m.svc.Prefetch(ctx, url)
+		return nil
 	}
-	return tea.Batch(load, m.spinner.Tick)
 }
 
 func (m *Model) cmdBooks() tea.Cmd {

@@ -290,3 +290,17 @@ func handleReadURL(svc *reading.Service) http.HandlerFunc {
 		writeJSON(w, http.StatusOK, c)
 	}
 }
+
+func handlePrefetch(svc *reading.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req readURLRequest
+		body, _ := io.ReadAll(r.Body)
+		if err := json.Unmarshal(body, &req); err != nil || req.URL == "" {
+			writeError(w, http.StatusBadRequest, "invalid body")
+			return
+		}
+		svc.Prefetch(r.Context(), req.URL)
+		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	}
+}
+

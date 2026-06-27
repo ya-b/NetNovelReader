@@ -44,6 +44,7 @@ func Run(ctx context.Context, addr string) error {
 		r.Get("/records", handleGetRecords(svc))
 		r.Delete("/records/{id}", handleDeleteRecord)
 		r.Post("/read", handleReadURL(svc))
+		r.Post("/prefetch", handlePrefetch(svc))
 		r.Get("/book_sources", handleListBookSources)
 		r.Post("/book_sources", handleCreateBookSource)
 		r.Get("/book_sources/{id}", handleGetBookSource)

@@ -32,10 +32,24 @@
         const API_BASE = '/api/v1';
         let currentNextUrl = null;
         let lastReadUrl = null;
+        let prefetchController = null;
 
         function getQueryParam(name) {
             const params = new URLSearchParams(window.location.search);
             return params.get(name);
+        }
+
+        function prefetchNextChapter(url) {
+            if (prefetchController) {
+                prefetchController.abort();
+            }
+            prefetchController = new AbortController();
+            fetch(`${API_BASE}/prefetch`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url }),
+                signal: prefetchController.signal
+            }).catch(() => {}); // 静默失败
         }
 
         async function readChapter(url) {
@@ -69,6 +83,8 @@
                     const nextBtn = document.getElementById('next-chapter-btn');
                     nextBtn.href = 'chapter.html?url=' + encodeURIComponent(data.next_url);
                     nextBtn.style.display = 'inline-block';
+                    // 预加载下一章
+                    prefetchNextChapter(data.next_url);
                 } else {
                     currentNextUrl = null;
                 }
