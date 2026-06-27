@@ -10,9 +10,9 @@ import (
 )
 
 // Service is the app-facing reading backend. Both the WebUI and TUI front-ends
-// adapt to it: it opens a URL into a chapter, lists the bookshelf, and re-reads
-// the current page. A disguised Service wraps opened chapter content in the
-// screen-share log disguise.
+// adapt to it: it opens a URL into a chapter, lists the bookshelf, and
+// prefetches the next chapter. A disguised Service wraps opened chapter content
+// in the screen-share log disguise.
 type Service struct {
 	proc     *processor.Processor
 	disguise bool
@@ -21,7 +21,7 @@ type Service struct {
 // Option configures a Service at construction.
 type Option func(*Service)
 
-// Disguised makes Open and ReloadCurrent wrap chapter content in the fake-log
+// Disguised makes Open wrap chapter content in the fake-log
 // disguise. The TUI constructs a disguised Service; the WebUI does not.
 func Disguised() Option {
 	return func(s *Service) { s.disguise = true }
@@ -45,13 +45,10 @@ func (s *Service) Open(ctx context.Context, url string) (*model.ChapterContent, 
 	return s.applyDisguise(c), nil
 }
 
-// ReloadCurrent re-parses the driver's current page without re-fetching it.
-func (s *Service) ReloadCurrent(ctx context.Context) (*model.ChapterContent, error) {
-	c, err := s.proc.ReadContent(ctx, "")
-	if err != nil {
-		return nil, err
-	}
-	return s.applyDisguise(c), nil
+// Prefetch fetches url in the background to warm the cache. When the user later
+// navigates to this URL via Open, the network request will be skipped.
+func (s *Service) Prefetch(ctx context.Context, url string) {
+	s.proc.Prefetch(ctx, url)
 }
 
 // Bookshelf returns reading records, most-recently-opened first.
@@ -65,3 +62,4 @@ func (s *Service) applyDisguise(c *model.ChapterContent) *model.ChapterContent {
 	}
 	return c
 }
+

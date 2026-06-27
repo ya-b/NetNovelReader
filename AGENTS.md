@@ -100,11 +100,12 @@ GORM models live in `internal/model`. `BookSource` uses **camelCase column names
 - Incoming async messages (`chapterMsg`, `booksMsg`, `backupMsg`) are discarded in `Update` if their `reqID` does not match the model's current `reqID`, preventing slow/outdated operations from clobbering the view.
 
 **Input & Key Bindings:**
-- `Ctrl+B` is a prefix/leader key (sets `prefixKey = true`). After pressing it, a second key is expected: `b` → 书架, `n` → 下一章, `q` → 退出, `r` → 重新读取当前内容 (`cmdReadCurrentContent`). Any other key clears the prefix state.
+- `Ctrl+B` is a prefix/leader key (sets `prefixKey = true`). After pressing it, a second key is expected: `b` → 书架, `n` → 下一章, `q` → 退出. Any other key clears the prefix state.
 - Pressing `/` opens the bottom input bar (`showInput = true`); backspacing to empty closes it. `bottomReserve` (4) is the layout constant used by `resizeViewport` to leave room for the input + hint bar.
-- Slash commands: `/exit`, `/quit`, `/books`, `/next`, `/refresh` (re-fetches current chapter URL), `/reload` (re-reads current content without re-fetching), `/open <url>`, `/export <path>`, and `/import <path>`. Bare `http...` input is treated as `/open`.
+- Slash commands: `/exit`, `/quit`, `/books`, `/next`, `/refresh` (re-fetches current chapter URL), `/open <url>`, `/export <path>`, and `/import <path>`. Bare `http...` input is treated as `/open`.
 
 **Content & Navigation:**
 - `lineLinks` maps each rendered viewport line to a clickable URL. Mouse clicks are mapped via `urlAt(screenY)` accounting for `viewport.YOffset`. Mouse wheel events scroll the viewport.
 - `viewportHeader` prepends the chapter title (or "Reader" as fallback) to the viewport content so it scrolls with the text.
 - A spinner + "加载中: <url>" message is shown in the viewport while a request is in flight.
+- **Prefetching**: When a chapter loads successfully and has a `NextURL`, the TUI silently calls `cmdPrefetch` which warms the processor's LRU cache via `svc.Prefetch`. This does not affect the loading/spinner state.
