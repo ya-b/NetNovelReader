@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/go-reader/reader/internal/logger"
 	"github.com/go-reader/reader/internal/model"
 )
 
@@ -29,6 +30,7 @@ func (r *RuleParser) ParseContent(src *model.BookSource, pageURL, html string) (
 	nextURL, _ := r.extractPageValue(doc, html, pageURL, src.NextContentURLRule, false)
 
 	if strings.TrimSpace(content) == "" {
+		logger.Log.Warnf("content is empty: %s", pageURL)
 		return nil, ErrRuleExecution
 	}
 

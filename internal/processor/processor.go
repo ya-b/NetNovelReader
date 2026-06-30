@@ -54,6 +54,18 @@ func (p *Processor) Prefetch(ctx context.Context, url string) {
 	_, _ = p.loadURL(ctx, url)
 }
 
+// ClearCache empties the LRU cache so subsequent loads re-fetch from the
+// network. Used by the TUI /refresh command to bypass stale cached content.
+func (p *Processor) ClearCache() {
+	p.cache.Clear()
+}
+
+// InvalidateCache removes the cached page source for url, if present, so the
+// next load re-fetches from the network.
+func (p *Processor) InvalidateCache(url string) {
+	p.cache.Delete(url)
+}
+
 func (p *Processor) loadURL(ctx context.Context, url string) (string, error) {
 	if val, ok := p.cache.Get(url); ok {
 		logger.Log.Infof("cache hit for url %s", url)

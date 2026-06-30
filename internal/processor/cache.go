@@ -58,3 +58,21 @@ func (c *lruCache) removeOldest() {
 		delete(c.items, item.key)
 	}
 }
+
+// Clear removes all entries from the cache.
+func (c *lruCache) Clear() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.list.Init()
+	c.items = make(map[string]*list.Element)
+}
+
+// Delete removes the entry for key, if present.
+func (c *lruCache) Delete(key string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if elem, ok := c.items[key]; ok {
+		c.list.Remove(elem)
+		delete(c.items, key)
+	}
+}

@@ -51,6 +51,18 @@ func (s *Service) Prefetch(ctx context.Context, url string) {
 	s.proc.Prefetch(ctx, url)
 }
 
+// ClearCache empties the processor's LRU cache so the next Open re-fetches
+// from the network. Used by the TUI /refresh command.
+func (s *Service) ClearCache() {
+	s.proc.ClearCache()
+}
+
+// InvalidateCache removes the cached page source for url, if present, so the
+// next Open re-fetches from the network.
+func (s *Service) InvalidateCache(url string) {
+	s.proc.InvalidateCache(url)
+}
+
 // Bookshelf returns reading records, most-recently-opened first.
 func (s *Service) Bookshelf(ctx context.Context) ([]model.Record, error) {
 	return repo.GetAllRecords(ctx, "update_time DESC")
@@ -62,4 +74,3 @@ func (s *Service) applyDisguise(c *model.ChapterContent) *model.ChapterContent {
 	}
 	return c
 }
-

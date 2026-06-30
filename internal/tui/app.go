@@ -131,6 +131,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmd = m.cmdBooks()
 			case "n":
 				cmd = m.cmdOpenURL(m.state.NextURL)
+			case "r":
+				m.svc.InvalidateCache(m.state.ChapterURL)
+				cmd = m.cmdOpenURL(m.state.ChapterURL)
 			case "q":
 				return m, tea.Quit
 			}
@@ -349,6 +352,7 @@ const helpText = `命令:
 Ctrl+B 前缀键（按下后再按下列键）:
   b                  书架
   n                  下一章
+  r                  重新获取当前章节
   q                  退出`
 
 func (m *Model) handleEnter() (tea.Model, tea.Cmd) {
@@ -368,6 +372,7 @@ func (m *Model) handleEnter() (tea.Model, tea.Cmd) {
 		}
 	case cmd == "/refresh":
 		if m.state.ChapterURL != "" {
+			m.svc.InvalidateCache(m.state.ChapterURL)
 			return m, m.cmdOpenURL(m.state.ChapterURL)
 		}
 	case strings.HasPrefix(cmd, "/open "):

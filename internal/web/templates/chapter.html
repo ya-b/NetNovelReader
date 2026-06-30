@@ -26,6 +26,11 @@
             <button class="action-btn" id="retry-btn" style="display: none;" onclick="retryChapter()">🔄 重试</button>
             <a class="action-btn" id="next-chapter-btn" style="display: none;" href="#">下一章</a>
         </div>
+
+        <div id="page-buttons">
+            <button class="page-btn" id="pageup-btn" onclick="scrollPage(-1)" title="向上翻页">▲</button>
+            <button class="page-btn" id="pagedown-btn" onclick="scrollPage(1)" title="向下翻页">▼</button>
+        </div>
     </div>
 
     <script>
@@ -37,6 +42,42 @@
         function getQueryParam(name) {
             const params = new URLSearchParams(window.location.search);
             return params.get(name);
+        }
+
+        function scrollPage(direction) {
+            // 翻页距离用视口高度（部分 Kindle 浏览器整页滚动，
+            // 此时 #main-content.clientHeight 是全文高度，不能拿来当一屏）。
+            var de = document.documentElement;
+            var step = direction * (de.clientHeight || window.innerHeight || 0) * 0.85;
+            var main = document.getElementById('main-content');
+            var before = main.scrollTop;
+            main.scrollTop += step;
+            if (main.scrollTop === before) {
+                // #main-content 不可滚动时（如 Kindle 整页滚动），退回滚动窗口
+                window.scrollBy(0, step);
+            }
+            positionPageButtons();
+        }
+
+        var lastBtnLeft = null, lastBtnTop = null;
+        // 把翻页按钮吸附到视口右下角。Kindle 墨水屏浏览器不支持 position:fixed，
+        // 既不滚动内层 overflow、也不触发 window 的 scroll 事件，所以靠下面的
+        // setInterval 轮询调用。仅当坐标变化时才写样式，避免墨水屏无谓重绘。
+        function positionPageButtons() {
+            var btns = document.getElementById('page-buttons');
+            if (!btns) return;
+            var de = document.documentElement;
+            var vw = de.clientWidth || window.innerWidth || 0;
+            var vh = de.clientHeight || window.innerHeight || 0;
+            var sx = window.pageXOffset || de.scrollLeft || document.body.scrollLeft || 0;
+            var sy = window.pageYOffset || de.scrollTop || document.body.scrollTop || 0;
+            var left = sx + vw - btns.offsetWidth - 12;
+            var top  = sy + vh - btns.offsetHeight - 12;
+            if (left === lastBtnLeft && top === lastBtnTop) return;
+            lastBtnLeft = left;
+            lastBtnTop = top;
+            btns.style.left = left + 'px';
+            btns.style.top  = top + 'px';
         }
 
         function prefetchNextChapter(url) {
@@ -90,6 +131,7 @@
                 }
 
                 document.getElementById('main-content').scrollTop = 0;
+                positionPageButtons();
 
             } catch (error) {
                 console.error('读取章节失败:', error);
@@ -114,7 +156,12 @@
                 document.getElementById('reader-title').textContent = '未指定章节';
                 document.getElementById('reader-text').textContent = '请从书架或输入阅读页面选择章节。';
             }
+            positionPageButtons();
         };
+        window.addEventListener('resize', positionPageButtons);
+        window.addEventListener('scroll', positionPageButtons);
+        document.getElementById('main-content').addEventListener('scroll', positionPageButtons);
+        setInterval(positionPageButtons, 300);
     </script>
 </body>
 </html>
